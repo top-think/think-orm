@@ -488,7 +488,7 @@ abstract class Connection
                 }
             } catch (\PDOException $e) {
                 if ($autoConnection) {
-                    $this->log($e->getMessage(), 'error');
+                    $this->log('[ ERR ] ' . $e->getMessage());
                     return $this->connect($autoConnection, $linkNum);
                 } else {
                     throw $e;
@@ -1840,7 +1840,7 @@ abstract class Connection
 
     public function getSqlLog()
     {
-        return $this->log;
+        return self::$log;
     }
 
     /**

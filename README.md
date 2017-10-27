@@ -14,7 +14,7 @@ Db类用法：
 ~~~
 use think\Db;
 // 数据库配置信息设置
-Db::config(['数据库配置参数（数组）']);
+Db::setConfig(['数据库配置参数（数组）']);
 // 进行CURD操作
 Db::table('user')->find();
 ~~~

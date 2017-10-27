@@ -87,7 +87,7 @@ abstract class Model implements \JsonSerializable, \ArrayAccess
             // 当前模型名
             $name       = str_replace('\\', '/', static::class);
             $this->name = basename($name);
-            if ($config['class_suffix']) {
+            if (!empty($config['class_suffix'])) {
                 $suffix     = basename(dirname($name));
                 $this->name = substr($this->name, 0, -strlen($suffix));
             }

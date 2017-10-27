@@ -16,8 +16,8 @@ use PDO;
 use PDOStatement;
 use think\Db;
 use think\db\exception\BindParamException;
+use think\db\exception\PDOException;
 use think\Exception;
-use think\exception\PDOException;
 
 abstract class Connection
 {
@@ -54,7 +54,7 @@ abstract class Connection
     protected static $info = [];
 
     // 数据库日志
-    protected $log = [];
+    protected static $log = [];
 
     // 使用Builder类
     protected $builderClassName;
@@ -108,6 +108,10 @@ abstract class Connection
         'query'           => '\\think\\db\\Query',
         // 是否需要断线重连
         'break_reconnect' => false,
+        // 数据字段缓存路径
+        'schema_path'     => '',
+        // 模型类后缀
+        'class_suffix'    => false,
     ];
 
     // PDO连接参数
@@ -174,7 +178,7 @@ abstract class Connection
 
             $class = false !== strpos($options['type'], '\\') ? $options['type'] : '\\think\\db\\connector\\' . ucwords($options['type']);
             // 记录初始化信息
-            $this->log[] = '[ DB ] INIT ' . $options['type'];
+            self::$log[] = '[ DB ] INIT ' . $options['type'];
 
             if (true === $name) {
                 $name = md5(serialize($config));
@@ -1777,7 +1781,7 @@ abstract class Connection
             if ($start) {
                 $this->queryStartTime = microtime(true);
             } else {
-                $runtime = number_format((microtime(true) - $this->queryEndTime), 6);
+                $runtime = number_format((microtime(true) - $this->queryStartTime), 6);
                 $sql     = $sql ?: $this->getLastsql();
                 $result  = [];
 
@@ -1831,7 +1835,7 @@ abstract class Connection
 
     public function log($log)
     {
-        $this->config['debug'] && $this->log[] = $log;
+        $this->config['debug'] && self::$log[] = $log;
     }
 
     public function getSqlLog()

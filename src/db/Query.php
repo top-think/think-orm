@@ -2032,7 +2032,7 @@ class Query
     /**
      * 插入记录
      * @access public
-     * @param mixed   $data         数据
+     * @param array   $data         数据
      * @param boolean $replace      是否replace
      * @param boolean $getLastInsID 返回自增主键
      * @param string  $sequence     自增序列名
@@ -2050,7 +2050,7 @@ class Query
     /**
      * 插入记录并获取自增ID
      * @access public
-     * @param mixed   $data     数据
+     * @param array   $data     数据
      * @param boolean $replace  是否replace
      * @param string  $sequence 自增序列名
      * @return integer|string
@@ -2063,7 +2063,7 @@ class Query
     /**
      * 批量插入记录
      * @access public
-     * @param mixed     $dataSet 数据集
+     * @param array     $dataSet 数据集
      * @param boolean   $replace 是否replace
      * @param integer   $limit   每次写入数据限制
      * @return integer|string

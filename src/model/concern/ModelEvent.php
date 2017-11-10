@@ -11,8 +11,6 @@
 
 namespace think\model\concern;
 
-use think\Container;
-
 /**
  * 模型事件处理
  */
@@ -52,7 +50,7 @@ trait ModelEvent
 
         if (isset(self::$event[$class][$event])) {
             foreach (self::$event[$class][$event] as $callback) {
-                $result = Container::getInstance()->invoke($callback, [$this]);
+                $result = call_user_func_array($callback, [$this]);
 
                 if (false === $result) {
                     return false;

@@ -11,13 +11,13 @@
 
 namespace think\db;
 
+use Exception;
 use InvalidArgumentException;
 use PDO;
 use PDOStatement;
 use think\Db;
 use think\db\exception\BindParamException;
 use think\db\exception\PDOException;
-use think\Exception;
 
 abstract class Connection
 {
@@ -225,6 +225,16 @@ abstract class Connection
     public function getBuilder()
     {
         return $this->builder;
+    }
+
+    /**
+     * 获取连接对象
+     * @access public
+     * @return object|null
+     */
+    public function getLinkID()
+    {
+        return $this->linkID ?: null;
     }
 
     /**
@@ -1949,9 +1959,7 @@ abstract class Connection
     public function __destruct()
     {
         // 释放查询
-        if ($this->PDOStatement) {
-            $this->free();
-        }
+        $this->free();
 
         // 关闭连接
         $this->close();

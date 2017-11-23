@@ -2207,7 +2207,7 @@ class Query
 
         $resultSet = $this->connection->select($this);
 
-        if ($this->options['fetch_sql']) {
+        if (!empty($this->options['fetch_sql'])) {
             return $resultSet;
         }
 
@@ -2270,7 +2270,7 @@ class Query
 
         $result = $this->connection->find($this);
 
-        if ($this->options['fetch_sql']) {
+        if (!empty($this->options['fetch_sql'])) {
             return $result;
         }
 
@@ -2589,7 +2589,7 @@ class Query
             $options['strict'] = $this->getConfig('fields_strict');
         }
 
-        foreach (['master', 'lock', 'fetch_pdo', 'fetch_sql', 'distinct'] as $name) {
+        foreach (['master', 'lock', 'fetch_pdo', 'distinct'] as $name) {
             if (!isset($options[$name])) {
                 $options[$name] = false;
             }

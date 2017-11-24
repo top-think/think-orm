@@ -86,7 +86,7 @@ class Db
 
     public static function setConfig($config = [])
     {
-        self::$config = $config;
+        self::$config = array_merge(self::$config, $config);
     }
 
     public static function getConfig($name = null)

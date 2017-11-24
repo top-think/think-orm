@@ -320,7 +320,7 @@ class Mongo
     protected function parseDateTime(Query $query, $value, $key)
     {
         // 获取时间字段类型
-        $type = $this->connection->getTableInfo('', 'type');
+        $type = $this->connection->getFieldsType($query->getOptions('table') ?: $query->getTable());
 
         if (isset($type[$key])) {
             $value = strtotime($value) ?: $value;

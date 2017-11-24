@@ -453,7 +453,7 @@ class Mongo
 
         if (is_array($data)) {
             array_walk_recursive($data, function (&$value) {
-                if ($value instanceof ObjectID) {
+                if ($value instanceof ObjectID || $value instanceof \MongoDB\BSON\ObjectId) {
                     $value = $value->__toString();
                 }
             });
@@ -767,11 +767,11 @@ class Mongo
 
         if (is_array($id)) {
             array_walk($id, function (&$item, $key) {
-                if ($item instanceof ObjectID) {
+                if ($item instanceof ObjectID || $item instanceof \MongoDB\BSON\ObjectId) {
                     $item = $item->__toString();
                 }
             });
-        } elseif ($id instanceof ObjectID) {
+        } elseif ($id instanceof ObjectID || $id instanceof \MongoDB\BSON\ObjectId) {
             $id = $id->__toString();
         }
 
@@ -1219,10 +1219,6 @@ class Mongo
                 $query->removeOption('field');
             }
 
-            if (is_string($field)) {
-                $field = array_map('trim', explode(',', $field));
-            }
-
             $query->setOption('field', $field);
             $query->setOption('limit', 1);
 
@@ -1232,8 +1228,16 @@ class Mongo
             $readPreference = isset($options['readPreference']) ? $options['readPreference'] : null;
             $cursor         = $this->query($options['table'], $mongoQuery, $readPreference, true, ['root' => 'array']);
             $resultSet      = $cursor->toArray();
-            $data           = isset($resultSet[0]) ? $resultSet[0] : null;
-            $result         = $data[$field];
+            if (!empty($resultSet)) {
+                $data = (array) array_shift($resultSet);
+                if ($this->getConfig('pk_convert_id')) {
+                    // 转换ObjectID 字段
+                    $data['id'] = $data['_id']->__toString();
+                }
+                $result = $data[$field];
+            } else {
+                $result = null;
+            }
 
             if (isset($cache)) {
                 // 缓存数据
@@ -1277,7 +1281,6 @@ class Mongo
             }
 
             $query->setOption('field', $field);
-            $query->setOption('limit', 1);
 
             $mongoQuery = $this->builder->select($query);
             // 执行查询操作
@@ -1286,17 +1289,21 @@ class Mongo
             $resultSet      = $cursor->toArray();
 
             if ($resultSet) {
-                $fields = array_keys($resultSet[0]);
+                $fields = array_keys(get_object_vars($resultSet[0]));
                 $count  = count($fields);
                 $key1   = array_shift($fields);
                 $key2   = $fields ? array_shift($fields) : '';
                 $key    = $key ?: $key1;
 
                 foreach ($resultSet as $val) {
-                    $name = $val[$key];
-                    if ($name instanceof ObjectID) {
-                        $name = $name->__toString();
+                    $val = (array) $val;
+                    if ($this->getConfig('pk_convert_id')) {
+                        // 转换ObjectID 字段
+                        $val['id'] = $val['_id']->__toString();
+                        unset($val['_id']);
                     }
+                    $name = $val[$key];
+
                     if (2 == $count) {
                         $result[$name] = $val[$key2];
                     } elseif (1 == $count) {

@@ -46,20 +46,47 @@ namespace think;
  */
 class Db
 {
-    // 数据库配置
+    /**
+     * 数据库配置
+     * @var array
+     */
     protected static $config = [];
-    // 数据库Query对象
+
+    /**
+     * 查询类名
+     * @var string
+     */
     protected static $query;
-    // 查询次数
+
+    /**
+     * 查询类自动映射
+     * @var array
+     */
+    protected static $queryMap = [
+        'mongo' => '\\think\\db\Mongo',
+    ];
+
+    /**
+     * 查询次数
+     * @var integer
+     */
     public static $queryTimes = 0;
-    // 执行次数
+
+    /**
+     * 执行次数
+     * @var integer
+     */
     public static $executeTimes = 0;
-    // 缓存对象Handler
+
+    /**
+     * 缓存对象
+     * @var object
+     */
     protected static $cacheHandler;
 
     public static function setConfig($config = [])
     {
-        self::$config = $config;
+        self::$config = array_merge(self::$config, $config);
     }
 
     public static function getConfig($name = null)
@@ -108,10 +135,16 @@ class Db
 
     public static function __callStatic($method, $args)
     {
-        $class = self::$query ?: '\\think\\db\\Query';
+        if (!self::$query) {
+            $type = strtolower(self::getConfig('type'));
 
-        $query = new $class(null, self::$config);
+            $class = isset(self::$queryMap[$type]) ? self::$queryMap[$type] : '\\think\\db\\Query';
 
-        return call_user_func_array([$query, $method], $args);
+            self::$query = $class;
+        }
+
+        $class = self::$query;
+
+        return call_user_func_array([new $class, $method], $args);
     }
 }

@@ -11,13 +11,13 @@
 
 namespace think\db;
 
+use Exception;
 use InvalidArgumentException;
 use PDO;
 use PDOStatement;
 use think\Db;
 use think\db\exception\BindParamException;
 use think\db\exception\PDOException;
-use think\Exception;
 
 abstract class Connection
 {
@@ -225,6 +225,16 @@ abstract class Connection
     public function getBuilder()
     {
         return $this->builder;
+    }
+
+    /**
+     * 获取连接对象
+     * @access public
+     * @return object|null
+     */
+    public function getLinkID()
+    {
+        return $this->linkID ?: null;
     }
 
     /**
@@ -793,7 +803,7 @@ abstract class Connection
 
             $bind = $query->getBind();
 
-            if ($options['fetch_sql']) {
+            if (!empty($options['fetch_sql'])) {
                 // 获取实际执行的SQL语句
                 return $this->getRealSql($sql, $bind);
             }
@@ -872,7 +882,7 @@ abstract class Connection
 
             $bind = $query->getBind();
 
-            if ($options['fetch_sql']) {
+            if (!empty($options['fetch_sql'])) {
                 // 获取实际执行的SQL语句
                 return $this->getRealSql($sql, $bind);
             }
@@ -916,7 +926,7 @@ abstract class Connection
 
         $bind = $query->getBind();
 
-        if ($options['fetch_sql']) {
+        if (!empty($options['fetch_sql'])) {
             // 获取实际执行的SQL语句
             return $this->getRealSql($sql, $bind);
         }
@@ -978,7 +988,7 @@ abstract class Connection
 
         $bind = $query->getBind();
 
-        if ($options['fetch_sql']) {
+        if (!empty($options['fetch_sql'])) {
             // 获取实际执行的SQL语句
             return $this->getRealSql($sql, $bind);
         } elseif (is_array($sql)) {
@@ -1011,7 +1021,7 @@ abstract class Connection
 
         $bind = $query->getBind();
 
-        if ($options['fetch_sql']) {
+        if (!empty($options['fetch_sql'])) {
             // 获取实际执行的SQL语句
             return $this->getRealSql($sql, $bind);
         } else {
@@ -1078,7 +1088,7 @@ abstract class Connection
         $sql  = $this->builder->update($query);
         $bind = $query->getBind();
 
-        if ($options['fetch_sql']) {
+        if (!empty($options['fetch_sql'])) {
             // 获取实际执行的SQL语句
             return $this->getRealSql($sql, $bind);
         } else {
@@ -1140,7 +1150,7 @@ abstract class Connection
 
         $bind = $query->getBind();
 
-        if ($options['fetch_sql']) {
+        if (!empty($options['fetch_sql'])) {
             // 获取实际执行的SQL语句
             return $this->getRealSql($sql, $bind);
         }
@@ -1207,7 +1217,7 @@ abstract class Connection
 
             $bind = $query->getBind();
 
-            if ($options['fetch_sql']) {
+            if (!empty($options['fetch_sql'])) {
                 // 获取实际执行的SQL语句
                 return $this->getRealSql($sql, $bind);
             }
@@ -1275,7 +1285,7 @@ abstract class Connection
 
             $bind = $query->getBind();
 
-            if ($options['fetch_sql']) {
+            if (!empty($options['fetch_sql'])) {
                 // 获取实际执行的SQL语句
                 return $this->getRealSql($sql, $bind);
             }
@@ -1339,7 +1349,7 @@ abstract class Connection
 
         $bind = $query->getBind();
 
-        if ($options['fetch_sql']) {
+        if (!empty($options['fetch_sql'])) {
             // 获取实际执行的SQL语句
             return $this->getRealSql($sql, $bind);
         }
@@ -1949,9 +1959,7 @@ abstract class Connection
     public function __destruct()
     {
         // 释放查询
-        if ($this->PDOStatement) {
-            $this->free();
-        }
+        $this->free();
 
         // 关闭连接
         $this->close();

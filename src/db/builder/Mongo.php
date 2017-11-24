@@ -233,74 +233,80 @@ class Mongo
             }
         }
 
-        $query = [];
+        if (is_object($value) && method_exists($value, '__toString')) {
+            // 对象数据写入
+            $value = $value->__toString();
+        }
+
+        $result = [];
         if ('=' == $exp) {
             // 普通查询
-            $query[$key] = $this->parseValue($query, $value, $key);
+            $result[$key] = $this->parseValue($query, $value, $key);
         } elseif (in_array($exp, ['neq', 'ne', 'gt', 'egt', 'gte', 'lt', 'lte', 'elt', 'mod'])) {
             // 比较运算
-            $k           = '$' . $exp;
-            $query[$key] = [$k => $this->parseValue($query, $value, $key)];
+            $k            = '$' . $exp;
+            $result[$key] = [$k => $this->parseValue($query, $value, $key)];
         } elseif ('null' == $exp) {
             // NULL 查询
-            $query[$key] = null;
+            $result[$key] = null;
         } elseif ('not null' == $exp) {
-            $query[$key] = ['$ne' => null];
+            $result[$key] = ['$ne' => null];
         } elseif ('all' == $exp) {
             // 满足所有指定条件
-            $query[$key] = ['$all', $this->parseValue($query, $value, $key)];
+            $result[$key] = ['$all', $this->parseValue($query, $value, $key)];
         } elseif ('between' == $exp) {
             // 区间查询
-            $value       = is_array($value) ? $value : explode(',', $value);
-            $query[$key] = ['$gte' => $this->parseValue($query, $value[0], $key), '$lte' => $this->parseValue($query, $value[1], $key)];
+            $value        = is_array($value) ? $value : explode(',', $value);
+            $result[$key] = ['$gte' => $this->parseValue($query, $value[0], $key), '$lte' => $this->parseValue($query, $value[1], $key)];
         } elseif ('not between' == $exp) {
             // 范围查询
-            $value       = is_array($value) ? $value : explode(',', $value);
-            $query[$key] = ['$lt' => $this->parseValue($query, $value[0], $key), '$gt' => $this->parseValue($query, $value[1], $key)];
+            $value        = is_array($value) ? $value : explode(',', $value);
+            $result[$key] = ['$lt' => $this->parseValue($query, $value[0], $key), '$gt' => $this->parseValue($query, $value[1], $key)];
         } elseif ('exists' == $exp) {
             // 字段是否存在
-            $query[$key] = ['$exists' => (bool) $value];
+            $result[$key] = ['$exists' => (bool) $value];
         } elseif ('type' == $exp) {
             // 类型查询
-            $query[$key] = ['$type' => intval($value)];
+            $result[$key] = ['$type' => intval($value)];
         } elseif ('exp' == $exp) {
             // 表达式查询
-            $query['$where'] = $value instanceof Javascript ? $value : new Javascript($value);
+            $result['$where'] = $value instanceof Javascript ? $value : new Javascript($value);
         } elseif ('like' == $exp) {
             // 模糊查询 采用正则方式
-            $query[$key] = $value instanceof Regex ? $value : new Regex($value, 'i');
+            $result[$key] = $value instanceof Regex ? $value : new Regex($value, 'i');
         } elseif (in_array($exp, ['nin', 'in'])) {
             // IN 查询
             $value = is_array($value) ? $value : explode(',', $value);
             foreach ($value as $k => $val) {
                 $value[$k] = $this->parseValue($query, $val, $key);
             }
-            $query[$key] = ['$' . $exp => $value];
+            $result[$key] = ['$' . $exp => $value];
         } elseif ('regex' == $exp) {
-            $query[$key] = $value instanceof Regex ? $value : new Regex($value, 'i');
+            $result[$key] = $value instanceof Regex ? $value : new Regex($value, 'i');
         } elseif ('< time' == $exp) {
-            $query[$key] = ['$lt' => $this->parseDateTime($query, $value, $field)];
+            $result[$key] = ['$lt' => $this->parseDateTime($query, $value, $field)];
         } elseif ('> time' == $exp) {
-            $query[$key] = ['$gt' => $this->parseDateTime($query, $value, $field)];
+            $result[$key] = ['$gt' => $this->parseDateTime($query, $value, $field)];
         } elseif ('between time' == $exp) {
             // 区间查询
-            $value       = is_array($value) ? $value : explode(',', $value);
-            $query[$key] = ['$gte' => $this->parseDateTime($query, $value[0], $field), '$lte' => $this->parseDateTime($query, $value[1], $field)];
+            $value        = is_array($value) ? $value : explode(',', $value);
+            $result[$key] = ['$gte' => $this->parseDateTime($query, $value[0], $field), '$lte' => $this->parseDateTime($query, $value[1], $field)];
         } elseif ('not between time' == $exp) {
             // 范围查询
-            $value       = is_array($value) ? $value : explode(',', $value);
-            $query[$key] = ['$lt' => $this->parseDateTime($query, $value[0], $field), '$gt' => $this->parseDateTime($query, $value[1], $field)];
+            $value        = is_array($value) ? $value : explode(',', $value);
+            $result[$key] = ['$lt' => $this->parseDateTime($query, $value[0], $field), '$gt' => $this->parseDateTime($query, $value[1], $field)];
         } elseif ('near' == $exp) {
             // 经纬度查询
-            $query[$key] = ['$near' => $this->parseValue($query, $value, $key)];
+            $result[$key] = ['$near' => $this->parseValue($query, $value, $key)];
         } elseif ('size' == $exp) {
             // 元素长度查询
-            $query[$key] = ['$size' => intval($value)];
+            $result[$key] = ['$size' => intval($value)];
         } else {
             // 普通查询
-            $query[$key] = $this->parseValue($query, $value, $key);
+            $result[$key] = $this->parseValue($query, $value, $key);
         }
-        return $query;
+
+        return $result;
     }
 
     /**

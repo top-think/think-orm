@@ -12,8 +12,8 @@
 namespace think\model\concern;
 
 use think\Collection;
-use think\db\Query;
 use think\Db;
+use think\db\Query;
 use think\Model;
 use think\model\Relation;
 use think\model\relation\BelongsTo;
@@ -30,14 +30,29 @@ use think\model\relation\MorphTo;
  */
 trait RelationShip
 {
-    // 父关联模型对象
+    /**
+     * 父关联模型对象
+     * @var object
+     */
     private $parent;
-    // 关联模型
+
+    /**
+     * 模型关联数据
+     * @var array
+     */
     private $relation = [];
-    // 关联写入
+
+    /**
+     * 关联写入定义信息
+     * @var array
+     */
     private $together;
-    // 关联自动写入
-    private $relationWrite;
+
+    /**
+     * 关联自动写入信息
+     * @var array
+     */
+    protected $relationWrite;
 
     /**
      * 设置父关联对象
@@ -114,6 +129,8 @@ trait RelationShip
         }
 
         $this->together = $relation;
+
+        $this->checkAutoRelationWrite();
 
         return $this;
     }
@@ -583,7 +600,7 @@ trait RelationShip
             if ($val instanceof Model) {
                 $val->save();
             } else {
-                $model = $this->getAttr($name);
+                $model = $this->getRelation($name);
                 if ($model instanceof Model) {
                     $model->save($val);
                 }

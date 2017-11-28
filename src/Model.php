@@ -320,11 +320,6 @@ abstract class Model implements \JsonSerializable, \ArrayAccess
             }
         }
 
-        // 关联写入检查
-        if ($this->together) {
-            $this->checkAutoRelationWrite();
-        }
-
         // 数据自动完成
         $this->autoCompleteData($this->auto);
 

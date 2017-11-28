@@ -26,34 +26,76 @@ abstract class Model implements \JsonSerializable, \ArrayAccess
     use model\concern\TimeStamp;
     use model\concern\Conversion;
 
-    // 是否为更新数据
+    /**
+     * 是否更新数据
+     * @var bool
+     */
     private $isUpdate = false;
-    // 更新条件
+
+    /**
+     * 是否强制更新所有数据
+     * @var bool
+     */
+    private $force = false;
+
+    /**
+     * 更新条件
+     * @var array
+     */
     private $updateWhere;
 
-    // 数据库配置
+    /**
+     * 数据库配置信息
+     * @var array|string
+     */
     protected $connection = [];
-    // 数据库查询类
+
+    /**
+     * 数据库查询对象类名
+     * @var string
+     */
     protected $query;
-    // 当前模型名称
+
+    /**
+     * 模型名称
+     * @var string
+     */
     protected $name;
-    // 数据表名称
+
+    /**
+     * 数据表名称
+     * @var string
+     */
     protected $table;
 
-    // 写入自动完成列表
+    /**
+     * 写入自动完成定义
+     * @var array
+     */
     protected $auto = [];
-    // 新增自动完成列表
+
+    /**
+     * 新增自动完成定义
+     * @var array
+     */
     protected $insert = [];
-    // 更新自动完成列表
+
+    /**
+     * 更新自动完成定义
+     * @var array
+     */
     protected $update = [];
 
     /**
      * 初始化过的模型.
-     *
      * @var array
      */
     protected static $initialized = [];
 
+    /**
+     * 查询对象实例
+     * @var Query
+     */
     protected $queryInstance;
 
     /**
@@ -221,6 +263,18 @@ abstract class Model implements \JsonSerializable, \ArrayAccess
      */
     protected static function init()
     {}
+
+    /**
+     * 更新是否强制写入数据 而不做比较
+     * @access public
+     * @param bool $force
+     * @return $this
+     */
+    public function force($force = true)
+    {
+        $this->force = $force;
+        return $this;
+    }
 
     /**
      * 数据自动完成

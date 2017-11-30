@@ -1175,14 +1175,18 @@ class Query
             }
         } elseif (is_null($op) && is_null($condition)) {
             if (is_array($field)) {
-                $where = $field;
+                if (key($field) !== 0) {
+                    $where = [];
+                    foreach ($field as $key => $val) {
+                        $where[$key] = !is_scalar($val) ? $val : [$key, '=', $val];
+                    }
+                } else {
+                    // 数组批量查询
+                    $where = $field;
+                }
 
                 if (!empty($where)) {
-                    if (isset($this->options['where'][$logic])) {
-                        $this->options['where'][$logic] = array_merge($this->options['where'][$logic], $where);
-                    } else {
-                        $this->options['where'][$logic] = $where;
-                    }
+                    $this->options['where'][$logic] = isset($this->options['where'][$logic]) ? array_merge($this->options['where'][$logic], $where) : $where;
                 }
 
                 return;

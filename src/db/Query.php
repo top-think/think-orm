@@ -232,7 +232,13 @@ class Query
     public function connect($config = [], $name = false)
     {
         $this->connection = Connection::instance($config, $name);
-        $this->prefix     = $this->connection->getConfig('prefix');
+        $query            = $this->connection->getConfig('query');
+
+        if (__CLASS__ != $query) {
+            return new $query($this->connection);
+        }
+
+        $this->prefix = $this->connection->getConfig('prefix');
 
         return $this;
     }

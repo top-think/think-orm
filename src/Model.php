@@ -114,7 +114,7 @@ abstract class Model implements \JsonSerializable, \ArrayAccess
         if ($this->disuse) {
             // 废弃字段
             foreach ((array) $this->disuse as $key) {
-                if (isset($this->data[$key])) {
+                if (array_key_exists($key, $this->data)) {
                     unset($this->data[$key]);
                 }
             }
@@ -184,7 +184,8 @@ abstract class Model implements \JsonSerializable, \ArrayAccess
     protected function buildQuery()
     {
         // 设置当前模型 确保查询返回模型对象
-        $query = Db::connect($this->connection)->model($this);
+        $class = $this->query;
+        $query = (new $class())->connect($this->connection)->model($this);
 
         // 设置当前数据表和模型名
         if (!empty($this->table)) {

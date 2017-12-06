@@ -820,7 +820,7 @@ class Mongo
      * @throws RuntimeException
      * @throws BulkWriteException
      */
-    public function update(Query $query, array $data)
+    public function update(Query $query, array $data = [])
     {
         $options = $query->getOptions();
         $data    = $options['data'];

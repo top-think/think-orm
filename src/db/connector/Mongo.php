@@ -52,6 +52,8 @@ class Mongo
     protected $linkWrite;
     // Builder对象
     protected $builder;
+    // 缓存对象
+    protected $cache;
     // 返回或者影响记录数
     protected $numRows = 0;
     // 错误信息
@@ -134,6 +136,7 @@ class Mongo
         }
 
         $this->builder = new Builder($this);
+        $this->cache   = Db::getCacheHandler();
     }
 
     /**
@@ -867,9 +870,9 @@ class Mongo
         $writeResult  = $this->execute($options['table'], $bulk, $writeConcern);
 
         // 检测缓存
-        if ($cache = Db::getCacheHandler() && isset($key) && $cache->get($key)) {
+        if ($this->cache && isset($key) && $this->cache->get($key)) {
             // 删除缓存
-            $cache->rm($key);
+            $this->cache->rm($key);
         }
 
         $result = $writeResult->getModifiedCount();
@@ -935,9 +938,9 @@ class Mongo
         $writeResult = $this->execute($options['table'], $bulk, $writeConcern);
 
         // 检测缓存
-        if ($cache = Db::getCacheHandler() && isset($key) && $cache->get($key)) {
+        if ($this->cache && isset($key) && $this->cache->get($key)) {
             // 删除缓存
-            $cache->rm($key);
+            $this->cache->rm($key);
         }
 
         $result = $writeResult->getDeletedCount();
@@ -990,14 +993,13 @@ class Mongo
      */
     public function select(Query $query)
     {
-        $options      = $query->getOptions();
-        $cacheHandler = Db::getCacheHandler();
-        $resultSet    = false;
-        if ($cacheHandler && !empty($options['cache'])) {
+        $options   = $query->getOptions();
+        $resultSet = false;
+        if ($this->cache && !empty($options['cache'])) {
             // 判断查询缓存
             $cache     = $options['cache'];
             $key       = is_string($cache['key']) ? $cache['key'] : md5(serialize($options));
-            $resultSet = $cacheHandler->get($key);
+            $resultSet = $this->cache->get($key);
         }
 
         if (!$resultSet) {
@@ -1041,16 +1043,15 @@ class Mongo
     public function find(Query $query)
     {
         // 分析查询表达式
-        $options      = $query->getOptions();
-        $pk           = $query->getPk($options);
-        $data         = $options['data'];
-        $cacheHandler = Db::getCacheHandler();
-        if ($cacheHandler && !empty($options['cache']) && true === $options['cache']['key'] && is_string($pk) && isset($options['where']['$and'][$pk])) {
+        $options = $query->getOptions();
+        $pk      = $query->getPk($options);
+        $data    = $options['data'];
+        if ($this->cache && !empty($options['cache']) && true === $options['cache']['key'] && is_string($pk) && isset($options['where']['$and'][$pk])) {
             $key = $this->getCacheKey($options['where']['$and'][$pk], $options);
         }
 
         $result = false;
-        if ($cacheHandler && !empty($options['cache'])) {
+        if ($this->cache && !empty($options['cache'])) {
             // 判断查询缓存
             $cache = $options['cache'];
             if (true === $cache['key'] && !is_null($data) && !is_array($data)) {
@@ -1058,7 +1059,7 @@ class Mongo
             } elseif (!isset($key)) {
                 $key = is_string($cache['key']) ? $cache['key'] : md5(serialize($options));
             }
-            $result = $cacheHandler->get($key);
+            $result = $this->cache->get($key);
         }
 
         if (false === $result) {
@@ -1114,7 +1115,7 @@ class Mongo
      */
     protected function cacheData($key, $data, $config = [])
     {
-        Db::getCacheHandler()->set($key, $data, $config['expire']);
+        $this->cache->set($key, $data, $config['expire']);
     }
 
     /**
@@ -1199,14 +1200,13 @@ class Mongo
      */
     public function value(Query $query, $field, $default = null)
     {
-        $options      = $query->getOptions();
-        $cacheHandler = Db::getCacheHandler();
-        $result       = null;
-        if ($cacheHandler && !empty($options['cache'])) {
+        $options = $query->getOptions();
+        $result  = null;
+        if ($this->cache && !empty($options['cache'])) {
             // 判断查询缓存
             $cache  = $options['cache'];
             $key    = is_string($cache['key']) ? $cache['key'] : md5($field . serialize($options));
-            $result = $cacheHandler->get($key);
+            $result = $this->cache->get($key);
         }
 
         if (!$result) {
@@ -1252,14 +1252,13 @@ class Mongo
      */
     public function column(Query $query, $field, $key = '')
     {
-        $options      = $query->getOptions();
-        $cacheHandler = Db::getCacheHandler();
-        $result       = false;
-        if ($cacheHandler && !empty($options['cache'])) {
+        $options = $query->getOptions();
+        $result  = false;
+        if ($this->cache && !empty($options['cache'])) {
             // 判断查询缓存
             $cache  = $options['cache'];
             $guid   = is_string($cache['key']) ? $cache['key'] : md5($field . serialize($options));
-            $result = $cacheHandler->get($guid);
+            $result = $this->cache->get($guid);
         }
 
         if (!$result) {

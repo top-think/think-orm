@@ -22,10 +22,27 @@ use MongoDB\Driver\Query as MongoQuery;
 use MongoDB\Driver\ReadPreference;
 use MongoDB\Driver\WriteConcern;
 use think\Collection;
-use think\db\Query as BaseQuery;
+use think\db\connector\Mongo as Connection;
+use think\db\Query;
 
-class Mongo extends BaseQuery
+class Mongo extends Query
 {
+
+    /**
+     * 架构函数
+     * @access public
+     */
+    public function __construct(Connection $connection = null)
+    {
+        if (is_null($connection)) {
+            $this->connection = Connection::instance();
+        } else {
+            $this->connection = $connection;
+        }
+
+        $this->prefix = $this->connection->getConfig('prefix');
+    }
+
     /**
      * 去除某个查询条件
      * @access public
@@ -696,8 +713,6 @@ class Mongo extends BaseQuery
         }
 
     }
-
-
 
     /**
      * 分析表达式（可用于查询或者写入操作）

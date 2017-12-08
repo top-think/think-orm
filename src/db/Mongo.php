@@ -643,9 +643,9 @@ class Mongo extends Query
         if (is_string($pk)) {
             // 根据主键查询
             if (is_array($data)) {
-                $where[$pk] = isset($data[$pk]) ? $data[$pk] : ['in', $data];
+                $where[$pk] = isset($data[$pk]) ? [$pk, '=', $data[$pk]] : [$pk, 'in', $data];
             } else {
-                $where[$pk] = strpos($data, ',') ? ['in', $data] : $data;
+                $where[$pk] = strpos($data, ',') ? [$pk, 'IN', $data] : [$pk, '=', $data];
             }
         }
 

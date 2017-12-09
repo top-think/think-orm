@@ -42,7 +42,8 @@ abstract class Connection
     protected $linkID;
     protected $linkRead;
     protected $linkWrite;
-
+    // 当前缓存对象
+    protected $cache;
     // 查询结果类型
     protected $fetchType = PDO::FETCH_ASSOC;
     // 字段属性大小写
@@ -141,6 +142,7 @@ abstract class Connection
         $class = $this->getBuilderClass();
 
         $this->builder = new $class($this);
+        $this->cache   = Db::getCacheHandler();
 
         // 执行初始化操作
         $this->initialize();
@@ -759,18 +761,17 @@ abstract class Connection
     public function find(Query $query)
     {
         // 分析查询表达式
-        $options      = $query->getOptions();
-        $pk           = $query->getPk($options);
-        $cacheHandler = Db::getCacheHandler();
+        $options = $query->getOptions();
+        $pk      = $query->getPk($options);
 
-        if ($cacheHandler && !empty($options['cache']) && true === $options['cache']['key'] && is_string($pk) && isset($options['where']['AND'][$pk])) {
+        if ($this->cache && !empty($options['cache']) && true === $options['cache']['key'] && is_string($pk) && isset($options['where']['AND'][$pk])) {
             $key = $this->getCacheKey($options['where']['AND'][$pk], $options);
         }
 
         $data   = $options['data'];
         $result = false;
 
-        if ($cacheHandler && empty($options['fetch_sql']) && !empty($options['cache'])) {
+        if ($this->cache && empty($options['fetch_sql']) && !empty($options['cache'])) {
             // 判断查询缓存
             $cache = $options['cache'];
 
@@ -780,7 +781,7 @@ abstract class Connection
                 $key = $this->getCacheKey($data, $options, $query->getBind(false));
             }
 
-            $result = $cacheHandler->get($key);
+            $result = $this->cache->get($key);
         }
 
         if (false === $result) {
@@ -866,14 +867,14 @@ abstract class Connection
     public function select(Query $query)
     {
         // 分析查询表达式
-        $options      = $query->getOptions();
-        $resultSet    = false;
-        $cacheHandler = Db::getCacheHandler();
-        if ($cacheHandler && empty($options['fetch_sql']) && !empty($options['cache'])) {
+        $options   = $query->getOptions();
+        $resultSet = false;
+
+        if ($this->cache && empty($options['fetch_sql']) && !empty($options['cache'])) {
             // 判断查询缓存
             $cache     = $options['cache'];
             $key       = is_string($cache['key']) ? $cache['key'] : md5(serialize($options) . serialize($query->getBind(false)));
-            $resultSet = $cacheHandler->get($key);
+            $resultSet = $this->cache->get($key);
         }
 
         if (false === $resultSet) {
@@ -1093,9 +1094,9 @@ abstract class Connection
             return $this->getRealSql($sql, $bind);
         } else {
             // 检测缓存
-            if ($cache = Db::getCacheHandler() && isset($key) && $cache->get($key)) {
+            if ($this->cache && isset($key) && $this->cache->get($key)) {
                 // 删除缓存
-                $cache->rm($key);
+                $this->cache->rm($key);
             }
 
             // 执行操作
@@ -1156,9 +1157,9 @@ abstract class Connection
         }
 
         // 检测缓存
-        if ($cache = Db::getCacheHandler() && isset($key) && $cache->get($key)) {
+        if ($this->cache && isset($key) && $this->cache->get($key)) {
             // 删除缓存
-            $cache->rm($key);
+            $this->cache->rm($key);
         }
 
         // 执行操作
@@ -1191,14 +1192,13 @@ abstract class Connection
     {
         $options = $query->getOptions();
 
-        $result       = false;
-        $cacheHandler = Db::getCacheHandler();
-        if ($cacheHandler && empty($options['fetch_sql']) && !empty($options['cache'])) {
+        $result = false;
+        if ($this->cache && empty($options['fetch_sql']) && !empty($options['cache'])) {
             // 判断查询缓存
             $cache = $options['cache'];
 
             $key    = is_string($cache['key']) ? $cache['key'] : md5($field . serialize($options) . serialize($query->getBind(false)));
-            $result = $cacheHandler->get($key);
+            $result = $this->cache->get($key);
         }
 
         if (false === $result) {
@@ -1253,14 +1253,13 @@ abstract class Connection
     {
         $options = $query->getOptions();
 
-        $result       = false;
-        $cacheHandler = Db::getCacheHandler();
-        if ($cacheHandler && empty($options['fetch_sql']) && !empty($options['cache'])) {
+        $result = false;
+        if ($this->cache && empty($options['fetch_sql']) && !empty($options['cache'])) {
             // 判断查询缓存
             $cache = $options['cache'];
 
             $guid   = is_string($cache['key']) ? $cache['key'] : md5($field . serialize($options) . serialize($query->getBind(false)));
-            $result = $cacheHandler->get($guid);
+            $result = $this->cache->get($guid);
         }
 
         if (false === $result) {
@@ -1974,7 +1973,7 @@ abstract class Connection
      */
     protected function cacheData($key, $data, $config = [])
     {
-        Db::getCacheHandler()->set($key, $data, $config['expire']);
+        $this->cache->set($key, $data, $config['expire']);
     }
 
     /**

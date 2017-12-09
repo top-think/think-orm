@@ -675,7 +675,8 @@ class Query
     {
         // 传入的表名为数组
         if (is_array($join)) {
-            list($table, $alias) = each($join);
+            $table = key($join);
+            $alias = current($join);
         } else {
             $join = trim($join);
 
@@ -700,7 +701,7 @@ class Query
             }
         }
 
-        if (isset($alias)) {
+        if (isset($alias) && $table != $alias) {
             if (isset($this->options['alias'][$table])) {
                 $table = $table . '@think' . uniqid();
             }

@@ -160,6 +160,15 @@ class Mongo
         $filter = [];
         foreach ($where as $logic => $val) {
             foreach ($val as $field => $value) {
+                if (is_array($value)) {
+                    if (key($value) !== 0) {
+                        throw new Exception('where express error:' . var_export($value, true));
+                    }
+                    $field = array_shift($value);
+                } elseif (!($value instanceof \Closure)) {
+                    throw new Exception('where express error:' . var_export($value, true));
+                }
+
                 if ($value instanceof \Closure) {
                     // 使用闭包查询
                     $query = new Query($this->connection);

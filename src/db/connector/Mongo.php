@@ -23,7 +23,6 @@ use MongoDB\Driver\Query as MongoQuery;
 use MongoDB\Driver\ReadPreference;
 use MongoDB\Driver\WriteConcern;
 use think\Collection;
-use think\Container;
 use think\Db;
 use think\db\builder\Mongo as Builder;
 use think\db\Mongo as Query;
@@ -53,6 +52,8 @@ class Mongo
     protected $linkWrite;
     // Builder对象
     protected $builder;
+    // 缓存对象
+    protected $cache;
     // 返回或者影响记录数
     protected $numRows = 0;
     // 错误信息
@@ -61,6 +62,8 @@ class Mongo
     protected $options = [];
     // 数据表信息
     protected static $info = [];
+    // 数据库日志
+    protected static $log = [];
     // 数据库连接参数配置
     protected $config = [
         // 数据库类型
@@ -133,6 +136,7 @@ class Mongo
         }
 
         $this->builder = new Builder($this);
+        $this->cache   = Db::getCacheHandler();
     }
 
     /**
@@ -536,7 +540,12 @@ class Mongo
 
     public function logger($log, $type = 'sql')
     {
-        $this->config['debug'] && Container::get('log')->record($log, $type);
+        $this->config['debug'] && self::$log[] = $log;
+    }
+
+    public function getSqlLog()
+    {
+        return self::$log;
     }
 
     /**
@@ -550,14 +559,10 @@ class Mongo
     {
         if (!empty($this->config['debug'])) {
             // 开启数据库调试模式
-            $debug = Container::get('debug');
             if ($start) {
-                $debug->remark('queryStartTime', 'time');
+                $this->queryStartTime = microtime(true);
             } else {
-                // 记录操作结束时间
-                $debug->remark('queryEndTime', 'time');
-
-                $runtime = $debug->getRangeTime('queryStartTime', 'queryEndTime');
+                $runtime = number_format((microtime(true) - $this->queryStartTime), 6);
 
                 $sql = $sql ?: $this->queryStr;
 
@@ -811,7 +816,6 @@ class Mongo
      * 更新记录
      * @access public
      * @param Query     $query 查询对象
-     * @param mixed     $data 数据
      * @return int
      * @throws Exception
      * @throws AuthenticationException
@@ -820,7 +824,7 @@ class Mongo
      * @throws RuntimeException
      * @throws BulkWriteException
      */
-    public function update(Query $query, array $data)
+    public function update(Query $query)
     {
         $options = $query->getOptions();
         $data    = $options['data'];
@@ -866,9 +870,9 @@ class Mongo
         $writeResult  = $this->execute($options['table'], $bulk, $writeConcern);
 
         // 检测缓存
-        if (isset($key) && Container::get('cache')->get($key)) {
+        if ($this->cache && isset($key) && $this->cache->get($key)) {
             // 删除缓存
-            Container::get('cache')->rm($key);
+            $this->cache->rm($key);
         }
 
         $result = $writeResult->getModifiedCount();
@@ -934,9 +938,9 @@ class Mongo
         $writeResult = $this->execute($options['table'], $bulk, $writeConcern);
 
         // 检测缓存
-        if (isset($key) && Container::get('cache')->get($key)) {
+        if ($this->cache && isset($key) && $this->cache->get($key)) {
             // 删除缓存
-            Container::get('cache')->rm($key);
+            $this->cache->rm($key);
         }
 
         $result = $writeResult->getDeletedCount();
@@ -989,14 +993,13 @@ class Mongo
      */
     public function select(Query $query)
     {
-        $options = $query->getOptions();
-
+        $options   = $query->getOptions();
         $resultSet = false;
-        if (!empty($options['cache'])) {
+        if ($this->cache && !empty($options['cache'])) {
             // 判断查询缓存
             $cache     = $options['cache'];
             $key       = is_string($cache['key']) ? $cache['key'] : md5(serialize($options));
-            $resultSet = Container::get('cache')->get($key);
+            $resultSet = $this->cache->get($key);
         }
 
         if (!$resultSet) {
@@ -1043,13 +1046,12 @@ class Mongo
         $options = $query->getOptions();
         $pk      = $query->getPk($options);
         $data    = $options['data'];
-
-        if (!empty($options['cache']) && true === $options['cache']['key'] && is_string($pk) && isset($options['where']['$and'][$pk])) {
+        if ($this->cache && !empty($options['cache']) && true === $options['cache']['key'] && is_string($pk) && isset($options['where']['$and'][$pk])) {
             $key = $this->getCacheKey($options['where']['$and'][$pk], $options);
         }
 
         $result = false;
-        if (!empty($options['cache'])) {
+        if ($this->cache && !empty($options['cache'])) {
             // 判断查询缓存
             $cache = $options['cache'];
             if (true === $cache['key'] && !is_null($data) && !is_array($data)) {
@@ -1057,7 +1059,7 @@ class Mongo
             } elseif (!isset($key)) {
                 $key = is_string($cache['key']) ? $cache['key'] : md5(serialize($options));
             }
-            $result = Container::get('cache')->get($key);
+            $result = $this->cache->get($key);
         }
 
         if (false === $result) {
@@ -1113,13 +1115,7 @@ class Mongo
      */
     protected function cacheData($key, $data, $config = [])
     {
-        $cache = Container::get('cache');
-
-        if (isset($config['tag'])) {
-            $cache->tag($config['tag'])->set($key, $data, $config['expire']);
-        } else {
-            $cache->set($key, $data, $config['expire']);
-        }
+        $this->cache->set($key, $data, $config['expire']);
     }
 
     /**
@@ -1205,13 +1201,12 @@ class Mongo
     public function value(Query $query, $field, $default = null)
     {
         $options = $query->getOptions();
-
-        $result = null;
-        if (!empty($options['cache'])) {
+        $result  = null;
+        if ($this->cache && !empty($options['cache'])) {
             // 判断查询缓存
             $cache  = $options['cache'];
             $key    = is_string($cache['key']) ? $cache['key'] : md5($field . serialize($options));
-            $result = Container::get('cache')->get($key);
+            $result = $this->cache->get($key);
         }
 
         if (!$result) {
@@ -1258,13 +1253,12 @@ class Mongo
     public function column(Query $query, $field, $key = '')
     {
         $options = $query->getOptions();
-
-        $result = false;
-        if (!empty($options['cache'])) {
+        $result  = false;
+        if ($this->cache && !empty($options['cache'])) {
             // 判断查询缓存
             $cache  = $options['cache'];
             $guid   = is_string($cache['key']) ? $cache['key'] : md5($field . serialize($options));
-            $result = Container::get('cache')->get($guid);
+            $result = $this->cache->get($guid);
         }
 
         if (!$result) {
@@ -1360,10 +1354,10 @@ class Mongo
     private static function parseConfig($config)
     {
         if (empty($config)) {
-            $config = Container::get('config')->pull('database');
+            $config = Db::getConfig();
         } elseif (is_string($config) && false === strpos($config, '/')) {
             // 支持读取配置参数
-            $config = Container::get('config')->get('database.' . $config);
+            $config = Db::getConfig($config);
         }
 
         if (is_string($config)) {

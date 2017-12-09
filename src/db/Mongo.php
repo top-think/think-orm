@@ -22,10 +22,27 @@ use MongoDB\Driver\Query as MongoQuery;
 use MongoDB\Driver\ReadPreference;
 use MongoDB\Driver\WriteConcern;
 use think\Collection;
-use think\db\Query as BaseQuery;
+use think\db\connector\Mongo as Connection;
+use think\db\Query;
 
-class Mongo extends BaseQuery
+class Mongo extends Query
 {
+
+    /**
+     * 架构函数
+     * @access public
+     */
+    public function __construct(Connection $connection = null)
+    {
+        if (is_null($connection)) {
+            $this->connection = Connection::instance();
+        } else {
+            $this->connection = $connection;
+        }
+
+        $this->prefix = $this->connection->getConfig('prefix');
+    }
+
     /**
      * 去除某个查询条件
      * @access public
@@ -635,9 +652,9 @@ class Mongo extends BaseQuery
         if (is_string($pk)) {
             // 根据主键查询
             if (is_array($data)) {
-                $where[$pk] = isset($data[$pk]) ? $data[$pk] : ['in', $data];
+                $where[$pk] = isset($data[$pk]) ? [$pk, '=', $data[$pk]] : [$pk, 'in', $data];
             } else {
-                $where[$pk] = strpos($data, ',') ? ['in', $data] : $data;
+                $where[$pk] = strpos($data, ',') ? [$pk, 'IN', $data] : [$pk, '=', $data];
             }
         }
 

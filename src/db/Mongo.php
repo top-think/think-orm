@@ -319,37 +319,46 @@ class Mongo extends BaseQuery
     {
         $logic = '$' . strtolower($logic);
         if ($field instanceof \Closure) {
-            $this->options['where'][$logic][] = is_string($op) ? [$op, $field] : $field;
-            return;
-        }
-        $where = [];
-        if (is_null($op) && is_null($condition)) {
+            $where = is_string($op) ? [$op, $field] : $field;
+        } elseif (is_null($op) && is_null($condition)) {
             if (is_array($field)) {
-                // 数组批量查询
-                $where = $field;
-            } elseif ($field) {
+                if (key($field) !== 0) {
+                    $where = [];
+                    foreach ($field as $key => $val) {
+                        $where[$key] = !is_scalar($val) ? $val : [$key, '=', $val];
+                    }
+                } else {
+                    // 数组批量查询
+                    $where = $field;
+                }
+
+                if (!empty($where)) {
+                    $this->options['where'][$logic] = isset($this->options['where'][$logic]) ? array_merge($this->options['where'][$logic], $where) : $where;
+                }
+
+                return;
+            } elseif ($field && is_string($field)) {
                 // 字符串查询
-                $where[] = ['exp', $field];
-            } else {
-                $where = '';
+                $where = [$field, 'null', ''];
             }
         } elseif (is_array($op)) {
-            $where[$field] = $param;
+            $where = $param;
         } elseif (in_array(strtolower($op), ['null', 'notnull', 'not null'])) {
             // null查询
-            $where[$field] = [$op, ''];
+            $where = [$field, $op, ''];
         } elseif (is_null($condition)) {
             // 字段相等查询
-            $where[$field] = ['=', $op];
+            $where = [$field, '=', $op];
         } else {
-            $where[$field] = [$op, $condition];
+            $where = [$field, $op, $condition, isset($param[2]) ? $param[2] : null];
         }
 
         if (!empty($where)) {
-            if (!isset($this->options['where'][$logic])) {
-                $this->options['where'][$logic] = [];
+            if (isset($this->options['where'][$logic][$field])) {
+                $this->options['where'][$logic][] = $where;
+            } else {
+                $this->options['where'][$logic][$field] = $where;
             }
-            $this->options['where'][$logic] = array_merge($this->options['where'][$logic], $where);
         }
     }
 
@@ -696,8 +705,6 @@ class Mongo extends BaseQuery
         }
 
     }
-
-
 
     /**
      * 分析表达式（可用于查询或者写入操作）

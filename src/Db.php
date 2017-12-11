@@ -11,6 +11,8 @@
 
 namespace think;
 
+use think\db\Query;
+
 /**
  * Class Db
  * @package think

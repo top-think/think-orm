@@ -586,7 +586,7 @@ class Query
      */
     public function setInc($field, $step = 1)
     {
-        return $this->setField($field, ['exp', $field . '+' . $step]);
+        return $this->setField($field, ['exp', $field, $step]);
     }
 
     /**
@@ -599,7 +599,7 @@ class Query
      */
     public function setDec($field, $step = 1)
     {
-        return $this->setField($field, ['exp', $field . '-' . $step]);
+        return $this->setField($field, ['exp', $field, $step]);
     }
 
     /**
@@ -823,7 +823,7 @@ class Query
         $fields = is_string($field) ? explode(',', $field) : $field;
 
         foreach ($fields as $field) {
-            $this->data($field, ['exp', $field . '+' . $step]);
+            $this->data($field, ['exp', $field, $step]);
         }
 
         return $this;
@@ -841,7 +841,7 @@ class Query
         $fields = is_string($field) ? explode(',', $field) : $field;
 
         foreach ($fields as $field) {
-            $this->data($field, ['exp', $field . '-' . $step]);
+            $this->data($field, ['exp', $field, $step]);
         }
 
         return $this;

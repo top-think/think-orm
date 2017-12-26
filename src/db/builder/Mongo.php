@@ -139,7 +139,7 @@ class Mongo
         foreach ($data as $key => $val) {
             $item = $this->parseKey($key);
 
-            if (is_array($val) && isset($val[0]) && 0 === strpos($val[0], '$')) {
+            if (is_array($val) && isset($val[0]) && is_string($val[0]) && 0 === strpos($val[0], '$')) {
                 $result[$val[0]][$item] = $this->parseValue($query, $val[1], $key);
             } else {
                 $result['$set'][$item] = $this->parseValue($query, $val, $key);

@@ -2408,8 +2408,7 @@ class Query
     public function chunk($count, $callback, $column = null, $order = 'asc')
     {
         $options = $this->getOptions();
-
-        $column = $column ?: $this->getPk($options);
+        $column  = $column ?: $this->getPk($options);
 
         if (isset($options['order'])) {
             if ($this->config['debug']) {

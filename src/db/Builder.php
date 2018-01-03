@@ -82,24 +82,32 @@ abstract class Builder
     /**
      * 数据分析
      * @access protected
-     * @param Query     $query        查询对象
-     * @param array     $data 数据
+     * @param  Query     $query     查询对象
+     * @param  array     $data      数据
+     * @param  array     $fields    字段信息
+     * @param  array     $bind      参数绑定
+     * @param  string    $suffix    参数绑定后缀
      * @return array
      */
-    protected function parseData(Query $query, $data = [])
+    protected function parseData(Query $query, $data = [], $fields = [], $bind = [], $suffix = '')
     {
         if (empty($data)) {
             return [];
         }
 
         $options = $query->getOptions();
-        // 获取绑定信息
-        $bind = $this->connection->getFieldsBind($options['table']);
 
-        if ('*' == $options['field']) {
-            $fields = array_keys($bind);
-        } else {
-            $fields = $options['field'];
+        // 获取绑定信息
+        if (empty($bind)) {
+            $bind = $this->connection->getFieldsBind($options['table']);
+        }
+
+        if (empty($fields)) {
+            if ('*' == $options['field']) {
+                $fields = array_keys($bind);
+            } else {
+                $fields = $options['field'];
+            }
         }
 
         $result = [];
@@ -110,6 +118,8 @@ abstract class Builder
             if (is_object($val) && method_exists($val, '__toString')) {
                 // 对象数据写入
                 $val = $val->__toString();
+            } elseif (is_array($val) && 'json' == $this->connection->getFieldsType($options['table'], $key)) {
+                $val = json_encode($val);
             }
 
             if (false === strpos($key, '.') && !in_array($key, $fields, true)) {
@@ -132,7 +142,7 @@ abstract class Builder
                 }
             } elseif (is_scalar($val)) {
                 // 过滤非标量数据
-                $result[$item] = $this->parseDataBind($query, $key, $val, $bind);
+                $result[$item] = $this->parseDataBind($query, $key, $val, $bind, $suffix);
             }
         }
 
@@ -1015,39 +1025,26 @@ abstract class Builder
 
         // 获取合法的字段
         if ('*' == $options['field']) {
-            $fields = $this->connection->getTableFields($options['table']);
+            $allowFields = $this->connection->getTableFields($options['table']);
         } else {
-            $fields = $options['field'];
+            $allowFields = $options['field'];
         }
         // 获取绑定信息
         $bind = $this->connection->getFieldsBind($options['table']);
 
-        foreach ($dataSet as $k => &$data) {
-            foreach ($data as $key => $val) {
-                if (!in_array($key, $fields, true)) {
-                    if ($options['strict']) {
-                        throw new Exception('fields not exists:[' . $key . ']');
-                    }
-                    unset($data[$key]);
-                } elseif (is_null($val)) {
-                    $data[$key] = 'NULL';
-                } elseif (is_scalar($val)) {
-                    $data[$key] = $this->parseDataBind($query, $key, $val, $bind, '_' . $k);
-                } elseif (is_object($val) && method_exists($val, '__toString')) {
-                    // 对象数据写入
-                    $data[$key] = $val->__toString();
-                } else {
-                    // 过滤掉非标量数据
-                    unset($data[$key]);
-                }
-            }
+        foreach ($dataSet as $k => $data) {
+            $data = $this->parseData($query, $data, $allowFields, $bind, '_' . $k);
 
-            $value    = array_values($data);
-            $values[] = 'SELECT ' . implode(',', $value);
+            $values[] = 'SELECT ' . implode(',', array_values($data));
+
+            if (!isset($insertFields)) {
+                $insertFields = array_keys($data);
+            }
         }
 
         $fields = [];
-        foreach (array_keys(reset($dataSet)) as $field) {
+
+        foreach ($insertFields as $field) {
             $fields[] = $this->parseKey($query, $field);
         }
 

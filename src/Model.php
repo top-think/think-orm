@@ -466,10 +466,15 @@ abstract class Model implements \JsonSerializable, \ArrayAccess
 
         $pk = $this->getPk();
 
-        if (is_string($pk) && isset($data[$pk])) {
-            unset($where);
-            $where[] = [$pk, '=', $data[$pk]];
-            unset($data[$pk]);
+        foreach ((array) $pk as $key) {
+            if (isset($data[$key])) {
+                $array[$key] = [$key, '=', $data[$key]];
+                unset($data[$key]);
+            }
+        }
+
+        if (!empty($array)) {
+            $where = $array;
         }
 
         if ($this->relationWrite) {
@@ -524,10 +529,13 @@ abstract class Model implements \JsonSerializable, \ArrayAccess
         $pk = $this->getPk();
 
         // 获取自动增长主键
-        if ($result && is_string($pk) && (!isset($this->data[$pk]) || '' == $this->data[$pk])) {
-            $insertId = $this->db(false)->getLastInsID($sequence);
-            if ($insertId) {
-                $this->data[$pk] = $insertId;
+        if ($result && $insertId = $this->db(false)->getLastInsID($sequence)) {
+            $pk = $this->getPk();
+
+            foreach ((array) $pk as $key) {
+                if (!isset($this->data[$key]) || '' == $this->data[$key]) {
+                    $this->data[$key] = $insertId;
+                }
             }
         }
 

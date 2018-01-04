@@ -588,7 +588,7 @@ class Query
      */
     public function setInc($field, $step = 1)
     {
-        return $this->setField($field, ['exp', $field, $step]);
+        return $this->setField($field, ['inc', $field, $step]);
     }
 
     /**
@@ -601,7 +601,7 @@ class Query
      */
     public function setDec($field, $step = 1)
     {
-        return $this->setField($field, ['exp', $field, $step]);
+        return $this->setField($field, ['dec', $field, $step]);
     }
 
     /**

@@ -49,7 +49,6 @@ Db类增加的（静态）方法包括：
 
 定义模型：
 ~~~php
-<?php
 namespace app\index\model;
 use think\Model;
 class User extends Model
@@ -67,4 +66,142 @@ $user->name = 'thinkphp';
 $user->save();
 ~~~
 
+## Db类和模型对比使用
+####   :white_check_mark:   创建Create
+* Db用法
+
+    ```php
+    Db::table('user')
+        ->insert([
+            'name'  => 'thinkphp',
+            'email' => 'thinkphp@qq.com',
+        ]);
+    ```
+* 模型用法
+
+    ```php
+   $user        = new User;
+   $user->name  = 'thinkphp';
+   $user->email = 'thinkphp@qq.com';
+   $user->save();
+    ```
+* 或者批量设置
+
+    ```php
+    $user = new User;
+    $user->save([
+        'name'  => 'thinkphp',
+        'email' => 'thinkphp@qq.com',
+    ]);
+    ```
+####  :white_check_mark:  读取Read
+* Db用法
+
+    ```php
+    $user = Db::table('user')
+        ->where('id', 1)
+        ->find();
+    //  或者
+    $user = Db::table('user')
+        ->find(1);
+    echo $user['id'];
+    echo $user['name'];
+    ```
+* 模型用法
+
+    ```php
+    $user = User::get(1);
+    echo $user->id;
+    echo $user->name;
+    ```
+* 模型实现读取多个记录
+
+    ```php
+    // 查询用户数据集
+    $users = User::where('id', '>', 1)
+        ->limit(5)
+        ->select();
+    
+    // 遍历读取用户数据
+    foreach ($users as $user) {
+        echo $user->id;
+        echo $user->name;
+    }
+    ```
+####  :white_check_mark:  更新Update
+* Db用法
+
+    ```php
+    Db::table('user')
+        ->where('id', 1)
+        ->update([
+            'name'  => 'topthink',
+            'email' => 'topthink@qq.com',
+        ]);
+    ```
+* 模型用法
+
+    ```php
+    $user        = User::get(1);
+    $user->name  = 'topthink';
+    $user->email = 'topthink@qq.com';
+    $user->save();
+    ```
+* 或者使用
+
+    ```php
+    $user = User::get(1);
+    $user->save([
+        'name'  => 'topthink',
+        'email' => 'topthink@qq.com',
+    ]);
+    ```
+* 静态调用
+
+    ```php
+    User::update([
+        'name'  => 'topthink',
+        'email' => 'topthink@qq.com',
+    ], ['id' => 1]);
+    ```
+####  :white_check_mark:  删除Delete
+* Db用法
+
+    ```php
+    Db::table('user')->delete(1);
+    ```
+* 模型用法
+
+    ```php
+    $user = User::get(1);
+    $user->delete();
+    ```
+* 或者静态实现
+
+    ```php
+   User::destroy(1);
+    ```
+* 静态调用
+
+    ```php
+    User::update([
+        'name'  => 'topthink',
+        'email' => 'topthink@qq.com',
+    ], ['id' => 1]);
+    ```
+* destroy方法支持删除指定主键或者查询条件的数据
+
+    ```php
+    // 根据主键删除多个数据
+    User::destroy([1, 2, 3]);
+    // 指定条件删除数据
+    User::destroy([
+        'status' => 0,
+    ]);
+    // 使用闭包条件
+    User::destroy(function ($query) {
+        $query->where('id', '>', 0)
+            ->where('status', 0);
+    });
+    ```
 更多模型用法可以参考5.1完全开发手册的[模型](https://www.kancloud.cn/manual/thinkphp5_1/354041)章节

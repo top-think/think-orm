@@ -211,7 +211,7 @@ trait Conversion
      * @param  string           $resultSetType 数据集类
      * @return Collection
      */
-    public function toCollection($collection,)
+    public function toCollection($collection, $resultSetType = null)
     {
         $resultSetType = $resultSetType ?: $this->resultSetType;
 

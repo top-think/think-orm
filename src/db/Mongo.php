@@ -21,7 +21,6 @@ use MongoDB\Driver\Exception\RuntimeException;
 use MongoDB\Driver\Query as MongoQuery;
 use MongoDB\Driver\ReadPreference;
 use MongoDB\Driver\WriteConcern;
-use think\Collection;
 use think\db\connector\Mongo as Connection;
 use think\db\Query;
 

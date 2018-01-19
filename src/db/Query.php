@@ -2391,7 +2391,7 @@ class Query
 
                 if (!empty($this->options['with'])) {
                     // 预载入
-                    $result->eagerlyResultSet($resultSet, $this->options['with']);
+                    $result->eagerlyResultSet($resultSet, $this->options['with'], $this->options['relation_cache']);
                 }
 
                 // 模型数据集转换

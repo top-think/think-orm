@@ -386,6 +386,37 @@ class Query
     }
 
     /**
+     * 获取数据表字段信息
+     * @access public
+     * @param  string $tableName 数据表名
+     * @return array
+     */
+    public function getTableFields($tableName = '')
+    {
+        if ('' == $tableName) {
+            $tableName = isset($this->options['table']) ? $this->options['table'] : $this->getTable();
+        }
+
+        return $this->connection->getTableFields($tableName);
+    }
+
+    /**
+     * 获取数据表字段类型
+     * @access public
+     * @param  string $tableName 数据表名
+     * @param  string $field    字段名
+     * @return array|string
+     */
+    public function getFieldsType($tableName = '', $field = null)
+    {
+        if ('' == $tableName) {
+            $tableName = isset($this->options['table']) ? $this->options['table'] : $this->getTable();
+        }
+
+        return $this->connection->getFieldsType($tableName, $field);
+    }
+
+    /**
      * 得到分表的的数据表名
      * @access public
      * @param array  $data  操作的数据
@@ -770,11 +801,11 @@ class Query
 
         if (true === $field) {
             // 获取全部字段
-            $fields = $this->connection->getTableFields($tableName ?: (isset($this->options['table']) ? $this->options['table'] : $this->getTable()));
+            $fields = $this->getTableFields($tableName);
             $field  = $fields ?: ['*'];
         } elseif ($except) {
             // 字段排除
-            $fields = $this->connection->getTableFields($tableName ?: (isset($this->options['table']) ? $this->options['table'] : $this->getTable()));
+            $fields = $this->getTableFields($tableName);
             $field  = $fields ? array_diff($fields, $field) : $field;
         }
 
@@ -1513,6 +1544,33 @@ class Query
     }
 
     /**
+     * 指定Field排序 order('id',[1,2,3],'desc')
+     * @access public
+     * @param  string|array $field 排序字段
+     * @param  string       $values 排序值
+     * @param  string       $order
+     * @return $this
+     */
+    public function orderField($field, array $values = [], $order = '')
+    {
+        $values['sort'] = $order;
+
+        $this->options['order'][$field] = $values;
+        return $this;
+    }
+
+    /**
+     * 随机排序
+     * @access public
+     * @return $this
+     */
+    public function orderRand()
+    {
+        $this->options['order'][] = '[rand]';
+        return $this;
+    }
+
+    /**
      * 查询缓存
      * @access public
      * @param mixed             $key    缓存key
@@ -1710,6 +1768,18 @@ class Query
     public function sequence($sequence = null)
     {
         $this->options['sequence'] = $sequence;
+        return $this;
+    }
+
+    /**
+     * 设置JSON字段信息
+     * @access public
+     * @param  array $json JSON字段
+     * @return $this
+     */
+    public function json(array $json = [])
+    {
+        $this->options['json'] = $json;
         return $this;
     }
 
@@ -1916,7 +1986,8 @@ class Query
     /**
      * 设置关联查询JOIN预查询
      * @access public
-     * @param string|array $with 关联方法名称
+     * @param  string|array $with 关联方法名称
+     * @param  bool|array   $cache 设置关联缓存
      * @return $this
      */
     public function with($with)
@@ -1969,23 +2040,26 @@ class Query
         } else {
             $this->options['with'] = $with;
         }
-
+        $this->options['relation_cache'] = $cache;
         return $this;
     }
 
     /**
      * 关联统计
-     * @access public
-     * @param string|array $relation 关联方法名
-     * @param bool         $subQuery 是否使用子查询
+     * @access protected
+     * @param  string|array $relation 关联方法名
+     * @param  string       $aggregate 聚合查询方法
+     * @param  string       $field 字段
+     * @param  bool         $subQuery 是否使用子查询
      * @return $this
      */
-    public function withCount($relation, $subQuery = true)
+    protected function withAggregate($relation, $aggregate = 'count', $field = '*', $subQuery = true)
     {
+        $relations = is_string($relation) ? explode(',', $relation) : $relation;
+
         if (!$subQuery) {
-            $this->options['with_count'] = $relation;
+            $this->options['with_count'][] = [$relations, $aggregate, $field];
         } else {
-            $relations = is_string($relation) ? explode(',', $relation) : $relation;
             if (!isset($this->options['field'])) {
                 $this->field('*');
             }
@@ -1996,13 +2070,77 @@ class Query
                     $closure  = $relation;
                     $relation = $key;
                 }
-                $relation = Db::parseName($relation, 1, false);
-                $count    = '(' . $this->model->$relation()->getRelationCountQuery($closure) . ')';
-                $this->field([$count => Db::parseName($relation) . '_count']);
+                $relation = Loader::parseName($relation, 1, false);
+                $count    = '(' . $this->model->$relation()->getRelationCountQuery($closure, $aggregate, $field) . ')';
+                $this->field([$count => Loader::parseName($relation) . '_' . $aggregate]);
             }
         }
 
         return $this;
+    }
+
+    /**
+     * 关联统计
+     * @access public
+     * @param  string|array $relation 关联方法名
+     * @param  bool         $subQuery 是否使用子查询
+     * @return $this
+     */
+    public function withCount($relation, $subQuery = true)
+    {
+        return $this->withAggregate($relation, 'count', '*', $subQuery);
+    }
+
+    /**
+     * 关联统计Sum
+     * @access public
+     * @param  string|array $relation 关联方法名
+     * @param  string       $field 字段
+     * @param  bool         $subQuery 是否使用子查询
+     * @return $this
+     */
+    public function withSum($relation, $field, $subQuery = true)
+    {
+        return $this->withAggregate($relation, 'sum', $field, $subQuery);
+    }
+
+    /**
+     * 关联统计Max
+     * @access public
+     * @param  string|array $relation 关联方法名
+     * @param  string       $field 字段
+     * @param  bool         $subQuery 是否使用子查询
+     * @return $this
+     */
+    public function withMax($relation, $field, $subQuery = true)
+    {
+        return $this->withAggregate($relation, 'max', $field, $subQuery);
+    }
+
+    /**
+     * 关联统计Min
+     * @access public
+     * @param  string|array $relation 关联方法名
+     * @param  string       $field 字段
+     * @param  bool         $subQuery 是否使用子查询
+     * @return $this
+     */
+    public function withMin($relation, $field, $subQuery = true)
+    {
+        return $this->withAggregate($relation, 'min', $field, $subQuery);
+    }
+
+    /**
+     * 关联统计Avg
+     * @access public
+     * @param  string|array $relation 关联方法名
+     * @param  string       $field 字段
+     * @param  bool         $subQuery 是否使用子查询
+     * @return $this
+     */
+    public function withAvg($relation, $field, $subQuery = true)
+    {
+        return $this->withAggregate($relation, 'avg', $field, $subQuery);
     }
 
     /**
@@ -2264,6 +2402,10 @@ class Query
         } elseif ('collection' == $this->connection->getConfig('resultset_type')) {
             // 返回Collection对象
             $resultSet = new Collection($resultSet);
+        } elseif (!empty($this->options['json'])) {
+            foreach ($resultSet as &$result) {
+                $this->jsonResult($result, $this->options['json'], true);
+            }
         }
 
         // 返回结果处理
@@ -2310,12 +2452,31 @@ class Query
             if (!empty($this->model)) {
                 // 返回模型对象
                 $this->resultToModel($result, $this->options);
+            } elseif (!empty($this->options['json'])) {
+                $this->jsonResult($result, $this->options['json'], true);
             }
         } elseif (!empty($this->options['fail'])) {
             $this->throwNotFound($this->options);
         }
 
         return $result;
+    }
+
+    /**
+     * JSON字段数据转换
+     * @access protected
+     * @param  array $result     查询数据
+     * @param  array $json       JSON字段
+     * @param  bool  $assoc      是否转换为数组
+     * @return void
+     */
+    protected function jsonResult(&$result, $json = [], $assoc = false)
+    {
+        foreach ($json as $name) {
+            if (isset($result[$name])) {
+                $result[$name] = json_decode($result[$name], $assoc);
+            }
+        }
     }
 
     /**
@@ -2328,6 +2489,9 @@ class Query
      */
     protected function resultToModel(&$result, $options = [], $resultSet = false)
     {
+        if (!empty($options['json'])) {
+            $this->jsonResult($result, $options['json']);
+        }
 
         $condition = (!$resultSet && isset($options['where']['AND'])) ? $options['where']['AND'] : null;
         $result    = $this->model->newInstance($result, $condition);
@@ -2339,14 +2503,15 @@ class Query
 
         // 预载入查询
         if (!$resultSet && !empty($options['with'])) {
-            $result->eagerlyResult($result, $options['with']);
+            $result->eagerlyResult($result, $options['with'], $options['relation_cache']);
         }
 
         // 关联统计
         if (!empty($options['with_count'])) {
-            $result->relationCount($result, $options['with_count']);
+            foreach ($options['with_count'] as $val) {
+                $result->relationCount($result, $val[0], $val[1], $val[2]);
+            }
         }
-
     }
 
     /**

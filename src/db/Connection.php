@@ -980,6 +980,8 @@ abstract class Connection
      * @param bool      $replace    是否replace
      * @param integer   $limit      每次写入数据限制
      * @return integer|string
+     * @throws \Exception
+     * @throws \Throwable
      */
     public function insertAll(Query $query, $dataSet = [], $replace = false, $limit = null)
     {

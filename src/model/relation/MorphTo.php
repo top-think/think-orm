@@ -11,8 +11,8 @@
 
 namespace think\model\relation;
 
-use think\Exception;
 use think\Db;
+use think\Exception;
 use think\Model;
 use think\model\Relation;
 
@@ -144,14 +144,15 @@ class MorphTo extends Relation
     /**
      * 预载入关联查询
      * @access public
-     * @param array    $resultSet   数据集
-     * @param string   $relation    当前关联名
-     * @param string   $subRelation 子关联名
-     * @param \Closure $closure     闭包
+     * @param  array    $resultSet   数据集
+     * @param  string   $relation    当前关联名
+     * @param  string   $subRelation 子关联名
+     * @param  \Closure $closure     闭包
+     * @param  mixed    $cache       缓存
      * @return void
      * @throws Exception
      */
-    public function eagerlyResultSet(&$resultSet, $relation, $subRelation, $closure)
+    public function eagerlyResultSet(&$resultSet, $relation, $subRelation, $closure, $cache = false)
     {
         $morphKey  = $this->morphKey;
         $morphType = $this->morphType;
@@ -201,20 +202,21 @@ class MorphTo extends Relation
     /**
      * 预载入关联查询
      * @access public
-     * @param Model    $result      数据对象
-     * @param string   $relation    当前关联名
-     * @param string   $subRelation 子关联名
-     * @param \Closure $closure     闭包
+     * @param  Model    $result      数据对象
+     * @param  string   $relation    当前关联名
+     * @param  string   $subRelation 子关联名
+     * @param  \Closure $closure     闭包
+     * @param  mixed    $cache       缓存
      * @return void
      */
-    public function eagerlyResult(&$result, $relation, $subRelation, $closure)
+    public function eagerlyResult(&$result, $relation, $subRelation, $closure, $cache = false)
     {
         $morphKey  = $this->morphKey;
         $morphType = $this->morphType;
         // 多态类型映射
         $model = $this->parseModel($result->{$this->morphType});
 
-        $this->eagerlyMorphToOne($model, $relation, $result, $subRelation);
+        $this->eagerlyMorphToOne($model, $relation, $result, $subRelation, $cache);
     }
 
     /**
@@ -229,18 +231,19 @@ class MorphTo extends Relation
 
     /**
      * 多态MorphTo 关联模型预查询
-     * @access   public
-     * @param object $model       关联模型对象
-     * @param string $relation    关联名
-     * @param Model  $result
-     * @param string $subRelation 子关联
+     * @access public
+     * @param  object $model       关联模型对象
+     * @param  string $relation    关联名
+     * @param  Model  $result
+     * @param  string $subRelation 子关联
+     * @param  mixed  $cache       缓存
      * @return void
      */
-    protected function eagerlyMorphToOne($model, $relation, &$result, $subRelation = '')
+    protected function eagerlyMorphToOne($model, $relation, &$result, $subRelation = '', $cache = false)
     {
         // 预载入关联查询 支持嵌套预载入
         $pk   = $this->parent->{$this->morphKey};
-        $data = (new $model)->with($subRelation)->find($pk);
+        $data = (new $model)->with($subRelation)->cache($cache)->find($pk);
 
         if ($data) {
             $data->setParent(clone $result);

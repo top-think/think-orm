@@ -11,8 +11,8 @@
 
 namespace think\model\relation;
 
-use think\db\Query;
 use think\Db;
+use think\db\Query;
 use think\Model;
 
 class HasOne extends OneToOne
@@ -113,13 +113,14 @@ class HasOne extends OneToOne
     /**
      * 预载入关联查询（数据集）
      * @access public
-     * @param array    $resultSet   数据集
-     * @param string   $relation    当前关联名
-     * @param string   $subRelation 子关联名
-     * @param \Closure $closure     闭包
+     * @param  array    $resultSet   数据集
+     * @param  string   $relation    当前关联名
+     * @param  string   $subRelation 子关联名
+     * @param  \Closure $closure     闭包
+     * @param  mixed    $cache       缓存
      * @return void
      */
-    protected function eagerlySet(&$resultSet, $relation, $subRelation, $closure)
+    protected function eagerlySet(&$resultSet, $relation, $subRelation, $closure, $cache = false)
     {
         $localKey   = $this->localKey;
         $foreignKey = $this->foreignKey;
@@ -135,7 +136,7 @@ class HasOne extends OneToOne
         if (!empty($range)) {
             $data = $this->eagerlyWhere([
                 [$foreignKey, 'in', $range],
-            ], $foreignKey, $relation, $subRelation, $closure);
+            ], $foreignKey, $relation, $subRelation, $closure, $cache);
 
             // 关联属性名
             $attr = Db::parseName($relation);
@@ -165,19 +166,20 @@ class HasOne extends OneToOne
     /**
      * 预载入关联查询（数据）
      * @access public
-     * @param Model    $result      数据对象
-     * @param string   $relation    当前关联名
-     * @param string   $subRelation 子关联名
-     * @param \Closure $closure     闭包
+     * @param  Model    $result      数据对象
+     * @param  string   $relation    当前关联名
+     * @param  string   $subRelation 子关联名
+     * @param  \Closure $closure     闭包
+     * @param  mixed    $cache       缓存
      * @return void
      */
-    protected function eagerlyOne(&$result, $relation, $subRelation, $closure)
+    protected function eagerlyOne(&$result, $relation, $subRelation, $closure, $cache = false)
     {
         $localKey   = $this->localKey;
         $foreignKey = $this->foreignKey;
         $data       = $this->eagerlyWhere([
             [$foreignKey, '=', $result->$localKey],
-        ], $foreignKey, $relation, $subRelation, $closure);
+        ], $foreignKey, $relation, $subRelation, $closure, $cache);
 
         // 关联模型
         if (!isset($data[$result->$localKey])) {

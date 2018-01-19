@@ -11,9 +11,9 @@
 
 namespace think\model\relation;
 
+use think\Db;
 use think\db\Query;
 use think\Exception;
-use think\Db;
 use think\Model;
 use think\model\Relation;
 
@@ -97,13 +97,14 @@ class MorphMany extends Relation
     /**
      * 预载入关联查询
      * @access public
-     * @param array    $resultSet   数据集
-     * @param string   $relation    当前关联名
-     * @param string   $subRelation 子关联名
-     * @param \Closure $closure     闭包
+     * @param  array    $resultSet   数据集
+     * @param  string   $relation    当前关联名
+     * @param  string   $subRelation 子关联名
+     * @param  \Closure $closure     闭包
+     * @param  mixed    $cache       缓存
      * @return void
      */
-    public function eagerlyResultSet(&$resultSet, $relation, $subRelation, $closure)
+    public function eagerlyResultSet(&$resultSet, $relation, $subRelation, $closure, $cache = false)
     {
         $morphType = $this->morphType;
         $morphKey  = $this->morphKey;
@@ -123,7 +124,7 @@ class MorphMany extends Relation
                 [$morphKey, 'in', $range],
                 [$morphType, '=', $type],
             ];
-            $data = $this->eagerlyMorphToMany($where, $relation, $subRelation, $closure);
+            $data = $this->eagerlyMorphToMany($where, $relation, $subRelation, $closure, $cache);
 
             // 关联属性名
             $attr = Db::parseName($relation);
@@ -147,13 +148,14 @@ class MorphMany extends Relation
     /**
      * 预载入关联查询
      * @access public
-     * @param Model    $result      数据对象
-     * @param string   $relation    当前关联名
-     * @param string   $subRelation 子关联名
-     * @param \Closure $closure     闭包
+     * @param  Model    $result      数据对象
+     * @param  string   $relation    当前关联名
+     * @param  string   $subRelation 子关联名
+     * @param  \Closure $closure     闭包
+     * @param  mixed    $cache       缓存
      * @return void
      */
-    public function eagerlyResult(&$result, $relation, $subRelation, $closure)
+    public function eagerlyResult(&$result, $relation, $subRelation, $closure, $cache = false)
     {
         $pk = $result->getPk();
 
@@ -163,7 +165,7 @@ class MorphMany extends Relation
                 [$this->morphKey, '=', $key],
                 [$this->morphType, '=', $this->type],
             ];
-            $data = $this->eagerlyMorphToMany($where, $relation, $subRelation, $closure);
+            $data = $this->eagerlyMorphToMany($where, $relation, $subRelation, $closure, $cache);
 
             if (!isset($data[$key])) {
                 $data[$key] = [];
@@ -229,14 +231,15 @@ class MorphMany extends Relation
 
     /**
      * 多态一对多 关联模型预查询
-     * @access   public
-     * @param array         $where       关联预查询条件
-     * @param string        $relation    关联名
-     * @param string        $subRelation 子关联
-     * @param bool|\Closure $closure     闭包
+     * @access public
+     * @param  array         $where       关联预查询条件
+     * @param  string        $relation    关联名
+     * @param  string        $subRelation 子关联
+     * @param  bool|\Closure $closure     闭包
+     * @param  mixed         $cache       缓存
      * @return array
      */
-    protected function eagerlyMorphToMany($where, $relation, $subRelation = '', $closure = false)
+    protected function eagerlyMorphToMany($where, $relation, $subRelation = '', $closure = false, $cache = false)
     {
         // 预载入关联查询 支持嵌套预载入
         $this->query->removeOptions('where');
@@ -245,7 +248,7 @@ class MorphMany extends Relation
             $closure($this->query);
         }
 
-        $list     = $this->query->where($where)->with($subRelation)->select();
+        $list     = $this->query->where($where)->with($subRelation)->cache($cache)->select();
         $morphKey = $this->morphKey;
 
         // 组装模型数据

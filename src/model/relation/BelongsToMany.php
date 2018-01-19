@@ -250,13 +250,14 @@ class BelongsToMany extends Relation
     /**
      * 预载入关联查询（数据集）
      * @access public
-     * @param array    $resultSet   数据集
-     * @param string   $relation    当前关联名
-     * @param string   $subRelation 子关联名
-     * @param \Closure $closure     闭包
+     * @param  array    $resultSet   数据集
+     * @param  string   $relation    当前关联名
+     * @param  string   $subRelation 子关联名
+     * @param  \Closure $closure     闭包
+     * @param  mixed    $cache       缓存
      * @return void
      */
-    public function eagerlyResultSet(&$resultSet, $relation, $subRelation, $closure)
+    public function eagerlyResultSet(&$resultSet, $relation, $subRelation, $closure, $cache = false)
     {
         $localKey   = $this->localKey;
         $foreignKey = $this->foreignKey;
@@ -274,7 +275,7 @@ class BelongsToMany extends Relation
             // 查询关联数据
             $data = $this->eagerlyManyToMany([
                 ['pivot.' . $localKey, 'in', $range],
-            ], $relation, $subRelation);
+            ], $relation, $subRelation, $cache);
 
             // 关联属性名
             $attr = Db::parseName($relation);
@@ -293,13 +294,14 @@ class BelongsToMany extends Relation
     /**
      * 预载入关联查询（单个数据）
      * @access public
-     * @param Model    $result      数据对象
-     * @param string   $relation    当前关联名
-     * @param string   $subRelation 子关联名
-     * @param \Closure $closure     闭包
+     * @param  Model    $result      数据对象
+     * @param  string   $relation    当前关联名
+     * @param  string   $subRelation 子关联名
+     * @param  \Closure $closure     闭包
+     * @param  mixed    $cache       缓存
      * @return void
      */
-    public function eagerlyResult(&$result, $relation, $subRelation, $closure)
+    public function eagerlyResult(&$result, $relation, $subRelation, $closure, $cache = false)
     {
         $pk = $result->getPk();
 
@@ -308,7 +310,7 @@ class BelongsToMany extends Relation
             // 查询管理数据
             $data = $this->eagerlyManyToMany([
                 ['pivot.' . $this->localKey, '=', $pk],
-            ], $relation, $subRelation);
+            ], $relation, $subRelation, $cache);
 
             // 关联数据封装
             if (!isset($data[$pk])) {
@@ -359,16 +361,18 @@ class BelongsToMany extends Relation
     /**
      * 多对多 关联模型预查询
      * @access public
-     * @param array  $where       关联预查询条件
-     * @param string $relation    关联名
-     * @param string $subRelation 子关联
+     * @param  array  $where       关联预查询条件
+     * @param  string $relation    关联名
+     * @param  string $subRelation 子关联
+     * @param  mixed  $cache       缓存
      * @return array
      */
-    protected function eagerlyManyToMany($where, $relation, $subRelation = '')
+    protected function eagerlyManyToMany($where, $relation, $subRelation = '', $cache = false)
     {
         // 预载入关联查询 支持嵌套预载入
         $list = $this->belongsToManyQuery($this->foreignKey, $this->localKey, $where)
             ->with($subRelation)
+            ->cache($cache)
             ->select();
 
         // 组装模型数据

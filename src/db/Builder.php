@@ -36,7 +36,7 @@ abstract class Builder
     ];
 
     // SQL表达式
-    protected $selectSql = 'SELECT%DISTINCT% %FIELD% FROM %TABLE%%FORCE%%UNION%%JOIN%%WHERE%%GROUP%%HAVING%%ORDER%%LIMIT%%LOCK%%COMMENT%';
+    protected $selectSql = 'SELECT%DISTINCT% %FIELD% FROM %TABLE%%FORCE%%JOIN%%WHERE%%GROUP%%HAVING%%UNION%%ORDER%%LIMIT%%LOCK%%COMMENT%';
 
     protected $insertSql = '%INSERT% INTO %TABLE% (%FIELD%) VALUES (%DATA%) %COMMENT%';
 
@@ -115,14 +115,18 @@ abstract class Builder
         foreach ($data as $key => $val) {
             $item = $this->parseKey($query, $key);
 
-            if (is_object($val) && method_exists($val, '__toString')) {
+            if (!is_scalar($val) && (in_array($key, (array) $query->getOptions('json')) || 'json' == $this->connection->getFieldsType($options['table'], $key))) {
+                $val = json_encode($val);
+            } elseif (is_object($val) && method_exists($val, '__toString')) {
                 // 对象数据写入
                 $val = $val->__toString();
-            } elseif (is_array($val) && 'json' == $this->connection->getFieldsType($options['table'], $key)) {
-                $val = json_encode($val);
             }
 
-            if (false === strpos($key, '.') && !in_array($key, $fields, true)) {
+            if (false !== strpos($key, '->')) {
+                list($key, $name) = explode('->', $key);
+                $item             = $this->parseKey($query, $key);
+                $result[$item]    = 'json_set(' . $item . ', \'$.' . $name . '\', ' . $this->parseDataBind($query, $key, $val, $bind, $suffix) . ')';
+            } elseif (false === strpos($key, '.') && !in_array($key, $fields, true)) {
                 if ($options['strict']) {
                     throw new Exception('fields not exists:[' . $key . ']');
                 }
@@ -165,7 +169,7 @@ abstract class Builder
         if (0 === strpos($data, ':') && $query->isBind(substr($data, 1))) {
             return $data;
         } else {
-            $key  = str_replace('.', '_', $key);
+            $key  = str_replace(['.', '->'], '_', $key);
             $name = 'data__' . $key . $suffix;
             $query->bind($name, $data, isset($bind[$key]) ? $bind[$key] : PDO::PARAM_STR);
             return ':' . $name;
@@ -822,7 +826,23 @@ abstract class Builder
             $array = [];
 
             foreach ($order as $key => $val) {
-                if (is_numeric($key)) {
+                if (is_array($val)) {
+                    if (isset($val['sort'])) {
+                        $sort = ' ' . $val['sort'];
+                        unset($val['sort']);
+                    } else {
+                        $sort = '';
+                    }
+
+                    $options = $query->getOptions();
+                    $bind    = $this->connection->getFieldsBind($options['table']);
+
+                    foreach ($val as $k => $item) {
+                        $val[$k] = $this->parseDataBind($query, $key, $item, $bind, $k);
+                    }
+
+                    $array[] = 'field(' . $this->parseKey($query, $key) . ',' . implode(',', $val) . ')' . $sort;
+                } elseif (is_numeric($key)) {
                     if ('[rand]' == $val) {
                         $array[] = $this->parseRand($query);
                     } elseif (false === strpos($val, '(')) {

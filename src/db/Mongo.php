@@ -21,7 +21,7 @@ use MongoDB\Driver\Exception\RuntimeException;
 use MongoDB\Driver\Query as MongoQuery;
 use MongoDB\Driver\ReadPreference;
 use MongoDB\Driver\WriteConcern;
-use think\db\connector\Mongo as Connection;
+use think\db\connector\Mongo as MongoConnection;
 use think\db\Query;
 
 class Mongo extends Query
@@ -31,10 +31,10 @@ class Mongo extends Query
      * 架构函数
      * @access public
      */
-    public function __construct(Connection $connection = null)
+    public function __construct(MongoConnection $connection = null)
     {
         if (is_null($connection)) {
-            $this->connection = Connection::instance();
+            $this->connection = MongoConnection::instance();
         } else {
             $this->connection = $connection;
         }

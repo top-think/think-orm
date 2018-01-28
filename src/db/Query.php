@@ -1980,7 +1980,7 @@ class Query
      * @param  bool|array   $cache 设置关联缓存
      * @return $this
      */
-    public function with($with)
+    public function with($with, $cache = false)
     {
         if (empty($with)) {
             return $this;

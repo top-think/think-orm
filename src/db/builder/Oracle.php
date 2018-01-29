@@ -61,12 +61,12 @@ class Oracle extends Builder
 
     /**
      * 字段和表名处理
-     * @access protected
+     * @access public
      * @param  Query      $query        查询对象
      * @param  string     $key
      * @return string
      */
-    protected function parseKey(Query $query, $key)
+    public function parseKey(Query $query, $key)
     {
         $key = trim($key);
 

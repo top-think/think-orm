@@ -480,10 +480,9 @@ class Query
      * @access public
      * @param string $field   字段名
      * @param mixed  $default 默认值
-     * @param bool   $force   强制转为数字类型
      * @return mixed
      */
-    public function value($field, $default = null, $force = false)
+    public function value($field, $default = null)
     {
         $this->parseOptions();
 
@@ -491,8 +490,6 @@ class Query
 
         if (!empty($this->options['fetch_sql'])) {
             return $result;
-        } elseif ($force) {
-            $result += 0;
         }
 
         return $result;
@@ -510,6 +507,29 @@ class Query
         $this->parseOptions();
 
         return $this->connection->column($this, $field, $key);
+    }
+
+    /**
+     * 聚合查询
+     * @access public
+     * @param  string $aggregate    聚合方法
+     * @param  string $field        字段名
+     * @param  bool   $force        强制转为数字类型
+     * @return mixed
+     */
+    public function aggregate($aggregate, $field, $force = false)
+    {
+        $this->parseOptions();
+
+        $result = $this->connection->aggregate($this, $aggregate, $field);
+
+        if (!empty($this->options['fetch_sql'])) {
+            return $result;
+        } elseif ($force) {
+            $result += 0;
+        }
+
+        return $result;
     }
 
     /**
@@ -531,56 +551,56 @@ class Query
                 $query->fetchSql(true);
             }
 
-            return $query->value('COUNT(*) AS tp_count', 0, true);
+            return $query->aggregate('COUNT', '*', true);
         }
 
-        return $this->value('COUNT(' . $field . ') AS tp_count', 0, true);
+        return $this->aggregate('COUNT', $field, true);
     }
 
     /**
      * SUM查询
      * @access public
-     * @param string $field 字段名
+     * @param  string $field 字段名
      * @return float|int
      */
     public function sum($field)
     {
-        return $this->value('SUM(' . $field . ') AS tp_sum', 0, true);
+        return $this->aggregate('SUM', $field, true);
     }
 
     /**
      * MIN查询
      * @access public
-     * @param  string $field 字段名
-     * @param  bool   $force   强制转为数字类型
+     * @param  string $field    字段名
+     * @param  bool   $force    强制转为数字类型
      * @return mixed
      */
     public function min($field, $force = true)
     {
-        return $this->value('MIN(' . $field . ') AS tp_min', 0, $force);
+        return $this->aggregate('MIN', $field, $force);
     }
 
     /**
      * MAX查询
      * @access public
-     * @param  string $field 字段名
-     * @param  bool   $force   强制转为数字类型
+     * @param  string $field    字段名
+     * @param  bool   $force    强制转为数字类型
      * @return mixed
      */
     public function max($field, $force = true)
     {
-        return $this->value('MAX(' . $field . ') AS tp_max', 0, $force);
+        return $this->aggregate('MAX', $field, $force);
     }
 
     /**
      * AVG查询
      * @access public
-     * @param string $field 字段名
+     * @param  string $field 字段名
      * @return float|int
      */
     public function avg($field)
     {
-        return $this->value('AVG(' . $field . ') AS tp_avg', 0, true);
+        return $this->aggregate('AVG', $field, true);
     }
 
     /**
@@ -708,8 +728,7 @@ class Query
     {
         // 传入的表名为数组
         if (is_array($join)) {
-            $table = key($join);
-            $alias = current($join);
+            $table = $join;
         } else {
             $join = trim($join);
 
@@ -732,17 +751,10 @@ class Query
                     $table = $this->getTable($table);
                 }
             }
-        }
 
-        if (isset($alias) && $table != $alias) {
-            if (isset($this->options['alias'][$table])) {
-                $table = $table . '@think' . uniqid();
-            } elseif ($this->gettable() == $table) {
-                $table = $table . '@think' . uniqid();
+            if (isset($alias) && $table != $alias) {
+                $table = [$table => $alias];
             }
-
-            $table = [$table => $alias];
-            $this->alias($table);
         }
 
         return $table;

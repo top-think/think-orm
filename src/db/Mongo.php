@@ -174,14 +174,14 @@ class Mongo extends Query
      * @access public
      * @param string $aggregate 聚合指令
      * @param string $field     字段名
-     * @param bool   $force   强制转为数字类型
+     * @param bool   $force     强制转为数字类型
      * @return mixed
      */
     public function aggregate($aggregate, $field, $force = false)
     {
         $this->parseOptions();
 
-        $result = $this->cmd('aggregate', [$aggregate, $field]);
+        $result = $this->cmd('aggregate', [strtolower($aggregate), $field]);
         $value  = isset($result[0]['result'][0]['aggregate']) ? $result[0]['result'][0]['aggregate'] : 0;
 
         if ($force) {
@@ -189,52 +189,6 @@ class Mongo extends Query
         }
 
         return $value;
-    }
-
-    /**
-     * MAX查询
-     * @access public
-     * @param string $field   字段名
-     * @param bool   $force   强制转为数字类型
-     * @return float
-     */
-    public function max($field, $force = true)
-    {
-        return $this->aggregate('max', $field, $force);
-    }
-
-    /**
-     * MIN查询
-     * @access public
-     * @param string $field   字段名
-     * @param bool   $force   强制转为数字类型
-     * @return mixed
-     */
-    public function min($field, $force = true)
-    {
-        return $this->aggregate('min', $field, $force);
-    }
-
-    /**
-     * SUM查询
-     * @access public
-     * @param string $field   字段名
-     * @return float
-     */
-    public function sum($field)
-    {
-        return $this->aggregate('sum', $field);
-    }
-
-    /**
-     * AVG查询
-     * @access public
-     * @param string $field   字段名
-     * @return float
-     */
-    public function avg($field)
-    {
-        return $this->aggregate('avg', $field);
     }
 
     /**

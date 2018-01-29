@@ -199,12 +199,12 @@ abstract class Builder
 
     /**
      * 字段名分析
-     * @access protected
+     * @access public
      * @param Query  $query        查询对象
      * @param string $key
      * @return string
      */
-    protected function parseKey(Query $query, $key)
+    public function parseKey(Query $query, $key)
     {
         return $key;
     }
@@ -249,12 +249,9 @@ abstract class Builder
     {
         $item    = [];
         $options = $query->getOptions();
+
         foreach ((array) $tables as $key => $table) {
             if (!is_numeric($key)) {
-                if (strpos($key, '@think')) {
-                    $key = strstr($key, '@think', true);
-                }
-
                 $key    = $this->connection->parseSqlTable($key);
                 $item[] = $this->parseKey($query, $key) . ' ' . $this->parseKey($query, $table);
             } else {

@@ -182,13 +182,38 @@ class Mongo extends Query
         $this->parseOptions();
 
         $result = $this->cmd('aggregate', [strtolower($aggregate), $field]);
-        $value  = isset($result[0]['result'][0]['aggregate']) ? $result[0]['result'][0]['aggregate'] : 0;
+        $value  = isset($result[0]['aggregate']) ? $result[0]['aggregate'] : 0;
 
         if ($force) {
             $value += 0;
         }
 
         return $value;
+    }
+
+    /**
+     * 多聚合操作
+     *
+     * @param array $aggregate 聚合指令, 可以聚合多个参数, 如 ['sum' => 'field1', 'avg' => 'field2']
+     * @param array $groupBy 类似mysql里面的group字段, 可以传入多个字段, 如 ['field_a', 'field_b', 'field_c']
+     * @return array 查询结果
+     */
+    public function multiAggregate($aggregate, $groupBy)
+    {
+        $this->parseOptions();
+
+        $result = $this->cmd('multiAggregate', [$aggregate, $groupBy]);
+
+        foreach ($result as &$row) {
+            if (isset($row['_id']) && !empty($row['_id'])) {
+                foreach ($row['_id'] as $k => $v) {
+                    $row[$k] = $v;
+                }
+                unset($row['_id']);
+            }
+        }
+
+        return $result;
     }
 
     /**

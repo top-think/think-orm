@@ -280,6 +280,34 @@ class Mongo
     }
 
     /**
+     * 启动事务
+     * @access public
+     * @return void
+     * @throws \PDOException
+     * @throws \Exception
+     */
+    public function startTrans()
+    {}
+
+    /**
+     * 用于非自动提交状态下面的查询提交
+     * @access public
+     * @return void
+     * @throws PDOException
+     */
+    public function commit()
+    {}
+
+    /**
+     * 事务回滚
+     * @access public
+     * @return void
+     * @throws PDOException
+     */
+    public function rollback()
+    {}
+
+    /**
      * 执行查询
      * @access public
      * @param string            $namespace 当前查询的collection

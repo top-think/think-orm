@@ -535,6 +535,7 @@ class Mongo
             'aggregate'    => $options['table'],
             'allowDiskUse' => true,
             'pipeline'     => $pipeline,
+            'cursor'       => new \stdClass,
         ];
 
         foreach (['explain', 'collation', 'bypassDocumentValidation', 'readConcern'] as $option) {
@@ -547,6 +548,47 @@ class Mongo
 
         $this->log('aggregate', $cmd);
 
+        return $command;
+    }
+
+    /**
+     * 多聚合查询命令, 可以对多个字段进行 group by 操作
+     *
+     * @param array $options 参数
+     * @param array $extra 指令和字段
+     * @return Command
+     */
+    public function multiAggregate(Query $query, $extra)
+    {
+        $options = $query->getOptions();
+
+        list($aggregate, $groupBy) = $extra;
+        $groups                    = ['_id' => []];
+        foreach ($groupBy as $field) {
+            $groups['_id'][$field] = '$' . $field;
+        }
+
+        foreach ($aggregate as $fun => $field) {
+            $groups[$field . '_' . $fun] = ['$' . $fun => '$' . $field];
+        }
+        $pipeline = [
+            ['$match' => (object) $this->parseWhere($query, $options['where'])],
+            ['$group' => $groups],
+        ];
+        $cmd = [
+            'aggregate'    => $options['table'],
+            'allowDiskUse' => true,
+            'pipeline'     => $pipeline,
+            'cursor'       => new \stdClass,
+        ];
+
+        foreach (['explain', 'collation', 'bypassDocumentValidation', 'readConcern'] as $option) {
+            if (isset($options[$option])) {
+                $cmd[$option] = $options[$option];
+            }
+        }
+        $command = new Command($cmd);
+        $this->log('group', $cmd);
         return $command;
     }
 

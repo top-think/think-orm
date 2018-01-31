@@ -132,14 +132,13 @@ abstract class OneToOne extends Relation
      * @param  string   $relation    当前关联名
      * @param  string   $subRelation 子关联名
      * @param  \Closure $closure     闭包
-     * @param  mixed    $cache       缓存
      * @return void
      */
-    public function eagerlyResultSet(&$resultSet, $relation, $subRelation, $closure, $cache = false)
+    public function eagerlyResultSet(&$resultSet, $relation, $subRelation, $closure)
     {
         if (1 == $this->eagerlyType) {
             // IN查询
-            $this->eagerlySet($resultSet, $relation, $subRelation, $closure, $cache);
+            $this->eagerlySet($resultSet, $relation, $subRelation, $closure);
         } else {
             // 模型关联组装
             foreach ($resultSet as $result) {
@@ -155,14 +154,13 @@ abstract class OneToOne extends Relation
      * @param  string   $relation    当前关联名
      * @param  string   $subRelation 子关联名
      * @param  \Closure $closure     闭包
-     * @param  mixed    $cache       缓存
      * @return void
      */
-    public function eagerlyResult(&$result, $relation, $subRelation, $closure, $cache = false)
+    public function eagerlyResult(&$result, $relation, $subRelation, $closure)
     {
         if (1 == $this->eagerlyType) {
             // IN查询
-            $this->eagerlyOne($result, $relation, $subRelation, $closure, $cache);
+            $this->eagerlyOne($result, $relation, $subRelation, $closure);
         } else {
             // 模型关联组装
             $this->match($this->model, $relation, $result);
@@ -311,10 +309,9 @@ abstract class OneToOne extends Relation
      * @param  string        $relation    关联名
      * @param  string        $subRelation 子关联
      * @param  bool|\Closure $closure
-     * @param  mixed         $cache       缓存
      * @return array
      */
-    protected function eagerlyWhere($where, $key, $relation, $subRelation = '', $closure = false, $cache = false)
+    protected function eagerlyWhere($where, $key, $relation, $subRelation = '', $closure = false)
     {
         // 预载入关联查询 支持嵌套预载入
         if ($closure) {
@@ -325,7 +322,7 @@ abstract class OneToOne extends Relation
             }
         }
 
-        $list = $this->query->where($where)->with($subRelation)->cache($cache)->select();
+        $list = $this->query->where($where)->with($subRelation)->select();
 
         // 组装模型数据
         $data = [];

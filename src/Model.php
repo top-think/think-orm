@@ -777,10 +777,11 @@ abstract class Model implements \JsonSerializable, \ArrayAccess
      * @param mixed     $data  主键值或者查询条件（闭包）
      * @param mixed     $with  关联预查询
      * @param bool      $cache 是否缓存
+     * @param bool      $failException 数据不存在是否抛出异常
      * @return static
      * @throws exception\DbException
      */
-    public static function get($data, $with = [], $cache = false)
+    public static function get($data, $with = [], $cache = false, $failException = false)
     {
         if (is_null($data)) {
             return;
@@ -793,7 +794,21 @@ abstract class Model implements \JsonSerializable, \ArrayAccess
 
         $query = static::parseQuery($data, $with, $cache);
 
-        return $query->find($data);
+        return $query->failException($failException)->find($data);
+    }
+
+    /**
+     * 查找单条记录 如果不存在直接抛出异常
+     * @access public
+     * @param  mixed     $data  主键值或者查询条件（闭包）
+     * @param  mixed     $with  关联预查询
+     * @param  bool      $cache 是否缓存
+     * @return static|null
+     * @throws exception\DbException
+     */
+    public static function getOrFail($data, $with = [], $cache = false)
+    {
+        return self::get($data, $with, $cache, true);
     }
 
     /**

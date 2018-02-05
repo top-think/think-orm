@@ -316,7 +316,7 @@ class Mongo extends Query
      * @param mixed                 $op 查询表达式
      * @param mixed                 $condition 查询条件
      * @param array                 $param 查询参数
-     * @return void
+     * @return $this
      */
     protected function parseWhereExp($logic, $field, $op, $condition, $param = [])
     {
@@ -339,7 +339,7 @@ class Mongo extends Query
                     $this->options['where'][$logic] = isset($this->options['where'][$logic]) ? array_merge($this->options['where'][$logic], $where) : $where;
                 }
 
-                return;
+                return $this;
             } elseif ($field && is_string($field)) {
                 // 字符串查询
                 $where = [$field, 'null', ''];
@@ -363,6 +363,8 @@ class Mongo extends Query
                 $this->options['where'][$logic][$field] = $where;
             }
         }
+
+        return $this;
     }
 
     /**

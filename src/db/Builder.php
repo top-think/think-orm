@@ -132,16 +132,16 @@ abstract class Builder
                 }
             } elseif (is_null($val)) {
                 $result[$item] = 'NULL';
-            } elseif (is_array($val)) {
+            } elseif (is_array($val) && isset($val[0])) {
                 switch ($val[0]) {
                     case 'exp':
                         $result[$item] = $val[1];
                         break;
                     case 'inc':
-                        $result[$item] = $this->parseKey($query, $val[1]) . ' + ' . $val[2];
+                        $result[$item] = $item . ' + ' . floatval($val[2]);
                         break;
                     case 'dec':
-                        $result[$item] = $this->parseKey($query, $val[1]) . ' - ' . $val[2];
+                        $result[$item] = $item . ' - ' . floatval($val[2]);
                         break;
                 }
             } elseif (is_scalar($val)) {

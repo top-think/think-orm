@@ -283,11 +283,18 @@ class Mongo extends Query
      * @param integer      $step  增长值
      * @return $this
      */
-    public function inc($field, $step = 1)
+    public function inc($field, $step = 1, $op = 'inc')
     {
         $fields = is_string($field) ? explode(',', $field) : $field;
+
         foreach ($fields as $field) {
-            $this->data($field, ['$inc', $step]);
+            if (is_numeric($field)) {
+                $field = $val;
+            } else {
+                $step = $val;
+            }
+
+            $this->data($field, ['$' . $op, $step]);
         }
         return $this;
     }
@@ -301,11 +308,7 @@ class Mongo extends Query
      */
     public function dec($field, $step = 1)
     {
-        $fields = is_string($field) ? explode(',', $field) : $field;
-        foreach ($fields as $field) {
-            $this->data($field, ['$inc', -1 * $step]);
-        }
-        return $this;
+        return $this->inc($field, -1 * $step);
     }
 
     /**
@@ -318,53 +321,10 @@ class Mongo extends Query
      * @param array                 $param 查询参数
      * @return $this
      */
-    protected function parseWhereExp($logic, $field, $op, $condition, $param = [])
+    protected function parseWhereExp($logic, $field, $op, $condition, array $param = [], $strict = false)
     {
         $logic = '$' . strtolower($logic);
-        if ($field instanceof \Closure) {
-            $where = is_string($op) ? [$op, $field] : $field;
-        } elseif (is_null($op) && is_null($condition)) {
-            if (is_array($field)) {
-                if (key($field) !== 0) {
-                    $where = [];
-                    foreach ($field as $key => $val) {
-                        $where[$key] = !is_scalar($val) ? $val : [$key, '=', $val];
-                    }
-                } else {
-                    // 数组批量查询
-                    $where = $field;
-                }
-
-                if (!empty($where)) {
-                    $this->options['where'][$logic] = isset($this->options['where'][$logic]) ? array_merge($this->options['where'][$logic], $where) : $where;
-                }
-
-                return $this;
-            } elseif ($field && is_string($field)) {
-                // 字符串查询
-                $where = [$field, 'null', ''];
-            }
-        } elseif (is_array($op)) {
-            $where = $param;
-        } elseif (in_array(strtolower($op), ['null', 'notnull', 'not null'])) {
-            // null查询
-            $where = [$field, $op, ''];
-        } elseif (is_null($condition)) {
-            // 字段相等查询
-            $where = [$field, '=', $op];
-        } else {
-            $where = [$field, $op, $condition, isset($param[2]) ? $param[2] : null];
-        }
-
-        if (!empty($where)) {
-            if (isset($this->options['where'][$logic][$field])) {
-                $this->options['where'][$logic][] = $where;
-            } else {
-                $this->options['where'][$logic][$field] = $where;
-            }
-        }
-
-        return $this;
+        return parent::parseWhereExp($logic, $field, $op, $condition, $param, $strict);
     }
 
     /**

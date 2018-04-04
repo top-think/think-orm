@@ -285,18 +285,7 @@ class Mongo extends Query
      */
     public function inc($field, $step = 1, $op = 'inc')
     {
-        $fields = is_string($field) ? explode(',', $field) : $field;
-
-        foreach ($fields as $field) {
-            if (is_numeric($field)) {
-                $field = $val;
-            } else {
-                $step = $val;
-            }
-
-            $this->data($field, ['$' . $op, $step]);
-        }
-        return $this;
+        return parent::inc($field, $step, strtolower('$' . $op));
     }
 
     /**
@@ -309,22 +298,6 @@ class Mongo extends Query
     public function dec($field, $step = 1)
     {
         return $this->inc($field, -1 * $step);
-    }
-
-    /**
-     * 分析查询表达式
-     * @access public
-     * @param string                $logic 查询逻辑    and or xor
-     * @param string|array|\Closure $field 查询字段
-     * @param mixed                 $op 查询表达式
-     * @param mixed                 $condition 查询条件
-     * @param array                 $param 查询参数
-     * @return $this
-     */
-    protected function parseWhereExp($logic, $field, $op, $condition, array $param = [], $strict = false)
-    {
-        $logic = '$' . strtolower($logic);
-        return parent::parseWhereExp($logic, $field, $op, $condition, $param, $strict);
     }
 
     /**
@@ -479,7 +452,18 @@ class Mongo extends Query
      */
     public function field($field, $except = false, $tableName = '', $prefix = '', $alias = '')
     {
+        if (empty($field)) {
+            return $this;
+        } elseif ($field instanceof Expression) {
+            $this->options['field'][] = $field;
+            return $this;
+        }
+
         if (is_string($field)) {
+            if (preg_match('/[\<\'\"\(]/', $field)) {
+                return $this->fieldRaw($field);
+            }
+
             $field = array_map('trim', explode(',', $field));
         }
 

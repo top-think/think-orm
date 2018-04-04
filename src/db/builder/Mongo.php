@@ -163,7 +163,10 @@ class Mongo
         }
 
         $filter = [];
+
         foreach ($where as $logic => $val) {
+            $logic = strtolower($logic);
+
             foreach ($val as $field => $value) {
                 if (is_array($value)) {
                     if (key($value) !== 0) {

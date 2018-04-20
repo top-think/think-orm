@@ -138,13 +138,14 @@ trait RelationShip
     /**
      * 根据关联条件查询当前模型
      * @access public
-     * @param string  $relation 关联方法名
-     * @param mixed   $operator 比较操作符
-     * @param integer $count    个数
-     * @param string  $id       关联表的统计字段
+     * @param  string  $relation 关联方法名
+     * @param  mixed   $operator 比较操作符
+     * @param  integer $count    个数
+     * @param  string  $id       关联表的统计字段
+     * @param  string  $joinType JOIN类型
      * @return Query
      */
-    public static function has($relation, $operator = '>=', $count = 1, $id = '*')
+    public static function has($relation, $operator = '>=', $count = 1, $id = '*', $joinType = 'INNER')
     {
         $relation = (new static())->$relation();
 
@@ -152,7 +153,7 @@ trait RelationShip
             return $relation->hasWhere($operator);
         }
 
-        return $relation->has($operator, $count, $id);
+        return $relation->has($operator, $count, $id, $joinType);
     }
 
     /**
@@ -274,14 +275,14 @@ trait RelationShip
     /**
      * 关联统计
      * @access public
-     * @param Model        $result   数据对象
-     * @param string|array $relation 关联名
+     * @param  Model    $result     数据对象
+     * @param  array    $relations  关联名
+     * @param  string   $aggregate  聚合查询方法
+     * @param  string   $field      字段
      * @return void
      */
-    public function relationCount(&$result, $relation)
+    public function relationCount(&$result, $relations, $aggregate = 'sum', $field = '*')
     {
-        $relations = is_string($relation) ? explode(',', $relation) : $relation;
-
         foreach ($relations as $key => $relation) {
             $closure = false;
 
@@ -294,11 +295,10 @@ trait RelationShip
             }
 
             $relation = Db::parseName($relation, 1, false);
-
-            $count = $this->$relation()->relationCount($result, $closure);
+            $count    = $this->$relation()->relationCount($result, $closure, $aggregate, $field);
 
             if (!isset($name)) {
-                $name = Db::parseName($relation) . '_count';
+                $name = Db::parseName($relation) . '_' . $aggregate;
             }
 
             $result->setAttr($name, $count);

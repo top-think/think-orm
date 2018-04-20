@@ -52,6 +52,7 @@ class BelongsTo extends OneToOne
         $foreignKey = $this->foreignKey;
 
         $relationModel = $this->query
+            ->removeWhereField($this->localKey)
             ->where($this->localKey, $this->parent->$foreignKey)
             ->relation($subRelation)
             ->find();
@@ -125,6 +126,8 @@ class BelongsTo extends OneToOne
         }
 
         if (!empty($range)) {
+            $this->query->removeWhereField($localKey);
+
             $data = $this->eagerlyWhere([
                 [$localKey, 'in', $range],
             ], $localKey, $relation, $subRelation, $closure);
@@ -220,5 +223,22 @@ class BelongsTo extends OneToOne
         $this->parent->save();
 
         return $this->parent->setRelation($this->relation, null);
+    }
+
+    /**
+     * 执行基础查询（仅执行一次）
+     * @access protected
+     * @return void
+     */
+    protected function baseQuery()
+    {
+        if (empty($this->baseQuery)) {
+            if (isset($this->parent->{$this->foreignKey})) {
+                // 关联查询带入关联条件
+                $this->query->where($this->localKey, '=', $this->parent->{$this->foreignKey});
+            }
+
+            $this->baseQuery = true;
+        }
     }
 }

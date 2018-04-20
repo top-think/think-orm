@@ -220,7 +220,7 @@ class MorphMany extends Relation
 
         return $this->query
             ->where([
-                [$this->morphKey, 'exp', '=' . $this->parent->getTable() . '.' . $this->parent->getPk()],
+                [$this->morphKey, 'exp', Db::raw('=' . $this->parent->getTable() . '.' . $this->parent->getPk())],
                 [$this->morphType, '=', $this->type],
             ])
             ->fetchSql()

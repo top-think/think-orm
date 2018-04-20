@@ -113,7 +113,7 @@ class Query
             $name = Db::parseName(substr($method, 10));
             return $this->where($name, '=', $args[0])->value($args[1]);
         } elseif (strtolower(substr($method, 0, 7)) == 'whereor') {
-            $name = Loader::parseName(substr($method, 7));
+            $name = Db::parseName(substr($method, 7));
             array_unshift($args, $name);
             return call_user_func_array([$this, 'whereOr'], $args);
         } elseif (strtolower(substr($method, 0, 5)) == 'where') {
@@ -223,6 +223,29 @@ class Query
         $name = $name ?: $this->name;
 
         return $this->prefix . Db::parseName($name);
+    }
+
+    /**
+     * 设置字段类型信息
+     * @access public
+     * @param  array $type 字段类型信息
+     * @return $this
+     */
+    public function setJsonFieldType(array $type)
+    {
+        $this->options['field_type'] = $type;
+        return $this;
+    }
+
+    /**
+     * 获取字段类型信息
+     * @access public
+     * @param  string $field 字段名
+     * @return string|null
+     */
+    public function getJsonFieldType($field)
+    {
+        return isset($this->options['field_type'][$field]) ? $this->options['field_type'][$field] : null;
     }
 
     /**
@@ -649,7 +672,7 @@ class Query
      */
     public function setInc($field, $step = 1)
     {
-        return $this->setField($field, ['inc', $field, $step]);
+        return $this->setField($field, ['inc', $step]);
     }
 
     /**
@@ -662,7 +685,7 @@ class Query
      */
     public function setDec($field, $step = 1)
     {
-        return $this->setField($field, ['dec', $field, $step]);
+        return $this->setField($field, ['dec', $step]);
     }
 
     /**
@@ -1140,7 +1163,11 @@ class Query
      */
     public function whereExists($condition, $logic = 'AND')
     {
-        $this->options['where'][strtoupper($logic)][] = ['', 'exists', $condition];
+        if (is_string($condition)) {
+            $condition = $this->raw($condition);
+        }
+
+        $this->options['where'][strtoupper($logic)][] = ['', 'EXISTS', $condition];
         return $this;
     }
 
@@ -1153,7 +1180,11 @@ class Query
      */
     public function whereNotExists($condition, $logic = 'AND')
     {
-        $this->options['where'][strtoupper($logic)][] = ['', 'not exists', $condition];
+        if (is_string($condition)) {
+            $condition = $this->raw($condition);
+        }
+
+        $this->options['where'][strtoupper($logic)][] = ['', 'NOT EXISTS', $condition];
         return $this;
     }
 
@@ -1238,20 +1269,27 @@ class Query
     /**
      * 比较两个字段
      * @access public
-     * @param string    $field1     查询字段
-     * @param string    $operator   比较操作符
-     * @param string    $field2     比较字段
-     * @param string    $logic      查询逻辑 and or xor
+     * @param string|array  $field1     查询字段
+     * @param string        $operator   比较操作符
+     * @param string        $field2     比较字段
+     * @param string        $logic      查询逻辑 and or xor
      * @return $this
      */
     public function whereColumn($field1, $operator, $field2 = null, $logic = 'AND')
     {
+        if (is_array($field1)) {
+            foreach ($field1 as $item) {
+                $this->whereColumn($item[0], $item[1], isset($item[2]) ? $item[2] : null);
+            }
+            return $this;
+        }
+
         if (is_null($field2)) {
             $field2   = $operator;
             $operator = '=';
         }
 
-        return $this->whereExp($field1, $operator . ' ' . $field2, $logic);
+        return $this->parseWhereExp($logic, $field1, 'COLUMN', [$operator, $field2], [], true);
     }
 
     /**
@@ -1264,7 +1302,7 @@ class Query
     public function useSoftDelete($field, $condition = null)
     {
         if ($field) {
-            $this->options['soft_delete'] = [$field, $condition ?: ['null', '']];
+            $this->options['soft_delete'] = [$field, $condition];
         }
 
         return $this;
@@ -1336,11 +1374,7 @@ class Query
         }
 
         if (!empty($where)) {
-            if (isset($this->options['where'][$logic][$field])) {
-                $this->options['where'][$logic][] = $where;
-            } else {
-                $this->options['where'][$logic][$field] = $where;
-            }
+            $this->options['where'][$logic][] = $where;
         }
 
         return $this;
@@ -1366,10 +1400,16 @@ class Query
             if (in_array(strtoupper($op), ['NULL', 'NOTNULL', 'NOT NULL'], true)) {
                 // null查询
                 $where = [$field, $op, ''];
+            } elseif (in_array($op, ['=', 'eq', 'EQ', null], true)) {
+                $where = [$field, 'NULL', ''];
+            } elseif (in_array($op, ['<>', 'neq', 'NEQ'], true)) {
+                $where = [$field, 'NOTNULL', ''];
             } else {
                 // 字段相等查询
-                $where = is_null($op) ? [$field, 'NULL', ''] : [$field, '=', $op];
+                $where = [$field, '=', $op];
             }
+        } elseif (in_array(strtoupper($op), ['REGEXP', 'NOT REGEXP', 'EXISTS', 'NOT EXISTS', 'NOTEXISTS'], true)) {
+            $where = [$field, $op, is_string($condition) ? $this->raw($condition) : $condition];
         } else {
             $where = $field ? [$field, $op, $condition] : null;
         }
@@ -1389,11 +1429,7 @@ class Query
         if (key($field) !== 0) {
             $where = [];
             foreach ($field as $key => $val) {
-                if (is_null($val)) {
-                    $where[$key] = [$key, 'NULL', ''];
-                } else {
-                    $where[$key] = !is_scalar($val) ? $val : [$key, '=', $val];
-                }
+                $where[] = is_null($val) ? [$key, 'NULL', ''] : [$key, '=', $val];
             }
         } else {
             // 数组批量查询
@@ -1418,8 +1454,12 @@ class Query
     {
         $logic = strtoupper($logic);
 
-        if (isset($this->options['where'][$logic][$field])) {
-            unset($this->options['where'][$logic][$field]);
+        if (isset($this->options['where'][$logic])) {
+            foreach ($this->options['where'][$logic] as $key => $val) {
+                if (is_array($val) && $val[0] == $field) {
+                    unset($this->options['where'][$logic][$key]);
+                }
+            }
         }
 
         return $this;
@@ -1648,7 +1688,11 @@ class Query
                 $field = $this->options['via'] . '.' . $field;
             }
 
-            $field = empty($order) ? $field : [$field => $order];
+            if (strpos($field, ',')) {
+                $field = array_map('trim', explode(',', $field));
+            } else {
+                $field = empty($order) ? $field : [$field => $order];
+            }
         } elseif (!empty($this->options['via'])) {
             foreach ($field as $key => $val) {
                 if (is_numeric($key)) {
@@ -1701,9 +1745,12 @@ class Query
      */
     public function orderField($field, array $values = [], $order = '')
     {
-        $values['sort'] = $order;
+        if (!empty($values)) {
+            $values['sort'] = $order;
 
-        $this->options['order'][$field] = $values;
+            $this->options['order'][$field] = $values;
+        }
+
         return $this;
     }
 
@@ -2230,9 +2277,9 @@ class Query
                     $closure  = $relation;
                     $relation = $key;
                 }
-                $relation = Loader::parseName($relation, 1, false);
+                $relation = Db::parseName($relation, 1, false);
                 $count    = '(' . $this->model->$relation()->getRelationCountQuery($closure, $aggregate, $field) . ')';
-                $this->field([$count => Loader::parseName($relation) . '_' . $aggregate]);
+                $this->field([$count => Db::parseName($relation) . '_' . $aggregate]);
             }
         }
 

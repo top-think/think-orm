@@ -107,10 +107,10 @@ class Mongo
         foreach ($data as $key => $val) {
             $item = $this->parseKey($key);
 
-            if (is_object($val)) {
+            if ($val instanceof Expression) {
+                $result[$item] = $val->getValue();
+            } elseif (is_object($val)) {
                 $result[$item] = $val;
-            } elseif (isset($val[0]) && 'exp' == $val[0]) {
-                $result[$item] = $val[1];
             } elseif (is_null($val)) {
                 $result[$item] = 'NULL';
             } else {

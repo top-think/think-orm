@@ -167,6 +167,10 @@ class Mongo
         foreach ($where as $logic => $val) {
             $logic = strtolower($logic);
 
+            if (0 !== strpos($logic, '$')) {
+                $logic = '$' . $logic;
+            }
+
             foreach ($val as $field => $value) {
                 if (is_array($value)) {
                     if (key($value) !== 0) {

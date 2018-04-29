@@ -1245,7 +1245,7 @@ abstract class Connection
         if ($this->cache && empty($options['fetch_sql']) && !empty($options['cache'])) {
             // 判断查询缓存
             $cache  = $options['cache'];
-            $result = $this->getCacheData($query, $cache, $field, $key);
+            $result = $this->getCacheData($query, $cache, null, $key);
 
             if (false !== $result) {
                 return $result;

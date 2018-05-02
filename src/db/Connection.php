@@ -587,7 +587,7 @@ abstract class Connection
         $this->PDOStatement->execute();
 
         // 调试结束
-        $this->debug(false);
+        $this->debug(false, '', $master);
 
         // 返回结果集
         while ($result = $this->PDOStatement->fetch($this->fetchType)) {
@@ -660,7 +660,7 @@ abstract class Connection
             $this->PDOStatement->execute();
 
             // 调试结束
-            $this->debug(false);
+            $this->debug(false, '', $master);
 
             // 返回结果集
             return $this->getResult($pdo, $procedure);
@@ -688,14 +688,15 @@ abstract class Connection
     /**
      * 执行语句
      * @access public
-     * @param string        $sql sql指令
-     * @param array         $bind 参数绑定
+     * @param  string        $sql sql指令
+     * @param  array         $bind 参数绑定
+     * @param  Query         $query 查询对象
      * @return int
      * @throws BindParamException
      * @throws \PDOException
      * @throws \Exception
      */
-    public function execute($sql, $bind = [])
+    public function execute($sql, $bind = [], Query $query)
     {
         $this->initConnect(true);
 
@@ -737,26 +738,30 @@ abstract class Connection
             $this->PDOStatement->execute();
 
             // 调试结束
-            $this->debug(false);
+            $this->debug(false, '', true);
+
+            if ($query && !empty($this->config['deploy']) && !empty($this->config['read_master'])) {
+                $query->readMaster();
+            }
 
             $this->numRows = $this->PDOStatement->rowCount();
 
             return $this->numRows;
         } catch (\PDOException $e) {
             if ($this->isBreak($e)) {
-                return $this->close()->execute($sql, $bind);
+                return $this->close()->execute($sql, $bind, $query);
             }
 
             throw new PDOException($e, $this->config, $this->getLastsql());
         } catch (\Throwable $e) {
             if ($this->isBreak($e)) {
-                return $this->close()->execute($sql, $bind);
+                return $this->close()->execute($sql, $bind, $query);
             }
 
             throw $e;
         } catch (\Exception $e) {
             if ($this->isBreak($e)) {
-                return $this->close()->execute($sql, $bind);
+                return $this->close()->execute($sql, $bind, $query);
             }
 
             throw $e;
@@ -778,11 +783,9 @@ abstract class Connection
         $options = $query->getOptions();
         $pk      = $query->getPk($options);
 
-        if ($this->cache && !empty($options['cache']) && true === $options['cache']['key'] && is_string($pk) && isset($options['where']['AND'][$pk])) {
-            $key = $this->getCacheKey($query, $options['where']['AND'][$pk]);
-        }
-
         $data = $options['data'];
+
+        $query->setOption('limit', 1);
 
         if ($this->cache && empty($options['fetch_sql']) && !empty($options['cache'])) {
             // 判断查询缓存
@@ -811,7 +814,6 @@ abstract class Connection
             $data = $item;
         }
         $query->setOption('data', $data);
-        $query->setOption('limit', 1);
 
         // 生成查询SQL
         $sql = $this->builder->select($query);
@@ -1243,7 +1245,7 @@ abstract class Connection
         if ($this->cache && empty($options['fetch_sql']) && !empty($options['cache'])) {
             // 判断查询缓存
             $cache  = $options['cache'];
-            $result = $this->getCacheData($query, $cache, $field, $key);
+            $result = $this->getCacheData($query, $cache, null, $key);
 
             if (false !== $result) {
                 return $result;
@@ -1861,11 +1863,12 @@ abstract class Connection
     /**
      * 数据库调试 记录当前SQL及分析性能
      * @access protected
-     * @param boolean $start 调试开始标记 true 开始 false 结束
-     * @param string  $sql 执行的SQL语句 留空自动获取
+     * @param  boolean $start 调试开始标记 true 开始 false 结束
+     * @param  string  $sql 执行的SQL语句 留空自动获取
+     * @param  bool    $master 主从标记
      * @return void
      */
-    protected function debug($start, $sql = '')
+    protected function debug($start, $sql = '', $master = false)
     {
         if (!empty($this->config['debug'])) {
             // 开启数据库调试模式
@@ -1882,7 +1885,7 @@ abstract class Connection
                 }
 
                 // SQL监听
-                $this->triggerSql($sql, $runtime, $result);
+                $this->triggerSql($sql, $runtime, $result, $master);
             }
         }
     }
@@ -1901,22 +1904,30 @@ abstract class Connection
     /**
      * 触发SQL事件
      * @access protected
-     * @param string    $sql SQL语句
-     * @param float     $runtime SQL运行时间
-     * @param mixed     $explain SQL分析
+     * @param  string    $sql SQL语句
+     * @param  float     $runtime SQL运行时间
+     * @param  mixed     $explain SQL分析
+     * @param  bool      $master 主从标记
      * @return bool
      */
-    protected function triggerSql($sql, $runtime, $explain = [])
+    protected function triggerSql($sql, $runtime, $explain = [], $master = false)
     {
         if (!empty(self::$event)) {
             foreach (self::$event as $callback) {
                 if (is_callable($callback)) {
-                    call_user_func_array($callback, [$sql, $runtime, $explain]);
+                    call_user_func_array($callback, [$sql, $runtime, $explain, $master]);
                 }
             }
         } else {
+            if ($this->config['deploy']) {
+                // 分布式记录当前操作的主从
+                $master = $master ? 'master|' : 'slave|';
+            } else {
+                $master = '';
+            }
+
             // 未注册监听则记录到日志中
-            $this->log('[ SQL ] ' . $sql . ' [ RunTime:' . $runtime . 's ]');
+            $this->log('[ SQL ] ' . $sql . ' [ ' . $master . 'RunTime:' . $runtime . 's ]');
 
             if (!empty($explain)) {
                 $this->log('[ EXPLAIN : ' . var_export($explain, true) . ' ]');

@@ -171,6 +171,11 @@ abstract class Model implements \JsonSerializable, \ArrayAccess
             $this->connection = array_merge($config, $this->connection);
         }
 
+        if ($this->observerClass) {
+            // 注册模型观察者
+            static::observe($this->observerClass);
+        }
+
         // 执行初始化操作
         $this->initialize();
     }

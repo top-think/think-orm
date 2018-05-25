@@ -2297,10 +2297,19 @@ class Query
                 if ($relation instanceof \Closure) {
                     $closure  = $relation;
                     $relation = $key;
+                } elseif (!is_int($key)) {
+                    $aggregateField = $relation;
+                    $relation       = $key;
                 }
+
+                if (!isset($aggregateField)) {
+                    $aggregateField = Db::parseName($relation) . '_' . $aggregate;
+                }
+
                 $relation = Db::parseName($relation, 1, false);
                 $count    = '(' . $this->model->$relation()->getRelationCountQuery($closure, $aggregate, $field) . ')';
-                $this->field([$count => Db::parseName($relation) . '_' . $aggregate]);
+
+                $this->field([$count => $aggregateField]);
             }
         }
 

@@ -926,12 +926,16 @@ abstract class Builder
     /**
      * comment分析
      * @access protected
-     * @param Query  $query        查询对象
-     * @param string $comment
+     * @param  Query  $query        查询对象
+     * @param  string $comment
      * @return string
      */
     protected function parseComment(Query $query, $comment)
     {
+        if (false !== strpos($comment, '*/')) {
+            $comment = strstr($comment, '*/', true);
+        }
+
         return !empty($comment) ? ' /* ' . $comment . ' */' : '';
     }
 
@@ -1054,7 +1058,7 @@ abstract class Builder
         // 分析并处理数据
         $data = $this->parseData($query, $options['data']);
         if (empty($data)) {
-            return 0;
+            return '';
         }
 
         $fields = array_keys($data);

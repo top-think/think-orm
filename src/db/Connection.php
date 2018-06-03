@@ -1134,7 +1134,6 @@ abstract class Connection
                     $key = $this->getCacheKey($query, $val);
                 }
             }
-            $key = $this->getCacheKey($query, $options['where']['AND'][$pk]);
         }
 
         // 更新数据

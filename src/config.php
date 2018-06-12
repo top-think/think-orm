@@ -57,4 +57,10 @@ Db::setConfig([
     'query'           => '\\think\\db\\Query',
     // 是否需要断线重连
     'break_reconnect' => false,
+    // 默认分页设置
+    'paginate' => [
+        'type'     => 'bootstrap',
+        'var_page'  => 'page',
+        'list_rows' => 15,
+    ]
 ]);

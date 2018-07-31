@@ -100,8 +100,8 @@ class MorphTo extends Relation
     /**
      * 根据关联条件查询当前模型
      * @access public
-     * @param mixed     $where 查询条件（数组或者闭包）
-     * @param mixed     $fields 字段
+     * @param  mixed     $where 查询条件（数组或者闭包）
+     * @param  mixed     $fields 字段
      * @return Query
      */
     public function hasWhere($where = [], $fields = null)
@@ -111,8 +111,8 @@ class MorphTo extends Relation
 
     /**
      * 解析模型的完整命名空间
-     * @access public
-     * @param string $model 模型名（或者完整类名）
+     * @access protected
+     * @param  string $model 模型名（或者完整类名）
      * @return string
      */
     protected function parseModel($model)
@@ -134,7 +134,7 @@ class MorphTo extends Relation
     /**
      * 设置多态别名
      * @access public
-     * @param array $alias 别名定义
+     * @param  array $alias 别名定义
      * @return $this
      */
     public function setAlias($alias)
@@ -197,14 +197,14 @@ class MorphTo extends Relation
                     if ($key == $result->$morphType) {
                         // 关联模型
                         if (!isset($data[$result->$morphKey])) {
-                            throw new Exception('relation data not exists :' . $this->model);
+                            $relationModel = null;
                         } else {
                             $relationModel = $data[$result->$morphKey];
                             $relationModel->setParent(clone $result);
                             $relationModel->isUpdate(true);
-
-                            $result->setRelation($attr, $relationModel);
                         }
+
+                        $result->setRelation($attr, $relationModel);
                     }
                 }
             }

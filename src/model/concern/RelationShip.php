@@ -172,10 +172,11 @@ trait RelationShip
     /**
      * 查询当前模型的关联数据
      * @access public
-     * @param string|array $relations 关联名
+     * @param  string|array $relations 关联名
+     * @param  array        $withRelationAttr   关联获取器
      * @return $this
      */
-    public function relationQuery($relations)
+    public function relationQuery($relations, $withRelationAttr = [])
     {
         if (is_string($relations)) {
             $relations = explode(',', $relations);
@@ -198,9 +199,17 @@ trait RelationShip
                 list($relation, $subRelation) = explode('.', $relation, 2);
             }
 
-            $method = Db::parseName($relation, 1, false);
+            $method       = Db::parseName($relation, 1, false);
+            $relationName = Db::parseName($relation);
 
-            $this->relation[$relation] = $this->$method()->getRelation($subRelation, $closure);
+            $relationResult = $this->$method();
+
+            if (isset($withRelationAttr[$relationName])) {
+                $relationResult->withAttr($withRelationAttr[$relationName]);
+            }
+
+            $this->relation[$relation] = $relationResult->getRelation($subRelation, $closure);
+
         }
 
         return $this;
@@ -211,9 +220,10 @@ trait RelationShip
      * @access public
      * @param  array  $resultSet 数据集
      * @param  string $relation  关联名
+     * @param  array  $withRelationAttr 关联获取器
      * @return array
      */
-    public function eagerlyResultSet(&$resultSet, $relation)
+    public function eagerlyResultSet(&$resultSet, $relation, $withRelationAttr = [])
     {
         $relations = is_string($relation) ? explode(',', $relation) : $relation;
 
@@ -233,9 +243,16 @@ trait RelationShip
                 list($relation, $subRelation) = explode('.', $relation, 2);
             }
 
-            $relation = Db::parseName($relation, 1, false);
+            $relation     = Db::parseName($relation, 1, false);
+            $relationName = Db::parseName($relation);
 
-            $this->$relation()->eagerlyResultSet($resultSet, $relation, $subRelation, $closure);
+            $relationResult = $this->$relation();
+
+            if (isset($withRelationAttr[$relationName])) {
+                $relationResult->withAttr($withRelationAttr[$relationName]);
+            }
+
+            $relationResult->eagerlyResultSet($resultSet, $relation, $subRelation, $closure);
         }
     }
 
@@ -244,9 +261,10 @@ trait RelationShip
      * @access public
      * @param  Model  $result   数据对象
      * @param  string $relation 关联名
+     * @param  array  $withRelationAttr 关联获取器
      * @return Model
      */
-    public function eagerlyResult(&$result, $relation)
+    public function eagerlyResult(&$result, $relation, $withRelationAttr = [])
     {
         $relations = is_string($relation) ? explode(',', $relation) : $relation;
 
@@ -266,9 +284,16 @@ trait RelationShip
                 list($relation, $subRelation) = explode('.', $relation, 2);
             }
 
-            $relation = Db::parseName($relation, 1, false);
+            $relation     = Db::parseName($relation, 1, false);
+            $relationName = Db::parseName($relation);
 
-            $this->$relation()->eagerlyResult($result, $relation, $subRelation, $closure);
+            $relationResult = $this->$relation();
+
+            if (isset($withRelationAttr[$relationName])) {
+                $relationResult->withAttr($withRelationAttr[$relationName]);
+            }
+
+            $relationResult->eagerlyResult($result, $relation, $subRelation, $closure);
         }
     }
 
@@ -534,7 +559,7 @@ trait RelationShip
     {
         $relation = Db::parseName($attr, 1, false);
 
-        if (method_exists($this, $relation)) {
+        if (method_exists($this, $relation) && !method_exists('think\Model', $relation)) {
             return $relation;
         }
 

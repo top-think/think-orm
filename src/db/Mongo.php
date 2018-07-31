@@ -631,34 +631,13 @@ class Mongo extends Query
     }
 
     /**
-     * 查询数据转换为模型对象
-     * @access public
-     * @param array $result     查询数据
-     * @param array $options    查询参数
-     * @param bool  $resultSet  是否为数据集查询
-     * @return void
+     * 获取模型的更新条件
+     * @access protected
+     * @param  array $options 查询参数
      */
-    protected function resultToModel(&$result, $options = [], $resultSet = false)
+    protected function getModelUpdateCondition(array $options)
     {
-
-        $condition = (!$resultSet && isset($options['where']['$and'])) ? $options['where']['$and'] : null;
-        $result    = $this->model->newInstance($result, $condition);
-
-        // 关联查询
-        if (!empty($options['relation'])) {
-            $result->relationQuery($options['relation']);
-        }
-
-        // 预载入查询
-        if (!$resultSet && !empty($options['with'])) {
-            $result->eagerlyResult($result, $options['with']);
-        }
-
-        // 关联统计
-        if (!empty($options['with_count'])) {
-            $result->relationCount($result, $options['with_count']);
-        }
-
+        return isset($options['where']['$and']) ? $options['where']['$and'] : null;
     }
 
     /**

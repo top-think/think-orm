@@ -42,6 +42,12 @@ trait Attribute
     protected $jsonType = [];
 
     /**
+     * JSON数据取出是否需要转换为数组
+     * @var bool
+     */
+    protected $jsonAssoc = false;
+
+    /**
      * 数据表废弃字段
      * @var array
      */
@@ -70,6 +76,12 @@ trait Attribute
      * @var array
      */
     private $origin = [];
+
+    /**
+     * 动态获取器
+     * @var array
+     */
+    private $withAttr = [];
 
     /**
      * 获取模型对象的主键
@@ -423,9 +435,18 @@ trait Attribute
         }
 
         // 检测属性获取器
-        $method = 'get' . Db::parseName($name, 1) . 'Attr';
+        $fieldName = Db::parseName($name);
+        $method    = 'get' . Db::parseName($name, 1) . 'Attr';
 
-        if (method_exists($this, $method)) {
+        if (isset($this->withAttr[$fieldName])) {
+            if ($notFound && $relation = $this->isRelationAttr($name)) {
+                $modelRelation = $this->$relation();
+                $value         = $this->getRelationData($modelRelation);
+            }
+
+            $closure = $this->withAttr[$fieldName];
+            $value   = $closure($value, $this->data);
+        } elseif (method_exists($this, $method)) {
             if ($notFound && $relation = $this->isRelationAttr($name)) {
                 $modelRelation = $this->$relation();
                 $value         = $this->getRelationData($modelRelation);
@@ -435,7 +456,7 @@ trait Attribute
         } elseif (isset($this->type[$name])) {
             // 类型转换
             $value = $this->readTransform($value, $this->type[$name]);
-        } elseif (in_array($name, [$this->createTime, $this->updateTime])) {
+        } elseif ($this->autoWriteTimestamp && in_array($name, [$this->createTime, $this->updateTime])) {
             if (is_string($this->autoWriteTimestamp) && in_array(strtolower($this->autoWriteTimestamp), [
                 'datetime',
                 'date',
@@ -446,36 +467,50 @@ trait Attribute
                 $value = $this->formatDateTime($value, $this->dateFormat);
             }
         } elseif ($notFound) {
-            $relation = $this->isRelationAttr($name);
-
-            if ($relation) {
-                $modelRelation = $this->$relation();
-                if ($modelRelation instanceof Relation) {
-                    $value = $this->getRelationData($modelRelation);
-
-                    if ($item && method_exists($modelRelation, 'getBindAttr') && $bindAttr = $modelRelation->getBindAttr()) {
-
-                        foreach ($bindAttr as $key => $attr) {
-                            $key = is_numeric($key) ? $attr : $key;
-
-                            if (isset($item[$key])) {
-                                throw new Exception('bind attr has exists:' . $key);
-                            } else {
-                                $item[$key] = $value ? $value->getAttr($attr) : null;
-                            }
-                        }
-                        return false;
-                    }
-
-                    // 保存关联对象值
-                    $this->relation[$name] = $value;
-
-                    return $value;
-                }
-            }
-            throw new InvalidArgumentException('property not exists:' . static::class . '->' . $name);
+            $value = $this->getRelationAttribute($name, $item);
         }
         return $value;
+    }
+
+    /**
+     * 获取关联属性值
+     * @access protected
+     * @param  string   $name  属性名
+     * @param  array    $item  数据
+     * @return mixed
+     */
+    protected function getRelationAttribute($name, &$item)
+    {
+        $relation = $this->isRelationAttr($name);
+
+        if ($relation) {
+            $modelRelation = $this->$relation();
+            if ($modelRelation instanceof Relation) {
+                $value = $this->getRelationData($modelRelation);
+
+                if ($item && method_exists($modelRelation, 'getBindAttr') && $bindAttr = $modelRelation->getBindAttr()) {
+
+                    foreach ($bindAttr as $key => $attr) {
+                        $key = is_numeric($key) ? $attr : $key;
+
+                        if (isset($item[$key])) {
+                            throw new Exception('bind attr has exists:' . $key);
+                        } else {
+                            $item[$key] = $value ? $value->getAttr($attr) : null;
+                        }
+                    }
+
+                    return false;
+                }
+
+                // 保存关联对象值
+                $this->relation[$name] = $value;
+
+                return $value;
+            }
+        }
+
+        throw new InvalidArgumentException('property not exists:' . static::class . '->' . $name);
     }
 
     /**
@@ -545,4 +580,16 @@ trait Attribute
         return $value;
     }
 
+    /**
+     * 动态设置获取器
+     * @access protected
+     * @param  array        $attrs 值
+     * @return $this
+     */
+    public function setModelAttrs(array $attrs = [])
+    {
+        $this->withAttr = $attrs;
+
+        return $this;
+    }
 }

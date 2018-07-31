@@ -27,10 +27,10 @@ abstract class Model implements \JsonSerializable, \ArrayAccess
     use model\concern\Conversion;
 
     /**
-     * 是否更新数据
+     * 数据是否存在
      * @var bool
      */
-    private $isUpdate = false;
+    private $exists = false;
 
     /**
      * 是否强制更新所有数据
@@ -225,7 +225,7 @@ abstract class Model implements \JsonSerializable, \ArrayAccess
         $class = $this->query;
         $query = (new $class())->connect($this->connection)
             ->model($this)
-            ->json($this->json)
+            ->json($this->json, $this->jsonAssoc)
             ->setJsonFieldType($this->jsonType);
 
         if (isset(static::$readMaster['*']) || isset(static::$readMaster[static::class])) {
@@ -273,15 +273,12 @@ abstract class Model implements \JsonSerializable, \ArrayAccess
         $query = $this->buildQuery();
 
         // 软删除
-        if (method_exists($this, 'withNoTrashed')) {
+        if (property_exists($this, 'withTrashed') && !$this->withTrashed) {
             $this->withNoTrashed($query);
         }
 
-        if ($useBaseQuery) {
-            // 全局作用域
-            if (method_exists($this, 'base')) {
-                call_user_func_array([$this, 'base'], [ & $query]);
-            }
+        if ($useBaseQuery && method_exists($this, 'base')) {
+            call_user_func_array([$this, 'base'], [ & $query]);
         }
 
         // 返回当前模型的数据库查询对象
@@ -322,6 +319,38 @@ abstract class Model implements \JsonSerializable, \ArrayAccess
     }
 
     /**
+     * 判断force
+     * @access public
+     * @return bool
+     */
+    public function isForce()
+    {
+        return $this->force;
+    }
+
+    /**
+     * 设置数据是否存在
+     * @access public
+     * @param  bool $exists
+     * @return $this
+     */
+    public function exists($exists)
+    {
+        $this->exists = $exists;
+        return $this;
+    }
+
+    /**
+     * 判断数据是否存在数据库
+     * @access public
+     * @return bool
+     */
+    public function isExists()
+    {
+        return $this->exists;
+    }
+
+    /**
      * 数据自动完成
      * @access protected
      * @param array $auto 要自动更新的字段列表
@@ -351,7 +380,7 @@ abstract class Model implements \JsonSerializable, \ArrayAccess
      * @param array  $data     数据
      * @param array  $where    更新条件
      * @param string $sequence 自增序列名
-     * @return integer|false
+     * @return false
      */
     public function save($data = [], $where = [], $sequence = null)
     {
@@ -364,7 +393,7 @@ abstract class Model implements \JsonSerializable, \ArrayAccess
             return false;
         }
 
-        $result = $this->isUpdate ? $this->updateData($where) : $this->insertData($sequence);
+        $result = $this->exists ? $this->updateData($where) : $this->insertData($sequence);
 
         if (false === $result) {
             return false;
@@ -376,7 +405,7 @@ abstract class Model implements \JsonSerializable, \ArrayAccess
         // 重新记录原始数据
         $this->origin = $this->data;
 
-        return $result;
+        return true;
     }
 
     /**
@@ -414,7 +443,7 @@ abstract class Model implements \JsonSerializable, \ArrayAccess
             }
 
             if (!empty($where)) {
-                $this->isUpdate    = true;
+                $this->exists      = true;
                 $this->updateWhere = self::parseWhere($where);
             }
         }
@@ -608,7 +637,7 @@ abstract class Model implements \JsonSerializable, \ArrayAccess
             $db->commit();
 
             // 标记为更新
-            $this->isUpdate = true;
+            $this->exists = true;
 
             // 新增回调
             $this->trigger('after_insert');
@@ -736,13 +765,13 @@ abstract class Model implements \JsonSerializable, \ArrayAccess
     public function isUpdate($update = true, $where = null)
     {
         if (is_bool($update)) {
-            $this->isUpdate = $update;
+            $this->exists = $update;
 
             if (!empty($where)) {
                 $this->updateWhere = $where;
             }
         } else {
-            $this->isUpdate    = true;
+            $this->exists      = true;
             $this->updateWhere = $update;
         }
 
@@ -752,11 +781,11 @@ abstract class Model implements \JsonSerializable, \ArrayAccess
     /**
      * 删除当前的记录
      * @access public
-     * @return integer
+     * @return bool
      */
     public function delete()
     {
-        if (false === $this->trigger('before_delete')) {
+        if (!$this->exists || false === $this->trigger('before_delete')) {
             return false;
         }
 
@@ -768,7 +797,7 @@ abstract class Model implements \JsonSerializable, \ArrayAccess
 
         try {
             // 删除当前模型数据
-            $result = $db->where($where)->delete();
+            $db->where($where)->delete();
 
             // 关联删除
             if (!empty($this->relationWrite)) {
@@ -779,11 +808,9 @@ abstract class Model implements \JsonSerializable, \ArrayAccess
 
             $this->trigger('after_delete');
 
-            // 清空数据
-            $this->data   = [];
-            $this->origin = [];
+            $this->exists = false;
 
-            return $result;
+            return true;
         } catch (\Exception $e) {
             $db->rollback();
             throw $e;
@@ -845,97 +872,10 @@ abstract class Model implements \JsonSerializable, \ArrayAccess
     }
 
     /**
-     * 查找单条记录
-     * @access public
-     * @param mixed     $data  主键值或者查询条件（闭包）
-     * @param mixed     $with  关联预查询
-     * @param bool      $cache 是否缓存
-     * @param bool      $failException 数据不存在是否抛出异常
-     * @return static
-     * @throws exception\DbException
-     */
-    public static function get($data, $with = [], $cache = false, $failException = false)
-    {
-        if (is_null($data)) {
-            return;
-        }
-
-        if (true === $with || is_int($with)) {
-            $cache = $with;
-            $with  = [];
-        }
-
-        $query = static::parseQuery($data, $with, $cache);
-
-        return $query->failException($failException)->find($data);
-    }
-
-    /**
-     * 查找单条记录 如果不存在直接抛出异常
-     * @access public
-     * @param  mixed     $data  主键值或者查询条件（闭包）
-     * @param  mixed     $with  关联预查询
-     * @param  bool      $cache 是否缓存
-     * @return static|null
-     * @throws exception\DbException
-     */
-    public static function getOrFail($data, $with = [], $cache = false)
-    {
-        return self::get($data, $with, $cache, true);
-    }
-
-    /**
-     * 查找所有记录
-     * @access public
-     * @param mixed        $data  主键列表或者查询条件（闭包）
-     * @param array|string $with  关联预查询
-     * @param bool         $cache 是否缓存
-     * @return static[]|false
-     * @throws exception\DbException
-     */
-    public static function all($data = null, $with = [], $cache = false)
-    {
-        if (true === $with || is_int($with)) {
-            $cache = $with;
-            $with  = [];
-        }
-
-        $query = static::parseQuery($data, $with, $cache);
-
-        return $query->select($data);
-    }
-
-    /**
-     * 分析查询表达式
-     * @access public
-     * @param mixed  $data  主键列表或者查询条件（闭包）
-     * @param string $with  关联预查询
-     * @param bool   $cache 是否缓存
-     * @return Query
-     */
-    protected static function parseQuery(&$data, $with, $cache)
-    {
-        $result = self::with($with, true === $cache ? true : false)->cache($cache);
-
-        if (is_array($data) && key($data) !== 0) {
-            $result = $result->where(self::parseWhere($data));
-            $data   = null;
-        } elseif ($data instanceof \Closure) {
-            $data($result);
-            $data = null;
-        } elseif ($data instanceof Query) {
-            $result = $data->with($with)->cache($cache);
-            $data   = null;
-        }
-
-        return $result;
-    }
-
-    /**
      * 删除记录
      * @access public
      * @param mixed $data 主键列表 支持闭包查询条件
-     * @return integer 成功删除的记录数
+     * @return bool
      */
     public static function destroy($data)
     {
@@ -944,7 +884,7 @@ abstract class Model implements \JsonSerializable, \ArrayAccess
         $query = $model->db();
 
         if (empty($data) && 0 !== $data) {
-            return 0;
+            return false;
         } elseif (is_array($data) && key($data) !== 0) {
             $query->where(self::parseWhere($data));
             $data = null;
@@ -954,16 +894,14 @@ abstract class Model implements \JsonSerializable, \ArrayAccess
         }
 
         $resultSet = $query->select($data);
-        $count     = 0;
 
         if ($resultSet) {
             foreach ($resultSet as $data) {
-                $result = $data->delete();
-                $count += $result;
+                $data->delete();
             }
         }
 
-        return $count;
+        return true;
     }
 
     /**

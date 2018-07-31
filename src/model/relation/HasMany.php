@@ -33,6 +33,10 @@ class HasMany extends Relation
         $this->foreignKey = $foreignKey;
         $this->localKey   = $localKey;
         $this->query      = (new $model)->db();
+
+        if (get_class($parent) == $model) {
+            $this->selfRelation = true;
+        }
     }
 
     /**
@@ -216,10 +220,11 @@ class HasMany extends Relation
     /**
      * 保存（新增）当前关联数据对象
      * @access public
-     * @param mixed $data 数据 可以使用数组 关联模型对象 和 关联对象的主键
+     * @param  mixed $data 数据 可以使用数组 关联模型对象 和 关联对象的主键
+     * @param  boolean  $replace    是否自动识别更新和写入
      * @return Model|false
      */
-    public function save($data)
+    public function save($data, $replace = true)
     {
         if ($data instanceof Model) {
             $data = $data->getData();
@@ -230,21 +235,22 @@ class HasMany extends Relation
 
         $model = new $this->model;
 
-        return $model->save($data) ? $model : false;
+        return $model->replace($replace)->save($data) ? $model : false;
     }
 
     /**
      * 批量保存当前关联数据对象
      * @access public
-     * @param array $dataSet 数据集
+     * @param  array $dataSet 数据集
+     * @param  boolean $replace 是否自动识别更新和写入
      * @return array|false
      */
-    public function saveAll(array $dataSet)
+    public function saveAll(array $dataSet, $replace = true)
     {
         $result = [];
 
         foreach ($dataSet as $key => $data) {
-            $result[] = $this->save($data);
+            $result[] = $this->save($data, $replace);
         }
 
         return empty($result) ? false : $result;

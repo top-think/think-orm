@@ -558,20 +558,13 @@ abstract class Connection
 
         $this->bind = $bind;
 
-        // 释放前次的查询结果
-        if (!empty($this->PDOStatement)) {
-            $this->free();
-        }
-
         Db::$queryTimes++;
 
         // 调试开始
         $this->debug(true);
 
         // 预处理
-        if (empty($this->PDOStatement)) {
-            $this->PDOStatement = $this->linkID->prepare($sql);
-        }
+        $this->PDOStatement = $this->linkID->prepare($sql);
 
         // 是否为存储过程调用
         $procedure = in_array(strtolower(substr(trim($sql), 0, 4)), ['call', 'exec']);
@@ -630,11 +623,6 @@ abstract class Connection
 
         $this->bind = $bind;
 
-        // 释放前次的查询结果
-        if (!empty($this->PDOStatement)) {
-            $this->free();
-        }
-
         Db::$queryTimes++;
 
         try {
@@ -642,9 +630,7 @@ abstract class Connection
             $this->debug(true);
 
             // 预处理
-            if (empty($this->PDOStatement)) {
-                $this->PDOStatement = $this->linkID->prepare($sql);
-            }
+            $this->PDOStatement = $this->linkID->prepare($sql);
 
             // 是否为存储过程调用
             $procedure = in_array(strtolower(substr(trim($sql), 0, 4)), ['call', 'exec']);
@@ -709,20 +695,13 @@ abstract class Connection
 
         $this->bind = $bind;
 
-        //释放前次的查询结果
-        if (!empty($this->PDOStatement) && $this->PDOStatement->queryString != $sql) {
-            $this->free();
-        }
-
         Db::$executeTimes++;
         try {
             // 调试开始
             $this->debug(true);
 
             // 预处理
-            if (empty($this->PDOStatement)) {
-                $this->PDOStatement = $this->linkID->prepare($sql);
-            }
+            $this->PDOStatement = $this->linkID->prepare($sql);
 
             // 是否为存储过程调用
             $procedure = in_array(strtolower(substr(trim($sql), 0, 4)), ['call', 'exec']);
@@ -1670,13 +1649,9 @@ abstract class Connection
                     $this->parseSavepoint('trans' . $this->transTimes)
                 );
             }
-        } catch (\PDOException $e) {
-            if ($this->isBreak($e)) {
-                return $this->close()->startTrans();
-            }
-            throw $e;
         } catch (\Exception $e) {
             if ($this->isBreak($e)) {
+                --$this->transTimes;
                 return $this->close()->startTrans();
             }
             throw $e;

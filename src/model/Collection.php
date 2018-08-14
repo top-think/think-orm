@@ -80,4 +80,84 @@ class Collection extends BaseCollection
         return $this;
     }
 
+    /**
+     * 设置数据字段获取器
+     * @access public
+     * @param  string|array $name       字段名
+     * @param  callable     $callback   闭包获取器
+     * @return $this
+     */
+    public function withAttr($name, $callback = null)
+    {
+        $this->each(function ($model) use ($name, $callback) {
+            /** @var Model $model */
+            $model && $model->withAttribute($name, $callback);
+        });
+
+        return $this;
+    }
+
+    /**
+     * 按主键整理数据
+     *
+     * @access public
+     * @param  mixed $items
+     * @return array
+     */
+    public function dictionary($items = null)
+    {
+        $items = is_null($items) ? $this->items : $items;
+
+        if ($items) {
+            $indexKey = $items[0]->getPk();
+        }
+
+        if (isset($indexKey) && is_string($indexKey)) {
+            return array_column($items, null, $indexKey);
+        }
+
+        return $items;
+    }
+
+    /**
+     * 比较数组，返回差集
+     *
+     * @access public
+     * @param  mixed $items
+     * @return static
+     */
+    public function diff($items)
+    {
+        $diff       = [];
+        $dictionary = $this->dictionary($items);
+
+        foreach ($this->items as $item) {
+            if (!isset($dictionary[$item->getkey()])) {
+                $diff[] = $item;
+            }
+        }
+
+        return new static($diff);
+    }
+
+    /**
+     * 比较数组，返回交集
+     *
+     * @access public
+     * @param  mixed $items
+     * @return static
+     */
+    public function intersect($items)
+    {
+        $intersect  = [];
+        $dictionary = $this->dictionary($items);
+
+        foreach ($this->items as $item) {
+            if (isset($dictionary[$item->getkey()])) {
+                $intersect[] = $item;
+            }
+        }
+
+        return new static($intersect);
+    }
 }

@@ -17,6 +17,7 @@ use think\db\Query;
  * Class Model
  * @package think
  * @mixin Query
+ * @method \think\Model withAttr(array $name,\Closure $closure) 动态定义获取器
  */
 abstract class Model implements \JsonSerializable, \ArrayAccess
 {
@@ -1015,6 +1016,10 @@ abstract class Model implements \JsonSerializable, \ArrayAccess
 
     public function __call($method, $args)
     {
+        if ('withattr' == strtolower($method)) {
+            return call_user_func_array([$this, 'withAttribute'], $args);
+        }
+
         return call_user_func_array([$this->db(), $method], $args);
     }
 

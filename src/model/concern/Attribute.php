@@ -112,6 +112,21 @@ trait Attribute
     }
 
     /**
+     * 获取模型对象的主键值
+     * @access public
+     * @return integer
+     */
+    public function getKey()
+    {
+        $pk = $this->getPk();
+        if (is_string($pk) && array_key_exists($pk, $this->data)) {
+            return $this->data[$pk];
+        }
+
+        return;
+    }
+
+    /**
      * 设置允许写入的字段
      * @access public
      * @param mixed $field 允许写入的字段 如果为true只允许写入数据表字段
@@ -581,14 +596,25 @@ trait Attribute
     }
 
     /**
-     * 动态设置获取器
-     * @access protected
-     * @param  array        $attrs 值
+     * 设置数据字段获取器
+     * @access public
+     * @param  string|array $name       字段名
+     * @param  callable     $callback   闭包获取器
      * @return $this
      */
-    public function setModelAttrs(array $attrs = [])
+    public function withAttribute($name, $callback = null)
     {
-        $this->withAttr = $attrs;
+        if (is_array($name)) {
+            foreach ($name as $key => $val) {
+                $key = Db::parseName($key);
+
+                $this->withAttr[$key] = $val;
+            }
+        } else {
+            $name = Db::parseName($name);
+
+            $this->withAttr[$name] = $callback;
+        }
 
         return $this;
     }

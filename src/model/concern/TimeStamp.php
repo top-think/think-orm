@@ -35,6 +35,10 @@ trait TimeStamp
      */
     protected function formatDateTime($time, $format, $timestamp = false)
     {
+        if (empty($time)) {
+            return;
+        }
+
         if (false !== strpos($format, '\\')) {
             $time = new $format($time);
         } elseif (!$timestamp && false !== $format) {

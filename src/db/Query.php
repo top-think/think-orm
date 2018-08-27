@@ -2981,8 +2981,6 @@ class Query
             return !empty($this->model) ? $this->model->newInstance([], $this->getModelUpdateCondition($this->options)) : [];
         } elseif (!empty($this->options['fail'])) {
             $this->throwNotFound($this->options);
-        } else {
-            return;
         }
     }
 

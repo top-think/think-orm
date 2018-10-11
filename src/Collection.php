@@ -378,6 +378,7 @@ class Collection implements ArrayAccess, Countable, IteratorAggregate, JsonSeria
     /**
      * 对数组排序
      *
+     * @access public
      * @param  callable|null $callback
      * @return static
      */
@@ -385,16 +386,36 @@ class Collection implements ArrayAccess, Countable, IteratorAggregate, JsonSeria
     {
         $items = $this->items;
 
-        $callback ? uasort($items, $callback) : uasort($items, function ($a, $b) {
+        $callback = $callback ?: function ($a, $b) {
+            return $a == $b ? 0 : (($a < $b) ? -1 : 1);
 
-            if ($a == $b) {
-                return 0;
-            }
+        };
 
-            return ($a < $b) ? -1 : 1;
-        });
+        uasort($items, $callback);
 
         return new static($items);
+    }
+
+    /**
+     * 指定字段排序
+     * @access public
+     * @param  string       $field 排序字段
+     * @param  string       $order 排序
+     * @param  bool         $intSort 是否为数字排序
+     * @return $this
+     */
+    public function order($field, $order = null, $intSort = true)
+    {
+        return $this->sort(function ($a, $b) use ($field, $order, $intSort) {
+            $fieldA = isset($a[$field]) ? $a[$field] : null;
+            $fieldB = isset($b[$field]) ? $b[$field] : null;
+
+            if ($intSort) {
+                return 'desc' == strtolower($order) ? $fieldB >= $fieldA : $fieldA >= $fieldB;
+            } else {
+                return 'desc' == strtolower($order) ? strcmp($fieldB, $fieldA) : strcmp($fieldA, $fieldB);
+            }
+        });
     }
 
     /**

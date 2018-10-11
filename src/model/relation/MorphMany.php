@@ -192,7 +192,7 @@ class MorphMany extends Relation
 
         if (isset($result->$pk)) {
             if ($closure) {
-                $closur($this->query);
+                $closure($this->query);
             }
 
             $count = $this->query

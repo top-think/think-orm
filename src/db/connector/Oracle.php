@@ -92,6 +92,9 @@ class Oracle extends Connection
      */
     public function getLastInsID($sequence = null)
     {
+        if ($sequence === null) {
+            return '';
+        }
         $pdo    = $this->linkID->query("select {$sequence}.currval as id from dual");
         $result = $pdo->fetchColumn();
         return $result;

@@ -14,6 +14,7 @@ namespace think\db\builder;
 use think\db\Builder;
 use think\db\Expression;
 use think\db\Query;
+use think\Exception;
 
 /**
  * mysql数据库驱动
@@ -138,6 +139,10 @@ class Mysql extends Builder
             if (isset($alias[$table])) {
                 $table = $alias[$table];
             }
+        }
+
+        if ($strict && !preg_match('/^[\w\.\*]+$/', $key)) {
+            throw new Exception('not support data:' . $key);
         }
 
         if ('*' != $key && ($strict || !preg_match('/[,\'\"\*\(\)`.\s]/', $key))) {

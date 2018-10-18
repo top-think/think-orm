@@ -1802,8 +1802,18 @@ class Query
      * @param  array  $bind  参数绑定
      * @return $this
      */
-    public function orderRaw($field)
+    public function orderRaw($field, $bind = [])
     {
+        if ($bind) {
+            foreach ($bind as $key => $value) {
+                if (!is_numeric($key)) {
+                    $field = str_replace(':' . $key, '?', $field);
+                }
+            }
+
+            $this->bind(array_values($bind));
+        }
+
         $this->options['order'][] = $this->raw($field);
 
         return $this;

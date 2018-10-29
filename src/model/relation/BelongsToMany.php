@@ -27,6 +27,8 @@ class BelongsToMany extends Relation
     protected $pivotName;
     // 中间表模型对象
     protected $pivot;
+    // 中间表数据名称
+    protected $pivotDataName = 'pivot';
 
     /**
      * 架构函数
@@ -63,6 +65,18 @@ class BelongsToMany extends Relation
     public function pivot($pivot)
     {
         $this->pivotName = $pivot;
+        return $this;
+    }
+
+    /**
+     * 设置中间表数据名称
+     * @access public
+     * @param  string $name
+     * @return $this
+     */
+    public function pivotDataName($name)
+    {
+        $this->pivotDataName = $name;
         return $this;
     }
 
@@ -117,7 +131,7 @@ class BelongsToMany extends Relation
                 }
             }
 
-            $model->setRelation('pivot', $this->newPivot($pivot, true));
+            $model->setRelation($this->pivotDataName, $this->newPivot($pivot, true));
         }
     }
 
@@ -400,7 +414,7 @@ class BelongsToMany extends Relation
                 }
             }
 
-            $set->setRelation('pivot', $this->newPivot($pivot, true));
+            $set->setRelation($this->pivotDataName, $this->newPivot($pivot, true));
 
             $data[$pivot[$this->localKey]][] = $set;
         }
@@ -495,7 +509,7 @@ class BelongsToMany extends Relation
             } else {
                 // 保存关联表数据
                 $model = new $this->model;
-                $id = $model->insertGetId($data);
+                $id    = $model->insertGetId($data);
             }
         } elseif (is_numeric($data) || is_string($data)) {
             // 根据关联表主键直接写入中间表
@@ -527,6 +541,29 @@ class BelongsToMany extends Relation
         } else {
             throw new Exception('miss relation data');
         }
+    }
+
+    /**
+     * 判断是否存在关联数据
+     * @access public
+     * @param  mixed $data  数据 可以使用关联模型对象 或者 关联对象的主键
+     * @return Pivot
+     * @throws Exception
+     */
+    public function attached($data)
+    {
+        if ($data instanceof Model) {
+            $id = $data->getKey();
+        } else {
+            $id = $data;
+        }
+
+        $pivot = $this->pivot
+            ->where($this->localKey, $this->parent->getKey())
+            ->where($this->foreignKey, $id)
+            ->find();
+
+        return $pivot ?: false;
     }
 
     /**

@@ -343,6 +343,18 @@ abstract class Model implements \JsonSerializable, \ArrayAccess
     }
 
     /**
+     * 新增数据是否使用Replace
+     * @access public
+     * @param  bool $replace
+     * @return $this
+     */
+    public function replace($replace = true)
+    {
+        $this->replace = $replace;
+        return $this;
+    }
+
+    /**
      * 设置数据是否存在
      * @access public
      * @param  bool $exists

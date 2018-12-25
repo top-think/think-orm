@@ -882,7 +882,7 @@ abstract class Model implements \JsonSerializable, \ArrayAccess
         $model->isUpdate(false)->replace($replace)->save($data, []);
 
         return $model;
-    } }
+    }
 
     /**
      * 更新数据

@@ -1398,7 +1398,7 @@ abstract class Connection
      */
     public function aggregate(Query $query, $aggregate, $field)
     {
-        if (0 === stripos($field, 'DISTINCT ')) {
+        if (is_string($field) && 0 === stripos($field, 'DISTINCT ')) {
             list($distinct, $field) = explode(' ', $field);
         }
 

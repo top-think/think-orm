@@ -357,7 +357,8 @@ trait Attribute
                 case 'datetime':
                 case 'date':
                     $format = !empty($param) ? $param : $this->dateFormat;
-                    $value  = $this->formatDateTime(time(), $format);
+                    $format .= strpos($format, 'u') || false !== strpos($format, '\\') ? '' : '.u';
+                    $value = $this->formatDateTime($format);
                     break;
                 case 'timestamp':
                 case 'integer':
@@ -370,9 +371,10 @@ trait Attribute
             'date',
             'timestamp',
         ])) {
-            $value = $this->formatDateTime(time(), $this->dateFormat);
+            $format = strpos($this->dateFormat, 'u') || false !== strpos($this->dateFormat, '\\') ? '' : '.u';
+            $value  = $this->formatDateTime($this->dateFormat . $format);
         } else {
-            $value = $this->formatDateTime(time(), $this->dateFormat, true);
+            $value = time();
         }
 
         return $value;
@@ -419,7 +421,7 @@ trait Attribute
             case 'datetime':
                 $format = !empty($param) ? $param : $this->dateFormat;
                 $value  = is_numeric($value) ? $value : strtotime($value);
-                $value  = $this->formatDateTime($value, $format);
+                $value  = $this->formatDateTime($format, $value);
                 break;
             case 'object':
                 if (is_object($value)) {
@@ -486,9 +488,9 @@ trait Attribute
                 'date',
                 'timestamp',
             ])) {
-                $value = $this->formatDateTime(strtotime($value), $this->dateFormat);
+                $value = $this->formatDateTime($this->dateFormat, $value);
             } else {
-                $value = $this->formatDateTime($value, $this->dateFormat);
+                $value = $this->formatDateTime($this->dateFormat, $value, true);
             }
         } elseif ($notFound) {
             $value = $this->getRelationAttribute($name, $item);
@@ -573,13 +575,13 @@ trait Attribute
             case 'timestamp':
                 if (!is_null($value)) {
                     $format = !empty($param) ? $param : $this->dateFormat;
-                    $value  = $this->formatDateTime($value, $format);
+                    $value  = $this->formatDateTime($format, $value, true);
                 }
                 break;
             case 'datetime':
                 if (!is_null($value)) {
                     $format = !empty($param) ? $param : $this->dateFormat;
-                    $value  = $this->formatDateTime(strtotime($value), $format);
+                    $value  = $this->formatDateTime($format, $value);
                 }
                 break;
             case 'json':

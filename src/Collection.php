@@ -289,6 +289,19 @@ class Collection implements ArrayAccess, Countable, IteratorAggregate, JsonSeria
     }
 
     /**
+     * 给每个元素执行个回调,并返回新的Collection
+     *
+     * @param  callable  $callback
+     * @return static
+     */
+    public function map(callable $callback)
+    {
+        $keys = array_keys($this->items);
+        $items = array_map($callback, $this->items, $keys);
+        return new static(array_combine($keys, $items));
+    }
+
+    /**
      * 用回调函数过滤数组中的元素
      * @param callable|null $callback
      * @return static
@@ -301,6 +314,16 @@ class Collection implements ArrayAccess, Countable, IteratorAggregate, JsonSeria
 
         return new static(array_filter($this->items));
     }
+
+    /**
+     * 返回所有的值，可以理解为重新生成键
+     * @return static
+     */
+    public function values()
+    {
+        return new static(array_values($this->items));
+    }
+
 
     /**
      * 根据字段条件过滤数组中的元素

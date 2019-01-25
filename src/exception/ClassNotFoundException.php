@@ -9,12 +9,12 @@
 // | Author: yunwuxin <448901948@qq.com>
 // +----------------------------------------------------------------------
 
-namespace think\db\exception;
+namespace think\exception;
 
 class ClassNotFoundException extends \RuntimeException
 {
     protected $class;
-    public function __construct($message, $class = '')
+    public function __construct(string $message, string $class = '')
     {
         $this->message = $message;
         $this->class   = $class;

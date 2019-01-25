@@ -2,12 +2,13 @@
 // +----------------------------------------------------------------------
 // | ThinkPHP [ WE CAN DO IT JUST THINK ]
 // +----------------------------------------------------------------------
-// | Copyright (c) 2006~2017 http://thinkphp.cn All rights reserved.
+// | Copyright (c) 2006~2019 http://thinkphp.cn All rights reserved.
 // +----------------------------------------------------------------------
 // | Licensed ( http://www.apache.org/licenses/LICENSE-2.0 )
 // +----------------------------------------------------------------------
 // | Author: liu21st <liu21st@gmail.com>
 // +----------------------------------------------------------------------
+declare (strict_types = 1);
 
 namespace think\model;
 
@@ -24,11 +25,11 @@ class Pivot extends Model
     /**
      * 架构函数
      * @access public
-     * @param Model         $parent 上级模型
-     * @param array|object  $data 数据
-     * @param string        $table 中间数据表名
+     * @param  array    $data 数据
+     * @param  Model    $parent 上级模型
+     * @param  string   $table 中间数据表名
      */
-    public function __construct(Model $parent = null, $data = [], $table = '')
+    public function __construct(array $data = [], $parent = null, string $table = '')
     {
         $this->parent = $parent;
 
@@ -37,9 +38,6 @@ class Pivot extends Model
         }
 
         parent::__construct($data);
-
-        // 当前类名
-        $this->class = $this->name;
     }
 
 }

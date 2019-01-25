@@ -2,28 +2,45 @@
 // +----------------------------------------------------------------------
 // | ThinkPHP [ WE CAN DO IT JUST THINK ]
 // +----------------------------------------------------------------------
-// | Copyright (c) 2006~2017 http://thinkphp.cn All rights reserved.
+// | Copyright (c) 2006~2019 http://thinkphp.cn All rights reserved.
 // +----------------------------------------------------------------------
 // | Licensed ( http://www.apache.org/licenses/LICENSE-2.0 )
 // +----------------------------------------------------------------------
 // | Author: liu21st <liu21st@gmail.com>
 // +----------------------------------------------------------------------
+declare (strict_types = 1);
 
 namespace think\model\concern;
 
 use DateTime;
+
 /**
  * 自动时间戳
  */
 trait TimeStamp
 {
-    // 是否需要自动写入时间戳 如果设置为字符串 则表示时间字段的类型
+    /**
+     * 是否需要自动写入时间戳 如果设置为字符串 则表示时间字段的类型
+     * @var bool|string
+     */
     protected $autoWriteTimestamp;
-    // 创建时间字段
+
+    /**
+     * 创建时间字段 false表示关闭
+     * @var false|string
+     */
     protected $createTime = 'create_time';
-    // 更新时间字段
+
+    /**
+     * 更新时间字段 false表示关闭
+     * @var false|string
+     */
     protected $updateTime = 'update_time';
-    // 时间字段取出后的默认时间格式
+
+    /**
+     * 时间字段显示格式
+     * @var string
+     */
     protected $dateFormat;
 
     /**
@@ -31,10 +48,10 @@ trait TimeStamp
      * @access protected
      * @param  mixed $format    日期格式
      * @param  mixed $time      时间日期表达式
-     * @param  bool  $timestamp 是否进行时间戳转换
+     * @param  bool  $timestamp 时间表达式是否为时间戳
      * @return mixed
      */
-    protected function formatDateTime($format, $time = 'now', $timestamp = false)
+    protected function formatDateTime($format, $time = 'now', bool $timestamp = false)
     {
         if (empty($time)) {
             return;
@@ -46,9 +63,11 @@ trait TimeStamp
             return new $format($time);
         }
 
-        if ($timestamp) {
+        if ($time instanceof DateTime) {
+            $dateTime = $time;
+        } elseif ($timestamp) {
             $dateTime = new DateTime();
-            $dateTime->setTimestamp($time);
+            $dateTime->setTimestamp((int) $time);
         } else {
             $dateTime = new DateTime($time);
         }
@@ -56,16 +75,4 @@ trait TimeStamp
         return $dateTime->format($format);
     }
 
-    protected function checkTimeStampWrite()
-    {
-        // 自动写入创建时间和更新时间
-        if ($this->autoWriteTimestamp) {
-            if ($this->createTime && !isset($this->data[$this->createTime])) {
-                $this->data[$this->createTime] = $this->autoWriteTimestamp($this->createTime);
-            }
-            if ($this->updateTime && !isset($this->data[$this->updateTime])) {
-                $this->data[$this->updateTime] = $this->autoWriteTimestamp($this->updateTime);
-            }
-        }
-    }
 }

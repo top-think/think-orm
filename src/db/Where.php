@@ -2,12 +2,13 @@
 // +----------------------------------------------------------------------
 // | ThinkPHP [ WE CAN DO IT JUST THINK ]
 // +----------------------------------------------------------------------
-// | Copyright (c) 2006~2018 http://thinkphp.cn All rights reserved.
+// | Copyright (c) 2006~2019 http://thinkphp.cn All rights reserved.
 // +----------------------------------------------------------------------
 // | Licensed ( http://www.apache.org/licenses/LICENSE-2.0 )
 // +----------------------------------------------------------------------
 // | Author: liu21st <liu21st@gmail.com>
 // +----------------------------------------------------------------------
+declare (strict_types = 1);
 
 namespace think\db;
 
@@ -22,7 +23,7 @@ class Where implements ArrayAccess
     protected $where = [];
 
     /**
-     * 是否需要增加括号
+     * 是否需要把查询条件两边增加括号
      * @var bool
      */
     protected $enclose = false;
@@ -33,7 +34,7 @@ class Where implements ArrayAccess
      * @param  array    $where      查询条件数组
      * @param  bool     $enclose    是否增加括号
      */
-    public function __construct(array $where = [], $enclose = false)
+    public function __construct(array $where = [], bool $enclose = false)
     {
         $this->where   = $where;
         $this->enclose = $enclose;
@@ -45,7 +46,7 @@ class Where implements ArrayAccess
      * @param  bool $enclose
      * @return $this
      */
-    public function enclose($enclose = true)
+    public function enclose(bool $enclose = true)
     {
         $this->enclose = $enclose;
         return $this;
@@ -56,7 +57,7 @@ class Where implements ArrayAccess
      * @access public
      * @return array
      */
-    public function parse()
+    public function parse(): array
     {
         $where = [];
 
@@ -79,10 +80,10 @@ class Where implements ArrayAccess
      * 分析查询表达式
      * @access protected
      * @param  string   $field     查询字段
-     * @param  array    $where     查询表达式
+     * @param  array    $where     查询条件
      * @return array
      */
-    protected function parseItem($field, $where = [])
+    protected function parseItem(string $field, array $where = []): array
     {
         $op        = $where[0];
         $condition = isset($where[1]) ? $where[1] : null;
@@ -91,12 +92,12 @@ class Where implements ArrayAccess
             // 同一字段多条件查询
             array_unshift($where, $field);
         } elseif (is_null($condition)) {
-            if (in_array(strtoupper($op), ['NULL', 'NOTNULL', 'NOT NULL'], true)) {
+            if (is_string($op) && in_array(strtoupper($op), ['NULL', 'NOTNULL', 'NOT NULL'], true)) {
                 // null查询
                 $where = [$field, $op, ''];
-            } elseif (in_array($op, ['=', 'eq', 'EQ', null], true)) {
+            } elseif (is_null($op) || '=' == $op) {
                 $where = [$field, 'NULL', ''];
-            } elseif (in_array($op, ['<>', 'neq', 'NEQ'], true)) {
+            } elseif ('<>' == $op) {
                 $where = [$field, 'NOTNULL', ''];
             } else {
                 // 字段相等查询
@@ -129,14 +130,14 @@ class Where implements ArrayAccess
      */
     public function __get($name)
     {
-        return isset($this->where[$name]) ? $this->where[$name] : null;
+        return $this->where[$name] ?? null;
     }
 
     /**
      * 检测数据对象的值
      * @access public
      * @param  string $name 名称
-     * @return boolean
+     * @return bool
      */
     public function __isset($name)
     {

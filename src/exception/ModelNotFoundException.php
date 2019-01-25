@@ -2,40 +2,43 @@
 // +----------------------------------------------------------------------
 // | ThinkPHP [ WE CAN DO IT JUST THINK ]
 // +----------------------------------------------------------------------
-// | Copyright (c) 2006~2017 http://thinkphp.cn All rights reserved.
+// | Copyright (c) 2006~2019 http://thinkphp.cn All rights reserved.
 // +----------------------------------------------------------------------
 // | Licensed ( http://www.apache.org/licenses/LICENSE-2.0 )
 // +----------------------------------------------------------------------
 // | Author: 麦当苗儿 <zuojiazi@vip.qq.com> <http://zjzit.cn>
 // +----------------------------------------------------------------------
+declare (strict_types = 1);
 
-namespace think\db\exception;
+namespace think\exception;
 
-class DataNotFoundException extends DbException
+class ModelNotFoundException extends DbException
 {
-    protected $table;
+    protected $model;
 
     /**
-     * DbException constructor.
-     * @param string $message
-     * @param string $table
-     * @param array $config
+     * 构造方法
+     * @access public
+     * @param  string $message
+     * @param  string $model
+     * @param  array  $config
      */
-    public function __construct($message, $table = '', array $config = [])
+    public function __construct(string $message, string $model = '', array $config = [])
     {
         $this->message = $message;
-        $this->table   = $table;
+        $this->model   = $model;
 
         $this->setData('Database Config', $config);
     }
 
     /**
-     * 获取数据表名
+     * 获取模型类名
      * @access public
      * @return string
      */
-    public function getTable()
+    public function getModel()
     {
-        return $this->table;
+        return $this->model;
     }
+
 }

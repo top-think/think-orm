@@ -2,12 +2,13 @@
 // +----------------------------------------------------------------------
 // | ThinkPHP [ WE CAN DO IT JUST THINK ]
 // +----------------------------------------------------------------------
-// | Copyright (c) 2006~2017 http://thinkphp.cn All rights reserved.
+// | Copyright (c) 2006~2019 http://thinkphp.cn All rights reserved.
 // +----------------------------------------------------------------------
 // | Licensed ( http://www.apache.org/licenses/LICENSE-2.0 )
 // +----------------------------------------------------------------------
 // | Author: liu21st <liu21st@gmail.com>
 // +----------------------------------------------------------------------
+declare (strict_types = 1);
 
 namespace think\model\concern;
 
@@ -22,23 +23,38 @@ use think\model\Collection as ModelCollection;
  */
 trait Conversion
 {
-    // 显示属性
+    /**
+     * 数据输出显示的属性
+     * @var array
+     */
     protected $visible = [];
-    // 隐藏属性
+
+    /**
+     * 数据输出隐藏的属性
+     * @var array
+     */
     protected $hidden = [];
-    // 附加属性
+
+    /**
+     * 数据输出需要追加的属性
+     * @var array
+     */
     protected $append = [];
-    // 查询数据集对象
+
+    /**
+     * 数据集对象名
+     * @var string
+     */
     protected $resultSetType;
 
     /**
      * 设置需要附加的输出属性
      * @access public
-     * @param array $append   属性列表
-     * @param bool  $override 是否覆盖
+     * @param  array $append   属性列表
+     * @param  bool  $override 是否覆盖
      * @return $this
      */
-    public function append($append = [], $override = false)
+    public function append(array $append = [], bool $override = false)
     {
         $this->append = $override ? $append : array_merge($this->append, $append);
 
@@ -48,18 +64,15 @@ trait Conversion
     /**
      * 设置附加关联对象的属性
      * @access public
-     * @param string       $attr    关联属性
-     * @param string|array $append  追加属性名
+     * @param  string       $attr    关联属性
+     * @param  string|array $append  追加属性名
      * @return $this
      * @throws Exception
      */
-    public function appendRelationAttr($attr, $append)
+    public function appendRelationAttr(string $attr, array $append)
     {
-        if (is_string($append)) {
-            $append = explode(',', $append);
-        }
-
         $relation = Db::parseName($attr, 1, false);
+
         if (isset($this->relation[$relation])) {
             $model = $this->relation[$relation];
         } else {
@@ -83,11 +96,11 @@ trait Conversion
     /**
      * 设置需要隐藏的输出属性
      * @access public
-     * @param array $hidden   属性列表
-     * @param bool  $override 是否覆盖
+     * @param  array $hidden   属性列表
+     * @param  bool  $override 是否覆盖
      * @return $this
      */
-    public function hidden($hidden = [], $override = false)
+    public function hidden(array $hidden = [], bool $override = false)
     {
         $this->hidden = $override ? $hidden : array_merge($this->hidden, $hidden);
 
@@ -97,11 +110,11 @@ trait Conversion
     /**
      * 设置需要输出的属性
      * @access public
-     * @param array $visible
-     * @param bool  $override 是否覆盖
+     * @param  array $visible
+     * @param  bool  $override 是否覆盖
      * @return $this
      */
-    public function visible($visible = [], $override = false)
+    public function visible(array $visible = [], bool $override = false)
     {
         $this->visible = $override ? $visible : array_merge($this->visible, $visible);
 
@@ -113,7 +126,7 @@ trait Conversion
      * @access public
      * @return array
      */
-    public function toArray()
+    public function toArray(): array
     {
         $item    = [];
         $visible = [];
@@ -132,66 +145,71 @@ trait Conversion
         }
 
         foreach ($data as $key => $val) {
-            if ($val instanceof Model || $val instanceof ModelCollection) {
-                // 关联模型对象
-                if (isset($visible[$key])) {
-                    $val->visible($visible[$key]);
-                } elseif (isset($hidden[$key])) {
-                    $val->hidden($hidden[$key]);
-                }
-                // 关联模型对象
-                $item[$key] = $val->toArray();
-            } else {
-                // 模型属性
-                $item[$key] = $this->getAttr($key);
-            }
+            $item[$key] = $this->getArrayData($key, $val, $visible, $hidden);
         }
 
         // 追加属性（必须定义获取器）
-        if (!empty($this->append)) {
-            foreach ($this->append as $key => $name) {
-                if (is_array($name)) {
-                    // 追加关联对象属性
-                    $relation = $this->getRelation($key);
-
-                    if (!$relation) {
-                        $relation = $this->getAttr($key);
-                        $relation->visible($name);
-                    }
-
-                    $item[$key] = $relation->append($name)->toArray();
-
-                } elseif (strpos($name, '.')) {
-                    list($key, $attr) = explode('.', $name);
-                    // 追加关联对象属性
-                    $relation = $this->getRelation($key);
-
-                    if (!$relation) {
-                        $relation = $this->getAttr($key);
-                        $relation->visible([$attr]);
-                    }
-
-                    $item[$key] = $relation->append([$attr])->toArray();
-
-                } else {
-                    $value = $this->getAttr($name, $item);
-                    if (false !== $value) {
-                        $item[$name] = $value;
-                    }
-                }
-            }
+        foreach ($this->append as $key => $name) {
+            $this->appendAttrToArray($item, $key, $name);
         }
 
         return $item;
     }
 
+    protected function appendAttrToArray(array &$item, $key, string $name)
+    {
+        if (is_array($name)) {
+            // 追加关联对象属性
+            $relation = $this->getRelation($key);
+
+            if (!$relation) {
+                $relation = $this->getAttr($key);
+                $relation->visible($name);
+            }
+
+            $item[$key] = $relation->append($name)->toArray();
+        } elseif (strpos($name, '.')) {
+            list($key, $attr) = explode('.', $name);
+            // 追加关联对象属性
+            $relation = $this->getRelation($key);
+
+            if (!$relation) {
+                $relation = $this->getAttr($key);
+                $relation->visible([$attr]);
+            }
+
+            $item[$key] = $relation->append([$attr])->toArray();
+        } else {
+            $value = $this->getAttr($name, $item);
+
+            $item[$name] = $value;
+        }
+    }
+
+    protected function getArrayData(string $key, $val, array $visible, array $hidden)
+    {
+        if ($val instanceof Model || $val instanceof ModelCollection) {
+            // 关联模型对象
+            if (isset($visible[$key])) {
+                $val->visible($visible[$key]);
+            } elseif (isset($hidden[$key])) {
+                $val->hidden($hidden[$key]);
+            }
+            // 关联模型对象
+            return $val->toArray();
+        }
+
+        // 模型属性
+        return $this->getAttr($key);
+    }
+
     /**
      * 转换当前模型对象为JSON字符串
      * @access public
-     * @param integer $options json参数
+     * @param  integer $options json参数
      * @return string
      */
-    public function toJson($options = JSON_UNESCAPED_UNICODE)
+    public function toJson(int $options = JSON_UNESCAPED_UNICODE): string
     {
         return json_encode($this->toArray(), $options);
     }
@@ -225,7 +243,7 @@ trait Conversion
      * @param  string           $resultSetType 数据集类
      * @return Collection
      */
-    public function toCollection($collection, $resultSetType = null)
+    public function toCollection(iterable $collection, string $resultSetType = null): Collection
     {
         $resultSetType = $resultSetType ?: $this->resultSetType;
 
@@ -241,12 +259,12 @@ trait Conversion
     /**
      * 解析隐藏及显示属性
      * @access protected
-     * @param array $attrs  属性
-     * @param array $result 结果集
-     * @param bool  $visible
+     * @param  array $attrs  属性
+     * @param  array $result 结果集
+     * @param  bool  $visible
      * @return array
      */
-    protected function parseAttr($attrs, &$result, $visible = true)
+    protected function parseAttr(array $attrs, array &$result, bool $visible = true): array
     {
         $array = [];
 

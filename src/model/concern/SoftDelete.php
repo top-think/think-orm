@@ -1,4 +1,14 @@
 <?php
+// +----------------------------------------------------------------------
+// | ThinkPHP [ WE CAN DO IT JUST THINK ]
+// +----------------------------------------------------------------------
+// | Copyright (c) 2006~2019 http://thinkphp.cn All rights reserved.
+// +----------------------------------------------------------------------
+// | Licensed ( http://www.apache.org/licenses/LICENSE-2.0 )
+// +----------------------------------------------------------------------
+// | Author: liu21st <liu21st@gmail.com>
+// +----------------------------------------------------------------------
+declare (strict_types = 1);
 
 namespace think\model\concern;
 
@@ -18,9 +28,9 @@ trait SoftDelete
     /**
      * 判断当前实例是否被软删除
      * @access public
-     * @return boolean
+     * @return bool
      */
-    public function trashed()
+    public function trashed(): bool
     {
         $field = $this->getDeleteTimeField();
 
@@ -40,7 +50,7 @@ trait SoftDelete
     {
         $model = new static();
 
-        return $model->withTrashedData(true)->db(false);
+        return $model->withTrashedData(true)->db();
     }
 
     /**
@@ -49,7 +59,7 @@ trait SoftDelete
      * @param  bool $withTrashed 是否包含软删除数据
      * @return $this
      */
-    protected function withTrashedData($withTrashed)
+    protected function withTrashedData(bool $withTrashed)
     {
         $this->withTrashed = $withTrashed;
         return $this;
@@ -60,18 +70,18 @@ trait SoftDelete
      * @access public
      * @return Query
      */
-    public static function onlyTrashed()
+    public static function onlyTrashed(): Query
     {
         $model = new static();
         $field = $model->getDeleteTimeField(true);
 
         if ($field) {
             return $model
-                ->db(false)
+                ->db()
                 ->useSoftDelete($field, $model->getWithTrashedExp());
         }
 
-        return $model->db(false);
+        return $model->db();
     }
 
     /**
@@ -79,28 +89,25 @@ trait SoftDelete
      * @access protected
      * @return array
      */
-    protected function getWithTrashedExp()
+    protected function getWithTrashedExp(): array
     {
-        return is_null($this->defaultSoftDelete) ?
-        ['notnull', ''] : ['<>', $this->defaultSoftDelete];
+        return is_null($this->defaultSoftDelete) ? ['notnull', ''] : ['<>', $this->defaultSoftDelete];
     }
 
     /**
      * 删除当前的记录
      * @access public
-     * @param bool  $force 是否强制删除
      * @return bool
      */
-    public function delete($force = false)
+    public function delete(): bool
     {
-        if (!$this->isExists() || false === $this->trigger('before_delete', $this)) {
+        if (!$this->isExists() || $this->isEmpty() || false === $this->trigger('before_delete', $this)) {
             return false;
         }
 
-        $force = $force ?: $this->isForce();
-        $name  = $this->getDeleteTimeField();
+        $name = $this->getDeleteTimeField();
 
-        if ($name && !$force) {
+        if ($name && !$this->isForce()) {
             // 软删除
             $this->data($name, $this->autoWriteTimestamp($name));
 
@@ -112,10 +119,12 @@ trait SoftDelete
             $where = $this->getWhere();
 
             // 删除当前模型数据
-            $this->db(false)
+            $result = $this->db()
                 ->where($where)
                 ->removeOption('soft_delete')
                 ->delete();
+
+            $this->lazySave(false);
         }
 
         // 关联删除
@@ -133,14 +142,14 @@ trait SoftDelete
     /**
      * 删除记录
      * @access public
-     * @param mixed $data 主键列表 支持闭包查询条件
-     * @param bool  $force 是否强制删除
+     * @param  mixed $data 主键列表 支持闭包查询条件
+     * @param  bool  $force 是否强制删除
      * @return bool
      */
-    public static function destroy($data, $force = false)
+    public static function destroy($data, bool $force = false): bool
     {
         // 包含软删除数据
-        $query = self::withTrashed();
+        $query = (new static())->db(false);
 
         if (is_array($data) && key($data) !== 0) {
             $query->where($data);
@@ -154,10 +163,8 @@ trait SoftDelete
 
         $resultSet = $query->select($data);
 
-        if ($resultSet) {
-            foreach ($resultSet as $data) {
-                $data->force($force)->delete();
-            }
+        foreach ($resultSet as $result) {
+            $result->force($force)->delete();
         }
 
         return true;
@@ -166,46 +173,42 @@ trait SoftDelete
     /**
      * 恢复被软删除的记录
      * @access public
-     * @param array $where 更新条件
+     * @param  array $where 更新条件
      * @return bool
      */
-    public function restore($where = [])
+    public function restore($where = []): bool
     {
         $name = $this->getDeleteTimeField();
 
-        if ($name) {
-            if (false === $this->trigger('before_restore')) {
-                return false;
-            }
-
-            if (empty($where)) {
-                $pk = $this->getPk();
-                if (is_string($pk)) {
-                    $where[] = [$pk, '=', $this->getData($pk)];
-                }
-            }
-
-            // 恢复删除
-            $this->db(false)
-                ->where($where)
-                ->useSoftDelete($name, $this->getWithTrashedExp())
-                ->update([$name => $this->defaultSoftDelete]);
-
-            $this->trigger('after_restore');
-
-            return true;
+        if (!$name || false === $this->trigger('before_restore')) {
+            return false;
         }
 
-        return false;
+        if (empty($where)) {
+            $pk = $this->getPk();
+            if (is_string($pk)) {
+                $where[] = [$pk, '=', $this->getData($pk)];
+            }
+        }
+
+        // 恢复删除
+        $this->db(false)
+            ->where($where)
+            ->useSoftDelete($name, $this->getWithTrashedExp())
+            ->update([$name => $this->defaultSoftDelete]);
+
+        $this->trigger('after_restore');
+
+        return true;
     }
 
     /**
      * 获取软删除字段
-     * @access public
-     * @param bool  $read 是否查询操作 写操作的时候会自动去掉表别名
+     * @access protected
+     * @param  bool  $read 是否查询操作 写操作的时候会自动去掉表别名
      * @return string|false
      */
-    protected function getDeleteTimeField($read = false)
+    protected function getDeleteTimeField(bool $read = false)
     {
         $field = property_exists($this, 'deleteTime') && isset($this->deleteTime) ? $this->deleteTime : 'delete_time';
 
@@ -213,7 +216,7 @@ trait SoftDelete
             return false;
         }
 
-        if (!strpos($field, '.')) {
+        if (false === strpos($field, '.')) {
             $field = '__TABLE__.' . $field;
         }
 
@@ -231,7 +234,7 @@ trait SoftDelete
      * @param  Query  $query
      * @return void
      */
-    protected function withNoTrashed($query)
+    protected function withNoTrashed(Query $query): void
     {
         $field = $this->getDeleteTimeField(true);
 

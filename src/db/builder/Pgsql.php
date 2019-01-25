@@ -2,16 +2,18 @@
 // +----------------------------------------------------------------------
 // | ThinkPHP [ WE CAN DO IT JUST THINK ]
 // +----------------------------------------------------------------------
-// | Copyright (c) 2006~2017 http://thinkphp.cn All rights reserved.
+// | Copyright (c) 2006~2019 http://thinkphp.cn All rights reserved.
 // +----------------------------------------------------------------------
 // | Licensed ( http://www.apache.org/licenses/LICENSE-2.0 )
 // +----------------------------------------------------------------------
 // | Author: liu21st <liu21st@gmail.com>
 // +----------------------------------------------------------------------
+declare (strict_types = 1);
 
 namespace think\db\builder;
 
 use think\db\Builder;
+use think\db\Expression;
 use think\db\Query;
 
 /**
@@ -26,11 +28,11 @@ class Pgsql extends Builder
     /**
      * limit分析
      * @access protected
-     * @param Query     $query        查询对象
-     * @param mixed     $limit
+     * @param  Query     $query        查询对象
+     * @param  mixed     $limit
      * @return string
      */
-    public function parseLimit(Query $query, $limit)
+    public function parseLimit(Query $query, string $limit): string
     {
         $limitStr = '';
 
@@ -54,9 +56,9 @@ class Pgsql extends Builder
      * @param  bool      $strict   严格检测
      * @return string
      */
-    public function parseKey(Query $query, $key, $strict = false)
+    public function parseKey(Query $query, $key, bool $strict = false): string
     {
-        if (is_numeric($key)) {
+        if (is_int($key)) {
             return $key;
         } elseif ($key instanceof Expression) {
             return $key->getValue();
@@ -64,9 +66,9 @@ class Pgsql extends Builder
 
         $key = trim($key);
 
-        if (strpos($key, '$.') && false === strpos($key, '(')) {
+        if (strpos($key, '->') && false === strpos($key, '(')) {
             // JSON字段支持
-            list($field, $name) = explode('$.', $key);
+            list($field, $name) = explode('->', $key);
             $key                = $field . '->>\'' . $name . '\'';
         } elseif (strpos($key, '.')) {
             list($table, $key) = explode('.', $key, 2);
@@ -93,10 +95,10 @@ class Pgsql extends Builder
     /**
      * 随机排序
      * @access protected
-     * @param Query     $query        查询对象
+     * @param  Query     $query        查询对象
      * @return string
      */
-    protected function parseRand(Query $query)
+    protected function parseRand(Query $query): string
     {
         return 'RANDOM()';
     }

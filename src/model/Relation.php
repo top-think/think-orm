@@ -2,12 +2,13 @@
 // +----------------------------------------------------------------------
 // | ThinkPHP [ WE CAN DO IT JUST THINK ]
 // +----------------------------------------------------------------------
-// | Copyright (c) 2006~2017 http://thinkphp.cn All rights reserved.
+// | Copyright (c) 2006~2019 http://thinkphp.cn All rights reserved.
 // +----------------------------------------------------------------------
 // | Licensed ( http://www.apache.org/licenses/LICENSE-2.0 )
 // +----------------------------------------------------------------------
 // | Author: liu21st <liu21st@gmail.com>
 // +----------------------------------------------------------------------
+declare (strict_types = 1);
 
 namespace think\model;
 
@@ -43,7 +44,7 @@ abstract class Relation
      * @access public
      * @return Model
      */
-    public function getParent()
+    public function getParent(): Model
     {
         return $this->parent;
     }
@@ -53,7 +54,7 @@ abstract class Relation
      * @access public
      * @return Model
      */
-    public function getModel()
+    public function getModel(): Model
     {
         return $this->query->getModel();
     }
@@ -64,7 +65,7 @@ abstract class Relation
      * @param  bool $self 是否自关联
      * @return $this
      */
-    public function selfRelation($self = true)
+    public function selfRelation(bool $self = true)
     {
         $this->selfRelation = $self;
         return $this;
@@ -75,7 +76,7 @@ abstract class Relation
      * @access public
      * @return bool
      */
-    public function isSelfRelation()
+    public function isSelfRelation(): bool
     {
         return $this->selfRelation;
     }
@@ -83,41 +84,40 @@ abstract class Relation
     /**
      * 封装关联数据集
      * @access public
-     * @param array $resultSet 数据集
+     * @param  array $resultSet 数据集
      * @return mixed
      */
-    protected function resultSetBuild($resultSet)
+    protected function resultSetBuild(array $resultSet)
     {
         return (new $this->model)->toCollection($resultSet);
     }
 
-    protected function getQueryFields($model)
+    protected function getQueryFields(string $model)
     {
         $fields = $this->query->getOptions('field');
         return $this->getRelationQueryFields($fields, $model);
     }
 
-    protected function getRelationQueryFields($fields, $model)
+    protected function getRelationQueryFields($fields, string $model)
     {
-        if ($fields) {
+        if (empty($fields) || '*' == $fields) {
+            return $model . '.*';
+        }
 
-            if (is_string($fields)) {
-                $fields = explode(',', $fields);
-            }
+        if (is_string($fields)) {
+            $fields = explode(',', $fields);
+        }
 
-            foreach ($fields as &$field) {
-                if (false === strpos($field, '.')) {
-                    $field = $model . '.' . $field;
-                }
+        foreach ($fields as &$field) {
+            if (false === strpos($field, '.')) {
+                $field = $model . '.' . $field;
             }
-        } else {
-            $fields = $model . '.*';
         }
 
         return $fields;
     }
 
-    protected function getQueryWhere(&$where, $relation)
+    protected function getQueryWhere(array &$where, string $relation): void
     {
         foreach ($where as $key => &$val) {
             if (is_string($key)) {
@@ -137,7 +137,7 @@ abstract class Relation
      * @throws Exception
      * @throws PDOException
      */
-    public function delete($data = null)
+    public function delete($data = null): int
     {
         return $this->query->delete($data);
     }
@@ -147,7 +147,7 @@ abstract class Relation
      * @access protected
      * @return void
      */
-    protected function baseQuery()
+    protected function baseQuery(): void
     {}
 
     public function __call($method, $args)
@@ -159,8 +159,8 @@ abstract class Relation
             $result = call_user_func_array([$this->query->getModel(), $method], $args);
 
             return $result === $this->query ? $this : $result;
-        } else {
-            throw new Exception('method not exists:' . __CLASS__ . '->' . $method);
         }
+
+        throw new Exception('method not exists:' . __CLASS__ . '->' . $method);
     }
 }

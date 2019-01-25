@@ -2,7 +2,7 @@
 // +----------------------------------------------------------------------
 // | ThinkPHP [ WE CAN DO IT JUST THINK ]
 // +----------------------------------------------------------------------
-// | Copyright (c) 2006~2017 http://thinkphp.cn All rights reserved.
+// | Copyright (c) 2006~2019 http://thinkphp.cn All rights reserved.
 // +----------------------------------------------------------------------
 // | Licensed ( http://www.apache.org/licenses/LICENSE-2.0 )
 // +----------------------------------------------------------------------
@@ -32,10 +32,10 @@ class Pgsql extends Connection
     /**
      * 解析pdo连接的dsn信息
      * @access protected
-     * @param array $config 连接信息
+     * @param  array $config 连接信息
      * @return string
      */
-    protected function parseDsn($config)
+    protected function parseDsn(array $config): string
     {
         $dsn = 'pgsql:dbname=' . $config['database'] . ';host=' . $config['hostname'];
 
@@ -49,15 +49,15 @@ class Pgsql extends Connection
     /**
      * 取得数据表的字段信息
      * @access public
-     * @param string $tableName
+     * @param  string $tableName
      * @return array
      */
-    public function getFields($tableName)
+    public function getFields(string $tableName): array
     {
         list($tableName) = explode(' ', $tableName);
         $sql             = 'select fields_name as "field",fields_type as "type",fields_not_null as "null",fields_key_name as "key",fields_default as "default",fields_default as "extra" from table_msg(\'' . $tableName . '\');';
 
-        $pdo    = $this->query($sql, [], false, true);
+        $pdo    = $this->getPDOStatement($sql);
         $result = $pdo->fetchAll(PDO::FETCH_ASSOC);
         $info   = [];
 
@@ -81,13 +81,13 @@ class Pgsql extends Connection
     /**
      * 取得数据库的表信息
      * @access public
-     * @param string $dbName
+     * @param  string $dbName
      * @return array
      */
-    public function getTables($dbName = '')
+    public function getTables(string $dbName = ''): array
     {
         $sql    = "select tablename as Tables_in_test from pg_tables where  schemaname ='public'";
-        $pdo    = $this->query($sql, [], false, true);
+        $pdo    = $this->getPDOStatement($sql);
         $result = $pdo->fetchAll(PDO::FETCH_ASSOC);
         $info   = [];
 
@@ -101,15 +101,15 @@ class Pgsql extends Connection
     /**
      * SQL性能分析
      * @access protected
-     * @param string $sql
+     * @param  string $sql
      * @return array
      */
-    protected function getExplain($sql)
+    protected function getExplain(string $sql): array
     {
         return [];
     }
 
-    protected function supportSavepoint()
+    protected function supportSavepoint(): bool
     {
         return true;
     }

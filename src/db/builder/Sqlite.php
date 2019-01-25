@@ -2,7 +2,7 @@
 // +----------------------------------------------------------------------
 // | ThinkPHP [ WE CAN DO IT JUST THINK ]
 // +----------------------------------------------------------------------
-// | Copyright (c) 2006~2017 http://thinkphp.cn All rights reserved.
+// | Copyright (c) 2006~2019 http://thinkphp.cn All rights reserved.
 // +----------------------------------------------------------------------
 // | Licensed ( http://www.apache.org/licenses/LICENSE-2.0 )
 // +----------------------------------------------------------------------
@@ -12,6 +12,7 @@
 namespace think\db\builder;
 
 use think\db\Builder;
+use think\db\Expression;
 use think\db\Query;
 
 /**
@@ -19,15 +20,14 @@ use think\db\Query;
  */
 class Sqlite extends Builder
 {
-
     /**
      * limit
      * @access public
-     * @param Query     $query        查询对象
-     * @param mixed     $limit
+     * @param  Query     $query        查询对象
+     * @param  mixed     $limit
      * @return string
      */
-    public function parseLimit(Query $query, $limit)
+    public function parseLimit(Query $query, string $limit): string
     {
         $limitStr = '';
 
@@ -46,10 +46,10 @@ class Sqlite extends Builder
     /**
      * 随机排序
      * @access protected
-     * @param Query     $query        查询对象
+     * @param  Query     $query        查询对象
      * @return string
      */
-    protected function parseRand(Query $query)
+    protected function parseRand(Query $query): string
     {
         return 'RANDOM()';
     }
@@ -58,19 +58,20 @@ class Sqlite extends Builder
      * 字段和表名处理
      * @access public
      * @param  Query     $query     查询对象
-     * @param  mixed     $key       字段名
+     * @param  string    $key       字段名
      * @param  bool      $strict   严格检测
      * @return string
      */
-    public function parseKey(Query $query, $key, $strict = false)
+    public function parseKey(Query $query, $key, bool $strict = false): string
     {
-        if (is_numeric($key)) {
+        if (is_int($key)) {
             return $key;
         } elseif ($key instanceof Expression) {
             return $key->getValue();
         }
 
         $key = trim($key);
+
         if (strpos($key, '.')) {
             list($table, $key) = explode('.', $key, 2);
 

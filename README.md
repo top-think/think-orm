@@ -1,8 +1,8 @@
 # think-orm
 
-基于PHP5.6+ 的ORM实现，主要特性：
+基于PHP7.1+ 的ORM实现，主要特性：
 
-- 基于ThinkPHP5.1的ORM独立封装
+- 基于ThinkPHP的ORM独立封装
 - 支持Mysql、Pgsql、Sqlite、SqlServer、Oracle和Mongodb
 - 支持Db类和查询构造器
 - 支持事务
@@ -41,7 +41,6 @@ Db::table('user')
 Db类增加的（静态）方法包括：
 - `setConfig` 设置全局配置信息
 - `getConfig` 获取数据库配置信息
-- `setQuery`  设置数据库Query类名称
 - `setCacheHandler` 设置缓存对象Handler（必须支持get、set及rm方法）
 - `getSqlLog` 用于获取当前请求的SQL日志信息（包含连接信息）
 
@@ -61,7 +60,7 @@ class User extends Model
 ~~~php
 use app\index\model\User;
 
-$user = User::get(1);
+$user = User::find(1);
 $user->name = 'thinkphp';
 $user->save();
 ~~~
@@ -110,7 +109,7 @@ $user->save();
 * 模型用法
 
     ```php
-    $user = User::get(1);
+    $user = User::find(1);
     echo $user->id;
     echo $user->name;
     ```
@@ -142,7 +141,7 @@ $user->save();
 * 模型用法
 
     ```php
-    $user        = User::get(1);
+    $user        = User::find(1);
     $user->name  = 'topthink';
     $user->email = 'topthink@qq.com';
     $user->save();
@@ -150,7 +149,7 @@ $user->save();
 * 或者使用
 
     ```php
-    $user = User::get(1);
+    $user = User::find(1);
     $user->save([
         'name'  => 'topthink',
         'email' => 'topthink@qq.com',
@@ -173,7 +172,7 @@ $user->save();
 * 模型用法
 
     ```php
-    $user = User::get(1);
+    $user = User::find(1);
     $user->delete();
     ```
 * 或者静态实现

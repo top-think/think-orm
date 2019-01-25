@@ -2,12 +2,13 @@
 // +----------------------------------------------------------------------
 // | ThinkPHP [ WE CAN DO IT JUST THINK ]
 // +----------------------------------------------------------------------
-// | Copyright (c) 2006~2017 http://thinkphp.cn All rights reserved.
+// | Copyright (c) 2006~2019 http://thinkphp.cn All rights reserved.
 // +----------------------------------------------------------------------
 // | Licensed ( http://www.apache.org/licenses/LICENSE-2.0 )
 // +----------------------------------------------------------------------
 // | Author: liu21st <liu21st@gmail.com>
 // +----------------------------------------------------------------------
+declare (strict_types = 1);
 
 namespace think\db\builder;
 
@@ -47,7 +48,7 @@ class Mysql extends Builder
      * @param  bool      $replace 是否replace
      * @return string
      */
-    public function insertAll(Query $query, $dataSet, $replace = false)
+    public function insertAll(Query $query, array $dataSet, bool $replace = false): string
     {
         $options = $query->getOptions();
 
@@ -62,7 +63,7 @@ class Mysql extends Builder
         $bind = $this->connection->getFieldsBind($options['table']);
 
         foreach ($dataSet as $data) {
-            $data = $this->parseData($query, $data, $allowFields, $bind);
+            $data = $this->parseData($query, $data, $allowFields);
 
             $values[] = '( ' . implode(',', array_values($data)) . ' )';
 
@@ -93,12 +94,12 @@ class Mysql extends Builder
      * @access protected
      * @param  Query        $query        查询对象
      * @param  string       $key
-     * @param  string       $exp
-     * @param  Expression   $value
+     * @param  Expression   $exp
+     * @param  mixed        $value
      * @param  string       $field
      * @return string
      */
-    protected function parseRegexp(Query $query, $key, $exp, Expression $value, $field)
+    protected function parseRegexp(Query $query, string $key, string $exp, Expression $value, string $field): string
     {
         return $key . ' ' . $exp . ' ' . $value->getValue();
     }
@@ -106,14 +107,14 @@ class Mysql extends Builder
     /**
      * 字段和表名处理
      * @access public
-     * @param  Query     $query        查询对象
-     * @param  string    $key
+     * @param  Query     $query 查询对象
+     * @param  mixed     $key   字段名
      * @param  bool      $strict   严格检测
      * @return string
      */
-    public function parseKey(Query $query, $key, $strict = false)
+    public function parseKey(Query $query, $key, bool $strict = false): string
     {
-        if (is_numeric($key)) {
+        if (is_int($key)) {
             return $key;
         } elseif ($key instanceof Expression) {
             return $key->getValue();
@@ -125,7 +126,7 @@ class Mysql extends Builder
             // JSON字段支持
             list($field, $name) = explode('->', $key, 2);
 
-            return 'json_extract(' . $field . ', \'$.' . str_replace('->', '.', $name) . '\')';
+            return 'json_extract(' . $this->parseKey($query, $field) . ', \'$.' . str_replace('->', '.', $name) . '\')';
         } elseif (strpos($key, '.') && !preg_match('/[,\'\"\(\)`\s]/', $key)) {
             list($table, $key) = explode('.', $key, 2);
 
@@ -145,7 +146,7 @@ class Mysql extends Builder
             throw new Exception('not support data:' . $key);
         }
 
-        if ('*' != $key && ($strict || !preg_match('/[,\'\"\*\(\)`.\s]/', $key))) {
+        if ('*' != $key && !preg_match('/[,\'\"\*\(\)`.\s]/', $key)) {
             $key = '`' . $key . '`';
         }
 
@@ -163,10 +164,10 @@ class Mysql extends Builder
     /**
      * 随机排序
      * @access protected
-     * @param Query     $query        查询对象
+     * @param  Query     $query        查询对象
      * @return string
      */
-    protected function parseRand(Query $query)
+    protected function parseRand(Query $query): string
     {
         return 'rand()';
     }

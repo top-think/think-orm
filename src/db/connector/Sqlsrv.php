@@ -32,10 +32,10 @@ class Sqlsrv extends Connection
     /**
      * 解析pdo连接的dsn信息
      * @access protected
-     * @param array $config 连接信息
+     * @param  array $config 连接信息
      * @return string
      */
-    protected function parseDsn($config)
+    protected function parseDsn(array $config): string
     {
         $dsn = 'sqlsrv:Database=' . $config['database'] . ';Server=' . $config['hostname'];
 
@@ -49,14 +49,12 @@ class Sqlsrv extends Connection
     /**
      * 取得数据表的字段信息
      * @access public
-     * @param string $tableName
+     * @param  string $tableName
      * @return array
      */
-    public function getFields($tableName)
+    public function getFields(string $tableName): array
     {
         list($tableName) = explode(' ', $tableName);
-        $tableNames      = explode('.', $tableName);
-        $tableName       = isset($tableNames[1]) ? $tableNames[1] : $tableNames[0];
 
         $sql = "SELECT   column_name,   data_type,   column_default,   is_nullable
         FROM    information_schema.tables AS t
@@ -66,7 +64,7 @@ class Sqlsrv extends Connection
         AND t.table_name    = c.table_name
         WHERE   t.table_name = '$tableName'";
 
-        $pdo    = $this->query($sql, [], false, true);
+        $pdo    = $this->getPDOStatement($sql);
         $result = $pdo->fetchAll(PDO::FETCH_ASSOC);
         $info   = [];
 
@@ -106,17 +104,17 @@ class Sqlsrv extends Connection
     /**
      * 取得数据表的字段信息
      * @access public
-     * @param string $dbName
+     * @param  string $dbName
      * @return array
      */
-    public function getTables($dbName = '')
+    public function getTables(string $dbName = ''): array
     {
         $sql = "SELECT TABLE_NAME
             FROM INFORMATION_SCHEMA.TABLES
             WHERE TABLE_TYPE = 'BASE TABLE'
             ";
 
-        $pdo    = $this->query($sql, [], false, true);
+        $pdo    = $this->getPDOStatement($sql);
         $result = $pdo->fetchAll(PDO::FETCH_ASSOC);
         $info   = [];
 
@@ -130,10 +128,10 @@ class Sqlsrv extends Connection
     /**
      * SQL性能分析
      * @access protected
-     * @param string $sql
+     * @param  string $sql
      * @return array
      */
-    protected function getExplain($sql)
+    protected function getExplain(string $sql): array
     {
         return [];
     }

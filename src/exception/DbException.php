@@ -2,14 +2,14 @@
 // +----------------------------------------------------------------------
 // | ThinkPHP [ WE CAN DO IT JUST THINK ]
 // +----------------------------------------------------------------------
-// | Copyright (c) 2006~2017 http://thinkphp.cn All rights reserved.
+// | Copyright (c) 2006~2019 http://thinkphp.cn All rights reserved.
 // +----------------------------------------------------------------------
 // | Licensed ( http://www.apache.org/licenses/LICENSE-2.0 )
 // +----------------------------------------------------------------------
 // | Author: 麦当苗儿 <zuojiazi@vip.qq.com> <http://zjzit.cn>
 // +----------------------------------------------------------------------
 
-namespace think\db\exception;
+namespace think\exception;
 
 use think\Exception;
 
@@ -20,12 +20,13 @@ class DbException extends Exception
 {
     /**
      * DbException constructor.
-     * @param string    $message
-     * @param array     $config
-     * @param string    $sql
-     * @param int       $code
+     * @access public
+     * @param  string    $message
+     * @param  array     $config
+     * @param  string    $sql
+     * @param  int       $code
      */
-    public function __construct($message, array $config, $sql, $code = 10500)
+    public function __construct(string $message, array $config = [], string $sql = '', int $code = 10500)
     {
         $this->message = $message;
         $this->code    = $code;

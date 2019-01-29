@@ -42,6 +42,14 @@ class Mongo
     protected $mongo; // MongoDb Object
     protected $cursor; // MongoCursor Object
 
+    /**
+     * 查询次数
+     * @var integer
+     */
+    protected static $queryTimes = 0;
+
+    protected $queryStartTime;
+
     // 监听回调
     protected static $event = [];
     /** @var PDO[] 数据库连接ID 支持多个连接 */
@@ -324,7 +332,7 @@ class Mongo
     public function query($namespace, MongoQuery $query, ReadPreference $readPreference = null, $class = false, $typeMap = null)
     {
         $this->initConnect(false);
-        Db::$queryTimes++;
+        self::$queryTimes++;
 
         if (false === strpos($namespace, '.')) {
             $namespace = $this->dbName . '.' . $namespace;
@@ -361,7 +369,7 @@ class Mongo
     public function command(Command $command, $dbName = '', ReadPreference $readPreference = null, $class = false, $typeMap = null)
     {
         $this->initConnect(false);
-        Db::$queryTimes++;
+        self::$queryTimes++;
 
         $this->debug(true);
 
@@ -447,7 +455,7 @@ class Mongo
     public function execute($namespace, BulkWrite $bulk, WriteConcern $writeConcern = null)
     {
         $this->initConnect(true);
-        Db::$executeTimes++;
+        self::$queryTimes++;
 
         if (false === strpos($namespace, '.')) {
             $namespace = $this->dbName . '.' . $namespace;
@@ -757,7 +765,7 @@ class Mongo
     public function insert(Query $query, $replace = null, $getLastInsID = false)
     {
         // 分析查询表达式
-        $options = $query->getOptions();
+        $options = $query->parseOptions();
 
         if (empty($options['data'])) {
             throw new Exception('miss data to insert');
@@ -765,7 +773,7 @@ class Mongo
 
         // 生成bulk对象
         $bulk         = $this->builder->insert($query, $replace);
-        $writeConcern = isset($options['writeConcern']) ? $options['writeConcern'] : null;
+        $writeConcern = $options['writeConcern'] ?? null;
         $writeResult  = $this->execute($options['table'], $bulk, $writeConcern);
         $result       = $writeResult->getInsertedCount();
 
@@ -826,7 +834,7 @@ class Mongo
     public function insertAll(Query $query, array $dataSet)
     {
         // 分析查询表达式
-        $options = $query->getOptions();
+        $options = $query->parseOptions();
 
         if (!is_array(reset($dataSet))) {
             return false;
@@ -854,7 +862,7 @@ class Mongo
      */
     public function update(Query $query)
     {
-        $options = $query->getOptions();
+        $options = $query->parseOptions();
         $data    = $options['data'];
 
         if (isset($options['cache']) && is_string($options['cache']['key'])) {
@@ -936,7 +944,7 @@ class Mongo
     public function delete(Query $query)
     {
         // 分析查询表达式
-        $options = $query->getOptions();
+        $options = $query->parseOptions();
         $pk      = $query->getPk($options);
         $data    = $options['data'];
 
@@ -996,7 +1004,7 @@ class Mongo
     public function getCursor(Query $query)
     {
         // 分析查询表达式
-        $options = $query->getOptions();
+        $options = $query->parseOptions();
 
         // 生成MongoQuery对象
         $mongoQuery = $this->builder->select($query);
@@ -1021,7 +1029,7 @@ class Mongo
      */
     public function select(Query $query)
     {
-        $options   = $query->getOptions();
+        $options   = $query->parseOptions();
         $resultSet = false;
         if ($this->cache && !empty($options['cache'])) {
             // 判断查询缓存
@@ -1071,7 +1079,7 @@ class Mongo
     public function find(Query $query)
     {
         // 分析查询表达式
-        $options = $query->getOptions();
+        $options = $query->parseOptions();
         $pk      = $query->getPk($options);
         $data    = $options['data'];
         if ($this->cache && !empty($options['cache']) && true === $options['cache']['key'] && is_string($pk) && isset($options['where']['$and'][$pk])) {
@@ -1228,7 +1236,7 @@ class Mongo
      */
     public function value(Query $query, $field, $default = null)
     {
-        $options = $query->getOptions();
+        $options = $query->parseOptions();
         $result  = null;
         if ($this->cache && !empty($options['cache'])) {
             // 判断查询缓存
@@ -1280,7 +1288,7 @@ class Mongo
      */
     public function column(Query $query, $field, $key = '')
     {
-        $options = $query->getOptions();
+        $options = $query->parseOptions();
         $result  = false;
         if ($this->cache && !empty($options['cache'])) {
             // 判断查询缓存

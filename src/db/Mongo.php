@@ -80,7 +80,7 @@ class Mongo extends Query
      * @throws ConnectionException
      * @throws RuntimeException
      */
-    public function mongoQuery($namespace, MongoQuery $query, ReadPreference $readPreference = null, $class = false, $typeMap = null)
+    public function mongoQuery(string $namespace, MongoQuery $query, ReadPreference $readPreference = null, $class = false, $typeMap = null)
     {
         return $this->connection->query($namespace, $query, $readPreference, $class, $typeMap);
     }
@@ -99,7 +99,7 @@ class Mongo extends Query
      * @throws ConnectionException
      * @throws RuntimeException
      */
-    public function command(Command $command, $dbName = '', ReadPreference $readPreference = null, $class = false, $typeMap = null)
+    public function command(Command $command, string $dbName = '', ReadPreference $readPreference = null, $class = false, $typeMap = null)
     {
         return $this->connection->command($command, $dbName, $readPreference, $class, $typeMap);
     }
@@ -117,7 +117,7 @@ class Mongo extends Query
      * @throws RuntimeException
      * @throws BulkWriteException
      */
-    public function mongoExecute($namespace, BulkWrite $bulk, WriteConcern $writeConcern = null)
+    public function mongoExecute(string $namespace, BulkWrite $bulk, WriteConcern $writeConcern = null)
     {
         return $this->connection->execute($namespace, $bulk, $writeConcern);
     }
@@ -157,6 +157,7 @@ class Mongo extends Query
     {
         $cursor = $this->cmd('listCollections', null, $db);
         $result = [];
+
         foreach ($cursor as $collection) {
             $result[] = $collection['name'];
         }
@@ -168,7 +169,7 @@ class Mongo extends Query
      * @access public
      * @return integer
      */
-    public function count(string $field = null)
+    public function count(string $field = null): int
     {
         $this->parseOptions();
 
@@ -190,7 +191,7 @@ class Mongo extends Query
         $this->parseOptions();
 
         $result = $this->cmd('aggregate', [strtolower($aggregate), $field]);
-        $value  = isset($result[0]['aggregate']) ? $result[0]['aggregate'] : 0;
+        $value  = $result[0]['aggregate'] ?? 0;
 
         if ($force) {
             $value += 0;
@@ -513,7 +514,7 @@ class Mongo extends Query
      * @return void
      * @throws Exception
      */
-    public function parsePkWhere($data)
+    public function parsePkWhere($data): void
     {
         $pk = $this->getPk($this->options);
 
@@ -576,10 +577,10 @@ class Mongo extends Query
 
     /**
      * 分析表达式（可用于查询或者写入操作）
-     * @access protected
+     * @access public
      * @return array
      */
-    protected function parseOptions()
+    public function parseOptions(): array
     {
         $options = $this->options;
 

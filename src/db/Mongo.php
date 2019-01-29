@@ -227,28 +227,11 @@ class Mongo extends Query
      * @access public
      * @param string    $field 字段名
      * @param integer   $step 增长值
-     * @param integer   $lazyTime 延时时间(s)
      * @return integer|true
      * @throws Exception
      */
-    public function setInc($field, $step = 1, $lazyTime = 0)
+    public function setInc($field, $step = 1)
     {
-        $condition = !empty($this->options['where']) ? $this->options['where'] : [];
-
-        if (empty($condition)) {
-            // 没有条件不做任何更新
-            throw new Exception('no data to update');
-        }
-
-        if ($lazyTime > 0) {
-            // 延迟写入
-            $guid = md5($this->getTable() . '_' . $field . '_' . serialize($condition));
-            $step = $this->lazyWrite($guid, $step, $lazyTime);
-            if (empty($step)) {
-                return true; // 等待下次写入
-            }
-        }
-
         return $this->setField($field, ['$inc', $step]);
     }
 
@@ -257,28 +240,11 @@ class Mongo extends Query
      * @access public
      * @param string    $field 字段名
      * @param integer   $step 减少值
-     * @param integer   $lazyTime 延时时间(s)
      * @return integer|true
      * @throws Exception
      */
-    public function setDec($field, $step = 1, $lazyTime = 0)
+    public function setDec($field, $step = 1)
     {
-        $condition = !empty($this->options['where']) ? $this->options['where'] : [];
-
-        if (empty($condition)) {
-            // 没有条件不做任何更新
-            throw new Exception('no data to update');
-        }
-
-        if ($lazyTime > 0) {
-            // 延迟写入
-            $guid = md5($this->getTable() . '_' . $field . '_' . serialize($condition));
-            $step = $this->lazyWrite($guid, -$step, $lazyTime);
-            if (empty($step)) {
-                return true; // 等待下次写入
-            }
-        }
-
         return $this->setField($field, ['$inc', -1 * $step]);
     }
 

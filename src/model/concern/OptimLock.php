@@ -13,7 +13,6 @@ declare (strict_types = 1);
 namespace think\model\concern;
 
 use think\Exception;
-use think\Model;
 
 /**
  * 乐观锁
@@ -26,112 +25,61 @@ trait OptimLock
     }
 
     /**
-     * 创建新的模型实例
-     * @access public
-     * @param  array    $data 数据
-     * @param  bool     $isUpdate 是否为更新
-     * @param  mixed    $where 更新条件
-     * @return Model
-     */
-    public function newInstance(array $data = [], bool $isUpdate = false, $where = null): Model
-    {
-        // 缓存乐观锁
-        $this->cacheLockVersion($data);
-
-        return (new static($data))->isUpdate($isUpdate, $where);
-    }
-
-    /**
      * 数据检查
      * @access protected
-     * @param  array $data 数据
      * @return void
      */
-    protected function checkData(array &$data = []): void
+    protected function checkData(): void
     {
-        if ($this->isExists()) {
-            if (!$this->checkLockVersion($data)) {
-                throw new Exception('record has update');
-            }
-        } else {
-            $this->recordLockVersion($data);
-        }
+        $this->isExists() ? $this->updateLockVersion() : $this->recordLockVersion();
     }
 
     /**
      * 记录乐观锁
      * @access protected
-     * @param  array $data 数据
      * @return void
      */
-    protected function recordLockVersion(&$data): void
+    protected function recordLockVersion(): void
     {
         $optimLock = $this->getOptimLockField();
 
-        if ($optimLock && !isset($data[$optimLock])) {
-            $data[$optimLock] = 0;
+        if ($optimLock) {
+            $this->set($optimLock, 0);
         }
     }
 
     /**
-     * 缓存乐观锁
+     * 更新乐观锁
      * @access protected
-     * @param  array $data 数据
      * @return void
      */
-    protected function cacheLockVersion($data): void
+    protected function updateLockVersion(): void
     {
         $optimLock = $this->getOptimLockField();
-        $pk        = $this->getPk();
 
-        if ($optimLock && isset($data[$optimLock]) && is_string($pk) && isset($data[$pk])) {
-            $key = $this->getName() . '_' . $data[$pk] . '_lock_version';
-
-            $_SESSION[$key] = $data[$optimLock];
+        if ($optimLock && $lockVer = $this->getOrigin($optimLock)) {
+            // 更新乐观锁
+            $this->set($optimLock, $lockVer + 1);
         }
     }
 
-    /**
-     * 检查乐观锁
-     * @access protected
-     * @param  array $data 数据
-     * @return bool
-     */
-    protected function checkLockVersion(array &$data): bool
+    protected function getUpdateWhere(array &$data): array
     {
-        // 检查乐观锁
-        $id = $this->getKey();
-
-        if (empty($id)) {
-            return true;
-        }
-
-        $key       = $this->getName() . '_' . $id . '_lock_version';
+        $where     = parent::getUpdateWhere($data);
         $optimLock = $this->getOptimLockField();
 
-        if ($optimLock && isset($_SESSION[$key])) {
-            $lockVer        = $_SESSION[$key];
-            $vo             = $this->field($optimLock)->find($id);
-            $_SESSION[$key] = $lockVer;
-            $currVer        = $vo[$optimLock];
-
-            if (isset($currVer)) {
-                if ($currVer > 0 && $lockVer != $currVer) {
-                    // 记录已经更新
-                    return false;
-                }
-
-                // 更新乐观锁
-                $lockVer++;
-
-                if ($data[$optimLock] != $lockVer) {
-                    $data[$optimLock] = $lockVer;
-                }
-
-                $_SESSION[$key] = $lockVer;
-            }
+        if ($optimLock && $lockVer = $this->getOrigin($optimLock)) {
+            $where[] = [$optimLock, '=', $lockVer];
         }
 
-        return true;
+        return $where;
     }
+
+    protected function checkResult($result): void
+    {
+        if (!$result) {
+            throw new Exception('record has update');
+        }
+    }
+
 }

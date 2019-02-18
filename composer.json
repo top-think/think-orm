@@ -1,6 +1,10 @@
 {
     "name": "topthink/think-orm",
     "description": "think orm",
+    "keywords": [
+        "orm",
+        "database"
+    ],      
     "license": "Apache-2.0",
     "authors": [
         {

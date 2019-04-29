@@ -28,7 +28,6 @@ use think\Db;
 use think\db\builder\Mongo as Builder;
 use think\db\Mongo as Query;
 use think\Exception;
-use think\Log;
 
 /**
  * Mongo数据库驱动
@@ -122,10 +121,10 @@ class Mongo
     protected $db;
 
     /**
-     * 日志对象
-     * @var Log
+     * 日志记录
+     * @var array
      */
-    protected $log;
+    protected $log = [];
 
     /**
      * 架构函数 读取数据库配置信息
@@ -134,7 +133,7 @@ class Mongo
      * @param Log   $log 日志对象
      * @param array $config 数据库配置数组
      */
-    public function __construct(Cache $cache, Log $log, array $config = [])
+    public function __construct(Cache $cache, array $config = [])
     {
         if (!class_exists('\MongoDB\Driver\Manager')) {
             throw new Exception('require mongodb > 1.0');
@@ -147,7 +146,6 @@ class Mongo
         $this->builder = new Builder($this);
 
         $this->cache = $cache;
-        $this->log   = $log;
     }
 
     /**
@@ -572,9 +570,14 @@ class Mongo
         }
     }
 
-    public function logger(string $log, string $type = 'sql'): void
+    public function logger(string $log): void
     {
-        $this->config['debug'] && $this->log->record($log, $type);
+        $this->config['debug'] && $this->log[] = $log;
+    }
+
+    public function getSqlLog(): array
+    {
+        return $this->log;
     }
 
     /**

@@ -7,6 +7,9 @@
 - 支持Db类和查询构造器
 - 支持事务
 - 支持模型和关联
+- 事件支持依赖注入
+- 支持使用Db门面对象
+- 支持查询缓存
 
 适用于不使用ThinkPHP框架的开发者。
 
@@ -17,7 +20,7 @@ composer require topthink/think-orm
 
 Db类用法：
 ~~~php
-use think\Db;
+use think\facade\Db;
 // 数据库配置信息设置（全局有效）
 Db::setConfig(['数据库配置参数（数组）']);
 // 进行CURD操作
@@ -36,20 +39,18 @@ Db::table('user')
 Db::table('user')
 	->where('id',10)
 	->delete();
+// 获取数据库SQL日志记录
+Db::getSqlLog();    
 ~~~
 
-Db类增加的（静态）方法包括：
-- `setConfig` 设置全局配置信息
-- `getConfig` 获取数据库配置信息
-- `setCacheHandler` 设置缓存对象Handler（必须支持get、set及rm方法）
-- `getSqlLog` 用于获取当前请求的SQL日志信息（包含连接信息）
-
-其它操作参考TP5.1的完全开发手册[数据库](https://www.kancloud.cn/manual/thinkphp5_1/353998)章节
+其它操作参考TP6.0的完全开发手册[数据库](https://www.kancloud.cn/manual/thinkphp6_0/1037530)章节
 
 定义模型：
 ~~~php
 namespace app\index\model;
+
 use think\Model;
+
 class User extends Model
 {
 }
@@ -203,4 +204,4 @@ $user->save();
             ->where('status', 0);
     });
     ```
-更多模型用法可以参考5.1完全开发手册的[模型](https://www.kancloud.cn/manual/thinkphp5_1/354041)章节
+更多模型用法可以参考6.0完全开发手册的[模型](https://www.kancloud.cn/manual/thinkphp6_0/1037579)章节

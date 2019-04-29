@@ -17,21 +17,22 @@ use think\db\Query;
  */
 class Oracle extends Builder
 {
-
     protected $selectSql = 'SELECT * FROM (SELECT thinkphp.*, rownum AS numrow FROM (SELECT  %DISTINCT% %FIELD% FROM %TABLE%%JOIN%%WHERE%%GROUP%%HAVING%%ORDER%) thinkphp ) %LIMIT%%COMMENT%';
 
     /**
      * limit分析
      * @access protected
-     * @param  Query     $query        查询对象
-     * @param  mixed     $limit
+     * @param  Query $query 查询对象
+     * @param  mixed $limit
      * @return string
      */
-    protected function parseLimit(Query $query, $limit)
+    protected function parseLimit(Query $query, string $limit): string
     {
         $limitStr = '';
+
         if (!empty($limit)) {
             $limit = explode(',', $limit);
+
             if (count($limit) > 1) {
                 $limitStr = "(numrow>" . $limit[0] . ") AND (numrow<=" . ($limit[0] + $limit[1]) . ")";
             } else {
@@ -46,11 +47,11 @@ class Oracle extends Builder
     /**
      * 设置锁机制
      * @access protected
-     * @param  Query      $query        查询对象
+     * @param  Query      $query 查询对象
      * @param  bool|false $lock
      * @return string
      */
-    protected function parseLock(Query $query, $lock = false)
+    protected function parseLock(Query $query, $lock = false): string
     {
         if (!$lock) {
             return '';
@@ -62,19 +63,13 @@ class Oracle extends Builder
     /**
      * 字段和表名处理
      * @access public
-     * @param  Query     $query     查询对象
-     * @param  mixed     $key       字段名
-     * @param  bool      $strict   严格检测
+     * @param  Query  $query  查询对象
+     * @param  string $key
+     * @param  string $strict
      * @return string
      */
-    public function parseKey(Query $query, $key, $strict = false)
+    public function parseKey(Query $query, $key, bool $strict = false): string
     {
-        if (is_numeric($key)) {
-            return $key;
-        } elseif ($key instanceof Expression) {
-            return $key->getValue();
-        }
-
         $key = trim($key);
 
         if (strpos($key, '->') && false === strpos($key, '(')) {
@@ -89,12 +84,11 @@ class Oracle extends Builder
     /**
      * 随机排序
      * @access protected
-     * @param  Query      $query        查询对象
+     * @param  Query $query 查询对象
      * @return string
      */
-    protected function parseRand(Query $query)
+    protected function parseRand(Query $query): string
     {
         return 'DBMS_RANDOM.value';
     }
-
 }

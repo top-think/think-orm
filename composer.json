@@ -13,9 +13,9 @@
         }
     ],
     "require": {
-	   "php": ">=7.1.0",
-        "psr/cache": "~1.0",
-        "psr/simple-cache": "^1.0"
+        "php": ">=7.1.0",
+        "topthink/think-cache": "~2.0",
+        "topthink/think-container":"~1.0"
     },
     "autoload": {
         "psr-4": {

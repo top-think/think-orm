@@ -12,19 +12,38 @@
 namespace think\model\relation;
 
 use Closure;
-use think\Db;
 use think\Exception;
+use think\facade\Db;
 use think\Model;
 use think\model\Relation;
 
+/**
+ * 多态关联类
+ */
 class MorphTo extends Relation
 {
-    // 多态字段
+    /**
+     * 多态关联外键
+     * @var string
+     */
     protected $morphKey;
+
+    /**
+     * 多态字段
+     * @var string
+     */
     protected $morphType;
-    // 多态别名
-    protected $alias;
-    // 关联名
+
+    /**
+     * 多态别名
+     * @var array
+     */
+    protected $alias = [];
+
+    /**
+     * 关联名
+     * @var string
+     */
     protected $relation;
 
     /**
@@ -92,7 +111,7 @@ class MorphTo extends Relation
      * @param  integer $count    个数
      * @param  string  $id       关联表的统计字段
      * @param  string  $joinType JOIN类型
-     * @return Query
+     * @return \think\db\Query
      */
     public function has(string $operator = '>=', int $count = 1, string $id = '*', string $joinType = '')
     {
@@ -204,7 +223,7 @@ class MorphTo extends Relation
                         } else {
                             $relationModel = $data[$result->$morphKey];
                             $relationModel->setParent(clone $result);
-                            $relationModel->isUpdate(true);
+                            $relationModel->exists(true);
                         }
 
                         $result->setRelation($attr, $relationModel);
@@ -225,8 +244,6 @@ class MorphTo extends Relation
      */
     public function eagerlyResult(Model $result, string $relation, array $subRelation = [], Closure $closure = null): void
     {
-        $morphKey  = $this->morphKey;
-        $morphType = $this->morphType;
         // 多态类型映射
         $model = $this->parseModel($result->{$this->morphType});
 
@@ -262,7 +279,7 @@ class MorphTo extends Relation
 
         if ($data) {
             $data->setParent(clone $result);
-            $data->isUpdate(true);
+            $data->exists(true);
         }
 
         $result->setRelation(Db::parseName($relation), $data ?: null);

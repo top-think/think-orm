@@ -12,18 +12,33 @@
 namespace think\model\relation;
 
 use Closure;
-use think\Db;
 use think\db\Query;
 use think\Exception;
+use think\facade\Db;
 use think\Model;
 use think\model\Relation;
 
+/**
+ * 多态一对一关联类
+ */
 class MorphOne extends Relation
 {
-    // 多态字段
+    /**
+     * 多态关联外键
+     * @var string
+     */
     protected $morphKey;
+
+    /**
+     * 多态字段
+     * @var string
+     */
     protected $morphType;
-    // 多态类型
+
+    /**
+     * 多态类型
+     * @var string
+     */
     protected $type;
 
     /**
@@ -135,7 +150,7 @@ class MorphOne extends Relation
                 } else {
                     $relationModel = $data[$result->$pk];
                     $relationModel->setParent(clone $result);
-                    $relationModel->isUpdate(true);
+                    $relationModel->exists(true);
                 }
 
                 $result->setRelation($attr, $relationModel);
@@ -166,7 +181,7 @@ class MorphOne extends Relation
             if (isset($data[$pk])) {
                 $relationModel = $data[$pk];
                 $relationModel->setParent(clone $result);
-                $relationModel->isUpdate(true);
+                $relationModel->exists(true);
             } else {
                 $relationModel = null;
             }
@@ -207,18 +222,19 @@ class MorphOne extends Relation
     /**
      * 保存（新增）当前关联数据对象
      * @access public
-     * @param  mixed $data 数据 可以使用数组 关联模型对象 和 关联对象的主键
+     * @param  mixed   $data 数据 可以使用数组 关联模型对象
+     * @param  boolean $replace 是否自动识别更新和写入
      * @return Model|false
      */
-    public function save($data)
+    public function save($data, bool $replace = true)
     {
         $model = $this->make();
-        return $model->save($data) ? $model : false;
+        return $model->replace($replace)->save($data) ? $model : false;
     }
 
     /**
      * 创建关联对象实例
-     * @param array $data
+     * @param array|Model $data
      * @return Model
      */
     public function make($data = []): Model

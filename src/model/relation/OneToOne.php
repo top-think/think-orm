@@ -12,24 +12,34 @@
 namespace think\model\relation;
 
 use Closure;
-use think\Db;
 use think\db\Query;
 use think\Exception;
+use think\facade\Db;
 use think\Model;
 use think\model\Relation;
 
 /**
- * Class OneToOne
+ * 一对一关联基础类
  * @package think\model\relation
- *
  */
 abstract class OneToOne extends Relation
 {
-    // 当前关联的JOIN类型
+    /**
+     * JOIN类型
+     * @var string
+     */
     protected $joinType = 'INNER';
-    // 要绑定的属性
+
+    /**
+     * 绑定的关联属性
+     * @var array
+     */
     protected $bindAttr = [];
-    // 关联名
+
+    /**
+     * 关联名
+     * @var string
+     */
     protected $relation;
 
     /**
@@ -170,10 +180,11 @@ abstract class OneToOne extends Relation
     /**
      * 保存（新增）当前关联数据对象
      * @access public
-     * @param  mixed $data 数据 可以使用数组 关联模型对象 和 关联对象的主键
+     * @param  mixed   $data 数据 可以使用数组 关联模型对象
+     * @param  boolean $replace 是否自动识别更新和写入
      * @return Model|false
      */
-    public function save($data)
+    public function save($data, bool $replace = true)
     {
         if ($data instanceof Model) {
             $data = $data->getData();
@@ -183,13 +194,13 @@ abstract class OneToOne extends Relation
         // 保存关联表数据
         $data[$this->foreignKey] = $this->parent->{$this->localKey};
 
-        return $model->save($data) ? $model : false;
+        return $model->replace($replace)->save($data) ? $model : false;
     }
 
     /**
      * 绑定关联表的属性到父模型属性
      * @access public
-     * @param  mixed $attr 要绑定的属性列表
+     * @param  array $attr 要绑定的属性列表
      * @return $this
      */
     public function bind(array $attr)
@@ -238,11 +249,11 @@ abstract class OneToOne extends Relation
             } else {
                 $relationModel = new $model($list[$relation]);
                 $relationModel->setParent(clone $result);
-                $relationModel->isUpdate(true);
+                $relationModel->exists(true);
             }
 
-            if (!empty($this->bindAttr)) {
-                $this->bindAttr($relationModel, $result, $this->bindAttr);
+            if ($relationModel && !empty($this->bindAttr)) {
+                $this->bindAttr($relationModel, $result);
             }
         } else {
             $relationModel = null;
@@ -262,8 +273,9 @@ abstract class OneToOne extends Relation
     protected function bindAttr(Model $model, Model $result): void
     {
         foreach ($this->bindAttr as $key => $attr) {
-            $key = is_numeric($key) ? $attr : $key;
-            if (isset($result->$key)) {
+            $key   = is_numeric($key) ? $attr : $key;
+            $value = $result->getOrigin($key);
+            if (!is_null($value)) {
                 throw new Exception('bind attr has exists:' . $key);
             } else {
                 $result->setAttr($key, $model ? $model->$attr : null);

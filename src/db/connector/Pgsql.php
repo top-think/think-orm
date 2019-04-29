@@ -19,9 +19,11 @@ use think\db\Connection;
  */
 class Pgsql extends Connection
 {
-    protected $builder = '\\think\\db\\builder\\Pgsql';
 
-    // PDO连接参数
+    /**
+     * 默认PDO连接参数
+     * @var array
+     */
     protected $params = [
         PDO::ATTR_CASE              => PDO::CASE_NATURAL,
         PDO::ATTR_ERRMODE           => PDO::ERRMODE_EXCEPTION,
@@ -61,9 +63,10 @@ class Pgsql extends Connection
         $result = $pdo->fetchAll(PDO::FETCH_ASSOC);
         $info   = [];
 
-        if ($result) {
+        if (!empty($result)) {
             foreach ($result as $key => $val) {
-                $val                 = array_change_key_case($val);
+                $val = array_change_key_case($val);
+
                 $info[$val['field']] = [
                     'name'    => $val['field'],
                     'type'    => $val['type'],

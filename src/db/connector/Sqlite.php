@@ -20,8 +20,6 @@ use think\db\Connection;
 class Sqlite extends Connection
 {
 
-    protected $builder = '\\think\\db\\builder\\Sqlite';
-
     /**
      * 解析pdo连接的dsn信息
      * @access protected
@@ -50,9 +48,10 @@ class Sqlite extends Connection
         $result = $pdo->fetchAll(PDO::FETCH_ASSOC);
         $info   = [];
 
-        if ($result) {
+        if (!empty($result)) {
             foreach ($result as $key => $val) {
-                $val                = array_change_key_case($val);
+                $val = array_change_key_case($val);
+
                 $info[$val['name']] = [
                     'name'    => $val['name'],
                     'type'    => $val['type'],

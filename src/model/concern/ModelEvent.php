@@ -12,7 +12,9 @@ declare (strict_types = 1);
 
 namespace think\model\concern;
 
-use think\Db;
+use think\Container;
+use think\exception\ModelEventException;
+use think\facade\Db;
 
 /**
  * 模型事件处理
@@ -20,22 +22,22 @@ use think\Db;
 trait ModelEvent
 {
     /**
-     * 模型回调
-     * @var array
-     */
-    private static $event = [];
-
-    /**
      * 模型事件观察
      * @var array
      */
-    protected static $observe = ['after_read', 'before_write', 'after_write', 'before_insert', 'after_insert', 'before_update', 'after_update', 'before_delete', 'after_delete', 'before_restore', 'after_restore'];
+    protected $observe = ['AfterRead', 'BeforeWrite', 'AfterWrite', 'BeforeInsert', 'AfterInsert', 'BeforeUpdate', 'AfterUpdate', 'BeforeDelete', 'AfterDelete', 'BeforeRestore', 'AfterRestore'];
 
     /**
-     * 绑定模型事件观察者类
-     * @var array
+     * 模型事件观察者类名
+     * @var string
      */
     protected $observerClass;
+
+    /**
+     * Event
+     * @var array
+     */
+    protected $event = [];
 
     /**
      * 是否需要事件响应
@@ -44,28 +46,20 @@ trait ModelEvent
     protected $withEvent = true;
 
     /**
-     * 清除回调方法
-     * @access public
-     * @return void
-     */
-    public static function flush(): void
-    {
-        self::$event[static::class] = [];
-    }
-
-    /**
      * 注册一个模型观察者
      *
-     * @param  string  $class
+     * @param  string $class 观察者类
      * @return void
      */
-    protected static function observe(string $class): void
+    protected function observe(string $class): void
     {
-        foreach (static::$observe as $event) {
-            $call = 'on' . Db::parseName($event, 1, false);
+        foreach ($this->observe as $event) {
+            $call = 'on' . $event;
 
             if (method_exists($class, $call)) {
-                self::$event[static::class][$event][] = [$class, $call];
+                $instance = Container::getInstance()->invokeClass($class);
+
+                $this->event[$event][] = [$instance, $call];
             }
         }
     }
@@ -85,23 +79,29 @@ trait ModelEvent
     /**
      * 触发事件
      * @access protected
-     * @param  string $event  事件名
+     * @param  string $event 事件名
      * @return bool
      */
     protected function trigger(string $event): bool
     {
-        $class = static::class;
-
-        if ($this->withEvent && isset(self::$event[$class][$event])) {
-            foreach (self::$event[$class][$event] as $callback) {
-                $result = call_user_func_array($callback, [$this]);
-
-                if (false === $result) {
-                    return false;
-                }
-            }
+        if (!$this->withEvent) {
+            return true;
         }
 
-        return true;
+        $call   = 'on' . Db::parseName($event, 1);
+        $result = true;
+
+        try {
+            if (method_exists(static::class, $call)) {
+                $callback = [static::class, $call];
+            } elseif ($this->observerClass && method_exists($this->observerClass, $call)) {
+                $callback = [$this->observerClass, $call];
+            }
+
+            $result = Container::getInstance()->invoke($callback, [$this]);
+            return false === $result ? false : true;
+        } catch (ModelEventException $e) {
+            return false;
+        }
     }
 }

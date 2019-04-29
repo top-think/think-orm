@@ -12,7 +12,10 @@ declare (strict_types = 1);
 
 namespace think\db;
 
-class Expression
+/**
+ * SQL Raw
+ */
+class Raw
 {
     /**
      * 查询表达式

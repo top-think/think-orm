@@ -12,8 +12,8 @@
 namespace think\db\builder;
 
 use think\db\Builder;
-use think\db\Expression;
 use think\db\Query;
+use think\db\Raw;
 
 /**
  * Sqlite数据库驱动
@@ -58,15 +58,15 @@ class Sqlite extends Builder
      * 字段和表名处理
      * @access public
      * @param  Query     $query     查询对象
-     * @param  string    $key       字段名
+     * @param  mixed     $key       字段名
      * @param  bool      $strict   严格检测
      * @return string
      */
     public function parseKey(Query $query, $key, bool $strict = false): string
     {
         if (is_int($key)) {
-            return $key;
-        } elseif ($key instanceof Expression) {
+            return (string) $key;
+        } elseif ($key instanceof Raw) {
             return $key->getValue();
         }
 

@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------
 namespace think;
 
-Db::setConfig([
+facade\Db::setConfig([
     // 数据库类型
     'type'            => '',
     // 服务器地址
@@ -43,24 +43,18 @@ Db::setConfig([
     'slave_no'        => '',
     // 是否严格检查字段是否存在
     'fields_strict'   => true,
-    // 数据集返回类型
-    'resultset_type'  => '',
     // 自动写入时间戳字段
     'auto_timestamp'  => false,
     // 时间字段取出后的默认时间格式
     'datetime_format' => 'Y-m-d H:i:s',
     // 是否需要进行SQL性能分析
     'sql_explain'     => false,
-    // Builder类
-    'builder'         => '',
-    // Query类
-    'query'           => '\\think\\db\\Query',
     // 是否需要断线重连
     'break_reconnect' => false,
     // 默认分页设置
-    'paginate' => [
-        'type'     => 'bootstrap',
+    'paginate'        => [
+        'type'      => 'bootstrap',
         'var_page'  => 'page',
         'list_rows' => 15,
-    ]
+    ],
 ]);

@@ -13,18 +13,33 @@ namespace think\model\relation;
 
 use Closure;
 use think\Collection;
-use think\Db;
 use think\db\Query;
 use think\Exception;
+use think\facade\Db;
 use think\Model;
 use think\model\Relation;
 
+/**
+ * 多态一对多关联
+ */
 class MorphMany extends Relation
 {
-    // 多态字段
+
+    /**
+     * 多态关联外键
+     * @var string
+     */
     protected $morphKey;
+    /**
+     * 多态字段名
+     * @var string
+     */
     protected $morphType;
-    // 多态类型
+
+    /**
+     * 多态类型
+     * @var string
+     */
     protected $type;
 
     /**
@@ -139,7 +154,7 @@ class MorphMany extends Relation
 
                 foreach ($data[$result->$pk] as &$relationModel) {
                     $relationModel->setParent(clone $result);
-                    $relationModel->isUpdate(true);
+                    $relationModel->exists(true);
                 }
 
                 $result->setRelation($attr, $this->resultSetBuild($data[$result->$pk]));
@@ -174,7 +189,7 @@ class MorphMany extends Relation
 
             foreach ($data[$key] as &$relationModel) {
                 $relationModel->setParent(clone $result);
-                $relationModel->isUpdate(true);
+                $relationModel->exists(true);
             }
 
             $result->setRelation(Db::parseName($relation), $this->resultSetBuild($data[$key]));
@@ -200,11 +215,7 @@ class MorphMany extends Relation
         }
 
         if ($closure) {
-            $return = $closure($this->query);
-
-            if ($return && is_string($return)) {
-                $name = $return;
-            }
+            $closure($this->query, $name);
         }
 
         return $this->query
@@ -221,9 +232,10 @@ class MorphMany extends Relation
      * @param  Closure  $closure 闭包
      * @param  string   $aggregate 聚合查询方法
      * @param  string   $field 字段
+     * @param  string   $name 统计字段别名
      * @return string
      */
-    public function getRelationCountQuery(Closure $closure = null, string $aggregate = 'count', string $field = '*'): string
+    public function getRelationCountQuery(Closure $closure = null, string $aggregate = 'count', string $field = '*', string &$name = null): string
     {
         if ($closure) {
             $return = $closure($this->query);
@@ -273,19 +285,20 @@ class MorphMany extends Relation
     /**
      * 保存（新增）当前关联数据对象
      * @access public
-     * @param  mixed $data 数据 可以使用数组 关联模型对象 和 关联对象的主键
+     * @param  mixed   $data 数据 可以使用数组 关联模型对象
+     * @param  boolean $replace 是否自动识别更新和写入
      * @return Model|false
      */
-    public function save($data)
+    public function save($data, bool $replace = true)
     {
         $model = $this->make();
 
-        return $model->save($data) ? $model : false;
+        return $model->replace($replace)->save($data) ? $model : false;
     }
 
     /**
      * 创建关联对象实例
-     * @param array $data
+     * @param array|Model $data
      * @return Model
      */
     public function make($data = []): Model
@@ -306,15 +319,16 @@ class MorphMany extends Relation
     /**
      * 批量保存当前关联数据对象
      * @access public
-     * @param  array $dataSet 数据集
+     * @param  iterable $dataSet 数据集
+     * @param  boolean  $replace 是否自动识别更新和写入
      * @return array|false
      */
-    public function saveAll(array $dataSet)
+    public function saveAll(iterable $dataSet, bool $replace = true)
     {
         $result = [];
 
         foreach ($dataSet as $key => $data) {
-            $result[] = $this->save($data);
+            $result[] = $this->save($data, $replace);
         }
 
         return empty($result) ? false : $result;

@@ -44,6 +44,93 @@ trait TimeStamp
     protected $dateFormat;
 
     /**
+     * 是否需要自动写入时间字段
+     * @access public
+     * @param  bool|string $auto
+     * @return $this
+     */
+    public function isAutoWriteTimestamp($auto)
+    {
+        $this->autoWriteTimestamp = $auto;
+
+        return $this;
+    }
+
+    /**
+     * 获取自动写入时间字段
+     * @access public
+     * @return bool|string
+     */
+    public function getAutoWriteTimestamp()
+    {
+        return $this->autoWriteTimestamp;
+    }
+
+    /**
+     * 设置时间字段格式化
+     * @access public
+     * @param  string $format
+     * @return $this
+     */
+    public function setDateFormat(string $format)
+    {
+        $this->dateFormat = $format;
+
+        return $this;
+    }
+
+    /**
+     * 获取自动写入时间字段
+     * @access public
+     * @return string
+     */
+    public function getDateFormat()
+    {
+        return $this->dateFormat;
+    }
+
+    /**
+     * 自动写入时间戳
+     * @access protected
+     * @param  string $name 时间戳字段
+     * @return mixed
+     */
+    protected function autoWriteTimestamp(string $name)
+    {
+        $value = time();
+
+        if (isset($this->type[$name])) {
+            $type = $this->type[$name];
+
+            if (strpos($type, ':')) {
+                list($type, $param) = explode(':', $type, 2);
+            }
+
+            switch ($type) {
+                case 'datetime':
+                case 'date':
+                case 'timestamp':
+                    $value = $this->formatDateTime('Y-m-d H:i:s.u');
+                    break;
+                default:
+                    if (false !== strpos($type, '\\')) {
+                        // 对象数据写入
+                        $value = new $type();
+                        if (method_exists($value, '__toString')) {
+                            // 对象数据写入
+                            $value = $value->__toString();
+                        }
+                    }
+            }
+        } elseif (is_string($this->autoWriteTimestamp) && in_array(strtolower($this->autoWriteTimestamp),
+            ['datetime', 'date', 'timestamp'])) {
+            $value = $this->formatDateTime('Y-m-d H:i:s.u');
+        }
+
+        return $value;
+    }
+
+    /**
      * 时间日期字段格式化处理
      * @access protected
      * @param  mixed $format    日期格式
@@ -75,4 +162,22 @@ trait TimeStamp
         return $dateTime->format($format);
     }
 
+    /**
+     * 获取时间字段值
+     * @access protected
+     * @param  mixed   $value
+     * @return mixed
+     */
+    protected function getTimestampValue($value)
+    {
+        if (is_string($this->autoWriteTimestamp) && in_array(strtolower($this->autoWriteTimestamp), [
+            'datetime', 'date', 'timestamp',
+        ])) {
+            $value = $this->formatDateTime($this->dateFormat, $value);
+        } else {
+            $value = $this->formatDateTime($this->dateFormat, $value, true);
+        }
+
+        return $value;
+    }
 }

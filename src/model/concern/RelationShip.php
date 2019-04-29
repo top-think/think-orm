@@ -13,8 +13,9 @@ declare (strict_types = 1);
 namespace think\model\concern;
 
 use think\Collection;
-use think\Db;
 use think\db\Query;
+use think\Exception;
+use think\facade\Db;
 use think\Model;
 use think\model\Relation;
 use think\model\relation\BelongsTo;
@@ -47,7 +48,7 @@ trait RelationShip
      * 关联写入定义信息
      * @var array
      */
-    private $together;
+    private $together = [];
 
     /**
      * 关联自动写入信息
@@ -202,7 +203,7 @@ trait RelationShip
      * @param  array  $resultSet 数据集
      * @param  string $relation  关联名
      * @param  array  $withRelationAttr 关联获取器
-     * @param  bool   $join             是否为JOIN方式
+     * @param  bool   $join      是否为JOIN方式
      * @return void
      */
     public function eagerlyResultSet(array &$resultSet, array $relations, array $withRelationAttr = [], bool $join = false): void
@@ -244,7 +245,7 @@ trait RelationShip
      * @param  Model    $result    数据对象
      * @param  array    $relations 关联
      * @param  array    $withRelationAttr 关联获取器
-     * @param  bool     $join             是否为JOIN方式
+     * @param  bool     $join      是否为JOIN方式
      * @return void
      */
     public function eagerlyResult(Model $result, array $relations, array $withRelationAttr = [], bool $join = false): void
@@ -278,6 +279,32 @@ trait RelationShip
 
             $relationResult->eagerlyResult($result, $relation, $subRelation, $closure, $join);
         }
+    }
+
+    /**
+     * 绑定（一对一）关联属性到当前模型
+     * @access protected
+     * @param  string   $relation    关联名称
+     * @param  array    $attrs       绑定属性
+     * @return $this
+     * @throws Exception
+     */
+    public function bindAttr(string $relation, array $attrs = [])
+    {
+        $relation = $this->getRelation($relation);
+
+        foreach ($attrs as $key => $attr) {
+            $key   = is_numeric($key) ? $attr : $key;
+            $value = $this->getOrigin($key);
+
+            if (!is_null($value)) {
+                throw new Exception('bind attr has exists:' . $key);
+            } else {
+                $this->set($key, $relation ? $relation->$attr : null);
+            }
+        }
+
+        return $this;
     }
 
     /**
@@ -552,7 +579,7 @@ trait RelationShip
     /**
      * 智能获取关联模型数据
      * @access protected
-     * @param  Relation  $modelRelation 模型关联对象
+     * @param  Relation $modelRelation 模型关联对象
      * @return mixed
      */
     protected function getRelationData(Relation $modelRelation)
@@ -604,12 +631,12 @@ trait RelationShip
     {
         foreach ($this->relationWrite as $name => $val) {
             if ($val instanceof Model) {
-                $val->isUpdate()->save();
+                $val->exists(true)->save();
             } else {
                 $model = $this->getRelation($name);
 
                 if ($model instanceof Model) {
-                    $model->isUpdate()->save($val);
+                    $model->exists(true)->save($val);
                 }
             }
         }
@@ -647,5 +674,16 @@ trait RelationShip
                 }
             }
         }
+    }
+
+    /**
+     * 移除当前模型的关联属性
+     * @access public
+     * @return $this
+     */
+    public function removeRelation()
+    {
+        $this->relation = [];
+        return $this;
     }
 }

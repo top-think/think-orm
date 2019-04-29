@@ -14,11 +14,14 @@ namespace think\model\relation;
 
 use Closure;
 use think\Collection;
-use think\Db;
 use think\db\Query;
+use think\facade\Db;
 use think\Model;
 use think\model\Relation;
 
+/**
+ * 一对多关联类
+ */
 class HasMany extends Relation
 {
     /**
@@ -129,9 +132,9 @@ class HasMany extends Relation
         $localKey = $this->localKey;
 
         if (isset($result->$localKey)) {
-            $pk      = $result->$localKey;
-            $where[] = [$this->foreignKey, '=', $pk];
-            $data    = $this->eagerlyOneToMany($where, $relation, $subRelation, $closure);
+            $pk    = $result->$localKey;
+            $where = [$this->foreignKey, '=', $pk];
+            $data  = $this->eagerlyOneToMany([$where], $relation, $subRelation, $closure);
 
             // 关联数据封装
             if (!isset($data[$pk])) {
@@ -165,10 +168,7 @@ class HasMany extends Relation
         }
 
         if ($closure) {
-            $return = $closure($this->query);
-            if ($resturn && is_string($return)) {
-                $name = $return;
-            }
+            $closure($this->query, $name);
         }
 
         return $this->query
@@ -188,11 +188,14 @@ class HasMany extends Relation
     public function getRelationCountQuery(Closure $closure = null, string $aggregate = 'count', string $field = '*', string &$name = null): string
     {
         if ($closure) {
-            $closure($this->query);
+            $return = $closure($this->query);
+            if ($return && is_string($return)) {
+                $name = $return;
+            }
         }
 
-        return $this->query
-            ->whereExp($this->foreignKey, '=' . $this->parent->getTable() . '.' . $this->parent->getPk())
+        return $this->query->alias($aggregate . '_table')
+            ->whereExp($aggregate . '_table.' . $this->foreignKey, '=' . $this->parent->getTable() . '.' . $this->parent->getPk())
             ->fetchSql()
             ->$aggregate($field);
     }
@@ -232,7 +235,8 @@ class HasMany extends Relation
     /**
      * 保存（新增）当前关联数据对象
      * @access public
-     * @param  mixed $data 数据 可以使用数组 关联模型对象 和 关联对象的主键
+     * @param  mixed   $data 数据 可以使用数组 关联模型对象
+     * @param  boolean $replace 是否自动识别更新和写入
      * @return Model|false
      */
     public function save($data, bool $replace = true)
@@ -244,10 +248,10 @@ class HasMany extends Relation
 
     /**
      * 创建关联对象实例
-     * @param array $data
+     * @param array|Model $data
      * @return Model
      */
-    public function make(array $data = []): Model
+    public function make($data = []): Model
     {
         if ($data instanceof Model) {
             $data = $data->getData();
@@ -262,11 +266,11 @@ class HasMany extends Relation
     /**
      * 批量保存当前关联数据对象
      * @access public
-     * @param  array $dataSet   数据集
-     * @param  boolean $replace 是否自动识别更新和写入
+     * @param  iterable $dataSet 数据集
+     * @param  boolean  $replace 是否自动识别更新和写入
      * @return array|false
      */
-    public function saveAll(array $dataSet, bool $replace = true)
+    public function saveAll(iterable $dataSet, bool $replace = true)
     {
         $result = [];
 
@@ -286,7 +290,7 @@ class HasMany extends Relation
      * @param  string  $joinType JOIN类型
      * @return Query
      */
-    public function has(string $operator = '>=', int $count = 1, string $id = '*', string $joinType = ''): Query
+    public function has(string $operator = '>=', int $count = 1, string $id = '*', string $joinType = 'INNER'): Query
     {
         $table = $this->query->getTable();
 
@@ -296,7 +300,7 @@ class HasMany extends Relation
         return $this->parent->db()
             ->alias($model)
             ->field($model . '.*')
-            ->join([$table => $relation], $model . '.' . $this->localKey . '=' . $relation . '.' . $this->foreignKey, $joinType ?: $this->joinType)
+            ->join([$table => $relation], $model . '.' . $this->localKey . '=' . $relation . '.' . $this->foreignKey, $joinType)
             ->group($relation . '.' . $this->foreignKey)
             ->having('count(' . $id . ')' . $operator . $count);
     }

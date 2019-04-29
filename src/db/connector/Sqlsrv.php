@@ -19,15 +19,16 @@ use think\db\Connection;
  */
 class Sqlsrv extends Connection
 {
-    // PDO连接参数
+    /**
+     * 默认PDO连接参数
+     * @var array
+     */
     protected $params = [
         PDO::ATTR_CASE              => PDO::CASE_NATURAL,
         PDO::ATTR_ERRMODE           => PDO::ERRMODE_EXCEPTION,
         PDO::ATTR_ORACLE_NULLS      => PDO::NULL_NATURAL,
         PDO::ATTR_STRINGIFY_FETCHES => false,
     ];
-
-    protected $builder = '\\think\\db\\builder\\Sqlsrv';
 
     /**
      * 解析pdo连接的dsn信息
@@ -68,9 +69,10 @@ class Sqlsrv extends Connection
         $result = $pdo->fetchAll(PDO::FETCH_ASSOC);
         $info   = [];
 
-        if ($result) {
+        if (!empty($result)) {
             foreach ($result as $key => $val) {
-                $val                       = array_change_key_case($val);
+                $val = array_change_key_case($val);
+
                 $info[$val['column_name']] = [
                     'name'    => $val['column_name'],
                     'type'    => $val['data_type'],

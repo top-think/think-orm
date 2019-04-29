@@ -14,19 +14,23 @@ namespace think\model;
 
 use think\Collection as BaseCollection;
 use think\Model;
+use think\Paginator;
 
+/**
+ * 模型数据集类
+ */
 class Collection extends BaseCollection
 {
     /**
      * 延迟预载入关联查询
      * @access public
-     * @param  array $relation 关联
+     * @param  array|string $relation 关联
      * @return $this
      */
-    public function load(array $relation)
+    public function load($relation)
     {
         $item = current($this->items);
-        $item->eagerlyResultSet($this->items, $relation);
+        $item->eagerlyResultSet($this->items, (array) $relation);
 
         return $this;
     }
@@ -35,13 +39,12 @@ class Collection extends BaseCollection
      * 设置需要隐藏的输出属性
      * @access public
      * @param  array $hidden   属性列表
-     * @param  bool  $override 是否覆盖
      * @return $this
      */
-    public function hidden(array $hidden, bool $override = false)
+    public function hidden(array $hidden)
     {
-        $this->each(function (Model $model) use ($hidden, $override) {
-            $model->hidden($hidden, $override);
+        $this->each(function (Model $model) use ($hidden) {
+            $model->hidden($hidden);
         });
 
         return $this;
@@ -51,13 +54,12 @@ class Collection extends BaseCollection
      * 设置需要输出的属性
      * @access public
      * @param  array $visible
-     * @param  bool  $override 是否覆盖
      * @return $this
      */
-    public function visible(array $visible, bool $override = false)
+    public function visible(array $visible)
     {
-        $this->each(function (Model $model) use ($visible, $override) {
-            $model->visible($visible, $override);
+        $this->each(function (Model $model) use ($visible) {
+            $model->visible($visible);
         });
 
         return $this;
@@ -67,13 +69,12 @@ class Collection extends BaseCollection
      * 设置需要追加的输出属性
      * @access public
      * @param  array $append   属性列表
-     * @param  bool  $override 是否覆盖
      * @return $this
      */
-    public function append(array $append, bool $override = false)
+    public function append(array $append)
     {
-        $this->each(function (Model $model) use ($append, $override) {
-            $model && $model->append($append, $override);
+        $this->each(function (Model $model) use ($append) {
+            $model->append($append);
         });
 
         return $this;
@@ -88,9 +89,25 @@ class Collection extends BaseCollection
      */
     public function withAttr($name, $callback = null)
     {
-        $this->each(function ($model) use ($name, $callback) {
-            /** @var Model $model */
-            $model && $model->withAttribute($name, $callback);
+        $this->each(function (Model $model) use ($name, $callback) {
+            $model->withAttribute($name, $callback);
+        });
+
+        return $this;
+    }
+
+    /**
+     * 绑定（一对一）关联属性到当前模型
+     * @access protected
+     * @param  string   $relation    关联名称
+     * @param  array    $attrs       绑定属性
+     * @return $this
+     * @throws Exception
+     */
+    public function bindAttr($relation, $attrs = [])
+    {
+        $this->each(function (Model $model) use ($relation, $attrs) {
+            $model->bindAttr($relation, $attrs);
         });
 
         return $this;

@@ -23,17 +23,21 @@ class Oracle extends Connection
      * @param array $config 连接信息
      * @return string
      */
-    protected function parseDsn($config)
+    protected function parseDsn(array $config): string
     {
         $dsn = 'oci:dbname=';
+
         if (!empty($config['hostname'])) {
             //  Oracle Instant Client
             $dsn .= '//' . $config['hostname'] . ($config['hostport'] ? ':' . $config['hostport'] : '') . '/';
         }
+
         $dsn .= $config['database'];
+
         if (!empty($config['charset'])) {
             $dsn .= ';charset=' . $config['charset'];
         }
+
         return $dsn;
     }
 
@@ -43,14 +47,15 @@ class Oracle extends Connection
      * @param string $tableName
      * @return array
      */
-    public function getFields($tableName)
+    public function getFields(string $tableName): array
     {
-        $this->initConnect(true);
         list($tableName) = explode(' ', $tableName);
         $sql             = "select a.column_name,data_type,DECODE (nullable, 'Y', 0, 1) notnull,data_default, DECODE (A .column_name,b.column_name,1,0) pk from all_tab_columns a,(select column_name from all_constraints c, all_cons_columns col where c.constraint_name = col.constraint_name and c.constraint_type = 'P' and c.table_name = '" . strtoupper($tableName) . "' ) b where table_name = '" . strtoupper($tableName) . "' and a.column_name = b.column_name (+)";
-        $pdo             = $this->linkID->query($sql);
-        $result          = $pdo->fetchAll(PDO::FETCH_ASSOC);
-        $info            = [];
+
+        $pdo    = $this->getPDOStatement($sql);
+        $result = $pdo->fetchAll(PDO::FETCH_ASSOC);
+        $info   = [];
+
         if ($result) {
             foreach ($result as $key => $val) {
                 $val                       = array_change_key_case($val);
@@ -64,6 +69,7 @@ class Oracle extends Connection
                 ];
             }
         }
+
         return $this->fieldCase($info);
     }
 
@@ -73,30 +79,31 @@ class Oracle extends Connection
      * @param string $dbName
      * @return array
      */
-    public function getTables($dbName = '')
+    public function getTables(string $dbName = ''): array
     {
-        $pdo    = $this->linkID->query("select table_name from all_tables");
+        $sql    = 'select table_name from all_tables';
+        $pdo    = $this->getPDOStatement($sql);
         $result = $pdo->fetchAll(PDO::FETCH_ASSOC);
         $info   = [];
+
         foreach ($result as $key => $val) {
             $info[$key] = current($val);
         }
+
         return $info;
     }
 
     /**
      * 获取最近插入的ID
      * @access public
-     * @param string  $sequence     自增序列名
+     * @param string $sequence 自增序列名
      * @return string
      */
-    public function getLastInsID($sequence = null)
+    public function getLastInsID(string $sequence = null): string
     {
-        if ($sequence === null) {
-            return '';
-        }
         $pdo    = $this->linkID->query("select {$sequence}.currval as id from dual");
         $result = $pdo->fetchColumn();
+
         return $result;
     }
 
@@ -106,12 +113,12 @@ class Oracle extends Connection
      * @param string $sql
      * @return array
      */
-    protected function getExplain($sql)
+    protected function getExplain(string $sql): array
     {
         return [];
     }
 
-    protected function supportSavepoint()
+    protected function supportSavepoint(): bool
     {
         return true;
     }

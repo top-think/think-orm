@@ -13,10 +13,13 @@ declare (strict_types = 1);
 namespace think\model\relation;
 
 use Closure;
-use think\Db;
 use think\db\Query;
+use think\facade\Db;
 use think\Model;
 
+/**
+ * HasOne 关联类
+ */
 class HasOne extends OneToOne
 {
     /**
@@ -81,10 +84,7 @@ class HasOne extends OneToOne
     public function getRelationCountQuery(Closure $closure = null, string $aggregate = 'count', string $field = '*', string &$name = null): string
     {
         if ($closure) {
-            $return = $closure($this->query);
-            if ($resturn && is_string($return)) {
-                $name = $return;
-            }
+            $closure($this->query, $name);
         }
 
         return $this->query
@@ -113,7 +113,7 @@ class HasOne extends OneToOne
 
         if ($closure) {
             $return = $closure($this->query);
-            if ($resturn && is_string($return)) {
+            if ($return && is_string($return)) {
                 $name = $return;
             }
         }
@@ -216,12 +216,12 @@ class HasOne extends OneToOne
                 } else {
                     $relationModel = $data[$result->$localKey];
                     $relationModel->setParent(clone $result);
-                    $relationModel->isUpdate(true);
+                    $relationModel->exists(true);
                 }
 
-                if (!empty($this->bindAttr)) {
+                if ($relationModel && !empty($this->bindAttr)) {
                     // 绑定关联属性
-                    $this->bindAttr($relationModel, $result, $this->bindAttr);
+                    $this->bindAttr($relationModel, $result);
                 } else {
                     // 设置关联属性
                     $result->setRelation($attr, $relationModel);
@@ -256,12 +256,12 @@ class HasOne extends OneToOne
         } else {
             $relationModel = $data[$result->$localKey];
             $relationModel->setParent(clone $result);
-            $relationModel->isUpdate(true);
+            $relationModel->exists(true);
         }
 
-        if (!empty($this->bindAttr)) {
+        if ($relationModel && !empty($this->bindAttr)) {
             // 绑定关联属性
-            $this->bindAttr($relationModel, $result, $this->bindAttr);
+            $this->bindAttr($relationModel, $result);
         } else {
             $result->setRelation(Db::parseName($relation), $relationModel);
         }

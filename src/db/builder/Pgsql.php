@@ -13,15 +13,24 @@ declare (strict_types = 1);
 namespace think\db\builder;
 
 use think\db\Builder;
-use think\db\Expression;
 use think\db\Query;
+use think\db\Raw;
 
 /**
  * Pgsql数据库驱动
  */
 class Pgsql extends Builder
 {
-    protected $insertSql    = 'INSERT INTO %TABLE% (%FIELD%) VALUES (%DATA%) %COMMENT%';
+    /**
+     * INSERT SQL表达式
+     * @var string
+     */
+    protected $insertSql = 'INSERT INTO %TABLE% (%FIELD%) VALUES (%DATA%) %COMMENT%';
+
+    /**
+     * INSERT ALL SQL表达式
+     * @var string
+     */
     protected $insertAllSql = 'INSERT INTO %TABLE% (%FIELD%) %DATA% %COMMENT%';
 
     /**
@@ -58,8 +67,8 @@ class Pgsql extends Builder
     public function parseKey(Query $query, $key, bool $strict = false): string
     {
         if (is_int($key)) {
-            return $key;
-        } elseif ($key instanceof Expression) {
+            return (string) $key;
+        } elseif ($key instanceof Raw) {
             return $key->getValue();
         }
 

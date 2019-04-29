@@ -6,7 +6,7 @@
 // +----------------------------------------------------------------------
 // | Author: liu21st <liu21st@gmail.com>
 // +----------------------------------------------------------------------
-
+declare (strict_types = 1);
 namespace think\db\builder;
 
 use MongoDB\BSON\Javascript;
@@ -107,10 +107,10 @@ class Mongo
         foreach ($data as $key => $val) {
             $item = $this->parseKey($key);
 
-            if ($val instanceof Expression) {
-                $result[$item] = $val->getValue();
-            } elseif (is_object($val)) {
+            if (is_object($val)) {
                 $result[$item] = $val;
+            } elseif (isset($val[0]) && 'exp' == $val[0]) {
+                $result[$item] = $val[1];
             } elseif (is_null($val)) {
                 $result[$item] = 'NULL';
             } else {
@@ -163,14 +163,8 @@ class Mongo
         }
 
         $filter = [];
-
         foreach ($where as $logic => $val) {
-            $logic = strtolower($logic);
-
-            if (0 !== strpos($logic, '$')) {
-                $logic = '$' . $logic;
-            }
-
+            $logic = '$' . strtolower($logic);
             foreach ($val as $field => $value) {
                 if (is_array($value)) {
                     if (key($value) !== 0) {
@@ -243,8 +237,8 @@ class Mongo
                 $k        = '$' . $exp;
                 $data[$k] = $value;
             }
-            $query[$key] = $data;
-            return $query;
+            $result[$key] = $data;
+            return $result;
         } elseif (!in_array($exp, $this->exp)) {
             $exp = strtolower($exp);
             if (isset($this->exp[$exp])) {
@@ -252,11 +246,6 @@ class Mongo
             } else {
                 throw new Exception('where express error:' . $exp);
             }
-        }
-
-        if (is_object($value) && method_exists($value, '__toString')) {
-            // 对象数据写入
-            $value = $value->__toString();
         }
 
         $result = [];
@@ -341,7 +330,7 @@ class Mongo
     protected function parseDateTime(Query $query, $value, $key)
     {
         // 获取时间字段类型
-        $type = $this->connection->getFieldsType($query->getOptions('table') ?: $query->getTable());
+        $type = $this->connection->getTableInfo('', 'type');
 
         if (isset($type[$key])) {
             $value = strtotime($value) ?: $value;
@@ -405,6 +394,7 @@ class Mongo
         $bulk    = new BulkWrite;
         $options = $query->getOptions();
 
+        $this->insertId = [];
         foreach ($dataSet as $data) {
             // 分析并处理数据
             $data = $this->parseData($query, $data);
@@ -475,14 +465,20 @@ class Mongo
     /**
      * 生成Mongo查询对象
      * @access public
-     * @param Query     $query 查询对象
+     * @param  Query $query 查询对象
+     * @param  bool  $one   是否仅获取一个记录
      * @return MongoQuery
      */
-    public function select(Query $query)
+    public function select(Query $query, bool $one = false)
     {
         $options = $query->getOptions();
 
         $where = $this->parseWhere($query, $options['where']);
+
+        if ($one) {
+            $options['limit'] = 1;
+        }
+
         $query = new MongoQuery($where, $options);
 
         $this->log('find', $where, $options);
@@ -561,8 +557,8 @@ class Mongo
     /**
      * 多聚合查询命令, 可以对多个字段进行 group by 操作
      *
-     * @param array $options 参数
-     * @param array $extra 指令和字段
+     * @param Query     $query  查询对象
+     * @param array     $extra 指令和字段
      * @return Command
      */
     public function multiAggregate(Query $query, $extra)
@@ -570,7 +566,9 @@ class Mongo
         $options = $query->getOptions();
 
         list($aggregate, $groupBy) = $extra;
-        $groups                    = ['_id' => []];
+
+        $groups = ['_id' => []];
+
         foreach ($groupBy as $field) {
             $groups['_id'][$field] = '$' . $field;
         }
@@ -578,10 +576,12 @@ class Mongo
         foreach ($aggregate as $fun => $field) {
             $groups[$field . '_' . $fun] = ['$' . $fun => '$' . $field];
         }
+
         $pipeline = [
             ['$match' => (object) $this->parseWhere($query, $options['where'])],
             ['$group' => $groups],
         ];
+
         $cmd = [
             'aggregate'    => $options['table'],
             'allowDiskUse' => true,
@@ -594,8 +594,10 @@ class Mongo
                 $cmd[$option] = $options[$option];
             }
         }
+
         $command = new Command($cmd);
         $this->log('group', $cmd);
+
         return $command;
     }
 

@@ -14,6 +14,9 @@ namespace think\db;
 
 use ArrayAccess;
 
+/**
+ * 数组查询对象
+ */
 class Where implements ArrayAccess
 {
     /**
@@ -62,7 +65,7 @@ class Where implements ArrayAccess
         $where = [];
 
         foreach ($this->where as $key => $val) {
-            if ($val instanceof Expression) {
+            if ($val instanceof Raw) {
                 $where[] = [$key, 'exp', $val];
             } elseif (is_null($val)) {
                 $where[] = [$key, 'NULL', ''];
@@ -86,7 +89,7 @@ class Where implements ArrayAccess
     protected function parseItem(string $field, array $where = []): array
     {
         $op        = $where[0];
-        $condition = isset($where[1]) ? $where[1] : null;
+        $condition = $where[1] ?? null;
 
         if (is_array($op)) {
             // 同一字段多条件查询

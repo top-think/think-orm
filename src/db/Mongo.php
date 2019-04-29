@@ -6,10 +6,9 @@
 // +----------------------------------------------------------------------
 // | Author: liu21st <liu21st@gmail.com>
 // +----------------------------------------------------------------------
-
+declare (strict_types = 1);
 namespace think\db;
 
-use Exception;
 use MongoDB\Driver\BulkWrite;
 use MongoDB\Driver\Command;
 use MongoDB\Driver\Cursor;
@@ -21,95 +20,77 @@ use MongoDB\Driver\Exception\RuntimeException;
 use MongoDB\Driver\Query as MongoQuery;
 use MongoDB\Driver\ReadPreference;
 use MongoDB\Driver\WriteConcern;
-use think\Db;
-use think\db\connector\Mongo as MongoConnection;
-use think\db\Query;
+use think\Collection;
+use think\db\connector\Mongo as Connection;
+use think\db\Query as BaseQuery;
+use think\Exception;
 
-class Mongo extends Query
+class Mongo extends BaseQuery
 {
-
     /**
      * 架构函数
      * @access public
+     * @param Connection $connection 数据库连接对象
      */
-    public function __construct(MongoConnection $connection = null)
+    public function __construct(Connection $connection)
     {
-        if (is_null($connection)) {
-            $this->connection = MongoConnection::instance();
-        } else {
-            $this->connection = $connection;
-        }
+        $this->connection = $connection;
 
         $this->prefix = $this->connection->getConfig('prefix');
-        $this->cache  = Db::getCacheHandler();
     }
 
     /**
-     * 去除某个查询条件
+     * 获取当前的数据库Connection对象
      * @access public
-     * @param string $field 查询字段
-     * @param string $logic 查询逻辑 and or xor
-     * @return $this
+     * @return Connection
      */
-    public function removeWhereField(string $field, string $logic = 'AND')
+    public function getConnection()
     {
-        $logic = '$' . strtoupper($logic);
-
-        if (isset($this->options['where'][$logic])) {
-            foreach ($this->options['where'][$logic] as $key => $val) {
-                if (is_array($val) && $val[0] == $field) {
-                    unset($this->options['where'][$logic][$key]);
-                }
-            }
-        }
-
-        return $this;
+        return $this->connection;
     }
 
     /**
      * 执行查询 返回数据集
      * @access public
-     * @param string $namespace
-     * @param MongoQuery        $query 查询对象
-     * @param ReadPreference    $readPreference readPreference
-     * @param bool|string       $class 指定返回的数据集对象
-     * @param string|array      $typeMap 指定返回的typeMap
+     * @param  string         $namespace 当前查询的collection
+     * @param  MongoQuery     $query 查询对象
+     * @param  ReadPreference $readPreference readPreference
+     * @param  string|array   $typeMap 指定返回的typeMap
      * @return mixed
      * @throws AuthenticationException
      * @throws InvalidArgumentException
      * @throws ConnectionException
      * @throws RuntimeException
      */
-    public function mongoQuery(string $namespace, MongoQuery $query, ReadPreference $readPreference = null, $class = false, $typeMap = null)
+    public function mongoQuery(string $namespace, MongoQuery $query, ReadPreference $readPreference = null, $typeMap = null)
     {
-        return $this->connection->query($namespace, $query, $readPreference, $class, $typeMap);
+        return $this->connection->query($namespace, $query, $readPreference, $typeMap);
     }
 
     /**
      * 执行指令 返回数据集
      * @access public
-     * @param Command           $command 指令
-     * @param string            $dbName
-     * @param ReadPreference    $readPreference readPreference
-     * @param bool|string       $class 指定返回的数据集对象
-     * @param string|array      $typeMap 指定返回的typeMap
+     * @param  Command        $command 指令
+     * @param  string         $dbName
+     * @param  ReadPreference $readPreference readPreference
+     * @param  string|array   $typeMap 指定返回的typeMap
      * @return mixed
      * @throws AuthenticationException
      * @throws InvalidArgumentException
      * @throws ConnectionException
      * @throws RuntimeException
      */
-    public function command(Command $command, string $dbName = '', ReadPreference $readPreference = null, $class = false, $typeMap = null)
+    public function command(Command $command, string $dbName = '', ReadPreference $readPreference = null, $typeMap = null)
     {
-        return $this->connection->command($command, $dbName, $readPreference, $class, $typeMap);
+        return $this->connection->command($command, $dbName, $readPreference, $typeMap);
     }
 
     /**
      * 执行语句
      * @access public
-     * @param string        $namespace
-     * @param BulkWrite     $bulk
-     * @param WriteConcern  $writeConcern
+     * @param  string        $namespace
+     * @param  BulkWrite     $bulk
+     * @param  WriteConcern  $writeConcern
      * @return int
      * @throws AuthenticationException
      * @throws InvalidArgumentException
@@ -125,12 +106,12 @@ class Mongo extends Query
     /**
      * 执行command
      * @access public
-     * @param string|array|object   $command 指令
-     * @param mixed                 $extra 额外参数
-     * @param string                $db 数据库名
+     * @param  string|array|object $command 指令
+     * @param  mixed               $extra 额外参数
+     * @param  string              $db 数据库名
      * @return array
      */
-    public function cmd($command, $extra = null, $db = null)
+    public function cmd($command, $extra = null, string $db = ''): array
     {
         return $this->connection->cmd($this, $command, $extra, $db);
     }
@@ -138,10 +119,10 @@ class Mongo extends Query
     /**
      * 指定distinct查询
      * @access public
-     * @param string $field 字段名
+     * @param  string $field 字段名
      * @return array
      */
-    public function distinct($field)
+    public function getDistinct(string $field)
     {
         $result = $this->cmd('distinct', $field);
         return $result[0]['values'];
@@ -150,17 +131,17 @@ class Mongo extends Query
     /**
      * 获取数据库的所有collection
      * @access public
-     * @param string  $db 数据库名称 留空为当前数据库
+     * @param  string  $db 数据库名称 留空为当前数据库
      * @throws Exception
      */
-    public function listCollections($db = '')
+    public function listCollections(string $db = '')
     {
         $cursor = $this->cmd('listCollections', null, $db);
         $result = [];
-
         foreach ($cursor as $collection) {
             $result[] = $collection['name'];
         }
+
         return $result;
     }
 
@@ -181,9 +162,9 @@ class Mongo extends Query
     /**
      * 聚合查询
      * @access public
-     * @param string $aggregate 聚合指令
-     * @param string $field     字段名
-     * @param bool   $force     强制转为数字类型
+     * @param  string $aggregate 聚合指令
+     * @param  string $field     字段名
+     * @param  bool   $force   强制转为数字类型
      * @return mixed
      */
     public function aggregate(string $aggregate, $field, bool $force = false)
@@ -191,7 +172,8 @@ class Mongo extends Query
         $this->parseOptions();
 
         $result = $this->cmd('aggregate', [strtolower($aggregate), $field]);
-        $value  = $result[0]['aggregate'] ?? 0;
+
+        $value = $result[0]['aggregate'] ?? 0;
 
         if ($force) {
             $value += 0;
@@ -203,11 +185,11 @@ class Mongo extends Query
     /**
      * 多聚合操作
      *
-     * @param array $aggregate 聚合指令, 可以聚合多个参数, 如 ['sum' => 'field1', 'avg' => 'field2']
-     * @param array $groupBy 类似mysql里面的group字段, 可以传入多个字段, 如 ['field_a', 'field_b', 'field_c']
+     * @param  array $aggregate 聚合指令, 可以聚合多个参数, 如 ['sum' => 'field1', 'avg' => 'field2']
+     * @param  array $groupBy 类似mysql里面的group字段, 可以传入多个字段, 如 ['field_a', 'field_b', 'field_c']
      * @return array 查询结果
      */
-    public function multiAggregate($aggregate, $groupBy)
+    public function multiAggregate(array $aggregate, array $groupBy): array
     {
         $this->parseOptions();
 
@@ -228,36 +210,53 @@ class Mongo extends Query
     /**
      * 字段值增长
      * @access public
-     * @param string|array $field 字段名
-     * @param integer      $step  增长值
+     * @param string  $field 字段名
+     * @param float   $step  增长值
+     * @param integer $lazyTime 延时时间(s)
+     * @param string  $op inc/dec
      * @return $this
      */
-    public function inc(string $field, int $step = 1, string $op = 'INC')
+    public function inc(string $field, float $step = 1, int $lazyTime = 0, string $op = 'inc')
     {
-        return parent::inc($field, $step, strtolower('$' . $op));
+        if ($lazyTime > 0) {
+            // 延迟写入
+            $condition = $this->options['where'] ?? [];
+
+            $guid = md5($this->getTable() . '_' . $field . '_' . serialize($condition));
+            $step = $this->connection->lazyWrite($op, $guid, $step, $lazyTime);
+
+            if (false === $step) {
+                return $this;
+            }
+        }
+
+        $this->data($field, ['$' . $op, $step]);
+
+        return $this;
+    }
+
+    /**
+     * 字段值减少
+     * @access public
+     * @param  string  $field 字段名
+     * @param  float   $step  减少值
+     * @param  integer $lazyTime 延时时间(s)
+     * @return $this
+     */
+    public function dec(string $field, float $step = 1, int $lazyTime = 0)
+    {
+        return $this->inc($field, -1 * $step, $lazyTime);
     }
 
     /**
      * 指定当前操作的collection
      * @access public
-     * @param string $collection
+     * @param  string $collection
      * @return $this
      */
     public function collection(string $collection)
     {
         return $this->table($collection);
-    }
-
-    /**
-     * 不主动获取数据集
-     * @access public
-     * @param bool $cursor 是否返回 Cursor 对象
-     * @return $this
-     */
-    public function fetchCursor(bool $cursor = true)
-    {
-        $this->options['fetch_cursor'] = $cursor;
-        return $this;
     }
 
     /**
@@ -383,7 +382,7 @@ class Mongo extends Query
     /**
      * 设置返回字段
      * @access public
-     * @param  mixed   $field
+     * @param  mixed   $field     字段信息
      * @param  boolean $except    是否排除
      * @param  string  $tableName 数据表名
      * @param  string  $prefix    字段前缀
@@ -392,18 +391,7 @@ class Mongo extends Query
      */
     public function field($field, bool $except = false, string $tableName = '', string $prefix = '', string $alias = '')
     {
-        if (empty($field)) {
-            return $this;
-        } elseif ($field instanceof Expression) {
-            $this->options['field'][] = $field;
-            return $this;
-        }
-
         if (is_string($field)) {
-            if (preg_match('/[\<\'\"\(]/', $field)) {
-                return $this->fieldRaw($field);
-            }
-
             $field = array_map('trim', explode(',', $field));
         }
 
@@ -448,8 +436,8 @@ class Mongo extends Query
     /**
      * 指定查询数量
      * @access public
-     * @param mixed $offset 起始位置
-     * @param mixed $length 查询数量
+     * @param int $offset 起始位置
+     * @param int $length 查询数量
      * @return $this
      */
     public function limit(int $offset, int $length = null)
@@ -468,8 +456,8 @@ class Mongo extends Query
     /**
      * 设置sort
      * @access public
-     * @param array|string|object   $field
-     * @param string                $order
+     * @param  array|string $field
+     * @param  string       $order
      * @return $this
      */
     public function order($field, string $order = '')
@@ -485,7 +473,7 @@ class Mongo extends Query
     /**
      * 设置tailable
      * @access public
-     * @param bool $tailable
+     * @param  bool $tailable
      * @return $this
      */
     public function tailable(bool $tailable)
@@ -497,58 +485,21 @@ class Mongo extends Query
     /**
      * 设置writeConcern对象
      * @access public
-     * @param WriteConcern $writeConcern
+     * @param  WriteConcern $writeConcern
      * @return $this
      */
-    public function writeConcern($writeConcern)
+    public function writeConcern(WriteConcern $writeConcern)
     {
         $this->options['writeConcern'] = $writeConcern;
         return $this;
     }
 
     /**
-     * 把主键值转换为查询条件 支持复合主键
-     * @access public
-     * @param array|string  $data 主键数据
-     * @param mixed         $options 表达式参数
-     * @return void
-     * @throws Exception
-     */
-    public function parsePkWhere($data): void
-    {
-        $pk = $this->getPk($this->options);
-
-        if (is_string($pk)) {
-            // 获取数据表
-            if (empty($this->options['table'])) {
-                $this->options['table'] = $this->getTable();
-            }
-
-            $table = is_array($this->options['table']) ? key($this->options['table']) : $this->options['table'];
-
-            if (!empty($this->options['alias'][$table])) {
-                $alias = $this->options['alias'][$table];
-            }
-
-            $key = isset($alias) ? $alias . '.' . $pk : $pk;
-            // 根据主键查询
-            $where[$pk] = is_array($data) ? [$key, 'in', $data] : [$key, '=', $data];
-
-            if (isset($this->options['where']['$and'])) {
-                $this->options['where']['$and'] = array_merge($this->options['where']['$and'], $where);
-            } else {
-                $this->options['where']['$and'] = $where;
-            }
-        }
-    }
-
-    /**
      * 获取当前数据表的主键
      * @access public
-     * @param string|array $options 数据表名或者查询参数
      * @return string|array
      */
-    public function getPk($options = '')
+    public function getPk()
     {
         return $this->pk ?: $this->connection->getConfig('pk');
     }
@@ -558,21 +509,11 @@ class Mongo extends Query
      * @access public
      * @return Cursor
      */
-    public function getCursor()
+    public function getCursor(): Cursor
     {
         $this->parseOptions();
 
         return $this->connection->getCursor($this);
-    }
-
-    /**
-     * 获取模型的更新条件
-     * @access protected
-     * @param  array $options 查询参数
-     */
-    protected function getModelUpdateCondition(array $options)
-    {
-        return isset($options['where']['$and']) ? $options['where']['$and'] : null;
     }
 
     /**
@@ -620,7 +561,7 @@ class Mongo extends Query
             $options['limit'] = 0;
         }
 
-        foreach (['master', 'fetch_cursor'] as $name) {
+        foreach (['master', 'fetch_sql', 'fetch_cursor'] as $name) {
             if (!isset($options[$name])) {
                 $options[$name] = false;
             }

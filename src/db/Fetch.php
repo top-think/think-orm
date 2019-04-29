@@ -12,9 +12,12 @@ declare (strict_types = 1);
 
 namespace think\db;
 
-use think\Db;
 use think\Exception;
+use think\facade\Db;
 
+/**
+ * SQL获取类
+ */
 class Fetch
 {
     /**
@@ -56,7 +59,7 @@ class Fetch
      */
     public function aggregate(string $aggregate, string $field): string
     {
-        $options = $this->query->parseOptions();
+        $this->query->parseOptions();
 
         $field = $aggregate . '(' . $this->builder->parseKey($this->query, $field) . ') AS tp_' . strtolower($aggregate);
 
@@ -77,11 +80,7 @@ class Fetch
             $this->query->removeOption('field');
         }
 
-        if (is_string($field)) {
-            $field = array_map('trim', explode(',', $field));
-        }
-
-        $this->query->setOption('field', $field);
+        $this->query->setOption('field', (array) $field);
 
         // 生成查询SQL
         $sql = $this->builder->select($this->query, true);
@@ -133,30 +132,60 @@ class Fetch
     /**
      * 插入记录
      * @access public
-     * @param  array   $data         数据
-     * @param  boolean $replace      是否replace
+     * @param  array $data 数据
      * @return string
      */
-    public function insert(array $data = [], bool $replace = false): string
+    public function insert(array $data = []): string
     {
         $options = $this->query->parseOptions();
 
-        $this->query->setOption('data', array_merge($options['data'], $data));
+        if (!empty($data)) {
+            $this->query->setOption('data', $data);
+        }
 
-        $sql = $this->builder->insert($this->query, $replace);
+        $replace = $options['replace'] ?? false;
+        $sql     = $this->builder->insert($this->query, $replace);
+
         return $this->fetch($sql);
     }
 
     /**
      * 插入记录并获取自增ID
      * @access public
-     * @param  array   $data     数据
-     * @param  boolean $replace  是否replace
+     * @param  array $data 数据
      * @return string
      */
-    public function insertGetId(array $data, bool $replace = false)
+    public function insertGetId(array $data = []): string
     {
-        return $this->insert($data, $replace);
+        return $this->insert($data);
+    }
+
+    /**
+     * 保存数据 自动判断insert或者update
+     * @access public
+     * @param  array $data        数据
+     * @param  bool  $forceInsert 是否强制insert
+     * @return string
+     */
+    public function save(array $data = [], bool $forceInsert = false): string
+    {
+        if (empty($data)) {
+            $data = $this->query->getOptions('data');
+        }
+
+        if (empty($data)) {
+            return '';
+        }
+
+        if ($forceInsert) {
+            return $this->insert($data);
+        }
+
+        $isUpdate = $this->query->parseUpdateData($data);
+
+        $this->query->setOption('data', $data);
+
+        return $isUpdate ? $this->update() : $this->insert();
     }
 
     /**
@@ -180,19 +209,20 @@ class Fetch
         }
 
         if ($limit) {
-            $array = array_chunk($dataSet, $limit, true);
-
+            $array    = array_chunk($dataSet, $limit, true);
+            $fetchSql = [];
             foreach ($array as $item) {
                 $sql  = $this->builder->insertAll($this->query, $item, $replace);
                 $bind = $this->query->getBind();
 
-                $fetchSql[] = $this->getRealSql($sql, $bind);
+                $fetchSql[] = $this->connection->getRealSql($sql, $bind);
             }
 
             return implode(';', $fetchSql);
         }
 
         $sql = $this->builder->insertAll($this->query, $dataSet, $replace);
+
         return $this->fetch($sql);
     }
 
@@ -207,6 +237,7 @@ class Fetch
     {
         $this->query->parseOptions();
         $sql = $this->builder->selectInsert($this->query, $fields, $table);
+
         return $this->fetch($sql);
     }
 
@@ -220,26 +251,20 @@ class Fetch
     {
         $options = $this->query->parseOptions();
 
-        $this->query->setOption('data', array_merge($options['data'], $data));
+        $data = !empty($data) ? $data : $options['data'];
 
-        if (isset($options['cache']) && is_string($options['cache']['key'])) {
-            $key = $options['cache']['key'];
-        }
-
-        $pk            = $this->query->getPk($options);
-        $data          = $options['data'];
-        $options['pk'] = $pk;
+        $pk = $this->query->getPk();
 
         if (empty($options['where'])) {
             // 如果存在主键数据 则自动作为更新条件
             if (is_string($pk) && isset($data[$pk])) {
-                $where[$pk] = [$pk, '=', $data[$pk]];
+                $this->query->where($pk, '=', $data[$pk]);
                 unset($data[$pk]);
             } elseif (is_array($pk)) {
                 // 增加复合主键支持
                 foreach ($pk as $field) {
                     if (isset($data[$field])) {
-                        $where[$field] = [$field, '=', $data[$field]];
+                        $this->query->where($field, '=', $data[$field]);
                     } else {
                         // 如果缺少复合主键数据则不执行
                         throw new Exception('miss complex primary data');
@@ -248,12 +273,9 @@ class Fetch
                 }
             }
 
-            if (!isset($where)) {
+            if (empty($this->query->getOptions('where'))) {
                 // 如果没有任何更新条件则不执行
                 throw new Exception('miss update condition');
-            } else {
-                $options['where']['AND'] = $where;
-                $this->query->setOption('where', ['AND' => $where]);
             }
         }
 
@@ -262,6 +284,7 @@ class Fetch
 
         // 生成UPDATE SQL语句
         $sql = $this->builder->update($this->query);
+
         return $this->fetch($sql);
     }
 
@@ -292,9 +315,9 @@ class Fetch
             }
         }
 
-        $this->query->setOption('data', $data);
         // 生成删除SQL语句
         $sql = $this->builder->delete($this->query);
+
         return $this->fetch($sql);
     }
 
@@ -313,9 +336,9 @@ class Fetch
             $this->query->parsePkWhere($data);
         }
 
-        $this->query->setOption('data', $data);
         // 生成查询SQL
         $sql = $this->builder->select($this->query);
+
         return $this->fetch($sql);
     }
 
@@ -334,14 +357,8 @@ class Fetch
             $this->query->parsePkWhere($data);
         }
 
-        $this->query->setOption('data', $data);
-
-        $this->query->setOption('limit', '1');
-
         // 生成查询SQL
-        $sql = $this->builder->select($this->query);
-
-        $this->query->removeOption('limit');
+        $sql = $this->builder->select($this->query, true);
 
         // 获取实际执行的SQL语句
         return $this->fetch($sql);
@@ -350,23 +367,23 @@ class Fetch
     /**
      * 查找多条记录 如果不存在则抛出异常
      * @access public
-     * @param  array|string|Query|\Closure $data
+     * @param  mixed $data
      * @return string
      */
     public function selectOrFail($data = null): string
     {
-        return $this->failException(true)->select($data);
+        return $this->query->failException(true)->select($data);
     }
 
     /**
      * 查找单条记录 如果不存在则抛出异常
      * @access public
-     * @param  array|string|Query|\Closure $data
+     * @param  mixed $data
      * @return string
      */
     public function findOrFail($data = null): string
     {
-        return $this->failException(true)->find($data);
+        return $this->query->failException(true)->find($data);
     }
 
     /**
@@ -413,7 +430,7 @@ class Fetch
      */
     public function sum(string $field): string
     {
-        return $this->aggregate('SUM', $field, true);
+        return $this->aggregate('SUM', $field);
     }
 
     /**
@@ -454,11 +471,11 @@ class Fetch
         if (strtolower(substr($method, 0, 5)) == 'getby') {
             // 根据某个字段获取记录
             $field = Db::parseName(substr($method, 5));
-            return $this->where($field, '=', $args[0])->find();
+            return $this->query->where($field, '=', $args[0])->find();
         } elseif (strtolower(substr($method, 0, 10)) == 'getfieldby') {
             // 根据某个字段获取记录的某个值
             $name = Db::parseName(substr($method, 10));
-            return $this->where($name, '=', $args[0])->value($args[1]);
+            return $this->query->where($name, '=', $args[0])->value($args[1]);
         }
 
         $result = call_user_func_array([$this->query, $method], $args);

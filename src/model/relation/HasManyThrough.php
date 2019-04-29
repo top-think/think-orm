@@ -13,17 +13,27 @@ namespace think\model\relation;
 
 use Closure;
 use think\Collection;
-use think\Db;
 use think\db\Query;
 use think\Exception;
+use think\facade\Db;
 use think\Model;
 use think\model\Relation;
 
+/**
+ * 远程一对多关联类
+ */
 class HasManyThrough extends Relation
 {
-    // 中间关联表外键
+    /**
+     * 中间关联表外键
+     * @var string
+     */
     protected $throughKey;
-    // 中间表模型
+
+    /**
+     * 中间表模型
+     * @var string
+     */
     protected $through;
 
     /**

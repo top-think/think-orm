@@ -13,6 +13,9 @@ namespace think\paginator\driver;
 
 use think\Paginator;
 
+/**
+ * Bootstrap 分页驱动
+ */
 class Bootstrap extends Paginator
 {
 
@@ -131,10 +134,10 @@ class Bootstrap extends Paginator
      * 生成一个可点击的按钮
      *
      * @param  string $url
-     * @param  int    $page
+     * @param  string $page
      * @return string
      */
-    protected function getAvailablePageWrapper(string $url, int $page): string
+    protected function getAvailablePageWrapper(string $url, string $page): string
     {
         return '<li><a href="' . htmlentities($url) . '">' . $page . '</a></li>';
     }
@@ -192,10 +195,10 @@ class Bootstrap extends Paginator
      * 生成普通页码按钮
      *
      * @param  string $url
-     * @param  int    $page
+     * @param  string    $page
      * @return string
      */
-    protected function getPageLinkWrapper(string $url, int $page): string
+    protected function getPageLinkWrapper(string $url, string $page): string
     {
         if ($this->currentPage() == $page) {
             return $this->getActivePageWrapper($page);

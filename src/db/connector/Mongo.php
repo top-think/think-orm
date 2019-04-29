@@ -6,7 +6,7 @@
 // +----------------------------------------------------------------------
 // | Author: liu21st <liu21st@gmail.com>
 // +----------------------------------------------------------------------
-
+declare (strict_types = 1);
 namespace think\db\connector;
 
 use MongoDB\BSON\ObjectID;
@@ -22,19 +22,20 @@ use MongoDB\Driver\Manager;
 use MongoDB\Driver\Query as MongoQuery;
 use MongoDB\Driver\ReadPreference;
 use MongoDB\Driver\WriteConcern;
+use think\Cache;
 use think\Collection;
 use think\Db;
 use think\db\builder\Mongo as Builder;
 use think\db\Mongo as Query;
 use think\Exception;
+use think\Log;
 
 /**
  * Mongo数据库驱动
  */
 class Mongo
 {
-    protected static $instance = [];
-    protected $dbName          = ''; // dbName
+    protected $dbName = ''; // dbName
     /** @var string 当前SQL指令 */
     protected $queryStr = '';
     // 查询数据类型
@@ -42,36 +43,20 @@ class Mongo
     protected $mongo; // MongoDb Object
     protected $cursor; // MongoCursor Object
 
-    /**
-     * 查询次数
-     * @var integer
-     */
-    protected static $queryTimes = 0;
-
-    protected $queryStartTime;
-
-    // 监听回调
-    protected static $event = [];
-    /** @var PDO[] 数据库连接ID 支持多个连接 */
+    /** @var Manager[] 数据库连接ID 支持多个连接 */
     protected $links = [];
-    /** @var PDO 当前连接ID */
+    /** @var Manger 当前连接ID */
     protected $linkID;
     protected $linkRead;
     protected $linkWrite;
     // Builder对象
     protected $builder;
-    // 缓存对象
-    protected $cache;
     // 返回或者影响记录数
     protected $numRows = 0;
     // 错误信息
     protected $error = '';
     // 查询参数
     protected $options = [];
-    // 数据表信息
-    protected static $info = [];
-    // 数据库日志
-    protected static $log = [];
     // 数据库连接参数配置
     protected $config = [
         // 数据库类型
@@ -112,28 +97,44 @@ class Mongo
         'slave_no'        => '',
         // 是否严格检查字段是否存在
         'fields_strict'   => true,
-        // 数据集返回类型
-        'resultset_type'  => 'array',
         // 自动写入时间戳字段
         'auto_timestamp'  => false,
         // 时间字段取出后的默认时间格式
         'datetime_format' => 'Y-m-d H:i:s',
-        // 是否需要进行SQL性能分析
-        'sql_explain'     => false,
         // 是否_id转换为id
         'pk_convert_id'   => false,
         // typeMap
         'type_map'        => ['root' => 'array', 'document' => 'array'],
         // Query对象
-        'query'           => '\\think\\mongo\\Query',
+        'query'           => '\\think\\db\\Mongo',
     ];
+
+    /**
+     * 缓存对象
+     * @var Cache
+     */
+    protected $cache;
+
+    /**
+     * Db对象
+     * @var Db
+     */
+    protected $db;
+
+    /**
+     * 日志对象
+     * @var Log
+     */
+    protected $log;
 
     /**
      * 架构函数 读取数据库配置信息
      * @access public
+     * @param Cache $cache 缓存对象
+     * @param Log   $log 日志对象
      * @param array $config 数据库配置数组
      */
-    public function __construct(array $config = [])
+    public function __construct(Cache $cache, Log $log, array $config = [])
     {
         if (!class_exists('\MongoDB\Driver\Manager')) {
             throw new Exception('require mongodb > 1.0');
@@ -144,46 +145,63 @@ class Mongo
         }
 
         $this->builder = new Builder($this);
-        $this->cache   = Db::getCacheHandler();
+
+        $this->cache = $cache;
+        $this->log   = $log;
     }
 
     /**
-     * 取得数据库连接类实例
+     * 获取当前连接器类对应的Query类
      * @access public
-     * @param mixed         $config 连接配置
-     * @param bool|string   $name 连接标识 true 强制重新连接
-     * @return Connection
-     * @throws Exception
+     * @return string
      */
-    public static function instance($config = [], $name = false)
+    public function getQueryClass(): string
     {
-        if (false === $name) {
-            $name = md5(serialize($config));
-        }
+        return $this->getConfig('query') ?: Query::class;
+    }
 
-        if (true === $name || !isset(self::$instance[$name])) {
-            // 解析连接参数 支持数组和字符串
-            $options = self::parseConfig($config);
+    /**
+     * 设置当前的数据库Builder对象
+     * @access protected
+     * @param  Builder $builder
+     * @return void
+     */
+    protected function setBuilder(Builder $builder): void
+    {
+        $this->builder = $builder;
+    }
 
-            if (true === $name) {
-                $name = md5(serialize($config));
-            }
-            self::$instance[$name] = new static($options);
-        }
+    /**
+     * 获取当前的builder实例对象
+     * @access public
+     * @return Builder
+     */
+    public function getBuilder(): Builder
+    {
+        return $this->builder;
+    }
 
-        return self::$instance[$name];
+    /**
+     * 设置当前的数据库Db对象
+     * @access public
+     * @param Db $db
+     * @return void
+     */
+    public function setDb(Db $db): void
+    {
+        $this->db = $db;
     }
 
     /**
      * 连接数据库方法
      * @access public
-     * @param array         $config 连接参数
-     * @param integer       $linkNum 连接序号
+     * @param  array   $config 连接参数
+     * @param  integer $linkNum 连接序号
      * @return Manager
      * @throws InvalidArgumentException
      * @throws RuntimeException
      */
-    public function connect(array $config = [], $linkNum = 0)
+    public function connect(array $config = [], int $linkNum = 0): Manager
     {
         if (!isset($this->links[$linkNum])) {
             if (empty($config)) {
@@ -199,18 +217,19 @@ class Mongo
                 $this->config['pk'] = 'id';
             }
 
-            $host = 'mongodb://' . ($config['username'] ? "{$config['username']}" : '') . ($config['password'] ? ":{$config['password']}@" : '') . $config['hostname'] . ($config['hostport'] ? ":{$config['hostport']}" : '') . '/' . ($config['database'] ? "{$config['database']}" : '');
+            if (empty($config['dsn'])) {
+                $config['dsn'] = 'mongodb://' . ($config['username'] ? "{$config['username']}" : '') . ($config['password'] ? ":{$config['password']}@" : '') . $config['hostname'] . ($config['hostport'] ? ":{$config['hostport']}" : '');
+            }
 
             if ($config['debug']) {
                 $startTime = microtime(true);
             }
 
-            $this->links[$linkNum] = new Manager($host, $this->config['params']);
+            $this->links[$linkNum] = new Manager($config['dsn'], $config['params']);
 
-            if ($config['debug']) {
-                // 记录数据库连接信息
-                $this->logger('[ MongoDb ] CONNECT :[ UseTime:' . number_format(microtime(true) - $startTime, 6) . 's ] ' . $config['dsn']);
-            }
+            // 记录数据库连接信息
+            $this->logger('[ MongoDb ] CONNECT :[ UseTime:' . number_format(microtime(true) - $startTime, 6) . 's ] ' . $config['dsn']);
+
         }
 
         return $this->links[$linkNum];
@@ -219,24 +238,27 @@ class Mongo
     /**
      * 获取数据库的配置参数
      * @access public
-     * @param string $config 配置名称
+     * @param  string $config 配置名称
      * @return mixed
      */
-    public function getConfig($config = '')
+    public function getConfig(string $config = '')
     {
-        return $config ? $this->config[$config] : $this->config;
+        if ('' === $config) {
+            return $this->config;
+        }
+
+        return $this->config[$config] ?? null;
     }
 
     /**
      * 设置数据库的配置参数
      * @access public
-     * @param string    $config 配置名称
-     * @param mixed     $value 配置值
+     * @param  array $config 配置
      * @return void
      */
-    public function setConfig($config, $value)
+    public function setConfig(array $config): void
     {
-        $this->config[$config] = $value;
+        $this->config = array_merge($this->config, $config);
     }
 
     /**
@@ -246,20 +268,16 @@ class Mongo
      */
     public function getMongo()
     {
-        if (!$this->mongo) {
-            return;
-        } else {
-            return $this->mongo;
-        }
+        return $this->mongo ?: null;
     }
 
     /**
      * 设置/获取当前操作的database
      * @access public
-     * @param string  $db db
+     * @param  string  $db db
      * @throws Exception
      */
-    public function db($db = null)
+    public function db(string $db = null)
     {
         if (is_null($db)) {
             return $this->dbName;
@@ -269,70 +287,39 @@ class Mongo
     }
 
     /**
-     * 将SQL语句中的__TABLE_NAME__字符串替换成带前缀的表名（小写）
+     * 执行查询但只返回Cursor对象
      * @access public
-     * @param string $sql sql语句
-     * @return string
+     * @param  Query $query 查询对象
+     * @return Cursor
      */
-    public function parseSqlTable($sql)
+    public function getCursor(Query $query): Cursor
     {
-        if (false !== strpos($sql, '__')) {
-            $prefix = $this->getConfig('prefix');
+        // 分析查询表达式
+        $options = $query->parseOptions();
 
-            $sql = preg_replace_callback("/__([A-Z0-9_-]+)__/sU", function ($match) use ($prefix) {
-                return $prefix . strtolower($match[1]);
-            }, $sql);
-        }
+        // 生成MongoQuery对象
+        $mongoQuery = $this->builder->select($query);
 
-        return $sql;
+        // 执行查询操作
+        return $this->cursor($options['table'], $mongoQuery, $options['readPreference'] ?? null);
     }
 
     /**
-     * 启动事务
+     * 执行查询并返回Cursor对象
      * @access public
-     * @return void
-     * @throws \PDOException
-     * @throws \Exception
-     */
-    public function startTrans()
-    {}
-
-    /**
-     * 用于非自动提交状态下面的查询提交
-     * @access public
-     * @return void
-     * @throws PDOException
-     */
-    public function commit()
-    {}
-
-    /**
-     * 事务回滚
-     * @access public
-     * @return void
-     * @throws PDOException
-     */
-    public function rollback()
-    {}
-
-    /**
-     * 执行查询
-     * @access public
-     * @param string            $namespace 当前查询的collection
-     * @param MongoQuery        $query 查询对象
-     * @param ReadPreference    $readPreference readPreference
-     * @param string|bool       $class 返回的数据集类型
-     * @param string|array      $typeMap 指定返回的typeMap
-     * @return mixed
+     * @param string         $namespace 当前查询的collection
+     * @param MongoQuery     $query 查询对象
+     * @param ReadPreference $readPreference readPreference
+     * @return Cursor
      * @throws AuthenticationException
      * @throws InvalidArgumentException
      * @throws ConnectionException
      * @throws RuntimeException
      */
-    public function query($namespace, MongoQuery $query, ReadPreference $readPreference = null, $class = false, $typeMap = null)
+    public function cursor(string $namespace, MongoQuery $query, ReadPreference $readPreference = null): Cursor
     {
         $this->initConnect(false);
-        self::$queryTimes++;
+        $this->db->updateQueryTimes();
 
         if (false === strpos($namespace, '.')) {
             $namespace = $this->dbName . '.' . $namespace;
@@ -349,27 +336,85 @@ class Mongo
 
         $this->debug(false);
 
-        return $this->getResult($class, $typeMap);
+        return $this->cursor;
     }
 
     /**
-     * 执行指令
+     * 执行查询
      * @access public
-     * @param Command           $command 指令
-     * @param string            $dbName 当前数据库名
-     * @param ReadPreference    $readPreference readPreference
-     * @param string|bool       $class 返回的数据集类型
-     * @param string|array      $typeMap 指定返回的typeMap
-     * @return mixed
+     * @param  string         $namespace 当前查询的collection
+     * @param  MongoQuery     $query 查询对象
+     * @param  ReadPreference $readPreference readPreference
+     * @param  string|array   $typeMap 指定返回的typeMap
+     * @return array
      * @throws AuthenticationException
      * @throws InvalidArgumentException
      * @throws ConnectionException
      * @throws RuntimeException
      */
-    public function command(Command $command, $dbName = '', ReadPreference $readPreference = null, $class = false, $typeMap = null)
+    public function query(string $namespace, MongoQuery $query, ReadPreference $readPreference = null, $typeMap = null): array
+    {
+        $this->cursor($namespace, $query, $readPreference);
+
+        return $this->getResult($typeMap);
+    }
+
+    /**
+     * 执行写操作
+     * @access public
+     * @param string        $namespace
+     * @param BulkWrite     $bulk
+     * @param WriteConcern  $writeConcern
+     *
+     * @return WriteResult
+     * @throws AuthenticationException
+     * @throws InvalidArgumentException
+     * @throws ConnectionException
+     * @throws RuntimeException
+     * @throws BulkWriteException
+     */
+    public function execute(string $namespace, BulkWrite $bulk, WriteConcern $writeConcern = null)
+    {
+        $this->initConnect(true);
+        $this->db->updateQueryTimes();
+
+        if (false === strpos($namespace, '.')) {
+            $namespace = $this->dbName . '.' . $namespace;
+        }
+
+        if ($this->config['debug'] && !empty($this->queryStr)) {
+            // 记录执行指令
+            $this->queryStr = 'db' . strstr($namespace, '.') . '.' . $this->queryStr;
+        }
+
+        $this->debug(true);
+
+        $writeResult = $this->mongo->executeBulkWrite($namespace, $bulk, $writeConcern);
+
+        $this->debug(false);
+
+        $this->numRows = $writeResult->getMatchedCount();
+
+        return $writeResult;
+    }
+
+    /**
+     * 执行指令
+     * @access public
+     * @param  Command        $command 指令
+     * @param  string         $dbName 当前数据库名
+     * @param  ReadPreference $readPreference readPreference
+     * @param  string|array   $typeMap 指定返回的typeMap
+     * @return array
+     * @throws AuthenticationException
+     * @throws InvalidArgumentException
+     * @throws ConnectionException
+     * @throws RuntimeException
+     */
+    public function command(Command $command, string $dbName = '', ReadPreference $readPreference = null, $typeMap = null): array
     {
         $this->initConnect(false);
-        self::$queryTimes++;
+        $this->db->updateQueryTimes();
 
         $this->debug(true);
 
@@ -383,23 +428,17 @@ class Mongo
 
         $this->debug(false);
 
-        return $this->getResult($class, $typeMap);
-
+        return $this->getResult($typeMap);
     }
 
     /**
      * 获得数据集
      * @access protected
-     * @param bool|string       $class true 返回Mongo cursor对象 字符串用于指定返回的类名
-     * @param string|array      $typeMap 指定返回的typeMap
+     * @param  string|array      $typeMap 指定返回的typeMap
      * @return mixed
      */
-    protected function getResult($class = '', $typeMap = null)
+    protected function getResult($typeMap = null): array
     {
-        if (true === $class) {
-            return $this->cursor;
-        }
-
         // 设置结果数据类型
         if (is_null($typeMap)) {
             $typeMap = $this->typeMap;
@@ -426,66 +465,27 @@ class Mongo
 
     /**
      * ObjectID处理
-     * @access public
-     * @param array     $data
+     * @access protected
+     * @param  array $data 数据
      * @return void
      */
-    private function convertObjectID(&$data)
+    protected function convertObjectID(array &$data): void
     {
-        if (isset($data['_id'])) {
+        if (isset($data['_id']) && is_object($data['_id'])) {
             $data['id'] = $data['_id']->__toString();
             unset($data['_id']);
         }
     }
 
     /**
-     * 执行写操作
-     * @access public
-     * @param string        $namespace
-     * @param BulkWrite     $bulk
-     * @param WriteConcern  $writeConcern
-     *
-     * @return WriteResult
-     * @throws AuthenticationException
-     * @throws InvalidArgumentException
-     * @throws ConnectionException
-     * @throws RuntimeException
-     * @throws BulkWriteException
-     */
-    public function execute($namespace, BulkWrite $bulk, WriteConcern $writeConcern = null)
-    {
-        $this->initConnect(true);
-        self::$queryTimes++;
-
-        if (false === strpos($namespace, '.')) {
-            $namespace = $this->dbName . '.' . $namespace;
-        }
-
-        if ($this->config['debug'] && !empty($this->queryStr)) {
-            // 记录执行指令
-            $this->queryStr = 'db' . strstr($namespace, '.') . '.' . $this->queryStr;
-        }
-
-        $this->debug(true);
-
-        $writeResult = $this->mongo->executeBulkWrite($namespace, $bulk, $writeConcern);
-
-        $this->debug(false);
-
-        $this->numRows = $writeResult->getMatchedCount();
-
-        return $writeResult;
-    }
-
-    /**
      * 数据库日志记录（仅供参考）
      * @access public
-     * @param string $type 类型
-     * @param mixed  $data 数据
-     * @param array  $options 参数
+     * @param  string $type 类型
+     * @param  mixed  $data 数据
+     * @param  array  $options 参数
      * @return void
      */
-    public function log($type, $data, $options = [])
+    public function log(string $type, $data, array $options = [])
     {
         if (!$this->config['debug']) {
             return;
@@ -493,7 +493,7 @@ class Mongo
 
         if (is_array($data)) {
             array_walk_recursive($data, function (&$value) {
-                if ($value instanceof ObjectID || $value instanceof \MongoDB\BSON\ObjectId) {
+                if ($value instanceof ObjectID) {
                     $value = $value->__toString();
                 }
             });
@@ -536,52 +536,45 @@ class Mongo
      * @access public
      * @return string
      */
-    public function getLastSql()
+    public function getLastSql(): string
     {
         return $this->queryStr;
     }
 
     /**
-     * 监听SQL执行
-     * @access public
-     * @param callable $callback 回调方法
-     * @return void
-     */
-    public function listen($callback)
-    {
-        self::$event[] = $callback;
-    }
-
-    /**
      * 触发SQL事件
      * @access protected
-     * @param string    $sql SQL语句
-     * @param float     $runtime SQL运行时间
-     * @param mixed     $options 参数
-     * @return bool
+     * @param  string $sql SQL语句
+     * @param  string $runtime SQL运行时间
+     * @param  mixed  $options 参数
+     * @param  bool   $master  主从标记
+     * @return void
      */
-    protected function triggerSql($sql, $runtime, $options = [])
+    protected function triggerSql(string $sql, string $runtime, array $options = [], bool $master = false): void
     {
-        if (!empty(self::$event)) {
-            foreach (self::$event as $callback) {
+        $listen = $this->db->getListen();
+
+        if (!empty($listen)) {
+            foreach ($listen as $callback) {
                 if (is_callable($callback)) {
-                    call_user_func_array($callback, [$sql, $runtime, $options]);
+                    $callback($sql, $runtime, $options, $master);
                 }
             }
         } else {
             // 未注册监听则记录到日志中
-            $this->logger('[ SQL ] ' . $sql . ' [ RunTime:' . $runtime . 's ]');
+            if ($this->config['deploy']) {
+                // 分布式记录当前操作的主从
+                $master = $master ? 'master|' : 'slave|';
+            } else {
+                $master = '';
+            }
+            $this->logger('[ SQL ] ' . $sql . ' [' . $master . ' RunTime:' . $runtime . 's ]');
         }
     }
 
-    public function logger($log, $type = 'sql')
+    public function logger(string $log, string $type = 'sql'): void
     {
-        $this->config['debug'] && self::$log[] = $log;
-    }
-
-    public function getSqlLog()
-    {
-        return self::$log;
+        $this->config['debug'] && $this->log->record($log, $type);
     }
 
     /**
@@ -589,21 +582,23 @@ class Mongo
      * @access protected
      * @param boolean $start 调试开始标记 true 开始 false 结束
      * @param string  $sql 执行的SQL语句 留空自动获取
+     * @param bool    $master  主从标记
      * @return void
      */
-    protected function debug($start, $sql = '')
+    protected function debug(bool $start, string $sql = '', bool $master = false)
     {
         if (!empty($this->config['debug'])) {
             // 开启数据库调试模式
             if ($start) {
                 $this->queryStartTime = microtime(true);
             } else {
+                // 记录操作结束时间
                 $runtime = number_format((microtime(true) - $this->queryStartTime), 6);
 
                 $sql = $sql ?: $this->queryStr;
 
                 // SQL监听
-                $this->triggerSql($sql, $runtime, $this->options);
+                $this->triggerSql($sql, $runtime, $this->options, $master);
             }
         }
     }
@@ -636,7 +631,7 @@ class Mongo
      * @param boolean $master 是否主服务器
      * @return void
      */
-    protected function initConnect($master = true)
+    protected function initConnect(bool $master = true): void
     {
         if (!empty($this->config['deploy'])) {
             // 采用分布式数据库
@@ -662,15 +657,15 @@ class Mongo
     /**
      * 连接分布式服务器
      * @access protected
-     * @param boolean $master 主服务器
+     * @param  boolean $master 主服务器
      * @return Manager
      */
-    protected function multiConnect($master = false)
+    protected function multiConnect(bool $master = false): Manager
     {
         $config = [];
         // 分布式数据库配置解析
         foreach (['username', 'password', 'hostname', 'hostport', 'database', 'dsn'] as $name) {
-            $config[$name] = explode(',', $this->config[$name]);
+            $config[$name] = is_string($this->config[$name]) ? explode(',', $this->config[$name]) : $this->config[$name];
         }
 
         // 主服务器序号
@@ -710,7 +705,7 @@ class Mongo
      * 创建基于复制集的连接
      * @return Manager
      */
-    public function replicaSetConnect()
+    public function replicaSetConnect(): Manager
     {
         $this->dbName  = $this->config['database'];
         $this->typeMap = $this->config['type_map'];
@@ -723,10 +718,8 @@ class Mongo
 
         $manager = new Manager($this->buildUrl(), $this->config['params']);
 
-        if ($this->config['debug']) {
-            // 记录数据库连接信息
-            $this->logger('[ MongoDB ] ReplicaSet CONNECT:[ UseTime:' . number_format(microtime(true) - $startTime, 6) . 's ] ' . $this->config['dsn']);
-        }
+        // 记录数据库连接信息
+        $this->logger('[ MongoDB ] ReplicaSet CONNECT:[ UseTime:' . number_format(microtime(true) - $startTime, 6) . 's ] ' . $this->config['dsn']);
 
         return $manager;
     }
@@ -735,12 +728,12 @@ class Mongo
      * 根据配置信息 生成适用于连接复制集的 URL
      * @return string
      */
-    private function buildUrl()
+    private function buildUrl(): string
     {
         $url = 'mongodb://' . ($this->config['username'] ? "{$this->config['username']}" : '') . ($this->config['password'] ? ":{$this->config['password']}@" : '');
 
-        $hostList = explode(',', $this->config['hostname']);
-        $portList = explode(',', $this->config['hostport']);
+        $hostList = is_string($this->config['hostname']) ? explode(',', $this->config['hostname']) : $this->config['hostname'];
+        $portList = is_string($this->config['hostport']) ? explode(',', $this->config['hostport']) : $this->config['hostport'];
 
         for ($i = 0; $i < count($hostList); $i++) {
             $url = $url . $hostList[$i] . ':' . $portList[0] . ',';
@@ -752,9 +745,8 @@ class Mongo
     /**
      * 插入记录
      * @access public
-     * @param Query     $query 查询对象
-     * @param boolean   $replace      是否replace（目前无效）
-     * @param boolean   $getLastInsID 返回自增主键
+     * @param  Query     $query 查询对象
+     * @param  boolean   $getLastInsID 返回自增主键
      * @return WriteResult
      * @throws AuthenticationException
      * @throws InvalidArgumentException
@@ -762,7 +754,7 @@ class Mongo
      * @throws RuntimeException
      * @throws BulkWriteException
      */
-    public function insert(Query $query, $replace = null, $getLastInsID = false)
+    public function insert(Query $query, bool $getLastInsID = false)
     {
         // 分析查询表达式
         $options = $query->parseOptions();
@@ -772,7 +764,7 @@ class Mongo
         }
 
         // 生成bulk对象
-        $bulk         = $this->builder->insert($query, $replace);
+        $bulk         = $this->builder->insert($query);
         $writeConcern = $options['writeConcern'] ?? null;
         $writeResult  = $this->execute($options['table'], $bulk, $writeConcern);
         $result       = $writeResult->getInsertedCount();
@@ -782,18 +774,19 @@ class Mongo
             $lastInsId = $this->getLastInsID();
 
             if ($lastInsId) {
-                $pk        = $query->getPk($options);
+                $pk        = $query->getPk();
                 $data[$pk] = $lastInsId;
             }
 
             $query->setOption('data', $data);
 
-            $query->trigger('after_insert');
+            $this->db->trigger('after_insert', $query);
 
             if ($getLastInsID) {
                 return $lastInsId;
             }
         }
+
         return $result;
     }
 
@@ -802,17 +795,17 @@ class Mongo
      * @access public
      * @return mixed
      */
-    public function getLastInsID($sequence = null)
+    public function getLastInsID(string $sequence = null)
     {
         $id = $this->builder->getLastInsID();
 
         if (is_array($id)) {
             array_walk($id, function (&$item, $key) {
-                if ($item instanceof ObjectID || $item instanceof \MongoDB\BSON\ObjectId) {
+                if ($item instanceof ObjectID) {
                     $item = $item->__toString();
                 }
             });
-        } elseif ($id instanceof ObjectID || $id instanceof \MongoDB\BSON\ObjectId) {
+        } elseif ($id instanceof ObjectID) {
             $id = $id->__toString();
         }
 
@@ -822,8 +815,8 @@ class Mongo
     /**
      * 批量插入记录
      * @access public
-     * @param Query     $query 查询对象
-     * @param mixed     $dataSet 数据集
+     * @param  Query $query 查询对象
+     * @param  array $dataSet 数据集
      * @return integer
      * @throws AuthenticationException
      * @throws InvalidArgumentException
@@ -831,18 +824,18 @@ class Mongo
      * @throws RuntimeException
      * @throws BulkWriteException
      */
-    public function insertAll(Query $query, array $dataSet)
+    public function insertAll(Query $query, array $dataSet = []): int
     {
         // 分析查询表达式
         $options = $query->parseOptions();
 
         if (!is_array(reset($dataSet))) {
-            return false;
+            return 0;
         }
 
         // 生成bulkWrite对象
         $bulk         = $this->builder->insertAll($query, $dataSet);
-        $writeConcern = isset($options['writeConcern']) ? $options['writeConcern'] : null;
+        $writeConcern = $options['writeConcern'] ?? null;
         $writeResult  = $this->execute($options['table'], $bulk, $writeConcern);
 
         return $writeResult->getInsertedCount();
@@ -851,7 +844,7 @@ class Mongo
     /**
      * 更新记录
      * @access public
-     * @param Query     $query 查询对象
+     * @param  Query     $query 查询对象
      * @return int
      * @throws Exception
      * @throws AuthenticationException
@@ -860,70 +853,32 @@ class Mongo
      * @throws RuntimeException
      * @throws BulkWriteException
      */
-    public function update(Query $query)
+    public function update(Query $query): int
     {
         $options = $query->parseOptions();
-        $data    = $options['data'];
 
-        if (isset($options['cache']) && is_string($options['cache']['key'])) {
-            $key = $options['cache']['key'];
-        }
-
-        $pk = $query->getPk($options);
-
-        if (empty($options['where'])) {
-            // 如果存在主键数据 则自动作为更新条件
-            if (is_string($pk) && isset($data[$pk])) {
-                $where[$pk] = $data[$pk];
-                $key        = 'mongo:' . $options['table'] . '|' . $data[$pk];
-                unset($data[$pk]);
-            } elseif (is_array($pk)) {
-                // 增加复合主键支持
-                foreach ($pk as $field) {
-                    if (isset($data[$field])) {
-                        $where[$field] = $data[$field];
-                    } else {
-                        // 如果缺少复合主键数据则不执行
-                        throw new Exception('miss complex primary data');
-                    }
-
-                    unset($data[$field]);
-                }
-            }
-            if (!isset($where)) {
-                // 如果没有任何更新条件则不执行
-                throw new Exception('miss update condition');
-            } else {
-                $options['where']['$and'] = $where;
-            }
-        } elseif (!isset($key) && is_string($pk) && isset($options['where']['$and'][$pk])) {
-            $key = $this->getCacheKey($options['where']['$and'][$pk], $options);
+        if (isset($options['cache'])) {
+            $cacheItem = $this->parseCache($query, $options['cache']);
+            $key       = $cacheItem->getKey();
         }
 
         // 生成bulkWrite对象
         $bulk         = $this->builder->update($query);
-        $writeConcern = isset($options['writeConcern']) ? $options['writeConcern'] : null;
+        $writeConcern = $options['writeConcern'] ?? null;
         $writeResult  = $this->execute($options['table'], $bulk, $writeConcern);
 
         // 检测缓存
-        if ($this->cache && isset($key) && $this->cache->get($key)) {
+        if (isset($key) && $this->cache->get($key)) {
             // 删除缓存
-            $this->cache->rm($key);
+            $this->cache->delete($key);
+        } elseif (isset($cacheItem) && $cacheItem->getTag()) {
+            $this->cache->tag($cacheItem->getTag())->clear();
         }
 
         $result = $writeResult->getModifiedCount();
 
         if ($result) {
-            if (isset($where[$pk])) {
-                $data[$pk] = $where[$pk];
-            } elseif (is_string($pk) && isset($key) && strpos($key, '|')) {
-                list($a, $val) = explode('|', $key);
-                $data[$pk]     = $val;
-            }
-
-            $query->setOption('data', $data);
-
-            $query->trigger('after_update');
+            $this->db->trigger('after_update', $query);
         }
 
         return $result;
@@ -932,7 +887,7 @@ class Mongo
     /**
      * 删除记录
      * @access public
-     * @param Query     $query 查询对象
+     * @param  Query     $query 查询对象
      * @return int
      * @throws Exception
      * @throws AuthenticationException
@@ -941,85 +896,46 @@ class Mongo
      * @throws RuntimeException
      * @throws BulkWriteException
      */
-    public function delete(Query $query)
+    public function delete(Query $query): int
     {
         // 分析查询表达式
         $options = $query->parseOptions();
-        $pk      = $query->getPk($options);
-        $data    = $options['data'];
 
-        if (!is_null($data) && true !== $data) {
-            if (!is_array($data)) {
-                // 缓存标识
-                $key = 'mongo:' . $options['table'] . '|' . $data;
-            }
-
-            // AR模式分析主键条件
-            $query->parsePkWhere($data);
-        } elseif (!isset($key) && is_string($pk) && isset($options['where']['$and'][$pk])) {
-            $key = $this->getCacheKey($options['where']['$and'][$pk], $options);
-        }
-
-        if (true !== $data && empty($options['where'])) {
-            // 如果不是强制删除且条件为空 不进行删除操作
-            throw new Exception('delete without condition');
+        if (isset($options['cache'])) {
+            $cacheItem = $this->parseCache($query, $options['cache']);
+            $key       = $cacheItem->getKey();
         }
 
         // 生成bulkWrite对象
         $bulk = $this->builder->delete($query);
 
-        $writeConcern = isset($options['writeConcern']) ? $options['writeConcern'] : null;
+        $writeConcern = $options['writeConcern'] ?? null;
 
         // 执行操作
         $writeResult = $this->execute($options['table'], $bulk, $writeConcern);
 
         // 检测缓存
-        if ($this->cache && isset($key) && $this->cache->get($key)) {
+        if (isset($key) && $this->cache->get($key)) {
             // 删除缓存
-            $this->cache->rm($key);
+            $this->cache->delete($key);
+        } elseif (isset($cacheItem) && $cacheItem->getTag()) {
+            $this->cache->tag($cacheItem->getTag())->clear();
         }
 
         $result = $writeResult->getDeletedCount();
 
         if ($result) {
-            if (!is_array($data) && is_string($pk) && isset($key) && strpos($key, '|')) {
-                list($a, $val) = explode('|', $key);
-
-                $item[$pk] = $val;
-                $data      = $item;
-            }
-
-            $query->setOption('data', $data);
-            $query->trigger('after_delete');
+            $this->db->trigger('after_delete', $query);
         }
+
         return $result;
-    }
-
-    /**
-     * 执行查询但只返回Cursor对象
-     * @access public
-     * @param Query     $query 查询对象
-     * @return Cursor
-     */
-    public function getCursor(Query $query)
-    {
-        // 分析查询表达式
-        $options = $query->parseOptions();
-
-        // 生成MongoQuery对象
-        $mongoQuery = $this->builder->select($query);
-
-        // 执行查询操作
-        $readPreference = isset($options['readPreference']) ? $options['readPreference'] : null;
-
-        return $this->query($options['table'], $mongoQuery, $readPreference, true, $options['typeMap']);
     }
 
     /**
      * 查找记录
      * @access public
-     * @param Query     $query 查询对象
-     * @return Collection|false|Cursor|string
+     * @param  Query $query 查询对象
+     * @return Collection|array
      * @throws ModelNotFoundException
      * @throws DataNotFoundException
      * @throws AuthenticationException
@@ -1029,36 +945,33 @@ class Mongo
      */
     public function select(Query $query)
     {
-        $options   = $query->parseOptions();
-        $resultSet = false;
-        if ($this->cache && !empty($options['cache'])) {
-            // 判断查询缓存
-            $cache     = $options['cache'];
-            $key       = is_string($cache['key']) ? $cache['key'] : md5(serialize($options));
-            $resultSet = $this->cache->get($key);
+        $options = $query->parseOptions();
+
+        if (!empty($options['cache'])) {
+            $cacheItem = $this->parseCache($query, $options['cache']);
+            $resultSet = $this->getCacheData($cacheItem);
+
+            if (false !== $resultSet) {
+                return $resultSet;
+            }
         }
 
+        // 生成MongoQuery对象
+        $mongoQuery = $this->builder->select($query);
+
+        $resultSet = $this->db->trigger('before_select', $query);
+
         if (!$resultSet) {
-            // 生成MongoQuery对象
-            $mongoQuery = $this->builder->select($query);
+            // 执行查询操作
+            $readPreference = $options['readPreference'] ?? null;
 
-            if ($resultSet = $query->trigger('before_select')) {
-            } else {
-                // 执行查询操作
-                $readPreference = isset($options['readPreference']) ? $options['readPreference'] : null;
+            $resultSet = $this->query($options['table'], $mongoQuery, $readPreference, $options['typeMap']);
+        }
 
-                $resultSet = $this->query($options['table'], $mongoQuery, $readPreference, $options['fetch_cursor'], $options['typeMap']);
-
-                if ($resultSet instanceof Cursor) {
-                    // 返回MongoDB\Driver\Cursor对象
-                    return $resultSet;
-                }
-            }
-
-            if (isset($cache)) {
-                // 缓存数据集
-                $this->cacheData($key, $resultSet, $cache);
-            }
+        if (isset($cacheItem) && false !== $resultSet) {
+            // 缓存数据集
+            $cacheItem->set($resultSet);
+            $this->cacheData($cacheItem);
         }
 
         return $resultSet;
@@ -1067,8 +980,8 @@ class Mongo
     /**
      * 查找单条记录
      * @access public
-     * @param Query     $query 查询对象
-     * @return array|null|Cursor|string|Model
+     * @param  Query $query 查询对象
+     * @return array
      * @throws ModelNotFoundException
      * @throws DataNotFoundException
      * @throws AuthenticationException
@@ -1080,276 +993,208 @@ class Mongo
     {
         // 分析查询表达式
         $options = $query->parseOptions();
-        $pk      = $query->getPk($options);
-        $data    = $options['data'];
-        if ($this->cache && !empty($options['cache']) && true === $options['cache']['key'] && is_string($pk) && isset($options['where']['$and'][$pk])) {
-            $key = $this->getCacheKey($options['where']['$and'][$pk], $options);
-        }
 
-        $result = false;
-        if ($this->cache && !empty($options['cache'])) {
+        if (!empty($options['cache'])) {
             // 判断查询缓存
-            $cache = $options['cache'];
-            if (true === $cache['key'] && !is_null($data) && !is_array($data)) {
-                $key = 'mongo:' . $options['table'] . '|' . $data;
-            } elseif (!isset($key)) {
-                $key = is_string($cache['key']) ? $cache['key'] : md5(serialize($options));
-            }
-            $result = $this->cache->get($key);
+            $cacheItem = $this->parseCache($query, $options['cache']);
+            $key       = $cacheItem->getKey();
         }
 
-        if (false === $result) {
+        if (isset($key)) {
+            $result = $this->cache->get($key);
 
-            if (is_string($pk)) {
-                if (!is_array($data)) {
-                    if (isset($key) && strpos($key, '|')) {
-                        list($a, $val) = explode('|', $key);
-                        $item[$pk]     = $val;
-                    } else {
-                        $item[$pk] = $data;
-                    }
-                    $data = $item;
-                }
+            if (false !== $result) {
+                return $result;
             }
+        }
 
-            $query->setOption('data', $data);
-            $query->setOption('limit', 1);
+        // 生成查询对象
+        $mongoQuery = $this->builder->select($query, true);
 
-            // 生成查询对象
-            $mongoQuery = $this->builder->select($query);
+        // 事件回调
+        $result = $this->db->trigger('before_find', $query);
 
-            // 事件回调
-            if ($result = $query->trigger('before_find')) {
-            } else {
-                // 执行查询
-                $readPreference = isset($options['readPreference']) ? $options['readPreference'] : null;
-                $resultSet      = $this->query($options['table'], $mongoQuery, $readPreference, $options['fetch_cursor'], $options['typeMap']);
+        if (!$result) {
+            // 执行查询
+            $readPreference = $options['readPreference'] ?? null;
+            $resultSet      = $this->query($options['table'], $mongoQuery, $readPreference, $options['typeMap']);
 
-                if ($resultSet instanceof Cursor) {
-                    // 返回MongoDB\Driver\Cursor对象
-                    return $resultSet;
-                }
+            $result = $resultSet[0] ?? null;
+        }
 
-                $result = isset($resultSet[0]) ? $resultSet[0] : null;
-            }
-
-            if (isset($cache)) {
-                // 缓存数据
-                $this->cacheData($key, $result, $cache);
-            }
+        if (isset($cache) && $result) {
+            // 缓存数据
+            $cacheItem->set($result);
+            $this->cacheData($cacheItem);
         }
 
         return $result;
     }
 
     /**
-     * 缓存数据
-     * @access public
-     * @param string    $key    缓存标识
-     * @param mixed     $data   缓存数据
-     * @param array     $config 缓存参数
-     */
-    protected function cacheData($key, $data, $config = [])
-    {
-        $this->cache->set($key, $data, $config['expire']);
-    }
-
-    /**
-     * 生成缓存标识
-     * @access public
-     * @param mixed     $value   缓存数据
-     * @param array     $options 缓存参数
-     */
-    protected function getCacheKey($value, $options)
-    {
-        if (is_scalar($value)) {
-            $data = $value;
-        } elseif (is_array($value) && 'eq' == strtolower($value[0])) {
-            $data = $value[1];
-        }
-
-        if (isset($data)) {
-            return 'mongo:' . $options['table'] . '|' . $data;
-        } else {
-            return md5(serialize($options));
-        }
-    }
-
-    /**
-     * 获取数据表信息
-     * @access public
-     * @param string $tableName 数据表名 留空自动获取
-     * @param string $fetch 获取信息类型 包括 fields type pk
+     * 获取缓存数据
+     * @access protected
+     * @param  Query  $query 查询对象
+     * @param  mixed  $cache 缓存设置
+     * @param  array  $data  缓存数据
+     * @param  string $key   缓存Key
      * @return mixed
      */
-    public function getTableInfo($tableName, $fetch = '')
+    protected function getCacheData(CacheItem $cacheItem)
     {
-        if (is_array($tableName)) {
-            $tableName = key($tableName) ?: current($tableName);
+        // 判断查询缓存
+        return $this->cache->get($cacheItem->getKey());
+    }
+
+    /**
+     * 缓存数据
+     * @access protected
+     * @param  CacheItem $cacheItem 缓存Item
+     */
+    protected function cacheData(CacheItem $cacheItem): void
+    {
+        if ($cacheItem->getTag()) {
+            $this->cache->tag($cacheItem->getTag());
         }
 
-        if (strpos($tableName, ',')) {
-            // 多表不获取字段信息
-            return false;
+        $this->cache->set($cacheItem->getKey(), $cacheItem->get(), $cacheItem->getExpire());
+    }
+
+    protected function parseCache(Query $query, array $cache): CacheItem
+    {
+        list($key, $expire, $tag) = $cache;
+
+        if ($key instanceof CacheItem) {
+            $cacheItem = $key;
         } else {
-            $tableName = $this->parseSqlTable($tableName);
-        }
-
-        $guid = md5($tableName);
-        if (!isset(self::$info[$guid])) {
-            $mongoQuery = new MongoQuery([], ['limit' => 1]);
-
-            $cursor = $this->query($tableName, $mongoQuery, null, true, ['root' => 'array', 'document' => 'array']);
-
-            $resultSet = $cursor->toArray();
-            $result    = isset($resultSet[0]) ? (array) $resultSet[0] : [];
-            $fields    = array_keys($result);
-            $type      = [];
-
-            foreach ($result as $key => $val) {
-                // 记录字段类型
-                $type[$key] = getType($val);
-                if ('_id' == $key) {
-                    $pk = $key;
+            if (true === $key) {
+                if (!empty($query->getOptions('key'))) {
+                    $key = 'think:' . $this->getConfig('database') . '.' . $query->getTable() . '|' . $query->getOptions('key');
+                } else {
+                    $key = md5($this->getConfig('database') . serialize($query->getOptions()));
                 }
             }
 
-            if (!isset($pk)) {
-                // 设置主键
-                $pk = null;
-            }
-
-            $result = ['fields' => $fields, 'type' => $type, 'pk' => $pk];
-
-            self::$info[$guid] = $result;
+            $cacheItem = new CacheItem($key);
+            $cacheItem->expire($expire);
+            $cacheItem->tag($tag);
         }
 
-        return $fetch ? self::$info[$guid][$fetch] : self::$info[$guid];
+        return $cacheItem;
     }
 
     /**
      * 得到某个字段的值
      * @access public
-     * @param string    $field 字段名
-     * @param mixed     $default 默认值
+     * @param  string $field 字段名
+     * @param  mixed  $default 默认值
      * @return mixed
      */
-    public function value(Query $query, $field, $default = null)
+    public function value(Query $query, string $field, $default = null)
     {
         $options = $query->parseOptions();
-        $result  = null;
-        if ($this->cache && !empty($options['cache'])) {
-            // 判断查询缓存
-            $cache  = $options['cache'];
-            $key    = is_string($cache['key']) ? $cache['key'] : md5($field . serialize($options));
-            $result = $this->cache->get($key);
+
+        if (isset($options['projection'])) {
+            $query->removeOption('projection');
         }
 
-        if (!$result) {
-            if (isset($options['field'])) {
-                $query->removeOption('field');
-            }
+        $query->setOption('projection', (array) $field);
 
-            $query->setOption('field', $field);
-            $query->setOption('limit', 1);
+        if (!empty($options['cache'])) {
+            $cacheItem = $this->parseCache($query, $options['cache']);
+            $result    = $this->getCacheData($cacheItem);
 
-            $mongoQuery = $this->builder->select($query);
-
-            // 执行查询操作
-            $readPreference = isset($options['readPreference']) ? $options['readPreference'] : null;
-            $cursor         = $this->query($options['table'], $mongoQuery, $readPreference, true, ['root' => 'array']);
-            $resultSet      = $cursor->toArray();
-            if (!empty($resultSet)) {
-                $data = (array) array_shift($resultSet);
-                if ($this->getConfig('pk_convert_id')) {
-                    // 转换ObjectID 字段
-                    $data['id'] = $data['_id']->__toString();
-                }
-                $result = $data[$field];
-            } else {
-                $result = null;
-            }
-
-            if (isset($cache)) {
-                // 缓存数据
-                $this->cacheData($key, $result, $cache);
+            if (false !== $result) {
+                return $result;
             }
         }
 
-        return !is_null($result) ? $result : $default;
+        $mongoQuery = $this->builder->select($query, true);
+
+        if (isset($options['projection'])) {
+            $query->setOption('projection', $options['projection']);
+        } else {
+            $query->removeOption('projection');
+        }
+
+        // 执行查询操作
+        $readPreference = $options['readPreference'] ?? null;
+        $resultSet      = $this->query($options['table'], $mongoQuery, $readPreference);
+
+        if (!empty($resultSet)) {
+            $data = array_shift($resultSet);
+
+            $result = $data[$field];
+        } else {
+            $result = false;
+        }
+
+        if (isset($cacheItem) && false !== $result) {
+            // 缓存数据
+            $cacheItem->set($result);
+            $this->cacheData($cacheItem);
+        }
+
+        return false !== $result ? $result : $default;
     }
 
     /**
      * 得到某个列的数组
      * @access public
-     * @param string $field 字段名 多个字段用逗号分隔
-     * @param string $key 索引
+     * @param  string $field 字段名 多个字段用逗号分隔
+     * @param  string $key 索引
      * @return array
      */
-    public function column(Query $query, $field, $key = '')
+    public function column(Query $query, $field, string $key = '')
     {
         $options = $query->parseOptions();
-        $result  = false;
-        if ($this->cache && !empty($options['cache'])) {
-            // 判断查询缓存
-            $cache  = $options['cache'];
-            $guid   = is_string($cache['key']) ? $cache['key'] : md5($field . serialize($options));
-            $result = $this->cache->get($guid);
+
+        if (isset($options['projection'])) {
+            $query->removeOption('projection');
         }
 
-        if (!$result) {
-            if (isset($options['projection'])) {
-                $query->removeOption('projection');
+        if ($key && '*' != $field) {
+            $projection = $key . ',' . $field;
+        } else {
+            $projection = $field;
+        }
+
+        $query->setOption('projection', $projection);
+
+        if (!empty($options['cache'])) {
+            // 判断查询缓存
+            $cacheItem = $this->parseCache($query, $options['cache']);
+            $result    = $this->getCacheData($cacheItem);
+
+            if (false !== $result) {
+                return $result;
             }
+        }
 
-            if ($key && '*' != $field) {
-                $field = $key . ',' . $field;
-            }
+        $mongoQuery = $this->builder->select($query);
 
-            if (is_string($field)) {
-                $field = array_map('trim', explode(',', $field));
-            }
+        if (isset($options['projection'])) {
+            $query->setOption('projection', $options['projection']);
+        } else {
+            $query->removeOption('projection');
+        }
 
-            $query->field($field);
+        // 执行查询操作
+        $readPreference = $options['readPreference'] ?? null;
+        $resultSet      = $this->query($options['table'], $mongoQuery, $readPreference);
 
-            $mongoQuery = $this->builder->select($query);
-            // 执行查询操作
-            $readPreference = isset($options['readPreference']) ? $options['readPreference'] : null;
-            $cursor         = $this->query($options['table'], $mongoQuery, $readPreference, true, ['root' => 'array']);
-            $resultSet      = $cursor->toArray();
+        if (('*' == $field || strpos($field, ',')) && $key) {
+            $result = array_column($resultSet, null, $key);
+        } elseif (!empty($resultSet)) {
+            $result = array_column($resultSet, $field, $key);
+        } else {
+            $result = [];
+        }
 
-            if ($resultSet) {
-                $fields = array_keys(get_object_vars($resultSet[0]));
-                $count  = count($fields);
-                $key1   = array_shift($fields);
-                $key2   = $fields ? array_shift($fields) : '';
-                $key    = $key ?: $key1;
-
-                foreach ($resultSet as $val) {
-                    $val = (array) $val;
-                    if ($this->getConfig('pk_convert_id')) {
-                        // 转换ObjectID 字段
-                        $val['id'] = $val['_id']->__toString();
-                        unset($val['_id']);
-                    }
-                    $name = $val[$key];
-
-                    if (2 == $count) {
-                        $result[$name] = $val[$key2];
-                    } elseif (1 == $count) {
-                        $result[$name] = $val[$key1];
-                    } else {
-                        $result[$name] = $val;
-                    }
-                }
-            } else {
-                $result = [];
-            }
-
-            if (isset($cache) && isset($guid)) {
-                // 缓存数据
-                $this->cacheData($guid, $result, $cache);
-            }
+        if (isset($cacheItem)) {
+            // 缓存数据
+            $cacheItem->set($result);
+            $this->cacheData($cacheItem);
         }
 
         return $result;
@@ -1358,13 +1203,13 @@ class Mongo
     /**
      * 执行command
      * @access public
-     * @param Query                 $query      查询对象
-     * @param string|array|object   $command 指令
-     * @param mixed                 $extra 额外参数
-     * @param string                $db 数据库名
+     * @param  Query               $query      查询对象
+     * @param  string|array|object $command 指令
+     * @param  mixed               $extra 额外参数
+     * @param  string              $db 数据库名
      * @return array
      */
-    public function cmd(Query $query, $command, $extra = null, $db = null)
+    public function cmd(Query $query, $command, $extra = null, string $db = ''): array
     {
         if (is_array($command) || is_object($command)) {
             if ($this->getConfig('debug')) {
@@ -1381,84 +1226,45 @@ class Mongo
         return $this->command($command, $db);
     }
 
-    /**
-     * 数据库连接参数解析
-     * @access private
-     * @param mixed $config
-     * @return array
-     */
-    private static function parseConfig($config)
-    {
-        if (empty($config)) {
-            $config = Db::getConfig();
-        } elseif (is_string($config) && false === strpos($config, '/')) {
-            // 支持读取配置参数
-            $config = Db::getConfig($config);
-        }
-
-        if (is_string($config)) {
-            return self::parseDsnConfig($config);
-        } else {
-            return $config;
-        }
-    }
-
-    /**
-     * DSN解析
-     * 格式： mysql://username:passwd@localhost:3306/DbName?param1=val1&param2=val2#utf8
-     * @access private
-     * @param string $dsnStr
-     * @return array
-     */
-    private static function parseDsnConfig($dsnStr)
-    {
-        $info = parse_url($dsnStr);
-
-        if (!$info) {
-            return [];
-        }
-
-        $dsn = [
-            'type'     => $info['scheme'],
-            'username' => isset($info['user']) ? $info['user'] : '',
-            'password' => isset($info['pass']) ? $info['pass'] : '',
-            'hostname' => isset($info['host']) ? $info['host'] : '',
-            'hostport' => isset($info['port']) ? $info['port'] : '',
-            'database' => !empty($info['path']) ? ltrim($info['path'], '/') : '',
-            'charset'  => isset($info['fragment']) ? $info['fragment'] : 'utf8',
-        ];
-
-        if (isset($info['query'])) {
-            parse_str($info['query'], $dsn['params']);
-        } else {
-            $dsn['params'] = [];
-        }
-
-        return $dsn;
-    }
-
-    /**
-     * 获取数据表的主键
-     * @access public
-     * @param string $tableName 数据表名
-     * @return string|array
-     */
-    public function getPk($tableName)
-    {
-        return $this->getTableInfo($tableName, 'pk');
-    }
-
     // 获取当前数据表字段信息
-    public function getTableFields($tableName)
+    public function getTableFields(string $tableName)
     {
-        return $this->getTableInfo($tableName, 'fields');
+        return [];
     }
 
     // 获取当前数据表字段类型
-    public function getFieldsType($tableName)
+    public function getFieldsType(string $tableName)
     {
-        return $this->getTableInfo($tableName, 'type');
+        return [];
     }
+
+    /**
+     * 启动事务
+     * @access public
+     * @return void
+     * @throws \PDOException
+     * @throws \Exception
+     */
+    public function startTrans()
+    {}
+
+    /**
+     * 用于非自动提交状态下面的查询提交
+     * @access public
+     * @return void
+     * @throws PDOException
+     */
+    public function commit()
+    {}
+
+    /**
+     * 事务回滚
+     * @access public
+     * @return void
+     * @throws PDOException
+     */
+    public function rollback()
+    {}
 
     /**
      * 析构方法

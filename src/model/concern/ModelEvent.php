@@ -98,7 +98,10 @@ trait ModelEvent
                 $callback = [$this->observerClass, $call];
             }
 
-            $result = Container::getInstance()->invoke($callback, [$this]);
+            if (isset($callback)) {
+                $result = Container::getInstance()->invoke($callback, [$this]);
+            }
+
             return false === $result ? false : true;
         } catch (ModelEventException $e) {
             return false;

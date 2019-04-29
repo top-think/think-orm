@@ -212,10 +212,6 @@ abstract class Model implements JsonSerializable, ArrayAccess
             $this->name = basename($name);
         }
 
-        if (static::$maker) {
-            call_user_func(static::$maker, $this);
-        }
-
         // 执行初始化操作
         $this->initialize();
     }

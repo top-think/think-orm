@@ -430,6 +430,16 @@ class Query
     }
 
     /**
+     * 获取sql记录
+     * @access public
+     * @return string
+     */
+    public function getSqlLog()
+    {
+        return $this->connection->getSqlLog();
+    }
+
+    /**
      * 执行数据库事务
      * @access public
      * @param callable $callback 数据操作方法回调

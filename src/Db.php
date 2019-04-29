@@ -271,8 +271,6 @@ class Db
         if (isset($this->event[$event])) {
             return call_user_func_array($this->event[$event], [$this]);
         }
-
-        return true;
     }
 
     /**

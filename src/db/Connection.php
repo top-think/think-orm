@@ -16,7 +16,6 @@ use PDO;
 use PDOStatement;
 use think\Cache;
 use think\cache\CacheItem;
-use think\Container;
 use think\Db;
 use think\db\exception\BindParamException;
 use think\Exception;
@@ -179,6 +178,8 @@ abstract class Connection
         'break_reconnect' => false,
         // 断线标识字符串
         'break_match_str' => [],
+        // 字段缓存目录
+        'schema_path'     => '',
     ];
 
     /**
@@ -236,6 +237,12 @@ abstract class Connection
      * @var Cache
      */
     protected $cache;
+
+    /**
+     * 日志记录
+     * @var array
+     */
+    protected $log = [];
 
     /**
      * 架构函数 读取数据库配置信息
@@ -434,7 +441,7 @@ abstract class Connection
 
         if (!isset($this->info[$schema])) {
             // 读取缓存
-            $cacheFile = Container::pull('app')->getRuntimePath() . 'schema' . DIRECTORY_SEPARATOR . $schema . '.php';
+            $cacheFile = $this->config['schema_path'] . $schema . '.php';
 
             if (!$this->config['debug'] && is_file($cacheFile)) {
                 $info = include $cacheFile;
@@ -596,7 +603,7 @@ abstract class Connection
             return $this->links[$linkNum];
         } catch (\PDOException $e) {
             if ($autoConnection) {
-                $this->log->error($e->getMessage());
+                $this->log($e->getMessage());
                 return $this->connect($autoConnection, $linkNum);
             } else {
                 throw $e;
@@ -1715,14 +1722,18 @@ abstract class Connection
      * 记录SQL日志
      * @access protected
      * @param string $log  SQL日志信息
-     * @param string $type 日志类型
      * @return void
      */
-    protected function log($log, $type = 'sql'): void
+    protected function log($log): void
     {
         if ($this->config['debug']) {
-            $this->log->record($log, $type);
+            $this->log[] = $log;
         }
+    }
+
+    public function getSqlLog(): array
+    {
+        return $this->log;
     }
 
     /**

@@ -15,7 +15,6 @@ namespace think\db;
 use Closure;
 use PDO;
 use PDOStatement;
-use think\App;
 use think\Collection;
 use think\Db;
 use think\db\exception\BindParamException;

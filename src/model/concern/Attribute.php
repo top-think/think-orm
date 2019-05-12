@@ -486,8 +486,12 @@ trait Attribute
                 $value = $this->getRelationValue($name);
             }
 
-            $closure = $this->withAttr[$fieldName];
-            $value   = $closure($value, $this->data);
+            if (in_array($fieldName, $this->json) && is_array($this->withAttr[$fieldName])) {
+                $value = $this->getJsonValue($fieldName, $value);
+            } else {
+                $closure = $this->withAttr[$fieldName];
+                $value   = $closure($value, $this->data);
+            }
         } elseif (method_exists($this, $method)) {
             if ($relation) {
                 $value = $this->getRelationValue($name);
@@ -501,6 +505,26 @@ trait Attribute
             $value = $this->getTimestampValue($value);
         } elseif ($relation) {
             $value = $this->getRelationAttribute($name);
+        }
+
+        return $value;
+    }
+
+    /**
+     * 获取JSON字段属性值
+     * @access protected
+     * @param  string $name  属性名
+     * @param  mixed  $value JSON数据
+     * @return mixed
+     */
+    protected function getJsonValue($name, $value)
+    {
+        foreach ($this->withAttr[$name] as $key => $closure) {
+            if ($this->jsonAssoc) {
+                $value[$key] = $closure($value[$key], $value);
+            } else {
+                $value->$key = $closure($value->$key, $value);
+            }
         }
 
         return $value;
@@ -627,14 +651,18 @@ trait Attribute
     {
         if (is_array($name)) {
             foreach ($name as $key => $val) {
-                $key = $this->getRealFieldName($key);
-
-                $this->withAttr[$key] = $val;
+                $this->withAttribute($key, $val);
             }
         } else {
             $name = $this->getRealFieldName($name);
 
-            $this->withAttr[$name] = $callback;
+            if (strpos($name, '.')) {
+                list($name, $key) = explode('.', $name);
+
+                $this->withAttr[$name][$key] = $callback;
+            } else {
+                $this->withAttr[$name] = $callback;
+            }
         }
 
         return $this;

@@ -22,37 +22,17 @@ use think\facade\Db;
  * Class Model
  * @package think
  * @mixin Query
- * @method Query where(mixed $field, string $op = null, mixed $condition = null) static 查询条件
- * @method Query whereTime(string $field, string $op, mixed $range = null) static 查询日期和时间
- * @method Query whereBetweenTime(string $field, mixed $startTime, mixed $endTime) static 查询日期或者时间范围
- * @method Query whereBetweenTimeField(string $startField, string $endField) static 查询当前时间在两个时间字段范围
- * @method Query whereYear(string $field, string $year = 'this year') static 查询某年
- * @method Query whereMonth(string $field, string $month = 'this month') static 查询某月
- * @method Query whereDay(string $field, string $day = 'today') static 查询某日
- * @method Query whereRaw(string $where, array $bind = []) static 表达式查询
- * @method Query whereExp(string $field, string $condition, array $bind = []) static 字段表达式查询
- * @method Query when(mixed $condition, mixed $query, mixed $otherwise = null) static 条件查询
- * @method Query join(mixed $join, mixed $condition = null, string $type = 'INNER') static JOIN查询
- * @method Query view(mixed $join, mixed $field = null, mixed $on = null, string $type = 'INNER') static 视图查询
- * @method Query with(mixed $with) static 关联预载入
- * @method Query count(string $field) static Count统计查询
- * @method Query min(string $field) static Min统计查询
- * @method Query max(string $field) static Max统计查询
- * @method Query sum(string $field) static SUM统计查询
- * @method Query avg(string $field) static Avg统计查询
- * @method Query field(mixed $field, boolean $except = false) static 指定查询字段
- * @method Query fieldRaw(string $field, array $bind = []) static 指定查询字段
- * @method Query union(mixed $union, boolean $all = false) static UNION查询
- * @method Query limit(mixed $offset, integer $length = null) static 查询LIMIT
- * @method Query order(mixed $field, string $order = null) static 查询ORDER
- * @method Query orderRaw(string $field, array $bind = []) static 查询ORDER
- * @method Query cache(mixed $key = null, integer $expire = null) static 设置查询缓存
- * @method mixed value(string $field) static 获取某个字段的值
- * @method array column(string $field, string $key = '') static 获取某个列的值
- * @method Model find(mixed $data = null) static 查询单个记录 不存在返回Null
- * @method Model findOrEmpty(mixed $data = null) static 查询单个记录 不存在返回空模型
- * @method \think\model\Collection select(mixed $data = null) static 查询多个记录
- * @method Model withAttr(array $name, \Closure $closure) 动态定义获取器
+ * @method void onAfterRead(Model $model) static after_read事件定义
+ * @method mixed onBeforeInsert(Model $model) static before_insert事件定义
+ * @method void onAfterInsert(Model $model) static after_insert事件定义
+ * @method mixed onBeforeUpdate(Model $model) static before_update事件定义
+ * @method void onAfterUpdate(Model $model) static after_update事件定义
+ * @method mixed onBeforeWrite(Model $model) static before_write事件定义
+ * @method void onAfterWrite(Model $model) static after_write事件定义
+ * @method mixed onBeforeDelete(Model $model) static before_write事件定义
+ * @method void onAfterDelete(Model $model) static after_delete事件定义
+ * @method void onBeforeRestore(Model $model) static before_restore事件定义
+ * @method void onAfterRestore(Model $model) static after_restore事件定义
  */
 abstract class Model implements JsonSerializable, ArrayAccess
 {
@@ -109,24 +89,6 @@ abstract class Model implements JsonSerializable, ArrayAccess
      * @var string
      */
     protected $table;
-
-    /**
-     * 写入自动完成定义
-     * @var array
-     */
-    protected $auto = [];
-
-    /**
-     * 新增自动完成定义
-     * @var array
-     */
-    protected $insert = [];
-
-    /**
-     * 更新自动完成定义
-     * @var array
-     */
-    protected $update = [];
 
     /**
      * 初始化过的模型.
@@ -341,10 +303,6 @@ abstract class Model implements JsonSerializable, ArrayAccess
     private function initialize(): void
     {
         if (!isset(static::$initialized[static::class])) {
-            if ($this->observerClass) {
-                // 注册模型观察者
-                $this->observe($this->observerClass);
-            }
             static::$initialized[static::class] = true;
             static::init();
         }
@@ -357,30 +315,6 @@ abstract class Model implements JsonSerializable, ArrayAccess
      */
     protected static function init()
     {}
-
-    /**
-     * 数据自动完成
-     * @access protected
-     * @param array $auto 要自动更新的字段列表
-     * @return void
-     */
-    protected function autoCompleteData(array $auto = []): void
-    {
-        foreach ($auto as $field => $value) {
-            if (is_integer($field)) {
-                $field = $value;
-                $value = null;
-            }
-
-            if (!isset($this->data[$field])) {
-                $default = null;
-            } else {
-                $default = $this->data[$field];
-            }
-
-            $this->setAttr($field, !is_null($value) ? $value : $default);
-        }
-    }
 
     protected function checkData(): void
     {}
@@ -529,10 +463,9 @@ abstract class Model implements JsonSerializable, ArrayAccess
     /**
      * 检查数据是否允许写入
      * @access protected
-     * @param array $append 自动完成的字段列表
      * @return array
      */
-    protected function checkAllowFields(array $append = []): array
+    protected function checkAllowFields(): array
     {
         // 检测字段
         if (empty($this->field)) {
@@ -548,7 +481,7 @@ abstract class Model implements JsonSerializable, ArrayAccess
             return $this->field;
         }
 
-        $field = array_merge($this->field, $append);
+        $field = $this->field;
 
         if ($this->autoWriteTimestamp) {
             array_push($field, $this->createTime, $this->updateTime);
@@ -569,11 +502,6 @@ abstract class Model implements JsonSerializable, ArrayAccess
      */
     protected function updateData(): bool
     {
-        // 自动更新
-        $auto = array_merge($this->auto, $this->update);
-
-        $this->autoCompleteData($auto);
-
         // 事件回调
         if (false === $this->trigger('BeforeUpdate')) {
             return false;
@@ -590,7 +518,7 @@ abstract class Model implements JsonSerializable, ArrayAccess
                 $this->autoRelationUpdate();
             }
 
-            return false;
+            return true;
         }
 
         if ($this->autoWriteTimestamp && $this->updateTime && !isset($data[$this->updateTime])) {
@@ -600,7 +528,7 @@ abstract class Model implements JsonSerializable, ArrayAccess
         }
 
         // 检查允许字段
-        $allowFields = $this->checkAllowFields($auto);
+        $allowFields = $this->checkAllowFields();
 
         foreach ($this->relationWrite as $name => $val) {
             if (!is_array($val)) {
@@ -652,11 +580,6 @@ abstract class Model implements JsonSerializable, ArrayAccess
      */
     protected function insertData(string $sequence = null): bool
     {
-        // 自动写入
-        $auto = array_merge($this->auto, $this->insert);
-
-        $this->autoCompleteData($auto);
-
         // 时间戳自动写入
         if ($this->autoWriteTimestamp) {
             if ($this->createTime && !isset($this->data[$this->createTime])) {
@@ -675,7 +598,7 @@ abstract class Model implements JsonSerializable, ArrayAccess
         $this->checkData();
 
         // 检查允许字段
-        $allowFields = $this->checkAllowFields($auto);
+        $allowFields = $this->checkAllowFields();
 
         $db = $this->db();
         $db->startTrans();
@@ -814,19 +737,6 @@ abstract class Model implements JsonSerializable, ArrayAccess
             $db->rollback();
             throw $e;
         }
-    }
-
-    /**
-     * 设置自动完成的字段（ 规则通过修改器定义）
-     * @access public
-     * @param array $fields 需要自动完成的字段
-     * @return $this
-     */
-    public function auto(array $fields)
-    {
-        $this->auto = $fields;
-
-        return $this;
     }
 
     /**

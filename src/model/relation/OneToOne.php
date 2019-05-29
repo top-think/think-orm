@@ -79,8 +79,7 @@ abstract class OneToOne extends Relation
             } else {
                 $masterField = true;
             }
-
-            $query->field($masterField, false, $table, $name);
+            $query->tableField($masterField, $table, $name);
         }
 
         // 预载入封装
@@ -108,7 +107,7 @@ abstract class OneToOne extends Relation
         }
 
         $query->join([$joinTable => $joinAlias], $joinOn, $joinType)
-            ->field($field, false, $joinTable, $joinAlias, $relation . '__');
+            ->tableField($field, $joinTable, $joinAlias, $relation . '__');
     }
 
     /**

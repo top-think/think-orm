@@ -478,7 +478,7 @@ class BelongsToMany extends Relation
 
         $query = $this->query
             ->field($fields)
-            ->field(true, false, $table, 'pivot', 'pivot__');
+            ->tableField(true, $table, 'pivot', 'pivot__');
 
         if (empty($this->baseQuery)) {
             $relationFk = $this->query->getPk();

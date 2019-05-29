@@ -362,9 +362,13 @@ trait Attribute
             $method = 'set' . Db::parseName($name, 1) . 'Attr';
 
             if (method_exists($this, $method)) {
+                $array = $this->data;
                 $value = $this->$method($value, array_merge($this->data, $data));
 
                 $this->set[$name] = true;
+                if (is_null($value) && $array !== $this->data) {
+                    return;
+                }
             } elseif (isset($this->type[$name])) {
                 // 类型转换
                 $value = $this->writeTransform($value, $this->type[$name]);

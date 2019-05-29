@@ -29,10 +29,46 @@ class Collection extends BaseCollection
      */
     public function load($relation)
     {
-        $item = current($this->items);
-        $item->eagerlyResultSet($this->items, (array) $relation);
+        if (!$this->isEmpty()) {
+            $item = current($this->items);
+            $item->eagerlyResultSet($this->items, (array) $relation);
+        }
 
         return $this;
+    }
+
+    /**
+     * 删除数据集的数据
+     * @access public
+     * @return bool
+     */
+    public function delete(): bool
+    {
+        $this->each(function (Model $model) {
+            $model->delete();
+        });
+
+        return true;
+    }
+
+    /**
+     * 更新数据
+     * @access public
+     * @param array $data       数据数组
+     * @param array $allowField 允许字段
+     * @return bool
+     */
+    public function update(array $data, array $allowField = []): bool
+    {
+        $this->each(function (Model $model) use ($data, $allowField) {
+            if (!empty($allowField)) {
+                $model->allowField($allowField);
+            }
+
+            $model->save($data);
+        });
+
+        return true;
     }
 
     /**

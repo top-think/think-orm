@@ -64,7 +64,7 @@ abstract class Relation
      * 是否为自关联
      * @var bool
      */
-    protected $selfRelation;
+    protected $selfRelation = false;
 
     /**
      * 获取关联的所属模型
@@ -155,6 +155,17 @@ abstract class Relation
     }
 
     /**
+     * 更新数据
+     * @access public
+     * @param  array $data 更新数据
+     * @return integer
+     */
+    public function update(array $data = []): int
+    {
+        return $this->query->update($data);
+    }
+
+    /**
      * 删除记录
      * @access public
      * @param  mixed $data 表达式 true 表示强制删除
@@ -181,10 +192,9 @@ abstract class Relation
             // 执行基础查询
             $this->baseQuery();
 
-            $result = call_user_func_array([$this->query->getModel(), $method], $args);
-            $class  = get_class($this->query);
+            $result = call_user_func_array([$this->query->getModel(false), $method], $args);
 
-            return $result instanceof $class ? $this : $result;
+            return $result === $this->query ? $this : $result;
         }
 
         throw new Exception('method not exists:' . __CLASS__ . '->' . $method);

@@ -400,9 +400,10 @@ class Mongo extends BaseQuery
      * 设置返回字段
      * @access public
      * @param  mixed $field 字段信息
+     * @param  bool  $except 是否排除
      * @return $this
      */
-    public function field($field)
+    public function field($field, bool $except = false)
     {
         if (empty($field) || '*' == $field) {
             return $this;

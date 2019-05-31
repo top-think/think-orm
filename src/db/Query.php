@@ -412,9 +412,9 @@ class Query
      * 获取最近插入的ID
      * @access public
      * @param string $sequence 自增序列名
-     * @return string
+     * @return mixed
      */
-    public function getLastInsID(string $sequence = null): string
+    public function getLastInsID(string $sequence = null)
     {
         $insertId = $this->connection->getLastInsID($sequence);
 

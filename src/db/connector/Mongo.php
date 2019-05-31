@@ -750,7 +750,7 @@ class Mongo
      * @access public
      * @param  Query     $query 查询对象
      * @param  boolean   $getLastInsID 返回自增主键
-     * @return WriteResult
+     * @return mixed
      * @throws AuthenticationException
      * @throws InvalidArgumentException
      * @throws ConnectionException
@@ -1269,6 +1269,28 @@ class Mongo
     public function getFieldsType(string $tableName)
     {
         return [];
+    }
+
+    /**
+     * 获取数据表绑定信息
+     * @access public
+     * @param mixed $tableName 数据表名
+     * @return array
+     */
+    public function getFieldsBind($tableName): array
+    {
+        return [];
+    }
+
+    /**
+     * 获取字段绑定类型
+     * @access public
+     * @param string $type 字段类型
+     * @return integer
+     */
+    public function getFieldBindType(string $type): int
+    {
+        return 1;
     }
 
     /**

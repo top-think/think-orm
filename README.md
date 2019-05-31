@@ -181,14 +181,6 @@ $user->save();
     ```php
    User::destroy(1);
     ```
-* 静态调用
-
-    ```php
-    User::update([
-        'name'  => 'topthink',
-        'email' => 'topthink@qq.com',
-    ], ['id' => 1]);
-    ```
 * destroy方法支持删除指定主键或者查询条件的数据
 
     ```php

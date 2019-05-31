@@ -380,17 +380,34 @@ class Mongo extends BaseQuery
     }
 
     /**
+     * 获取执行的SQL语句而不进行实际的查询
+     * @access public
+     * @param bool $fetch 是否返回sql
+     * @return $this|Fetch
+     */
+    public function fetchSql(bool $fetch = true)
+    {
+        $this->options['fetch_sql'] = $fetch;
+
+        if ($fetch) {
+            throw new Exception('Mongo not support fetchSql');
+        }
+
+        return $this;
+    }
+
+    /**
      * 设置返回字段
      * @access public
-     * @param  mixed   $field     字段信息
-     * @param  boolean $except    是否排除
-     * @param  string  $tableName 数据表名
-     * @param  string  $prefix    字段前缀
-     * @param  string  $alias     别名前缀
+     * @param  mixed $field 字段信息
      * @return $this
      */
-    public function field($field, bool $except = false, string $tableName = '', string $prefix = '', string $alias = '')
+    public function field($field)
     {
+        if (empty($field) || '*' == $field) {
+            return $this;
+        }
+
         if (is_string($field)) {
             $field = array_map('trim', explode(',', $field));
         }
@@ -549,7 +566,7 @@ class Mongo extends BaseQuery
             $options['modifiers'] = $modifiers;
         }
 
-        if (!isset($options['projection']) || '*' == $options['projection']) {
+        if (!isset($options['projection'])) {
             $options['projection'] = [];
         }
 

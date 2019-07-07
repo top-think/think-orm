@@ -107,11 +107,10 @@ class Mysql extends Builder
     /**
      * 生成Insert SQL
      * @access public
-     * @param  Query     $query   查询对象
-     * @param  bool      $replace 是否replace
+     * @param  Query $query 查询对象
      * @return string
      */
-    public function insert(Query $query, bool $replace = false): string
+    public function insert(Query $query): string
     {
         $options = $query->getOptions();
 
@@ -129,7 +128,7 @@ class Mysql extends Builder
         return str_replace(
             ['%INSERT%', '%EXTRA%', '%TABLE%', '%PARTITION%', '%SET%', '%DUPLICATE%', '%COMMENT%'],
             [
-                $replace ? 'REPLACE' : 'INSERT',
+                !empty($options['replace']) ? 'REPLACE' : 'INSERT',
                 $this->parseExtra($query, $options['extra']),
                 $this->parseTable($query, $options['table']),
                 $this->parsePartition($query, $options['partition']),
@@ -317,8 +316,7 @@ class Mysql extends Builder
         if (strpos($key, '->') && false === strpos($key, '(')) {
             // JSON字段支持
             list($field, $name) = explode('->', $key, 2);
-
-            return 'json_extract(' . $this->parseKey($query, $field) . ', \'$.' . str_replace('->', '.', $name) . '\')';
+            return 'json_extract(' . $this->parseKey($query, $field) . ', \'$' . (strpos($name, '[') === 0 ? '' : '.') . str_replace('->', '.', $name) . '\')';
         } elseif (strpos($key, '.') && !preg_match('/[,\'\"\(\)`\s]/', $key)) {
             list($table, $key) = explode('.', $key, 2);
 
@@ -413,7 +411,7 @@ class Mysql extends Builder
             } elseif ($val instanceof Raw) {
                 $updates[] = $this->parseKey($query, $key) . " = " . $val->getValue();
             } else {
-                $name      = $query->bindValue($val, $query->getFieldBindType($key));
+                $name      = $query->bindValue($val, $query->getConnection()->getFieldBindType($key));
                 $updates[] = $this->parseKey($query, $key) . " = :" . $name;
             }
         }

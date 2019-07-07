@@ -13,8 +13,8 @@ declare (strict_types = 1);
 namespace think\model\concern;
 
 use think\Collection;
+use think\Container;
 use think\Exception;
-use think\facade\Db;
 use think\Model;
 use think\model\Collection as ModelCollection;
 use think\model\relation\OneToOne;
@@ -71,7 +71,7 @@ trait Conversion
      */
     public function appendRelationAttr(string $attr, array $append)
     {
-        $relation = Db::parseName($attr, 1, false);
+        $relation = Container::parseName($attr, 1, false);
 
         if (isset($this->relation[$relation])) {
             $model = $this->relation[$relation];
@@ -84,9 +84,9 @@ trait Conversion
                 $key = is_numeric($key) ? $attr : $key;
                 if (isset($this->data[$key])) {
                     throw new Exception('bind attr has exists:' . $key);
-                } else {
-                    $this->data[$key] = $model->$attr;
                 }
+
+                $this->data[$key] = $model->$attr;
             }
         }
 
@@ -167,7 +167,7 @@ trait Conversion
                 }
                 // 关联模型对象
                 if (!isset($this->hidden[$key]) || true !== $this->hidden[$key]) {
-                    $item[$key] = $val->toArray();
+                    $item[$key] = $val;
                 }
             } elseif (isset($this->visible[$key])) {
                 $item[$key] = $this->getAttr($key);
@@ -188,25 +188,15 @@ trait Conversion
     {
         if (is_array($name)) {
             // 追加关联对象属性
-            $relation = $this->getRelation($key);
-
-            if (!$relation) {
-                $relation = $this->getAttr($key);
-                $relation->visible($name);
-            }
-
-            $item[$key] = $relation->append($name)->toArray();
+            $relation   = $this->getRelation($key, true);
+            $item[$key] = $relation ? $relation->append($name)
+                ->toArray() : [];
         } elseif (strpos($name, '.')) {
             list($key, $attr) = explode('.', $name);
             // 追加关联对象属性
-            $relation = $this->getRelation($key);
-
-            if (!$relation) {
-                $relation = $this->getAttr($key);
-                $relation->visible([$attr]);
-            }
-
-            $item[$key] = $relation->append([$attr])->toArray();
+            $relation   = $this->getRelation($key, true);
+            $item[$key] = $relation ? $relation->append([$attr])
+                ->toArray() : [];
         } else {
             $value       = $this->getAttr($name);
             $item[$name] = $value;

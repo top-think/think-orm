@@ -16,7 +16,6 @@ use ArrayAccess;
 use Closure;
 use JsonSerializable;
 use think\db\Query;
-use think\facade\Db;
 
 /**
  * Class Model
@@ -127,24 +126,31 @@ abstract class Model implements JsonSerializable, ArrayAccess
     protected $db;
 
     /**
-     * 设置Connection信息
+     * 服务注入
+     * @var Closure
+     */
+    protected static $maker;
+
+    /**
+     * 设置服务注入
      * @access public
-     * @param mixed $connection 数据库配置
+     * @param Closure $maker
      * @return void
      */
-    public function setConnection($connection)
+    public static function maker(Closure $maker)
     {
-        $this->connection = $connection;
+        static::$maker = $maker;
     }
 
     /**
-     * 获取Connection信息
+     * 设置Db对象
      * @access public
-     * @return string|array
+     * @param Db $db Db对象
+     * @return void
      */
-    public function getConnection()
+    public function setDb(Db $db)
     {
-        return $this->connection;
+        $this->db = $db;
     }
 
     /**
@@ -172,6 +178,12 @@ abstract class Model implements JsonSerializable, ArrayAccess
             // 当前模型名
             $name       = str_replace('\\', '/', static::class);
             $this->name = basename($name);
+        }
+
+        $this->db = Container::pull('think\DbManager');
+
+        if (static::$maker) {
+            call_user_func(static::$maker, $this);
         }
 
         // 执行初始化操作
@@ -239,6 +251,16 @@ abstract class Model implements JsonSerializable, ArrayAccess
     }
 
     /**
+     * 获取当前模型的数据库查询对象
+     * @access public
+     * @return Query|null
+     */
+    public function getQuery()
+    {
+        return $this->queryInstance;
+    }
+
+    /**
      * 设置当前模型数据表的后缀
      * @access public
      * @param string $suffix 数据表后缀
@@ -263,7 +285,7 @@ abstract class Model implements JsonSerializable, ArrayAccess
     /**
      * 获取当前模型的数据库查询对象
      * @access public
-     * @param array|false $scope 使用的全局查询范围
+     * @param array $scope 设置不使用的全局查询范围
      * @return Query
      */
     public function db($scope = []): Query
@@ -272,18 +294,18 @@ abstract class Model implements JsonSerializable, ArrayAccess
         if ($this->queryInstance) {
             $query = $this->queryInstance;
         } else {
-            $query = Db::buildQuery($this->connection)
+            $query = $this->db->connect($this->connection)
                 ->name($this->name . $this->suffix)
                 ->pk($this->pk);
+        }
+
+        if (!empty($this->table)) {
+            $query->table($this->table . $this->suffix);
         }
 
         $query->model($this)
             ->json($this->json, $this->jsonAssoc)
             ->setFieldType(array_merge($this->schema, $this->jsonType));
-
-        if (!empty($this->table)) {
-            $query->table($this->table . $this->suffix);
-        }
 
         // 软删除
         if (property_exists($this, 'withTrashed') && !$this->withTrashed) {
@@ -370,7 +392,7 @@ abstract class Model implements JsonSerializable, ArrayAccess
     public function refresh(bool $relation = false)
     {
         if ($this->exists) {
-            $this->data   = $this->db()->fetchArray()->find($this->getKey());
+            $this->data   = $this->db()->find($this->getKey())->getData();
             $this->origin = $this->data;
 
             if ($relation) {
@@ -618,10 +640,8 @@ abstract class Model implements JsonSerializable, ArrayAccess
             if ($result && $insertId = $db->getLastInsID($sequence)) {
                 $pk = $this->getPk();
 
-                foreach ((array) $pk as $key) {
-                    if (!isset($this->data[$key]) || '' == $this->data[$key]) {
-                        $this->data[$key] = $insertId;
-                    }
+                if (is_string($pk) && (!isset($this->data[$pk]) || '' == $this->data[$pk])) {
+                    $this->data[$pk] = $insertId;
                 }
             }
 
@@ -689,7 +709,7 @@ abstract class Model implements JsonSerializable, ArrayAccess
 
             foreach ($dataSet as $key => $data) {
                 if ($this->exists || (!empty($auto) && isset($data[$pk]))) {
-                    $result[$key] = self::update($data, $this->field);
+                    $result[$key] = self::update($data);
                 } else {
                     $result[$key] = self::create($data, $this->field, $this->replace);
                 }
@@ -928,7 +948,7 @@ abstract class Model implements JsonSerializable, ArrayAccess
      * @param string $suffix 切换的表后缀
      * @return Model
      */
-    public static function change(string $suffix)
+    public static function suffix(string $suffix)
     {
         $model = new static();
         $model->setSuffix($suffix);

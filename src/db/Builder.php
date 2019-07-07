@@ -83,7 +83,7 @@ abstract class Builder
     /**
      * 架构函数
      * @access public
-     * @param  Connection    $connection 数据库连接对象实例
+     * @param  Connection $connection 数据库连接对象实例
      */
     public function __construct(Connection $connection)
     {
@@ -359,11 +359,14 @@ abstract class Builder
                     throw new Exception('where express error:' . var_export($value, true));
                 }
                 $field = array_shift($value);
-            } elseif (!($value instanceof \Closure)) {
+            } elseif (true === $value) {
+                $where[] = ' ' . $logic . ' 1 ';
+                continue;
+            } elseif (!($value instanceof Closure)) {
                 throw new Exception('where express error:' . var_export($value, true));
             }
 
-            if ($value instanceof \Closure) {
+            if ($value instanceof Closure) {
                 // 使用闭包查询
                 $where[] = $this->parseClousreWhere($query, $value, $logic);
             } elseif (is_array($field)) {
@@ -495,7 +498,7 @@ abstract class Builder
             $exp = $this->exp[$exp];
         }
 
-        if (is_string($field)) {
+        if (is_string($field) && 'LIKE' != $exp) {
             $bindType = $binds[$field] ?? PDO::PARAM_STR;
         } else {
             $bindType = PDO::PARAM_STR;
@@ -544,7 +547,7 @@ abstract class Builder
         if (is_array($value)) {
             $array = [];
             foreach ($value as $item) {
-                $name    = $query->bindValue($item, $bindType);
+                $name    = $query->bindValue($item, PDO::PARAM_STR);
                 $array[] = $key . ' ' . $exp . ' :' . $name;
             }
 
@@ -649,7 +652,7 @@ abstract class Builder
     protected function parseExists(Query $query, string $key, string $exp, $value, string $field, int $bindType): string
     {
         // EXISTS 查询
-        if ($value instanceof \Closure) {
+        if ($value instanceof Closure) {
             $value = $this->parseClosure($query, $value, false);
         } elseif ($value instanceof Raw) {
             $value = $value->getValue();
@@ -694,8 +697,12 @@ abstract class Builder
         }
 
         // 比较运算
-        if ($value instanceof \Closure) {
+        if ($value instanceof Closure) {
             $value = $this->parseClosure($query, $value);
+        }
+
+        if ('=' == $exp && is_null($value)) {
+            return $key . ' IS NULL';
         }
 
         return $key . ' ' . $exp . ' ' . $value;
@@ -739,7 +746,7 @@ abstract class Builder
     protected function parseIn(Query $query, string $key, string $exp, $value, $field, int $bindType): string
     {
         // IN 查询
-        if ($value instanceof \Closure) {
+        if ($value instanceof Closure) {
             $value = $this->parseClosure($query, $value, false);
         } elseif ($value instanceof Raw) {
             $value = $value->getValue();
@@ -752,8 +759,12 @@ abstract class Builder
                 $array[] = ':' . $name;
             }
 
-            $zone  = implode(',', $array);
-            $value = empty($zone) ? "''" : $zone;
+            if (count($array) == 1) {
+                return $key . ('IN' == $exp ? ' = ' : ' <> ') . $array[0];
+            } else {
+                $zone  = implode(',', $array);
+                $value = empty($zone) ? "''" : $zone;
+            }
         }
 
         return $key . ' ' . $exp . ' (' . $value . ')';
@@ -767,9 +778,9 @@ abstract class Builder
      * @param  bool     $show
      * @return string
      */
-    protected function parseClosure(Query $query, \Closure $call, bool $show = true): string
+    protected function parseClosure(Query $query, Closure $call, bool $show = true): string
     {
-        $newQuery = $query->newQuery()->setConnection($this->connection);
+        $newQuery = $query->newQuery()->removeOption();
         $call($newQuery);
 
         return $newQuery->buildSql($show);
@@ -1022,7 +1033,7 @@ abstract class Builder
         unset($union['type']);
 
         foreach ($union as $u) {
-            if ($u instanceof \Closure) {
+            if ($u instanceof Closure) {
                 $sql[] = $type . ' ' . $this->parseClosure($query, $u);
             } elseif (is_string($u)) {
                 $sql[] = $type . ' ( ' . $u . ' )';

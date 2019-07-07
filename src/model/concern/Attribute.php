@@ -13,8 +13,8 @@ declare (strict_types = 1);
 namespace think\model\concern;
 
 use InvalidArgumentException;
+use think\Container;
 use think\db\Raw;
-use think\facade\Db;
 use think\model\Relation;
 
 /**
@@ -185,7 +185,7 @@ trait Attribute
      */
     protected function getRealFieldName(string $name): string
     {
-        return $this->strict ? $name : Db::parseName($name);
+        return $this->strict ? $name : Container::parseName($name);
     }
 
     /**
@@ -356,10 +356,10 @@ trait Attribute
 
         if (is_null($value) && $this->autoWriteTimestamp && in_array($name, [$this->createTime, $this->updateTime])) {
             // 自动写入的时间戳字段
-            $value = $this->autoWriteTimestamp($name);
+            $value = $this->autoWriteTimestamp();
         } else {
             // 检测修改器
-            $method = 'set' . Db::parseName($name, 1) . 'Attr';
+            $method = 'set' . Container::parseName($name, 1) . 'Attr';
 
             if (method_exists($this, $method)) {
                 $array = $this->data;
@@ -422,7 +422,6 @@ trait Attribute
                 }
                 break;
             case 'datetime':
-
                 $value = is_numeric($value) ? $value : strtotime($value);
                 $value = $this->formatDateTime('Y-m-d H:i:s.u', $value);
                 break;
@@ -463,7 +462,7 @@ trait Attribute
             $relation = false;
             $value    = $this->getData($name);
         } catch (InvalidArgumentException $e) {
-            $relation = true;
+            $relation = $this->isRelationAttr($name);
             $value    = null;
         }
 
@@ -473,21 +472,21 @@ trait Attribute
     /**
      * 获取经过获取器处理后的数据对象的值
      * @access protected
-     * @param  string $name 字段名称
-     * @param  mixed  $value 字段值
-     * @param  bool   $relation 是否为关联属性
+     * @param  string      $name 字段名称
+     * @param  mixed       $value 字段值
+     * @param  bool|string $relation 是否为关联属性或者关联名
      * @return mixed
      * @throws InvalidArgumentException
      */
-    protected function getValue(string $name, $value, bool $relation = false)
+    protected function getValue(string $name, $value, $relation = false)
     {
         // 检测属性获取器
         $fieldName = $this->getRealFieldName($name);
-        $method    = 'get' . Db::parseName($name, 1) . 'Attr';
+        $method    = 'get' . Container::parseName($name, 1) . 'Attr';
 
         if (isset($this->withAttr[$fieldName])) {
             if ($relation) {
-                $value = $this->getRelationValue($name);
+                $value = $this->getRelationValue($relation);
             }
 
             if (in_array($fieldName, $this->json) && is_array($this->withAttr[$fieldName])) {
@@ -498,7 +497,7 @@ trait Attribute
             }
         } elseif (method_exists($this, $method)) {
             if ($relation) {
-                $value = $this->getRelationValue($name);
+                $value = $this->getRelationValue($relation);
             }
 
             $value = $this->$method($value, $this->data);
@@ -508,7 +507,9 @@ trait Attribute
         } elseif ($this->autoWriteTimestamp && in_array($fieldName, [$this->createTime, $this->updateTime])) {
             $value = $this->getTimestampValue($value);
         } elseif ($relation) {
-            $value = $this->getRelationAttribute($name);
+            $value = $this->getRelationValue($relation);
+            // 保存关联对象值
+            $this->relation[$name] = $value;
         }
 
         return $value;
@@ -537,40 +538,14 @@ trait Attribute
     /**
      * 获取关联属性值
      * @access protected
-     * @param  string   $name  属性名
+     * @param  string $relation 关联名
      * @return mixed
      */
-    protected function getRelationValue(string $name)
+    protected function getRelationValue(string $relation)
     {
-        $relation = $this->isRelationAttr($name);
-
-        if (false === $relation) {
-            return;
-        }
-
         $modelRelation = $this->$relation();
 
         return $modelRelation instanceof Relation ? $this->getRelationData($modelRelation) : null;
-    }
-
-    /**
-     * 获取并保存关联属性值
-     * @access protected
-     * @param  string   $name  属性名
-     * @return mixed
-     */
-    protected function getRelationAttribute(string $name)
-    {
-        $value = $this->getRelationValue($name);
-
-        if (!$value) {
-            throw new InvalidArgumentException('property not exists:' . static::class . '->' . $name);
-        }
-
-        // 保存关联对象值
-        $this->relation[$name] = $value;
-
-        return $value;
     }
 
     /**

@@ -19,6 +19,7 @@ use Countable;
 use DomainException;
 use IteratorAggregate;
 use JsonSerializable;
+use think\paginator\driver\Bootstrap;
 use Traversable;
 
 /**
@@ -135,7 +136,16 @@ abstract class Paginator implements ArrayAccess, Countable, IteratorAggregate, J
      */
     public static function make($items, int $listRows, int $currentPage = 1, int $total = null, bool $simple = false, array $options = [])
     {
-        return new static($items, $listRows, $currentPage, $total, $simple, $options);
+        if (isset(static::$maker)) {
+            return call_user_func(static::$maker, $items, $listRows, $currentPage, $total, $simple, $options);
+        }
+
+        return new Bootstrap($items, $listRows, $currentPage, $total, $simple, $options);
+    }
+
+    public static function maker(Closure $resolver)
+    {
+        static::$maker = $resolver;
     }
 
     protected function setCurrentPage(int $currentPage): int
@@ -189,33 +199,44 @@ abstract class Paginator implements ArrayAccess, Countable, IteratorAggregate, J
      */
     public static function getCurrentPage(string $varPage = 'page', int $default = 1): int
     {
-        $page = $_REQUEST[$varPage] ?? 1;
-
-        if (filter_var($page, FILTER_VALIDATE_INT) !== false && (int) $page >= 1) {
-            return $page;
+        if (isset(static::$currentPageResolver)) {
+            return call_user_func(static::$currentPageResolver, $varPage);
         }
 
         return $default;
     }
 
     /**
+     * 设置获取当前页码闭包
+     * @param Closure $resolver
+     */
+    public static function currentPageResolver(Closure $resolver)
+    {
+        static::$currentPageResolver = $resolver;
+    }
+
+    /**
      * 自动获取当前的path
      * @access public
+     * @param string $default
      * @return string
      */
-    public static function getCurrentPath(): string
+    public static function getCurrentPath($default = '/'): string
     {
-        if (isset($_SERVER['HTTP_X_REWRITE_URL'])) {
-            $url = $_SERVER['HTTP_X_REWRITE_URL'];
-        } elseif (isset($_SERVER['REQUEST_URI'])) {
-            $url = $_SERVER['REQUEST_URI'];
-        } elseif (isset($_SERVER['ORIG_PATH_INFO'])) {
-            $url = $_SERVER['ORIG_PATH_INFO'] . (!empty($_SERVER['QUERY_STRING']) ? '?' . $_SERVER['QUERY_STRING'] : '');
-        } else {
-            $url = '';
+        if (isset(static::$currentPathResolver)) {
+            return call_user_func(static::$currentPathResolver);
         }
 
-        return strpos($url, '?') ? strstr($url, '?', true) : $url;
+        return $default;
+    }
+
+    /**
+     * 设置获取当前路径闭包
+     * @param Closure $resolver
+     */
+    public static function currentPathResolver(Closure $resolver)
+    {
+        static::$currentPathResolver = $resolver;
     }
 
     public function total(): int

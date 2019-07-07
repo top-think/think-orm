@@ -10,44 +10,45 @@
 // +----------------------------------------------------------------------
 declare (strict_types = 1);
 
-namespace think\model;
+namespace think\db\concern;
 
-use think\Model;
+use PDOStatement;
 
 /**
- * 多对多中间表模型类
+ * PDO查询支持
  */
-class Pivot extends Model
+trait PDOQuery
 {
+    use JoinAndViewQuery, ParamsBind, TableFieldInfo;
 
     /**
-     * 父模型
-     * @var Model
-     */
-    public $parent;
-
-    /**
-     * 是否时间自动写入
-     * @var bool
-     */
-    protected $autoWriteTimestamp = false;
-
-    /**
-     * 架构函数
+     * 执行查询但只返回PDOStatement对象
      * @access public
-     * @param  array  $data 数据
-     * @param  Model  $parent 上级模型
-     * @param  string $table 中间数据表名
+     * @return PDOStatement
      */
-    public function __construct(array $data = [], Model $parent = null, string $table = '')
+    public function getPdo(): PDOStatement
     {
-        $this->parent = $parent;
+        return $this->connection->pdo($this);
+    }
 
-        if (is_null($this->name)) {
-            $this->name = $table;
+    /**
+     * 使用游标查找记录
+     * @access public
+     * @param mixed $data 数据
+     * @return \Generator
+     */
+    public function cursor($data = null)
+    {
+        if (!is_null($data)) {
+            // 主键条件分析
+            $this->parsePkWhere($data);
         }
 
-        parent::__construct($data);
+        $this->options['data'] = $data;
+
+        $connection = clone $this->connection;
+
+        return $connection->cursor($this);
     }
 
 }

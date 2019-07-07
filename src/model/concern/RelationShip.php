@@ -12,10 +12,11 @@ declare (strict_types = 1);
 
 namespace think\model\concern;
 
+use Closure;
 use think\Collection;
+use think\Container;
 use think\db\Query;
 use think\Exception;
-use think\facade\Db;
 use think\Model;
 use think\model\Relation;
 use think\model\relation\BelongsTo;
@@ -23,6 +24,7 @@ use think\model\relation\BelongsToMany;
 use think\model\relation\HasMany;
 use think\model\relation\HasManyThrough;
 use think\model\relation\HasOne;
+use think\model\relation\HasOneThrough;
 use think\model\relation\MorphMany;
 use think\model\relation\MorphOne;
 use think\model\relation\MorphTo;
@@ -95,8 +97,8 @@ trait RelationShip
         if (array_key_exists($name, $this->relation)) {
             return $this->relation[$name];
         } elseif ($auto) {
-            $method = Db::parseName($name, 1, false);
-            return $this->$method()->getRelation();
+            $relation = Container::parseName($name, 1, false);
+            return $this->getRelationValue($relation);
         }
     }
 
@@ -111,7 +113,7 @@ trait RelationShip
     public function setRelation(string $name, $value, array $data = [])
     {
         // 检测修改器
-        $method = 'set' . Db::parseName($name, 1) . 'Attr';
+        $method = 'set' . Container::parseName($name, 1) . 'Attr';
 
         if (method_exists($this, $method)) {
             $value = $this->$method($value, array_merge($this->data, $data));
@@ -135,7 +137,7 @@ trait RelationShip
             $subRelation = '';
             $closure     = null;
 
-            if ($relation instanceof \Closure) {
+            if ($relation instanceof Closure) {
                 // 支持闭包查询过滤关联条件
                 $closure  = $relation;
                 $relation = $key;
@@ -148,8 +150,8 @@ trait RelationShip
                 list($relation, $subRelation) = explode('.', $relation, 2);
             }
 
-            $method       = Db::parseName($relation, 1, false);
-            $relationName = Db::parseName($relation);
+            $method       = Container::parseName($relation, 1, false);
+            $relationName = Container::parseName($relation);
 
             $relationResult = $this->$method();
 
@@ -224,7 +226,7 @@ trait RelationShip
             $subRelation = [];
             $closure     = null;
 
-            if ($relation instanceof \Closure) {
+            if ($relation instanceof Closure) {
                 $closure  = $relation;
                 $relation = $key;
             }
@@ -238,8 +240,8 @@ trait RelationShip
                 $subRelation = [$subRelation];
             }
 
-            $relation     = Db::parseName($relation, 1, false);
-            $relationName = Db::parseName($relation);
+            $relation     = Container::parseName($relation, 1, false);
+            $relationName = Container::parseName($relation);
 
             $relationResult = $this->$relation();
 
@@ -266,7 +268,7 @@ trait RelationShip
             $subRelation = [];
             $closure     = null;
 
-            if ($relation instanceof \Closure) {
+            if ($relation instanceof Closure) {
                 $closure  = $relation;
                 $relation = $key;
             }
@@ -280,8 +282,8 @@ trait RelationShip
                 $subRelation = [$subRelation];
             }
 
-            $relation     = Db::parseName($relation, 1, false);
-            $relationName = Db::parseName($relation);
+            $relation     = Container::parseName($relation, 1, false);
+            $relationName = Container::parseName($relation);
 
             $relationResult = $this->$relation();
 
@@ -311,9 +313,9 @@ trait RelationShip
 
             if (!is_null($value)) {
                 throw new Exception('bind attr has exists:' . $key);
-            } else {
-                $this->set($key, $relation ? $relation->$attr : null);
             }
+
+            $this->set($key, $relation ? $relation->$attr : null);
         }
 
         return $this;
@@ -333,7 +335,7 @@ trait RelationShip
         foreach ($relations as $key => $relation) {
             $closure = $name = null;
 
-            if ($relation instanceof \Closure) {
+            if ($relation instanceof Closure) {
                 $closure  = $relation;
                 $relation = $key;
             } elseif (is_string($key)) {
@@ -341,11 +343,11 @@ trait RelationShip
                 $relation = $key;
             }
 
-            $relation = Db::parseName($relation, 1, false);
+            $relation = Container::parseName($relation, 1, false);
             $count    = $this->$relation()->relationCount($result, $closure, $aggregate, $field, $name);
 
             if (empty($name)) {
-                $name = Db::parseName($relation) . '_' . $aggregate;
+                $name = Container::parseName($relation) . '_' . $aggregate;
             }
 
             $result->setAttr($name, $count);
@@ -385,7 +387,7 @@ trait RelationShip
         $foreignKey = $foreignKey ?: $this->getForeignKey((new $model)->getName());
         $localKey   = $localKey ?: (new $model)->getPk();
         $trace      = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2);
-        $relation   = Db::parseName($trace[1]['function']);
+        $relation   = Container::parseName($trace[1]['function']);
 
         return new BelongsTo($this, $model, $foreignKey, $localKey, $relation);
     }
@@ -416,9 +418,10 @@ trait RelationShip
      * @param  string $foreignKey 关联外键
      * @param  string $throughKey 关联外键
      * @param  string $localKey   当前主键
+     * @param  string $throughPk  中间表主键
      * @return HasManyThrough
      */
-    public function hasManyThrough(string $model, string $through, string $foreignKey = '', string $throughKey = '', string $localKey = ''): HasManyThrough
+    public function hasManyThrough(string $model, string $through, string $foreignKey = '', string $throughKey = '', string $localKey = '', string $throughPk = ''): HasManyThrough
     {
         // 记录当前关联信息
         $model      = $this->parseModel($model);
@@ -426,29 +429,54 @@ trait RelationShip
         $localKey   = $localKey ?: $this->getPk();
         $foreignKey = $foreignKey ?: $this->getForeignKey($this->name);
         $throughKey = $throughKey ?: $this->getForeignKey((new $through)->getName());
+        $throughPk  = $throughPk ?: (new $through)->getPk();
 
-        return new HasManyThrough($this, $model, $through, $foreignKey, $throughKey, $localKey);
+        return new HasManyThrough($this, $model, $through, $foreignKey, $throughKey, $localKey, $throughPk);
+    }
+
+    /**
+     * HAS ONE 远程关联定义
+     * @access public
+     * @param  string $model      模型名
+     * @param  string $through    中间模型名
+     * @param  string $foreignKey 关联外键
+     * @param  string $throughKey 关联外键
+     * @param  string $localKey   当前主键
+     * @param  string $throughPk  中间表主键
+     * @return HasOneThrough
+     */
+    public function hasOneThrough(string $model, string $through, string $foreignKey = '', string $throughKey = '', string $localKey = '', string $throughPk = ''): HasOneThrough
+    {
+        // 记录当前关联信息
+        $model      = $this->parseModel($model);
+        $through    = $this->parseModel($through);
+        $localKey   = $localKey ?: $this->getPk();
+        $foreignKey = $foreignKey ?: $this->getForeignKey($this->name);
+        $throughKey = $throughKey ?: $this->getForeignKey((new $through)->getName());
+        $throughPk  = $throughPk ?: (new $through)->getPk();
+
+        return new HasOneThrough($this, $model, $through, $foreignKey, $throughKey, $localKey, $throughPk);
     }
 
     /**
      * BELONGS TO MANY 关联定义
      * @access public
      * @param  string $model      模型名
-     * @param  string $table      中间表名
+     * @param  string $middle     中间表/模型名
      * @param  string $foreignKey 关联外键
      * @param  string $localKey   当前模型关联键
      * @return BelongsToMany
      */
-    public function belongsToMany(string $model, string $table = '', string $foreignKey = '', string $localKey = ''): BelongsToMany
+    public function belongsToMany(string $model, string $middle = '', string $foreignKey = '', string $localKey = ''): BelongsToMany
     {
         // 记录当前关联信息
         $model      = $this->parseModel($model);
-        $name       = Db::parseName(Db::classBaseName($model));
-        $table      = $table ?: Db::parseName($this->name) . '_' . $name;
+        $name       = Container::parseName(Container::classBaseName($model));
+        $middle     = $middle ?: Container::parseName($this->name) . '_' . $name;
         $foreignKey = $foreignKey ?: $name . '_id';
         $localKey   = $localKey ?: $this->getForeignKey($this->name);
 
-        return new BelongsToMany($this, $model, $table, $foreignKey, $localKey);
+        return new BelongsToMany($this, $model, $middle, $foreignKey, $localKey);
     }
 
     /**
@@ -466,7 +494,7 @@ trait RelationShip
 
         if (is_null($morph)) {
             $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2);
-            $morph = Db::parseName($trace[1]['function']);
+            $morph = Container::parseName($trace[1]['function']);
         }
 
         if (is_array($morph)) {
@@ -496,7 +524,7 @@ trait RelationShip
 
         if (is_null($morph)) {
             $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2);
-            $morph = Db::parseName($trace[1]['function']);
+            $morph = Container::parseName($trace[1]['function']);
         }
 
         $type = $type ?: get_class($this);
@@ -521,7 +549,7 @@ trait RelationShip
     public function morphTo($morph = null, array $alias = []): MorphTo
     {
         $trace    = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2);
-        $relation = Db::parseName($trace[1]['function']);
+        $relation = Container::parseName($trace[1]['function']);
 
         if (is_null($morph)) {
             $morph = $relation;
@@ -549,7 +577,7 @@ trait RelationShip
         if (false === strpos($model, '\\')) {
             $path = explode('\\', static::class);
             array_pop($path);
-            array_push($path, Db::parseName($model, 1));
+            array_push($path, Container::parseName($model, 1));
             $model = implode('\\', $path);
         }
 
@@ -565,10 +593,10 @@ trait RelationShip
     protected function getForeignKey(string $name): string
     {
         if (strpos($name, '\\')) {
-            $name = Db::classBaseName($name);
+            $name = Container::classBaseName($name);
         }
 
-        return Db::parseName($name) . '_id';
+        return Container::parseName($name) . '_id';
     }
 
     /**
@@ -579,7 +607,7 @@ trait RelationShip
      */
     protected function isRelationAttr(string $attr)
     {
-        $relation = Db::parseName($attr, 1, false);
+        $relation = Container::parseName($attr, 1, false);
 
         if (method_exists($this, $relation) && !method_exists('think\Model', $relation)) {
             return $relation;
@@ -596,7 +624,8 @@ trait RelationShip
      */
     protected function getRelationData(Relation $modelRelation)
     {
-        if ($this->parent && !$modelRelation->isSelfRelation() && get_class($this->parent) == get_class($modelRelation->getModel())) {
+        if ($this->parent && !$modelRelation->isSelfRelation()
+            && get_class($this->parent) == get_class($modelRelation->getModel(false))) {
             return $this->parent;
         }
 
@@ -662,7 +691,7 @@ trait RelationShip
     protected function autoRelationInsert(): void
     {
         foreach ($this->relationWrite as $name => $val) {
-            $method = Db::parseName($name, 1, false);
+            $method = Container::parseName($name, 1, false);
             $this->$method()->save($val);
         }
     }

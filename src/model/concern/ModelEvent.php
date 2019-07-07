@@ -14,18 +14,12 @@ namespace think\model\concern;
 
 use think\Container;
 use think\exception\ModelEventException;
-use think\facade\Db;
 
 /**
  * 模型事件处理
  */
 trait ModelEvent
 {
-    /**
-     * Event
-     * @var array
-     */
-    protected $event = [];
 
     /**
      * 是否需要事件响应
@@ -57,11 +51,12 @@ trait ModelEvent
             return true;
         }
 
-        $call = 'on' . Db::parseName($event, 1);
+        $call = 'on' . Container::parseName($event, 1);
 
         try {
             if (method_exists(static::class, $call)) {
-                $result = Container::getInstance()->invoke([static::class, $call], [$this]);
+                $result = Container::getInstance()
+                    ->invoke([static::class, $call], [$this]);
             } else {
                 $result = true;
             }

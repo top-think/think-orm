@@ -12,8 +12,8 @@ declare (strict_types = 1);
 
 namespace think\db;
 
+use think\Container;
 use think\Exception;
-use think\facade\Db;
 
 /**
  * SQL获取类
@@ -53,8 +53,8 @@ class Fetch
     /**
      * 聚合查询
      * @access protected
-     * @param  string $aggregate 聚合方法
-     * @param  string $field     字段名
+     * @param  string $aggregate    聚合方法
+     * @param  string $field        字段名
      * @return string
      */
     protected function aggregate(string $aggregate, string $field): string
@@ -71,7 +71,6 @@ class Fetch
      * @access public
      * @param  string $field   字段名
      * @param  mixed  $default 默认值
-     * @param  bool   $one     限制返回一个数据
      * @return string
      */
     public function value(string $field, $default = null, bool $one = true): string
@@ -234,6 +233,7 @@ class Fetch
     public function selectInsert(array $fields, string $table): string
     {
         $this->query->parseOptions();
+
         $sql = $this->builder->selectInsert($this->query, $fields, $table);
 
         return $this->fetch($sql);
@@ -479,11 +479,11 @@ class Fetch
     {
         if (strtolower(substr($method, 0, 5)) == 'getby') {
             // 根据某个字段获取记录
-            $field = Db::parseName(substr($method, 5));
+            $field = Container::parseName(substr($method, 5));
             return $this->where($field, '=', $args[0])->find();
         } elseif (strtolower(substr($method, 0, 10)) == 'getfieldby') {
             // 根据某个字段获取记录的某个值
-            $name = Db::parseName(substr($method, 10));
+            $name = Container::parseName(substr($method, 10));
             return $this->where($name, '=', $args[0])->value($args[1]);
         }
 

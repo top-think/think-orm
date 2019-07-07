@@ -67,6 +67,18 @@ abstract class Relation
     protected $selfRelation = false;
 
     /**
+     * 关联数据数量限制
+     * @var int
+     */
+    protected $withLimit;
+
+    /**
+     * 关联数据字段限制
+     * @var array
+     */
+    protected $withField;
+
+    /**
      * 获取关联的所属模型
      * @access public
      * @return Model
@@ -89,11 +101,12 @@ abstract class Relation
     /**
      * 获取当前的关联模型类的实例
      * @access public
+     * @param bool $clear 是否需要清空查询条件
      * @return Model
      */
-    public function getModel(): Model
+    public function getModel(bool $clear = true): Model
     {
-        return $this->query->getModel();
+        return $this->query->getModel($clear);
     }
 
     /**
@@ -110,11 +123,12 @@ abstract class Relation
      * 封装关联数据集
      * @access public
      * @param  array $resultSet 数据集
+     * @param  Model $parent 父模型
      * @return mixed
      */
-    protected function resultSetBuild(array $resultSet)
+    protected function resultSetBuild(array $resultSet, Model $parent = null)
     {
-        return (new $this->model)->toCollection($resultSet);
+        return (new $this->model)->toCollection($resultSet)->setParent($parent);
     }
 
     protected function getQueryFields(string $model)
@@ -179,6 +193,30 @@ abstract class Relation
     }
 
     /**
+     * 限制关联数据的数量
+     * @access public
+     * @param  int $limit 关联数量限制
+     * @return $this
+     */
+    public function withLimit(int $limit)
+    {
+        $this->withLimit = $limit;
+        return $this;
+    }
+
+    /**
+     * 限制关联数据的字段
+     * @access public
+     * @param  array $field 关联字段限制
+     * @return $this
+     */
+    public function withField(array $field)
+    {
+        $this->withField = $field;
+        return $this;
+    }
+
+    /**
      * 执行基础查询（仅执行一次）
      * @access protected
      * @return void
@@ -192,8 +230,10 @@ abstract class Relation
             // 执行基础查询
             $this->baseQuery();
 
-            $result = call_user_func_array([$this->query->getModel(false), $method], $args);
+            $model  = $this->query->getModel(false);
+            $result = call_user_func_array([$model, $method], $args);
 
+            $this->query = $model->getQuery();
             return $result === $this->query ? $this : $result;
         }
 

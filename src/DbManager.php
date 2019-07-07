@@ -13,6 +13,7 @@ declare (strict_types = 1);
 namespace think;
 
 use InvalidArgumentException;
+use think\CacheManager;
 use think\db\BaseQuery;
 use think\db\Connection;
 use think\db\Raw;
@@ -50,6 +51,12 @@ class DbManager
     protected $listen = [];
 
     /**
+     * SQL日志
+     * @var array
+     */
+    protected $log = [];
+
+    /**
      * 查询次数
      * @var int
      */
@@ -65,6 +72,11 @@ class DbManager
         $this->config = $config;
     }
 
+    public function setCacheHandler(CacheManager $cache)
+    {
+        $this->cache = $cache;
+    }
+
     /**
      * 创建/切换数据库连接查询
      * @access public
@@ -76,6 +88,7 @@ class DbManager
     {
         $connection = $this->instance($name, $force);
         $connection->setDb($this);
+        $connection->setCache($this->cache);
 
         $class = $connection->getQueryClass();
         $query = new $class($connection);
@@ -153,6 +166,28 @@ class DbManager
     public function getQueryTimes(): int
     {
         return $this->queryTimes;
+    }
+
+    /**
+     * 记录SQL日志
+     * @access protected
+     * @param string $log  SQL日志信息
+     * @param string $type 日志类型
+     * @return void
+     */
+    public function log($log, $type = 'sql')
+    {
+        $this->log[$type][] = $log;
+    }
+
+    /**
+     * 获得查询日志
+     * @access public
+     * @return array
+     */
+    public function getLog(): array
+    {
+        return $this->log;
     }
 
     /**

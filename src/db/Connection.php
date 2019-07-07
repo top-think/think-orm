@@ -12,15 +12,14 @@ declare (strict_types = 1);
 
 namespace think\db;
 
-use think\Cache;
+use think\CacheManager;
 use think\cache\CacheItem;
-use think\Db;
+use think\DbManager;
 use think\db\exception\DataNotFoundException;
 use think\db\exception\ModelNotFoundException;
 use think\Exception;
 use think\exception\DbException;
 use think\exception\PDOException;
-use think\Log;
 
 /**
  * 数据库连接基础类
@@ -119,19 +118,11 @@ abstract class Connection
     protected $cache;
 
     /**
-     * 日志对象
-     * @var Log
-     */
-    protected $log;
-
-    /**
      * 架构函数 读取数据库配置信息
      * @access public
-     * @param Cache $cache 缓存对象
-     * @param Log   $log 日志对象
      * @param array $config 数据库配置数组
      */
-    public function __construct(Cache $cache, Log $log, array $config = [])
+    public function __construct(array $config = [])
     {
         if (!empty($config)) {
             $this->config = array_merge($this->config, $config);
@@ -141,8 +132,6 @@ abstract class Connection
         $class = $this->getBuilderClass();
 
         $this->builder = new $class($this);
-        $this->cache   = $cache;
-        $this->log     = $log;
 
         // 执行初始化操作
         $this->initialize();
@@ -195,12 +184,23 @@ abstract class Connection
     /**
      * 设置当前的数据库Db对象
      * @access public
-     * @param Db $db
+     * @param DbManager $db
      * @return void
      */
-    public function setDb(Db $db)
+    public function setDb(DbManager $db)
     {
         $this->db = $db;
+    }
+
+    /**
+     * 设置当前的缓存对象
+     * @access public
+     * @param CacheManager $cache
+     * @return void
+     */
+    public function setCache(CacheManager $cache)
+    {
+        $this->cache = $cache;
     }
 
     /**
@@ -412,7 +412,7 @@ abstract class Connection
     protected function log($log, $type = 'sql')
     {
         if ($this->config['debug']) {
-            $this->log->record($log, $type);
+            $this->db->log($log, $type);
         }
     }
 
@@ -472,6 +472,10 @@ abstract class Connection
      */
     public function lazyWrite(string $type, string $guid, float $step, int $lazyTime)
     {
+        if (!$this->cache) {
+            return $step;
+        }
+
         if (!$this->cache->has($guid . '_time')) {
             // 计时开始
             $this->cache->set($guid . '_time', time(), 0);

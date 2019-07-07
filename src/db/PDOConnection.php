@@ -15,7 +15,6 @@ namespace think\db;
 use PDO;
 use PDOStatement;
 use think\cache\CacheItem;
-use think\Container;
 use think\db\exception\BindParamException;
 use think\Exception;
 use think\exception\PDOException;
@@ -253,7 +252,7 @@ abstract class PDOConnection extends Connection
 
         if (!isset($this->info[$schema])) {
             // 读取缓存
-            $cacheFile = Container::pull('app')->getRuntimePath() . 'schema' . DIRECTORY_SEPARATOR . $schema . '.php';
+            $cacheFile = $this->config['schema_path'] . 'schema' . DIRECTORY_SEPARATOR . $schema . '.php';
 
             if (!$this->config['debug'] && is_file($cacheFile)) {
                 $info = include $cacheFile;
@@ -471,7 +470,7 @@ abstract class PDOConnection extends Connection
         // 分析查询表达式
         $query->parseOptions();
 
-        if ($query->getOptions('cache')) {
+        if ($query->getOptions('cache') && $this->cache) {
             // 检查查询缓存
             $cacheItem = $this->parseCache($query, $query->getOptions('cache'));
             $resultSet = $this->cache->get($cacheItem->getKey());
@@ -602,7 +601,7 @@ abstract class PDOConnection extends Connection
 
         $this->numRows = $this->PDOStatement->rowCount();
 
-        if ($query->getOptions('cache')) {
+        if ($query->getOptions('cache') && $this->cache) {
             // 清理缓存数据
             $cacheItem = $this->parseCache($query, $query->getOptions('cache'));
             $key       = $cacheItem->getKey();
@@ -874,7 +873,7 @@ abstract class PDOConnection extends Connection
 
         $query->setOption('field', (array) $field);
 
-        if (!empty($options['cache'])) {
+        if (!empty($options['cache']) && $this->cache) {
             $cacheItem = $this->parseCache($query, $options['cache']);
             $result    = $this->cache->get($cacheItem->getKey());
 
@@ -954,7 +953,7 @@ abstract class PDOConnection extends Connection
 
         $query->setOption('field', $field);
 
-        if (!empty($options['cache'])) {
+        if (!empty($options['cache']) && $this->cache) {
             // 判断查询缓存
             $cacheItem = $this->parseCache($query, $options['cache']);
             $result    = $this->cache->get($cacheItem->getKey());

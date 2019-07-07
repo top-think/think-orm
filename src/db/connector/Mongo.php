@@ -22,9 +22,8 @@ use MongoDB\Driver\Manager;
 use MongoDB\Driver\Query as MongoQuery;
 use MongoDB\Driver\ReadPreference;
 use MongoDB\Driver\WriteConcern;
-use think\Cache;
+use think\CacheManager;
 use think\Collection;
-use think\Db;
 use think\db\builder\Mongo as Builder;
 use think\db\Mongo as Query;
 use think\Exception;
@@ -129,11 +128,10 @@ class Mongo
     /**
      * 架构函数 读取数据库配置信息
      * @access public
-     * @param Cache $cache 缓存对象
-     * @param Log   $log 日志对象
-     * @param array $config 数据库配置数组
+     * @param CacheManager $cache 缓存对象
+     * @param array        $config 数据库配置数组
      */
-    public function __construct(Cache $cache, array $config = [])
+    public function __construct(CacheManager $cache, array $config = [])
     {
         if (!class_exists('\MongoDB\Driver\Manager')) {
             throw new Exception('require mongodb > 1.0');

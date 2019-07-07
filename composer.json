@@ -14,9 +14,11 @@
     ],
     "require": {
         "php": ">=7.1.0",
-        "topthink/think-cache": "^2.0",
         "topthink/think-container":"^2.0"
     },
+    "suggest": {
+        "topthink/think-cache": "Required to use query cache (^2.0)."
+    },    
     "autoload": {
         "psr-4": {
             "think\\": "src"

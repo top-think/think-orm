@@ -63,16 +63,24 @@ class DbManager
     protected $queryTimes = 0;
 
     /**
+     * 查询缓存对象
+     * @var CacheManager
+     */
+    protected $cache;
+
+    /**
      * 初始化
-     * @param array $config 连接配置
      * @access public
+     * @param array $config 连接配置
+     * @return $this
      */
     public function init(array $config = [])
     {
         $this->config = $config;
+        return $this;
     }
 
-    public function setCacheHandler(CacheManager $cache)
+    public function setCache(CacheManager $cache)
     {
         $this->cache = $cache;
     }
@@ -88,7 +96,10 @@ class DbManager
     {
         $connection = $this->instance($name, $force);
         $connection->setDb($this);
-        $connection->setCache($this->cache);
+
+        if ($this->cache) {
+            $connection->setCache($this->cache);
+        }
 
         $class = $connection->getQueryClass();
         $query = new $class($connection);

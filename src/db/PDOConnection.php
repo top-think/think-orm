@@ -252,12 +252,17 @@ abstract class PDOConnection extends Connection
 
         if (!isset($this->info[$schema])) {
             // 读取缓存
-            $cacheFile = $this->config['schema_path'] . 'schema' . DIRECTORY_SEPARATOR . $schema . '.php';
+            if ($this->cache) {
+                $cacheSchema = $this->cache->get('schema:' . $schema);
+            }
 
-            if (!$this->config['debug'] && is_file($cacheFile)) {
-                $info = include $cacheFile;
+            if (!$this->config['debug'] && !empty($cacheSchema)) {
+                $info = $cacheSchema;
             } else {
                 $info = $this->getFields($tableName);
+                if ($this->cache) {
+                    $this->cache->set('schema:' . $schema, $info);
+                }
             }
 
             $fields = array_keys($info);

@@ -1,8 +1,7 @@
 # think-orm
 
-基于PHP7.1+ 的ORM实现，主要特性：
+ThinkPHP6内置ORM，基于PHP7.1+ 的ORM实现，主要特性：
 
-- 基于ThinkPHP的ORM独立封装
 - 支持Mysql、Pgsql、Sqlite、SqlServer、Oracle和Mongodb
 - 支持Db类和查询构造器
 - 支持事务
@@ -11,18 +10,59 @@
 - 支持使用Db门面对象
 - 支持查询缓存
 
-适用于不使用ThinkPHP框架的开发者。
 
-安装
+## 安装
 ~~~
 composer require topthink/think-orm
 ~~~
 
-Db类用法：
+## 使用
+
+Db类：
 ~~~php
 use think\facade\Db;
 // 数据库配置信息设置（全局有效）
-Db::setConfig(['数据库配置参数（数组）']);
+Db::init([
+    // 默认数据连接标识
+    'default'     => 'mysql',
+    // 数据库连接信息
+    'connections' => [
+        'mysql' => [
+            // 数据库类型
+            'type'     => 'mysql',
+            // 主机地址
+            'hostname' => '127.0.0.1',
+            // 用户名
+            'username' => 'root',
+            // 数据库名
+            'database' => 'demo',
+            // 数据库编码默认采用utf8
+            'charset'  => 'utf8',
+            // 数据库表前缀
+            'prefix'   => 'think_',
+            // 数据库调试模式
+            'debug'    => true,
+        ],
+        'mongo' => [
+            // 数据库类型
+            'type'          => 'mongo',
+            // 服务器地址
+            'hostname'      => '127.0.0.1',
+            // 数据库名
+            'database'      => 'demo',
+            // 用户名
+            'username'      => '',
+            // 密码
+            'password'      => '',
+            // 主键转换为Id
+            'pk_convert_id' => true,
+            // 数据库调试模式
+            'debug'         => true,
+            // 端口
+            'hostport'      => '27017',
+        ],
+    ],
+]);
 // 进行CURD操作
 Db::table('user')
 	->data(['name'=>'thinkphp','email'=>'thinkphp@qq.com'])
@@ -45,7 +85,7 @@ Db::getSqlLog();
 
 其它操作参考TP6.0的完全开发手册[数据库](https://www.kancloud.cn/manual/thinkphp6_0/1037530)章节
 
-定义模型：
+模型：
 ~~~php
 namespace app\index\model;
 

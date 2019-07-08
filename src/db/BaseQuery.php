@@ -143,7 +143,7 @@ class BaseQuery
      * @access public
      * @return Connection
      */
-    public function getConnection(): Connection
+    public function getConnection()
     {
         return $this->connection;
     }

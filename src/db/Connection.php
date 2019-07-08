@@ -161,17 +161,6 @@ abstract class Connection
     abstract public function getBuilderClass(): string;
 
     /**
-     * 设置当前的数据库Builder对象
-     * @access protected
-     * @param Builder $builder
-     * @return void
-     */
-    protected function setBuilder($builder)
-    {
-        $this->builder = $builder;
-    }
-
-    /**
      * 获取当前的builder实例对象
      * @access public
      * @return Builder

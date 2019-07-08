@@ -12,12 +12,12 @@
 namespace think\db\connector;
 
 use PDO;
-use think\db\Connection;
+use think\db\PDOConnection;
 
 /**
  * Sqlsrv数据库驱动
  */
-class Sqlsrv extends Connection
+class Sqlsrv extends PDOConnection
 {
     /**
      * 默认PDO连接参数

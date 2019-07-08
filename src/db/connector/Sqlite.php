@@ -12,12 +12,12 @@
 namespace think\db\connector;
 
 use PDO;
-use think\db\Connection;
+use think\db\PDOConnection;
 
 /**
  * Sqlite数据库驱动
  */
-class Sqlite extends Connection
+class Sqlite extends PDOConnection
 {
 
     /**

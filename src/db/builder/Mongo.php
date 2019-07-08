@@ -670,8 +670,6 @@ class Mongo
 
     protected function log($type, $data, $options = [])
     {
-        if ($this->connection->getConfig('debug')) {
-            $this->connection->log($type, $data, $options);
-        }
+        $this->connection->mongoLog($type, $data, $options);
     }
 }

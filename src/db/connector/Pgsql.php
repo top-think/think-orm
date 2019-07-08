@@ -12,12 +12,12 @@
 namespace think\db\connector;
 
 use PDO;
-use think\db\Connection;
+use think\db\PDOConnection;
 
 /**
  * Pgsql数据库驱动
  */
-class Pgsql extends Connection
+class Pgsql extends PDOConnection
 {
 
     /**

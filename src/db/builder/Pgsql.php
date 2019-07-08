@@ -77,7 +77,7 @@ class Pgsql extends Builder
         if (strpos($key, '->') && false === strpos($key, '(')) {
             // JSON字段支持
             list($field, $name) = explode('->', $key);
-            $key                = $field . '->>\'' . $name . '\'';
+            $key                = '"' . $field . '"' . '->>\'' . $name . '\'';
         } elseif (strpos($key, '.')) {
             list($table, $key) = explode('.', $key, 2);
 
@@ -90,6 +90,10 @@ class Pgsql extends Builder
 
             if (isset($alias[$table])) {
                 $table = $alias[$table];
+            }
+
+            if ('*' != $key && !preg_match('/[,\"\*\(\).\s]/', $key)) {
+                $key = '"' . $key . '"';
             }
         }
 

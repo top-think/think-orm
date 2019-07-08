@@ -40,31 +40,18 @@ class Mongo extends BaseQuery
     }
 
     /**
-     * 获取当前的数据库Connection对象
-     * @access public
-     * @return Connection
-     */
-    public function getConnection()
-    {
-        return $this->connection;
-    }
-
-    /**
      * 执行查询 返回数据集
      * @access public
-     * @param  string         $namespace 当前查询的collection
      * @param  MongoQuery     $query 查询对象
-     * @param  ReadPreference $readPreference readPreference
-     * @param  string|array   $typeMap 指定返回的typeMap
      * @return mixed
      * @throws AuthenticationException
      * @throws InvalidArgumentException
      * @throws ConnectionException
      * @throws RuntimeException
      */
-    public function mongoQuery(string $namespace, MongoQuery $query, ReadPreference $readPreference = null, $typeMap = null)
+    public function mongoQuery(MongoQuery $query)
     {
-        return $this->connection->query($namespace, $query, $readPreference, $typeMap);
+        return $this->connection->mongoQuery($this, $query);
     }
 
     /**
@@ -88,9 +75,7 @@ class Mongo extends BaseQuery
     /**
      * 执行语句
      * @access public
-     * @param  string        $namespace
      * @param  BulkWrite     $bulk
-     * @param  WriteConcern  $writeConcern
      * @return int
      * @throws AuthenticationException
      * @throws InvalidArgumentException
@@ -98,9 +83,9 @@ class Mongo extends BaseQuery
      * @throws RuntimeException
      * @throws BulkWriteException
      */
-    public function mongoExecute(string $namespace, BulkWrite $bulk, WriteConcern $writeConcern = null)
+    public function mongoExecute(BulkWrite $bulk)
     {
-        return $this->connection->execute($namespace, $bulk, $writeConcern);
+        return $this->connection->mongoExecute($this, $bulk);
     }
 
     /**

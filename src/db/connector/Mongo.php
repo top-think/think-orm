@@ -36,6 +36,7 @@ class Mongo extends Connection
 {
 
     // 查询数据类型
+    protected $dbName  = '';
     protected $typeMap = 'array';
     protected $mongo; // MongoDb Object
     protected $cursor; // MongoCursor Object

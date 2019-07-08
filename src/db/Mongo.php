@@ -28,18 +28,6 @@ use think\Exception;
 class Mongo extends BaseQuery
 {
     /**
-     * 架构函数
-     * @access public
-     * @param Connection $connection 数据库连接对象
-     */
-    public function __construct(Connection $connection)
-    {
-        $this->connection = $connection;
-
-        $this->prefix = $this->connection->getConfig('prefix');
-    }
-
-    /**
      * 执行查询 返回数据集
      * @access public
      * @param  MongoQuery     $query 查询对象

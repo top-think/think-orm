@@ -180,10 +180,20 @@ abstract class Model implements JsonSerializable, ArrayAccess
             $this->name = basename($name);
         }
 
-        $this->db = Container::pull('think\DbManager');
-
         if (static::$maker) {
             call_user_func(static::$maker, $this);
+        } else {
+            $this->db = Container::pull('think\DbManager');
+
+            if (is_null($this->isAutoWriteTimestamp)) {
+                // 自动写入时间戳
+                $this->isAutoWriteTimestamp($this->db->getConfig('auto_timestamp'));
+            }
+
+            if (is_null($dateFormat)) {
+                // 设置时间戳格式
+                $this->setDateFormat($this->db->getConfig('datetime_format'));
+            }
         }
 
         // 执行初始化操作

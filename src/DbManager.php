@@ -80,9 +80,30 @@ class DbManager
         return $this;
     }
 
+    /**
+     * 设置缓存对象
+     * @access public
+     * @param  CacheManager $cache 缓存对象
+     * @return void
+     */
     public function setCache(CacheManager $cache)
     {
         $this->cache = $cache;
+    }
+
+    /**
+     * 获取配置参数
+     * @access public
+     * @param  string $config 配置参数
+     * @return mixed
+     */
+    public function getConfig($config = '')
+    {
+        if ('' === $config) {
+            return $this->config;
+        }
+
+        return $this->config[$config] ?? null;
     }
 
     /**
@@ -196,7 +217,7 @@ class DbManager
      * @access public
      * @return array
      */
-    public function getLog(): array
+    public function getLog()
     {
         return $this->log;
     }

@@ -185,14 +185,14 @@ abstract class Model implements JsonSerializable, ArrayAccess
         } else {
             $this->db = Container::pull('think\DbManager');
 
-            if (is_null($this->isAutoWriteTimestamp)) {
+            if (is_null($this->autoWriteTimestamp)) {
                 // 自动写入时间戳
-                $this->isAutoWriteTimestamp($this->db->getConfig('auto_timestamp'));
+                $this->autoWriteTimestamp = $this->db->getConfig('auto_timestamp');
             }
 
-            if (is_null($dateFormat)) {
+            if (is_null($this->dateFormat)) {
                 // 设置时间戳格式
-                $this->setDateFormat($this->db->getConfig('datetime_format'));
+                $this->dateFormat = $this->db->getConfig('datetime_format');
             }
         }
 

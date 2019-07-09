@@ -13,7 +13,7 @@ namespace think\model\relation;
 
 use Closure;
 use think\Container;
-use think\Exception;
+use think\db\exception\DbException as Exception;
 use think\Model;
 use think\model\Relation;
 

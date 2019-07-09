@@ -15,7 +15,7 @@ use Closure;
 use think\Collection;
 use think\Container;
 use think\db\BaseQuery as Query;
-use think\Exception;
+use think\db\exception\DbException as Exception;
 use think\Model;
 use think\model\Relation;
 

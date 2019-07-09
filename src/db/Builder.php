@@ -14,7 +14,7 @@ namespace think\db;
 
 use Closure;
 use PDO;
-use think\Exception;
+use think\db\exception\DbException as Exception;
 
 /**
  * Db Builder

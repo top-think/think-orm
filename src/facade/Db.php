@@ -14,8 +14,8 @@ namespace think\facade;
 use think\Facade;
 
 /**
- * @see \think\Db
- * @mixin \think\Db
+ * @see \think\DbManager
+ * @mixin \think\DbManager
  */
 class Db extends Facade
 {

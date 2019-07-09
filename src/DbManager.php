@@ -19,10 +19,10 @@ use think\db\Connection;
 use think\db\Raw;
 
 /**
- * Class Db
+ * Class DbManager
  * @package think
- * @mixin BaseQuery
- * @mixin Query
+ * @mixin think\db\BaseQuery
+ * @mixin think\db\Query
  */
 class DbManager
 {

@@ -22,8 +22,8 @@ use MongoDB\Driver\ReadPreference;
 use MongoDB\Driver\WriteConcern;
 use think\Collection;
 use think\db\connector\Mongo as Connection;
+use think\db\exception\DbException as Exception;
 use think\db\Query as BaseQuery;
-use think\Exception;
 
 class Mongo extends BaseQuery
 {

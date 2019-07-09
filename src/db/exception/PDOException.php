@@ -8,8 +8,9 @@
 // +----------------------------------------------------------------------
 // | Author: 麦当苗儿 <zuojiazi@vip.qq.com> <http://zjzit.cn>
 // +----------------------------------------------------------------------
+declare (strict_types = 1);
 
-namespace think\exception;
+namespace think\db\exception;
 
 /**
  * PDO异常处理类

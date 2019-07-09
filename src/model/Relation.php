@@ -12,14 +12,13 @@ declare (strict_types = 1);
 
 namespace think\model;
 
+use think\db\exception\DbException as Exception;
 use think\db\Query;
-use think\Exception;
 use think\Model;
 
 /**
  * 模型关联基础类
  * @package think\model
- *
  * @mixin Query
  */
 abstract class Relation

@@ -14,7 +14,7 @@ namespace think\model\concern;
 
 use think\Collection;
 use think\Container;
-use think\Exception;
+use think\db\exception\DbException as Exception;
 use think\Model;
 use think\model\Collection as ModelCollection;
 use think\model\relation\OneToOne;

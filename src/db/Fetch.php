@@ -13,7 +13,7 @@ declare (strict_types = 1);
 namespace think\db;
 
 use think\Container;
-use think\Exception;
+use think\db\exception\DbException as Exception;
 
 /**
  * SQL获取类

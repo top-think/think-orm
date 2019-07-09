@@ -13,7 +13,7 @@ declare (strict_types = 1);
 namespace think\model\concern;
 
 use think\Container;
-use think\exception\ModelEventException;
+use think\db\exception\ModelEventException;
 
 /**
  * 模型事件处理

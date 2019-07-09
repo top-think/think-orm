@@ -16,10 +16,9 @@ use think\CacheManager;
 use think\cache\CacheItem;
 use think\DbManager;
 use think\db\exception\DataNotFoundException;
+use think\db\exception\DbException as Exception;
 use think\db\exception\ModelNotFoundException;
-use think\Exception;
-use think\exception\DbException;
-use think\exception\PDOException;
+use think\db\exception\PDOException;
 
 /**
  * 数据库连接基础类

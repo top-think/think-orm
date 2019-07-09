@@ -13,7 +13,7 @@ declare (strict_types = 1);
 namespace think\db;
 
 /**
- * 数据查询类
+ * PDO数据查询类
  */
 class Query extends BaseQuery
 {

@@ -16,15 +16,14 @@ use think\Collection;
 use think\Container;
 use think\db\exception\BindParamException;
 use think\db\exception\DataNotFoundException;
+use think\db\exception\DbException as Exception;
 use think\db\exception\ModelNotFoundException;
-use think\Exception;
-use think\exception\DbException;
-use think\exception\PDOException;
+use think\db\exception\PDOException;
 use think\Model;
 use think\Paginator;
 
 /**
- * 数据查询类
+ * 数据查询基础类
  */
 class BaseQuery
 {
@@ -105,7 +104,6 @@ class BaseQuery
      * @param string $method 方法名称
      * @param array  $args   调用参数
      * @return mixed
-     * @throws DbException
      * @throws Exception
      */
     public function __call(string $method, array $args)
@@ -583,7 +581,7 @@ class BaseQuery
      * @param int|array $listRows 每页数量 数组表示配置参数
      * @param int|bool  $simple   是否简洁模式或者总记录数
      * @return Paginator
-     * @throws DbException
+     * @throws Exception
      */
     public function paginate($listRows = null, $simple = false): Paginator
     {
@@ -641,7 +639,7 @@ class BaseQuery
      * @param string    $key      分页索引键
      * @param string    $sort     索引键排序 asc|desc
      * @return Paginator
-     * @throws DbException
+     * @throws Exception
      */
     public function paginateX($listRows = null, string $key = null, string $sort = null): Paginator
     {
@@ -712,7 +710,7 @@ class BaseQuery
      * @param string     $key    分页索引键 默认为主键
      * @param string     $sort   索引键排序 asc|desc
      * @return array
-     * @throws DbException
+     * @throws Exception
      */
     public function more(int $limit, $lastId = null, string $key = null, string $sort = null): array
     {
@@ -1403,7 +1401,7 @@ class BaseQuery
      * @access public
      * @param mixed $data 数据
      * @return Collection
-     * @throws DbException
+     * @throws Exception
      * @throws ModelNotFoundException
      * @throws DataNotFoundException
      */
@@ -1437,7 +1435,7 @@ class BaseQuery
      * @access public
      * @param mixed $data 查询数据
      * @return array|Model|null
-     * @throws DbException
+     * @throws Exception
      * @throws ModelNotFoundException
      * @throws DataNotFoundException
      */
@@ -1477,7 +1475,7 @@ class BaseQuery
      * @param string|array $column   分批处理的字段名
      * @param string       $order    字段排序
      * @return bool
-     * @throws DbException
+     * @throws Exception
      */
     public function chunk(int $count, callable $callback, $column = null, string $order = 'asc'): bool
     {
@@ -1533,7 +1531,7 @@ class BaseQuery
      * @access public
      * @param bool $sub 是否添加括号
      * @return string
-     * @throws DbException
+     * @throws Exception
      */
     public function buildSql(bool $sub = true): string
     {

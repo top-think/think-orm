@@ -16,8 +16,9 @@ use PDO;
 use PDOStatement;
 use think\cache\CacheItem;
 use think\db\exception\BindParamException;
-use think\Exception;
-use think\exception\PDOException;
+use think\db\exception\DataNotFoundException;
+use think\db\exception\ModelNotFoundException;
+use think\db\exception\PDOException;
 
 /**
  * 数据库连接基础类
@@ -399,7 +400,7 @@ abstract class PDOConnection extends Connection
      * @param integer    $linkNum        连接序号
      * @param array|bool $autoConnection 是否自动连接主数据库（用于分布式）
      * @return PDO
-     * @throws Exception
+     * @throws PDOException
      */
     public function connect(array $config = [], $linkNum = 0, $autoConnection = false): PDO
     {
@@ -863,7 +864,6 @@ abstract class PDOConnection extends Connection
      * @access public
      * @param BaseQuery $query 查询对象
      * @return integer
-     * @throws Exception
      * @throws PDOException
      */
     public function update(BaseQuery $query): int
@@ -888,7 +888,6 @@ abstract class PDOConnection extends Connection
      * @access public
      * @param BaseQuery $query 查询对象
      * @return int
-     * @throws Exception
      * @throws PDOException
      */
     public function delete(BaseQuery $query): int

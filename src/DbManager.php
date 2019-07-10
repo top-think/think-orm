@@ -16,13 +16,14 @@ use InvalidArgumentException;
 use think\CacheManager;
 use think\db\BaseQuery;
 use think\db\Connection;
+use think\db\Query;
 use think\db\Raw;
 
 /**
  * Class DbManager
  * @package think
- * @mixin think\db\BaseQuery
- * @mixin think\db\Query
+ * @mixin BaseQuery
+ * @mixin Query
  */
 class DbManager
 {

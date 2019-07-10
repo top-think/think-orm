@@ -15,6 +15,8 @@ namespace think;
 use ArrayAccess;
 use Closure;
 use JsonSerializable;
+use think\contract\Arrayable;
+use think\contract\Jsonable;
 use think\db\Query;
 
 /**
@@ -33,7 +35,7 @@ use think\db\Query;
  * @method void onBeforeRestore(Model $model) static before_restore事件定义
  * @method void onAfterRestore(Model $model) static after_restore事件定义
  */
-abstract class Model implements JsonSerializable, ArrayAccess
+abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonable
 {
     use model\concern\Attribute;
     use model\concern\RelationShip;
@@ -351,13 +353,16 @@ abstract class Model implements JsonSerializable, ArrayAccess
      * @return void
      */
     protected static function init()
-    {}
+    {
+    }
 
     protected function checkData(): void
-    {}
+    {
+    }
 
     protected function checkResult($result): void
-    {}
+    {
+    }
 
     /**
      * 更新是否强制写入数据 而不做比较

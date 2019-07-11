@@ -75,7 +75,16 @@ class DbManager
      */
     public function __construct()
     {
-        // 模型注入Db对象
+        $this->modelMaker();
+    }
+
+    /**
+     * 注入模型对象
+     * @access public
+     * @return void
+     */
+    protected function modelMaker()
+    {
         Model::maker(function (Model $model) {
             $model->setDb($this);
 

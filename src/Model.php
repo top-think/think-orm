@@ -147,10 +147,10 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
     /**
      * 设置Db对象
      * @access public
-     * @param Db $db Db对象
+     * @param DbManager $db Db对象
      * @return void
      */
-    public function setDb(Db $db)
+    public function setDb(DbManager $db)
     {
         $this->db = $db;
     }

@@ -12,9 +12,11 @@ declare (strict_types = 1);
 
 namespace think\db;
 
+use Closure;
 use PDO;
 use PDOStatement;
-use think\cache\CacheItem;
+use Psr\Cache\CacheItemInterface;
+use think\db\CacheItem;
 use think\db\exception\BindParamException;
 use think\db\exception\DataNotFoundException;
 use think\db\exception\ModelNotFoundException;
@@ -526,7 +528,7 @@ abstract class PDOConnection extends Connection
         // 分析查询表达式
         $query->parseOptions();
 
-        if ($query->getOptions('cache') && $this->cache) {
+        if ($query->getOptions('cache')) {
             // 检查查询缓存
             $cacheItem = $this->parseCache($query, $query->getOptions('cache'));
             $resultSet = $this->cache->get($cacheItem->getKey());
@@ -536,7 +538,7 @@ abstract class PDOConnection extends Connection
             }
         }
 
-        if ($sql instanceof \Closure) {
+        if ($sql instanceof Closure) {
             $sql  = $sql($query);
             $bind = $query->getBind();
         }
@@ -657,7 +659,7 @@ abstract class PDOConnection extends Connection
 
         $this->numRows = $this->PDOStatement->rowCount();
 
-        if ($query->getOptions('cache') && $this->cache) {
+        if ($query->getOptions('cache')) {
             // 清理缓存数据
             $cacheItem = $this->parseCache($query, $query->getOptions('cache'));
             $key       = $cacheItem->getKey();
@@ -665,7 +667,7 @@ abstract class PDOConnection extends Connection
 
             if (isset($key) && $this->cache->get($key)) {
                 $this->cache->delete($key);
-            } elseif (!empty($tag)) {
+            } elseif (!empty($tag) && method_exists($this->cache, 'tag')) {
                 $this->cache->tag($tag)->clear();
             }
         }
@@ -927,7 +929,7 @@ abstract class PDOConnection extends Connection
 
         $query->setOption('field', (array) $field);
 
-        if (!empty($options['cache']) && $this->cache) {
+        if (!empty($options['cache'])) {
             $cacheItem = $this->parseCache($query, $options['cache']);
             $result    = $this->cache->get($cacheItem->getKey());
 
@@ -1007,7 +1009,7 @@ abstract class PDOConnection extends Connection
 
         $query->setOption('field', $field);
 
-        if (!empty($options['cache']) && $this->cache) {
+        if (!empty($options['cache'])) {
             // 判断查询缓存
             $cacheItem = $this->parseCache($query, $options['cache']);
             $result    = $this->cache->get($cacheItem->getKey());
@@ -1620,13 +1622,13 @@ abstract class PDOConnection extends Connection
      * @access protected
      * @param BaseQuery $query 查询对象
      * @param array $cache 缓存信息
-     * @return CacheItem
+     * @return CacheItemInterface
      */
-    protected function parseCache(BaseQuery $query, array $cache): CacheItem
+    protected function parseCache(BaseQuery $query, array $cache): CacheItemInterface
     {
         list($key, $expire, $tag) = $cache;
 
-        if ($key instanceof CacheItem) {
+        if ($key instanceof CacheItemInterface) {
             $cacheItem = $key;
         } else {
             if (true === $key) {

@@ -13,7 +13,7 @@ declare (strict_types = 1);
 namespace think;
 
 use InvalidArgumentException;
-use think\CacheManager;
+use Psr\SimpleCache\CacheInterface;
 use think\db\BaseQuery;
 use think\db\Connection;
 use think\db\Query;
@@ -118,10 +118,10 @@ class DbManager
     /**
      * 设置缓存对象
      * @access public
-     * @param  CacheManager $cache 缓存对象
+     * @param  CacheInterface $cache 缓存对象
      * @return void
      */
-    public function setCache(CacheManager $cache): void
+    public function setCache(CacheInterface $cache): void
     {
         $this->cache = $cache;
     }

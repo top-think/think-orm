@@ -938,7 +938,7 @@ class BaseQuery
      */
     public function cache($key = true, $expire = null, string $tag = null)
     {
-        if (false === $key) {
+        if (false === $key || !$this->getConnection()->getCache()) {
             return $this;
         }
 

@@ -12,9 +12,10 @@ declare (strict_types = 1);
 
 namespace think\db;
 
-use think\CacheManager;
-use think\cache\CacheItem;
+use Psr\Cache\CacheItemInterface;
+use Psr\SimpleCache\CacheInterface;
 use think\DbManager;
+use think\db\CacheItem;
 use think\db\exception\DataNotFoundException;
 use think\db\exception\DbException as Exception;
 use think\db\exception\ModelNotFoundException;
@@ -183,12 +184,22 @@ abstract class Connection
     /**
      * 设置当前的缓存对象
      * @access public
-     * @param CacheManager $cache
+     * @param CacheInterface $cache
      * @return void
      */
-    public function setCache(CacheManager $cache)
+    public function setCache(CacheInterface $cache)
     {
         $this->cache = $cache;
+    }
+
+    /**
+     * 获取当前的缓存对象
+     * @access public
+     * @return CacheInterface|null
+     */
+    public function getCache()
+    {
+        return $this->cache;
     }
 
     /**
@@ -407,11 +418,11 @@ abstract class Connection
     /**
      * 缓存数据
      * @access protected
-     * @param CacheItem $cacheItem 缓存Item
+     * @param CacheItemInterface $cacheItem 缓存Item
      */
-    protected function cacheData(CacheItem $cacheItem)
+    protected function cacheData(CacheItemInterface $cacheItem)
     {
-        if ($cacheItem->getTag()) {
+        if (method_exists($cacheItem, 'getTag') && $cacheItem->getTag()) {
             $this->cache->tag($cacheItem->getTag());
         }
 
@@ -423,13 +434,13 @@ abstract class Connection
      * @access protected
      * @param BaseQuery $query 查询对象
      * @param array $cache 缓存信息
-     * @return CacheItem
+     * @return CacheItemInterface
      */
-    protected function parseCache(BaseQuery $query, array $cache): CacheItem
+    protected function parseCache(BaseQuery $query, array $cache): CacheItemInterface
     {
         list($key, $expire, $tag) = $cache;
 
-        if ($key instanceof CacheItem) {
+        if ($key instanceof CacheItemInterface) {
             $cacheItem = $key;
         } else {
             if (true === $key) {

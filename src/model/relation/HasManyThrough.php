@@ -13,8 +13,8 @@ namespace think\model\relation;
 
 use Closure;
 use think\Collection;
-use think\Container;
 use think\db\BaseQuery as Query;
+use think\helper\Str;
 use think\Model;
 use think\model\Relation;
 
@@ -99,7 +99,7 @@ class HasManyThrough extends Relation
      */
     public function has(string $operator = '>=', int $count = 1, string $id = '*', string $joinType = ''): Query
     {
-        $model         = Container::parseName(Container::classBaseName($this->parent));
+        $model         = Str::snake(class_basename($this->parent));
         $throughTable  = $this->through->getTable();
         $pk            = $this->throughPk;
         $throughKey    = $this->throughKey;
@@ -129,7 +129,7 @@ class HasManyThrough extends Relation
      */
     public function hasWhere($where = [], $fields = null, $joinType = ''): Query
     {
-        $model        = Container::parseName(Container::classBaseName($this->parent));
+        $model        = Str::snake(class_basename($this->parent));
         $throughTable = $this->through->getTable();
         $pk           = $this->throughPk;
         $throughKey   = $this->throughKey;
@@ -185,7 +185,7 @@ class HasManyThrough extends Relation
             ], $foreignKey, $relation, $subRelation, $closure);
 
             // 关联属性名
-            $attr = Container::parseName($relation);
+            $attr = Str::snake($relation);
 
             // 关联数据封装
             foreach ($resultSet as $result) {
@@ -226,7 +226,7 @@ class HasManyThrough extends Relation
             $data[$pk] = [];
         }
 
-        $result->setRelation(Container::parseName($relation), $this->resultSetBuild($data[$pk], clone $this->parent));
+        $result->setRelation(Str::snake($relation), $this->resultSetBuild($data[$pk], clone $this->parent));
     }
 
     /**
@@ -291,7 +291,7 @@ class HasManyThrough extends Relation
             $closure($this, $name);
         }
 
-        $alias        = Container::parseName(Container::classBaseName($this->model));
+        $alias        = Str::snake(class_basename($this->model));
         $throughTable = $this->through->getTable();
         $pk           = $this->throughPk;
         $throughKey   = $this->throughKey;
@@ -324,7 +324,7 @@ class HasManyThrough extends Relation
             $closure($this, $name);
         }
 
-        $alias        = Container::parseName(Container::classBaseName($this->model));
+        $alias        = Str::snake(class_basename($this->model));
         $throughTable = $this->through->getTable();
         $pk           = $this->throughPk;
         $throughKey   = $this->throughKey;
@@ -351,7 +351,7 @@ class HasManyThrough extends Relation
     protected function baseQuery(): void
     {
         if (empty($this->baseQuery) && $this->parent->getData()) {
-            $alias        = Container::parseName(Container::classBaseName($this->model));
+            $alias        = Str::snake(class_basename($this->model));
             $throughTable = $this->through->getTable();
             $pk           = $this->throughPk;
             $throughKey   = $this->throughKey;

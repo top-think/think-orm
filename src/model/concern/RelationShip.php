@@ -14,9 +14,9 @@ namespace think\model\concern;
 
 use Closure;
 use think\Collection;
-use think\Container;
 use think\db\exception\DbException as Exception;
 use think\db\Query;
+use think\helper\Str;
 use think\Model;
 use think\model\Relation;
 use think\model\relation\BelongsTo;
@@ -97,7 +97,7 @@ trait RelationShip
         if (array_key_exists($name, $this->relation)) {
             return $this->relation[$name];
         } elseif ($auto) {
-            $relation = Container::parseName($name, 1, false);
+            $relation = Str::camel($name);
             return $this->getRelationValue($relation);
         }
     }
@@ -113,7 +113,7 @@ trait RelationShip
     public function setRelation(string $name, $value, array $data = [])
     {
         // 检测修改器
-        $method = 'set' . Container::parseName($name, 1) . 'Attr';
+        $method = 'set' . Str::studly($name) . 'Attr';
 
         if (method_exists($this, $method)) {
             $value = $this->$method($value, array_merge($this->data, $data));
@@ -150,8 +150,8 @@ trait RelationShip
                 list($relation, $subRelation) = explode('.', $relation, 2);
             }
 
-            $method       = Container::parseName($relation, 1, false);
-            $relationName = Container::parseName($relation);
+            $method       = Str::camel($relation);
+            $relationName = Str::snake($relation);
 
             $relationResult = $this->$method();
 
@@ -240,8 +240,8 @@ trait RelationShip
                 $subRelation = [$subRelation];
             }
 
-            $relation     = Container::parseName($relation, 1, false);
-            $relationName = Container::parseName($relation);
+            $relation     = Str::camel($relation);
+            $relationName = Str::snake($relation);
 
             $relationResult = $this->$relation();
 
@@ -282,8 +282,8 @@ trait RelationShip
                 $subRelation = [$subRelation];
             }
 
-            $relation     = Container::parseName($relation, 1, false);
-            $relationName = Container::parseName($relation);
+            $relation     = Str::camel($relation);
+            $relationName = Str::snake($relation);
 
             $relationResult = $this->$relation();
 
@@ -343,11 +343,11 @@ trait RelationShip
                 $relation = $key;
             }
 
-            $relation = Container::parseName($relation, 1, false);
+            $relation = Str::camel($relation);
             $count    = $this->$relation()->relationCount($result, $closure, $aggregate, $field, $name);
 
             if (empty($name)) {
-                $name = Container::parseName($relation) . '_' . $aggregate;
+                $name = Str::snake($relation) . '_' . $aggregate;
             }
 
             $result->setAttr($name, $count);
@@ -387,7 +387,7 @@ trait RelationShip
         $foreignKey = $foreignKey ?: $this->getForeignKey((new $model)->getName());
         $localKey   = $localKey ?: (new $model)->getPk();
         $trace      = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2);
-        $relation   = Container::parseName($trace[1]['function']);
+        $relation   = Str::snake($trace[1]['function']);
 
         return new BelongsTo($this, $model, $foreignKey, $localKey, $relation);
     }
@@ -471,8 +471,8 @@ trait RelationShip
     {
         // 记录当前关联信息
         $model      = $this->parseModel($model);
-        $name       = Container::parseName(Container::classBaseName($model));
-        $middle     = $middle ?: Container::parseName($this->name) . '_' . $name;
+        $name       = Str::snake(class_basename($model));
+        $middle     = $middle ?: Str::snake($this->name) . '_' . $name;
         $foreignKey = $foreignKey ?: $name . '_id';
         $localKey   = $localKey ?: $this->getForeignKey($this->name);
 
@@ -494,7 +494,7 @@ trait RelationShip
 
         if (is_null($morph)) {
             $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2);
-            $morph = Container::parseName($trace[1]['function']);
+            $morph = Str::snake($trace[1]['function']);
         }
 
         if (is_array($morph)) {
@@ -524,7 +524,7 @@ trait RelationShip
 
         if (is_null($morph)) {
             $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2);
-            $morph = Container::parseName($trace[1]['function']);
+            $morph = Str::snake($trace[1]['function']);
         }
 
         $type = $type ?: get_class($this);
@@ -549,7 +549,7 @@ trait RelationShip
     public function morphTo($morph = null, array $alias = []): MorphTo
     {
         $trace    = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2);
-        $relation = Container::parseName($trace[1]['function']);
+        $relation = Str::snake($trace[1]['function']);
 
         if (is_null($morph)) {
             $morph = $relation;
@@ -577,7 +577,7 @@ trait RelationShip
         if (false === strpos($model, '\\')) {
             $path = explode('\\', static::class);
             array_pop($path);
-            array_push($path, Container::parseName($model, 1));
+            array_push($path, Str::studly($model));
             $model = implode('\\', $path);
         }
 
@@ -593,10 +593,10 @@ trait RelationShip
     protected function getForeignKey(string $name): string
     {
         if (strpos($name, '\\')) {
-            $name = Container::classBaseName($name);
+            $name = class_basename($name);
         }
 
-        return Container::parseName($name) . '_id';
+        return Str::snake($name) . '_id';
     }
 
     /**
@@ -607,7 +607,7 @@ trait RelationShip
      */
     protected function isRelationAttr(string $attr)
     {
-        $relation = Container::parseName($attr, 1, false);
+        $relation = Str::camel($attr);
 
         if (method_exists($this, $relation) && !method_exists('think\Model', $relation)) {
             return $relation;
@@ -691,7 +691,7 @@ trait RelationShip
     protected function autoRelationInsert(): void
     {
         foreach ($this->relationWrite as $name => $val) {
-            $method = Container::parseName($name, 1, false);
+            $method = Str::camel($name);
             $this->$method()->save($val);
         }
     }

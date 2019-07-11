@@ -14,7 +14,7 @@
     ],
     "require": {
         "php": ">=7.1.0",
-        "topthink/think-container":"^2.0.2"
+        "topthink/think-helper":"^3.1"
     },
     "suggest": {
         "topthink/think-cache": "Required to use query cache (^2.0)."

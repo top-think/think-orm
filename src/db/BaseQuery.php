@@ -13,12 +13,12 @@ declare (strict_types = 1);
 namespace think\db;
 
 use think\Collection;
-use think\Container;
 use think\db\exception\BindParamException;
 use think\db\exception\DataNotFoundException;
 use think\db\exception\DbException as Exception;
 use think\db\exception\ModelNotFoundException;
 use think\db\exception\PDOException;
+use think\helper\Str;
 use think\Model;
 use think\Paginator;
 
@@ -110,18 +110,18 @@ class BaseQuery
     {
         if (strtolower(substr($method, 0, 5)) == 'getby') {
             // 根据某个字段获取记录
-            $field = Container::parseName(substr($method, 5));
+            $field = Str::snake(substr($method, 5));
             return $this->where($field, '=', $args[0])->find();
         } elseif (strtolower(substr($method, 0, 10)) == 'getfieldby') {
             // 根据某个字段获取记录的某个值
-            $name = Container::parseName(substr($method, 10));
+            $name = Str::snake(substr($method, 10));
             return $this->where($name, '=', $args[0])->value($args[1]);
         } elseif (strtolower(substr($method, 0, 7)) == 'whereor') {
-            $name = Container::parseName(substr($method, 7));
+            $name = Str::snake(substr($method, 7));
             array_unshift($args, $name);
             return call_user_func_array([$this, 'whereOr'], $args);
         } elseif (strtolower(substr($method, 0, 5)) == 'where') {
-            $name = Container::parseName(substr($method, 5));
+            $name = Str::snake(substr($method, 5));
             array_unshift($args, $name);
             return call_user_func_array([$this, 'where'], $args);
         } elseif ($this->model && method_exists($this->model, 'scope' . $method)) {
@@ -206,7 +206,7 @@ class BaseQuery
 
         $name = $name ?: $this->name;
 
-        return $this->prefix . Container::parseName($name);
+        return $this->prefix . Str::snake($name);
     }
 
     /**

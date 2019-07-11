@@ -12,7 +12,7 @@
 namespace think\model\relation;
 
 use Closure;
-use think\Container;
+use think\helper\Str;
 use think\Model;
 
 /**
@@ -75,7 +75,7 @@ class HasOneThrough extends HasManyThrough
             ], $foreignKey, $relation, $subRelation, $closure);
 
             // 关联属性名
-            $attr = Container::parseName($relation);
+            $attr = Str::snake($relation);
 
             // 关联数据封装
             foreach ($resultSet as $result) {
@@ -123,7 +123,7 @@ class HasOneThrough extends HasManyThrough
             $relationModel->exists(true);
         }
 
-        $result->setRelation(Container::parseName($relation), $relationModel);
+        $result->setRelation(Str::snake($relation), $relationModel);
     }
 
     /**

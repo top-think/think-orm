@@ -13,8 +13,8 @@ declare (strict_types = 1);
 namespace think\model\concern;
 
 use InvalidArgumentException;
-use think\Container;
 use think\db\Raw;
+use think\helper\Str;
 use think\model\Relation;
 
 /**
@@ -185,7 +185,7 @@ trait Attribute
      */
     protected function getRealFieldName(string $name): string
     {
-        return $this->strict ? $name : Container::parseName($name);
+        return $this->strict ? $name : Str::snake($name);
     }
 
     /**
@@ -359,7 +359,7 @@ trait Attribute
             $value = $this->autoWriteTimestamp();
         } else {
             // 检测修改器
-            $method = 'set' . Container::parseName($name, 1) . 'Attr';
+            $method = 'set' . Str::studly($name) . 'Attr';
 
             if (method_exists($this, $method)) {
                 $array = $this->data;
@@ -482,7 +482,7 @@ trait Attribute
     {
         // 检测属性获取器
         $fieldName = $this->getRealFieldName($name);
-        $method    = 'get' . Container::parseName($name, 1) . 'Attr';
+        $method    = 'get' . Str::studly($name) . 'Attr';
 
         if (isset($this->withAttr[$fieldName])) {
             if ($relation) {

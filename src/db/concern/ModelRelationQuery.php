@@ -13,7 +13,7 @@ declare (strict_types = 1);
 namespace think\db\concern;
 
 use Closure;
-use think\Container;
+use think\helper\Str;
 use think\Model;
 use think\model\Collection as ModelCollection;
 
@@ -154,7 +154,7 @@ trait ModelRelationQuery
             } elseif ($this->model) {
                 // 检测搜索器
                 $fieldName = is_numeric($key) ? $field : $key;
-                $method    = 'search' . Container::parseName($fieldName, 1) . 'Attr';
+                $method    = 'search' . Str::studly($fieldName) . 'Attr';
 
                 if (method_exists($this->model, $method)) {
                     $this->model->$method($this, $data[$field] ?? null, $data, $prefix);
@@ -227,14 +227,14 @@ trait ModelRelationQuery
                     $relation       = $key;
                 }
 
-                $relation = Container::parseName($relation, 1, false);
+                $relation = Str::camel($relation);
 
                 $count = $this->model
                     ->$relation()
                     ->getRelationCountQuery($closure, $aggregate, $field, $aggregateField);
 
                 if (empty($aggregateField)) {
-                    $aggregateField = Container::parseName($relation) . '_' . $aggregate;
+                    $aggregateField = Str::snake($relation) . '_' . $aggregate;
                 }
 
                 $this->field(['(' . $count . ')' => $aggregateField]);

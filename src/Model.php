@@ -184,18 +184,6 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
 
         if (static::$maker) {
             call_user_func(static::$maker, $this);
-        } else {
-            $this->db = Container::pull('think\DbManager');
-
-            if (is_null($this->autoWriteTimestamp)) {
-                // 自动写入时间戳
-                $this->autoWriteTimestamp = $this->db->getConfig('auto_timestamp');
-            }
-
-            if (is_null($this->dateFormat)) {
-                // 设置时间戳格式
-                $this->dateFormat = $this->db->getConfig('datetime_format');
-            }
         }
 
         // 执行初始化操作

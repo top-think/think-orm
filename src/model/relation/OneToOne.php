@@ -12,9 +12,9 @@
 namespace think\model\relation;
 
 use Closure;
-use think\Container;
 use think\db\BaseQuery as Query;
 use think\db\exception\DbException as Exception;
+use think\helper\Str;
 use think\Model;
 use think\model\Relation;
 
@@ -67,7 +67,7 @@ abstract class OneToOne extends Relation
      */
     public function eagerly(Query $query, string $relation, $field = true, string $joinType = '', Closure $closure = null, bool $first = false): void
     {
-        $name = Container::parseName(Container::classBaseName($this->parent));
+        $name = Str::snake(class_basename($this->parent));
 
         if ($first) {
             $table = $query->getTable();
@@ -257,7 +257,7 @@ abstract class OneToOne extends Relation
             $relationModel = null;
         }
 
-        $result->setRelation(Container::parseName($relation), $relationModel);
+        $result->setRelation(Str::snake($relation), $relationModel);
     }
 
     /**

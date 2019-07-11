@@ -13,9 +13,9 @@ namespace think\model\relation;
 
 use Closure;
 use think\Collection;
-use think\Container;
 use think\db\BaseQuery as Query;
 use think\db\exception\DbException as Exception;
+use think\helper\Str;
 use think\Model;
 use think\model\Relation;
 
@@ -144,7 +144,7 @@ class MorphMany extends Relation
             $data = $this->eagerlyMorphToMany($where, $relation, $subRelation, $closure);
 
             // 关联属性名
-            $attr = Container::parseName($relation);
+            $attr = Str::snake($relation);
 
             // 关联数据封装
             foreach ($resultSet as $result) {
@@ -181,7 +181,7 @@ class MorphMany extends Relation
                 $data[$key] = [];
             }
 
-            $result->setRelation(Container::parseName($relation), $this->resultSetBuild($data[$key], clone $this->parent));
+            $result->setRelation(Str::snake($relation), $this->resultSetBuild($data[$key], clone $this->parent));
         }
     }
 

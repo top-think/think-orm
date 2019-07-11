@@ -70,15 +70,40 @@ class DbManager
     protected $cache;
 
     /**
-     * 初始化
+     * 架构函数
+     * @access public
+     */
+    public function __construct()
+    {
+        // 模型注入Db对象
+        Model::maker(function (Model $model) {
+            $model->setDb($this);
+
+            $isAutoWriteTimestamp = $model->getAutoWriteTimestamp();
+
+            if (is_null($isAutoWriteTimestamp)) {
+                // 自动写入时间戳
+                $model->isAutoWriteTimestamp($this->config['auto_timestamp'] ?? true);
+            }
+
+            $dateFormat = $model->getDateFormat();
+
+            if (is_null($dateFormat)) {
+                // 设置时间戳格式
+                $model->setDateFormat($this->config['datetime_format'] ?? 'Y-m-d H:i:s');
+            }
+        });
+    }
+
+    /**
+     * 初始化配置参数
      * @access public
      * @param array $config 连接配置
-     * @return $this
+     * @return void
      */
-    public function init(array $config = [])
+    public function setConfig(array $config = []): void
     {
         $this->config = $config;
-        return $this;
     }
 
     /**
@@ -87,7 +112,7 @@ class DbManager
      * @param  CacheManager $cache 缓存对象
      * @return void
      */
-    public function setCache(CacheManager $cache)
+    public function setCache(CacheManager $cache): void
     {
         $this->cache = $cache;
     }
@@ -154,7 +179,13 @@ class DbManager
             $config = $this->config['connections'][$name];
             $type   = !empty($config['type']) ? $config['type'] : 'mysql';
 
-            $this->instance[$name] = Container::factory($type, '\\think\\db\\connector\\', $config);
+            if (strpos($type, '\\')) {
+                $class = $type;
+            } else {
+                $class = '\\think\\db\\connector\\' . ucfirst($type);
+            }
+
+            $this->instance[$name] = new $class($config);
         }
 
         return $this->instance[$name];

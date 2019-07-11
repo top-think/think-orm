@@ -13,8 +13,8 @@ declare (strict_types = 1);
 namespace think\model\relation;
 
 use Closure;
-use think\Container;
 use think\db\BaseQuery as Query;
+use think\helper\Str;
 use think\Model;
 
 /**
@@ -132,8 +132,8 @@ class HasOne extends OneToOne
     public function has(string $operator = '>=', int $count = 1, string $id = '*', string $joinType = ''): Query
     {
         $table      = $this->query->getTable();
-        $model      = Container::classBaseName($this->parent);
-        $relation   = Container::classBaseName($this->model);
+        $model      = class_basename($this->parent);
+        $relation   = class_basename($this->model);
         $localKey   = $this->localKey;
         $foreignKey = $this->foreignKey;
 
@@ -157,8 +157,8 @@ class HasOne extends OneToOne
     public function hasWhere($where = [], $fields = null, string $joinType = ''): Query
     {
         $table    = $this->query->getTable();
-        $model    = Container::classBaseName($this->parent);
-        $relation = Container::classBaseName($this->model);
+        $model    = class_basename($this->parent);
+        $relation = class_basename($this->model);
 
         if (is_array($where)) {
             $this->getQueryWhere($where, $relation);
@@ -208,7 +208,7 @@ class HasOne extends OneToOne
             ], $foreignKey, $relation, $subRelation, $closure);
 
             // 关联属性名
-            $attr = Container::parseName($relation);
+            $attr = Str::snake($relation);
 
             // 关联数据封装
             foreach ($resultSet as $result) {
@@ -265,7 +265,7 @@ class HasOne extends OneToOne
             // 绑定关联属性
             $this->bindAttr($relationModel, $result);
         } else {
-            $result->setRelation(Container::parseName($relation), $relationModel);
+            $result->setRelation(Str::snake($relation), $relationModel);
         }
     }
 

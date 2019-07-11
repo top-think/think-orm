@@ -14,8 +14,8 @@ namespace think\model\relation;
 
 use Closure;
 use think\Collection;
-use think\Container;
 use think\db\BaseQuery as Query;
+use think\helper\Str;
 use think\Model;
 use think\model\Relation;
 
@@ -96,7 +96,7 @@ class HasMany extends Relation
             ], $relation, $subRelation, $closure);
 
             // 关联属性名
-            $attr = Container::parseName($relation);
+            $attr = Str::snake($relation);
 
             // 关联数据封装
             foreach ($resultSet as $result) {
@@ -134,7 +134,7 @@ class HasMany extends Relation
                 $data[$pk] = [];
             }
 
-            $result->setRelation(Container::parseName($relation), $this->resultSetBuild($data[$pk], clone $this->parent));
+            $result->setRelation(Str::snake($relation), $this->resultSetBuild($data[$pk], clone $this->parent));
         }
     }
 
@@ -287,8 +287,8 @@ class HasMany extends Relation
     {
         $table = $this->query->getTable();
 
-        $model    = Container::classBaseName($this->parent);
-        $relation = Container::classBaseName($this->model);
+        $model    = class_basename($this->parent);
+        $relation = class_basename($this->model);
 
         if ('*' != $id) {
             $id = $relation . '.' . (new $this->model)->getPk();
@@ -313,8 +313,8 @@ class HasMany extends Relation
     public function hasWhere($where = [], $fields = null, string $joinType = ''): Query
     {
         $table    = $this->query->getTable();
-        $model    = Container::classBaseName($this->parent);
-        $relation = Container::classBaseName($this->model);
+        $model    = class_basename($this->parent);
+        $relation = class_basename($this->model);
 
         if (is_array($where)) {
             $this->getQueryWhere($where, $relation);

@@ -13,8 +13,8 @@ declare (strict_types = 1);
 namespace think\db\concern;
 
 use Closure;
-use think\Container;
 use think\db\Raw;
+use think\helper\Str;
 use think\model\relation\OneToOne;
 
 /**
@@ -164,7 +164,7 @@ trait JoinAndViewQuery
             }
 
             /** @var Relation $model */
-            $relation = Container::parseName($relation, 1, false);
+            $relation = Str::camel($relation);
             $model    = $class->$relation();
 
             if ($model instanceof OneToOne) {

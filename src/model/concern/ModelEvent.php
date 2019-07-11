@@ -12,8 +12,8 @@ declare (strict_types = 1);
 
 namespace think\model\concern;
 
-use think\Container;
 use think\db\exception\ModelEventException;
+use think\helper\Str;
 
 /**
  * 模型事件处理
@@ -51,12 +51,11 @@ trait ModelEvent
             return true;
         }
 
-        $call = 'on' . Container::parseName($event, 1);
+        $call = 'on' . Str::studly($event);
 
         try {
             if (method_exists(static::class, $call)) {
-                $result = Container::getInstance()
-                    ->invoke([static::class, $call], [$this]);
+                $result = call_user_func([static::class, $call], $this);
             } else {
                 $result = true;
             }

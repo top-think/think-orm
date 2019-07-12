@@ -14,8 +14,8 @@ namespace think\model\concern;
 
 use Closure;
 use think\Collection;
+use think\db\BaseQuery as Query;
 use think\db\exception\DbException as Exception;
-use think\db\Query;
 use think\helper\Str;
 use think\Model;
 use think\model\Relation;

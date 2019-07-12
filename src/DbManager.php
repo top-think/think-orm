@@ -13,6 +13,7 @@ declare (strict_types = 1);
 namespace think;
 
 use InvalidArgumentException;
+use Psr\Log\LoggerInterface;
 use Psr\SimpleCache\CacheInterface;
 use think\db\BaseQuery;
 use think\db\Connection;
@@ -55,7 +56,7 @@ class DbManager
      * SQL日志
      * @var array
      */
-    protected $log = [];
+    protected $dbLog = [];
 
     /**
      * 查询次数
@@ -65,9 +66,15 @@ class DbManager
 
     /**
      * 查询缓存对象
-     * @var CacheManager
+     * @var CacheInterface
      */
     protected $cache;
+
+    /**
+     * 查询日志对象
+     * @var LoggerInterface
+     */
+    protected $log;
 
     /**
      * 架构函数
@@ -124,6 +131,43 @@ class DbManager
     public function setCache(CacheInterface $cache): void
     {
         $this->cache = $cache;
+    }
+
+    /**
+     * 设置日志对象
+     * @access public
+     * @param  LoggerInterface $log 日志对象
+     * @return void
+     */
+    public function setLog(LoggerInterface $log): void
+    {
+        $this->log = $log;
+    }
+
+    /**
+     * 记录SQL日志
+     * @access protected
+     * @param string $log  SQL日志信息
+     * @param string $type 日志类型
+     * @return void
+     */
+    public function log($log, $type = 'sql')
+    {
+        if ($this->log) {
+            $this->log->log($type, $log);
+        } else {
+            $this->dbLog[$type][] = $log;
+        }
+    }
+
+    /**
+     * 获得查询日志（没有设置日志对象使用）
+     * @access public
+     * @return array
+     */
+    public function getDbLog(): array
+    {
+        return $this->dbLog;
     }
 
     /**
@@ -239,28 +283,6 @@ class DbManager
     public function getQueryTimes(): int
     {
         return $this->queryTimes;
-    }
-
-    /**
-     * 记录SQL日志
-     * @access protected
-     * @param string $log  SQL日志信息
-     * @param string $type 日志类型
-     * @return void
-     */
-    public function log($log, $type = 'sql')
-    {
-        $this->log[$type][] = $log;
-    }
-
-    /**
-     * 获得查询日志
-     * @access public
-     * @return array
-     */
-    public function getLog()
-    {
-        return $this->log;
     }
 
     /**

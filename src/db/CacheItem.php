@@ -15,13 +15,12 @@ namespace think\db;
 use DateInterval;
 use DateTime;
 use DateTimeInterface;
-use Psr\Cache\CacheItemInterface;
 use think\db\exception\InvalidArgumentException;
 
 /**
  * CacheItem实现类
  */
-class CacheItem implements CacheItemInterface
+class CacheItem
 {
     /**
      * 缓存Key

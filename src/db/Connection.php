@@ -429,6 +429,23 @@ abstract class Connection
     }
 
     /**
+     * 分析缓存Key
+     * @access protected
+     * @param BaseQuery $query 查询对象
+     * @return string
+     */
+    protected function getCacheKey(BaseQuery $query): string
+    {
+        if (!empty($query->getOptions('key'))) {
+            $key = 'think:' . $this->getConfig('database') . '.' . $query->getTable() . '|' . $query->getOptions('key');
+        } else {
+            $key = md5($this->getConfig('database') . serialize($query->getOptions()));
+        }
+
+        return $key;
+    }
+
+    /**
      * 分析缓存
      * @access protected
      * @param BaseQuery $query 查询对象
@@ -443,11 +460,7 @@ abstract class Connection
             $cacheItem = $key;
         } else {
             if (true === $key) {
-                if (!empty($query->getOptions('key'))) {
-                    $key = 'think:' . $this->getConfig('database') . '.' . $query->getTable() . '|' . $query->getOptions('key');
-                } else {
-                    $key = md5($this->getConfig('database') . serialize($query->getOptions()));
-                }
+                $key = $this->getCacheKey($query);
             }
 
             $cacheItem = new CacheItem($key);

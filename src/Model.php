@@ -17,7 +17,7 @@ use Closure;
 use JsonSerializable;
 use think\contract\Arrayable;
 use think\contract\Jsonable;
-use think\db\Query;
+use think\db\BaseQuery as Query;
 
 /**
  * Class Model

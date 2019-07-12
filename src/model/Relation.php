@@ -12,8 +12,8 @@ declare (strict_types = 1);
 
 namespace think\model;
 
+use think\db\BaseQuery as Query;
 use think\db\exception\DbException as Exception;
-use think\db\Query;
 use think\Model;
 
 /**

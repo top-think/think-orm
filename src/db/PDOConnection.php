@@ -15,7 +15,6 @@ namespace think\db;
 use Closure;
 use PDO;
 use PDOStatement;
-use think\db\CacheItem;
 use think\db\exception\BindParamException;
 use think\db\exception\DataNotFoundException;
 use think\db\exception\ModelNotFoundException;
@@ -1617,33 +1616,20 @@ abstract class PDOConnection extends Connection
     }
 
     /**
-     * 分析缓存
+     * 分析缓存Key
      * @access protected
      * @param BaseQuery $query 查询对象
-     * @param array $cache 缓存信息
-     * @return CacheItem
+     * @return string
      */
-    protected function parseCache(BaseQuery $query, array $cache): CacheItem
+    protected function getCacheKey(BaseQuery $query): string
     {
-        list($key, $expire, $tag) = $cache;
-
-        if ($key instanceof CacheItem) {
-            $cacheItem = $key;
+        if (!empty($query->getOptions('key'))) {
+            $key = 'think:' . $this->getConfig('database') . '.' . $query->getTable() . '|' . $query->getOptions('key');
         } else {
-            if (true === $key) {
-                if (!empty($query->getOptions('key'))) {
-                    $key = 'think:' . $this->getConfig('database') . '.' . $query->getTable() . '|' . $query->getOptions('key');
-                } else {
-                    $key = md5($this->getConfig('database') . serialize($query->getOptions()) . serialize($query->getBind(false)));
-                }
-            }
-
-            $cacheItem = new CacheItem($key);
-            $cacheItem->expire($expire);
-            $cacheItem->tag($tag);
+            $key = md5($this->getConfig('database') . serialize($query->getOptions()) . serialize($query->getBind(false)));
         }
 
-        return $cacheItem;
+        return $key;
     }
 
 }

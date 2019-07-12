@@ -12,7 +12,6 @@ declare (strict_types = 1);
 
 namespace think\db;
 
-use Psr\Cache\CacheItemInterface;
 use Psr\SimpleCache\CacheInterface;
 use think\DbManager;
 use think\db\CacheItem;
@@ -418,11 +417,11 @@ abstract class Connection
     /**
      * 缓存数据
      * @access protected
-     * @param CacheItemInterface $cacheItem 缓存Item
+     * @param CacheItem $cacheItem 缓存Item
      */
-    protected function cacheData(CacheItemInterface $cacheItem)
+    protected function cacheData(CacheItem $cacheItem)
     {
-        if (method_exists($cacheItem, 'getTag') && $cacheItem->getTag()) {
+        if ($cacheItem->getTag() && method_exists($this->cache, 'tag')) {
             $this->cache->tag($cacheItem->getTag());
         }
 
@@ -434,13 +433,13 @@ abstract class Connection
      * @access protected
      * @param BaseQuery $query 查询对象
      * @param array $cache 缓存信息
-     * @return CacheItemInterface
+     * @return CacheItem
      */
-    protected function parseCache(BaseQuery $query, array $cache): CacheItemInterface
+    protected function parseCache(BaseQuery $query, array $cache): CacheItem
     {
         list($key, $expire, $tag) = $cache;
 
-        if ($key instanceof CacheItemInterface) {
+        if ($key instanceof CacheItem) {
             $cacheItem = $key;
         } else {
             if (true === $key) {
@@ -471,7 +470,7 @@ abstract class Connection
      */
     public function lazyWrite(string $type, string $guid, float $step, int $lazyTime)
     {
-        if (!$this->cache) {
+        if (!$this->cache || !method_exists($this->cache, $type)) {
             return $step;
         }
 

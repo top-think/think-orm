@@ -15,7 +15,6 @@ namespace think\db;
 use Closure;
 use PDO;
 use PDOStatement;
-use Psr\Cache\CacheItemInterface;
 use think\db\CacheItem;
 use think\db\exception\BindParamException;
 use think\db\exception\DataNotFoundException;
@@ -1622,13 +1621,13 @@ abstract class PDOConnection extends Connection
      * @access protected
      * @param BaseQuery $query 查询对象
      * @param array $cache 缓存信息
-     * @return CacheItemInterface
+     * @return CacheItem
      */
-    protected function parseCache(BaseQuery $query, array $cache): CacheItemInterface
+    protected function parseCache(BaseQuery $query, array $cache): CacheItem
     {
         list($key, $expire, $tag) = $cache;
 
-        if ($key instanceof CacheItemInterface) {
+        if ($key instanceof CacheItem) {
             $cacheItem = $key;
         } else {
             if (true === $key) {

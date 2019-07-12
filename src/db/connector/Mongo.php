@@ -269,7 +269,7 @@ class Mongo extends Connection
     {
         $options = $query->parseOptions();
 
-        if ($query->getOptions('cache') && $this->cache) {
+        if ($query->getOptions('cache')) {
             // 检查查询缓存
             $cacheItem = $this->parseCache($query, $query->getOptions('cache'));
             $resultSet = $this->cache->get($cacheItem->getKey());
@@ -335,7 +335,7 @@ class Mongo extends Connection
 
         $this->numRows = $writeResult->getMatchedCount();
 
-        if ($query->getOptions('cache') && $this->cache) {
+        if ($query->getOptions('cache')) {
             // 清理缓存数据
             $cacheItem = $this->parseCache($query, $query->getOptions('cache'));
             $key       = $cacheItem->getKey();
@@ -343,7 +343,7 @@ class Mongo extends Connection
 
             if (isset($key) && $this->cache->get($key)) {
                 $this->cache->delete($key);
-            } elseif (!empty($tag)) {
+            } elseif (!empty($tag) && method_exists($this->cache, 'tag')) {
                 $this->cache->tag($tag)->clear();
             }
         }

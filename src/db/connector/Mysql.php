@@ -157,27 +157,6 @@ class Mysql extends PDOConnection
         return $info;
     }
 
-    /**
-     * SQL性能分析
-     * @access protected
-     * @param  string $sql
-     * @return array
-     */
-    protected function getExplain(string $sql): array
-    {
-        $pdo    = $this->linkID->query("EXPLAIN " . $sql);
-        $result = $pdo->fetch(PDO::FETCH_ASSOC);
-        $result = array_change_key_case($result);
-
-        if (isset($result['extra'])) {
-            if (strpos($result['extra'], 'filesort') || strpos($result['extra'], 'temporary')) {
-                $this->log('SQL:' . $this->queryStr . '[' . $result['extra'] . ']', 'warn');
-            }
-        }
-
-        return $result;
-    }
-
     protected function supportSavepoint(): bool
     {
         return true;

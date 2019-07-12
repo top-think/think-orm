@@ -89,8 +89,6 @@ class Mongo extends Connection
         'pk_convert_id'   => false,
         // typeMap
         'type_map'        => ['root' => 'array', 'document' => 'array'],
-        // Query对象
-        'query'           => '\\think\\db\\Mongo',
     ];
 
     /**
@@ -213,8 +211,7 @@ class Mongo extends Connection
      * 执行查询并返回Cursor对象
      * @access public
      * @param BaseQuery          $query 查询对象
-     * @param MongoQuery     $mongoQuery Mongo查询对象
-     * @param ReadPreference $readPreference readPreference
+     * @param MongoQuery|Closure $mongoQuery Mongo查询对象
      * @return Cursor
      * @throws AuthenticationException
      * @throws InvalidArgumentException
@@ -256,9 +253,7 @@ class Mongo extends Connection
      * 执行查询
      * @access public
      * @param BaseQuery          $query 查询对象
-     * @param MongoQuery     $mongoQuery Mongo查询对象
-     * @param  ReadPreference $readPreference readPreference
-     * @param  string|array   $typeMap 指定返回的typeMap
+     * @param MongoQuery|Closure $mongoQuery Mongo查询对象
      * @return array
      * @throws AuthenticationException
      * @throws InvalidArgumentException
@@ -272,10 +267,10 @@ class Mongo extends Connection
         if ($query->getOptions('cache')) {
             // 检查查询缓存
             $cacheItem = $this->parseCache($query, $query->getOptions('cache'));
-            $resultSet = $this->cache->get($cacheItem->getKey());
+            $key       = $cacheItem->getKey();
 
-            if (false !== $resultSet) {
-                return $resultSet;
+            if ($this->cache->has($key)) {
+                return $this->cache->get($key);
             }
         }
 
@@ -299,8 +294,8 @@ class Mongo extends Connection
     /**
      * 执行写操作
      * @access public
-     * @param BaseQuery    $query
-     * @param BulkWrite    $bulk
+     * @param BaseQuery $query
+     * @param BulkWrite $bulk
      *
      * @return WriteResult
      * @throws AuthenticationException
@@ -341,7 +336,7 @@ class Mongo extends Connection
             $key       = $cacheItem->getKey();
             $tag       = $cacheItem->getTag();
 
-            if (isset($key) && $this->cache->get($key)) {
+            if (isset($key) && $this->cache->has($key)) {
                 $this->cache->delete($key);
             } elseif (!empty($tag) && method_exists($this->cache, 'tag')) {
                 $this->cache->tag($tag)->clear();
@@ -499,18 +494,17 @@ class Mongo extends Connection
      * @access protected
      * @param  string $sql SQL语句
      * @param  string $runtime SQL运行时间
-     * @param  mixed  $options 参数
      * @param  bool   $master  主从标记
      * @return void
      */
-    protected function triggerSql(string $sql, string $runtime, array $options = [], bool $master = false): void
+    protected function triggerSql(string $sql, string $runtime, bool $master = false): void
     {
         $listen = $this->db->getListen();
 
         if (!empty($listen)) {
             foreach ($listen as $callback) {
                 if (is_callable($callback)) {
-                    $callback($sql, $runtime, $options, $master);
+                    $callback($sql, $runtime, $master);
                 }
             }
         } else {
@@ -546,7 +540,7 @@ class Mongo extends Connection
                 $sql = $sql ?: $this->queryStr;
 
                 // SQL监听
-                $this->triggerSql($sql, $runtime, $this->options, $master);
+                $this->triggerSql($sql, $runtime, $master);
             }
         }
     }
@@ -693,7 +687,7 @@ class Mongo extends Connection
     /**
      * 插入记录
      * @access public
-     * @param  BaseQuery     $query 查询对象
+     * @param  BaseQuery $query 查询对象
      * @param  boolean   $getLastInsID 返回自增主键
      * @return mixed
      * @throws AuthenticationException
@@ -764,7 +758,7 @@ class Mongo extends Connection
      * 批量插入记录
      * @access public
      * @param  BaseQuery $query 查询对象
-     * @param  array $dataSet 数据集
+     * @param  array     $dataSet 数据集
      * @return integer
      * @throws AuthenticationException
      * @throws InvalidArgumentException
@@ -792,7 +786,7 @@ class Mongo extends Connection
     /**
      * 更新记录
      * @access public
-     * @param  BaseQuery     $query 查询对象
+     * @param  BaseQuery $query 查询对象
      * @return int
      * @throws Exception
      * @throws AuthenticationException
@@ -822,7 +816,7 @@ class Mongo extends Connection
     /**
      * 删除记录
      * @access public
-     * @param  BaseQuery     $query 查询对象
+     * @param  BaseQuery $query 查询对象
      * @return int
      * @throws Exception
      * @throws AuthenticationException
@@ -924,10 +918,10 @@ class Mongo extends Connection
 
         if (!empty($options['cache'])) {
             $cacheItem = $this->parseCache($query, $options['cache']);
-            $result    = $this->getCacheData($cacheItem);
+            $key       = $cacheItem->getKey();
 
-            if (false !== $result) {
-                return $result;
+            if ($this->cache->has($key)) {
+                return $this->cache->get($key);
             }
         }
 
@@ -940,12 +934,10 @@ class Mongo extends Connection
         }
 
         // 执行查询操作
-        $readPreference = $options['readPreference'] ?? null;
-        $resultSet      = $this->query($options['table'], $mongoQuery, $readPreference);
+        $resultSet = $this->mongoQuery($query, $mongoQuery);
 
         if (!empty($resultSet)) {
-            $data = array_shift($resultSet);
-
+            $data   = array_shift($resultSet);
             $result = $data[$field];
         } else {
             $result = false;
@@ -981,15 +973,15 @@ class Mongo extends Connection
             $projection = $field;
         }
 
-        $query->setOption('projection', $projection);
+        $query->field($projection);
 
         if (!empty($options['cache'])) {
             // 判断查询缓存
             $cacheItem = $this->parseCache($query, $options['cache']);
-            $result    = $this->getCacheData($cacheItem);
+            $key       = $cacheItem->getKey();
 
-            if (false !== $result) {
-                return $result;
+            if ($this->cache->has($key)) {
+                return $this->cache->get($key);
             }
         }
 
@@ -1002,8 +994,7 @@ class Mongo extends Connection
         }
 
         // 执行查询操作
-        $readPreference = $options['readPreference'] ?? null;
-        $resultSet      = $this->query($options['table'], $mongoQuery, $readPreference);
+        $resultSet = $this->mongoQuery($query, $mongoQuery);
 
         if (('*' == $field || strpos($field, ',')) && $key) {
             $result = array_column($resultSet, null, $key);
@@ -1025,7 +1016,7 @@ class Mongo extends Connection
     /**
      * 执行command
      * @access public
-     * @param  BaseQuery               $query      查询对象
+     * @param  BaseQuery           $query      查询对象
      * @param  string|array|object $command 指令
      * @param  mixed               $extra 额外参数
      * @param  string              $db 数据库名

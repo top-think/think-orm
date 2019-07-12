@@ -529,10 +529,10 @@ abstract class PDOConnection extends Connection
         if ($query->getOptions('cache')) {
             // 检查查询缓存
             $cacheItem = $this->parseCache($query, $query->getOptions('cache'));
-            $resultSet = $this->cache->get($cacheItem->getKey());
+            $key       = $cacheItem->getKey();
 
-            if (false !== $resultSet) {
-                return $resultSet;
+            if ($this->cache->has($key)) {
+                return $this->cache->get($key);
             }
         }
 
@@ -663,7 +663,7 @@ abstract class PDOConnection extends Connection
             $key       = $cacheItem->getKey();
             $tag       = $cacheItem->getTag();
 
-            if (isset($key) && $this->cache->get($key)) {
+            if (isset($key) && $this->cache->has($key)) {
                 $this->cache->delete($key);
             } elseif (!empty($tag) && method_exists($this->cache, 'tag')) {
                 $this->cache->tag($tag)->clear();
@@ -929,10 +929,10 @@ abstract class PDOConnection extends Connection
 
         if (!empty($options['cache'])) {
             $cacheItem = $this->parseCache($query, $options['cache']);
-            $result    = $this->cache->get($cacheItem->getKey());
+            $key       = $cacheItem->getKey();
 
-            if (false !== $result) {
-                return $result;
+            if ($this->cache->has($key)) {
+                return $this->cache->get($key);
             }
         }
 
@@ -950,7 +950,7 @@ abstract class PDOConnection extends Connection
 
         $result = $pdo->fetchColumn();
 
-        if (isset($cacheItem) && false !== $result) {
+        if (isset($cacheItem)) {
             // 缓存数据
             $cacheItem->set($result);
             $this->cacheData($cacheItem);
@@ -1010,10 +1010,10 @@ abstract class PDOConnection extends Connection
         if (!empty($options['cache'])) {
             // 判断查询缓存
             $cacheItem = $this->parseCache($query, $options['cache']);
-            $result    = $this->cache->get($cacheItem->getKey());
+            $key       = $cacheItem->getKey();
 
-            if (false !== $result) {
-                return $result;
+            if ($this->cache->has($key)) {
+                return $this->cache->get($key);
             }
         }
 
@@ -1486,15 +1486,9 @@ abstract class PDOConnection extends Connection
                 // 记录操作结束时间
                 $runtime = number_format((microtime(true) - $this->queryStartTime), 6);
                 $sql     = $sql ?: $this->getLastsql();
-                $result  = [];
-
-                // SQL性能分析
-                if ($this->config['sql_explain'] && 0 === stripos(trim($sql), 'select')) {
-                    $result = $this->getExplain($sql);
-                }
 
                 // SQL监听
-                $this->triggerSql($sql, $runtime, $result, $master);
+                $this->triggerSql($sql, $runtime, $master);
             }
         }
     }
@@ -1504,17 +1498,16 @@ abstract class PDOConnection extends Connection
      * @access protected
      * @param string $sql     SQL语句
      * @param string $runtime SQL运行时间
-     * @param mixed  $explain SQL分析
      * @param bool   $master  主从标记
      * @return void
      */
-    protected function triggerSql(string $sql, string $runtime, array $explain = [], bool $master = false): void
+    protected function triggerSql(string $sql, string $runtime, bool $master = false): void
     {
         $listen = $this->db->getListen();
         if (!empty($listen)) {
             foreach ($listen as $callback) {
                 if (is_callable($callback)) {
-                    $callback($sql, $runtime, $explain, $master);
+                    $callback($sql, $runtime, $master);
                 }
             }
         } else {
@@ -1527,10 +1520,6 @@ abstract class PDOConnection extends Connection
 
             // 未注册监听则记录到日志中
             $this->log($sql . ' [ ' . $master . 'RunTime:' . $runtime . 's ]');
-
-            if (!empty($explain)) {
-                $this->log('[ EXPLAIN : ' . var_export($explain, true) . ' ]');
-            }
         }
     }
 

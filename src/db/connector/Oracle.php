@@ -107,17 +107,6 @@ class Oracle extends Connection
         return $result;
     }
 
-    /**
-     * SQL性能分析
-     * @access protected
-     * @param string $sql
-     * @return array
-     */
-    protected function getExplain(string $sql): array
-    {
-        return [];
-    }
-
     protected function supportSavepoint(): bool
     {
         return true;

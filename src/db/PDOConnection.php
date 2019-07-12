@@ -214,14 +214,6 @@ abstract class PDOConnection extends Connection
     abstract public function getTables(string $dbName);
 
     /**
-     * SQL性能分析
-     * @access protected
-     * @param string $sql SQL语句
-     * @return array
-     */
-    abstract protected function getExplain(string $sql);
-
-    /**
      * 对返数据表字段信息进行大小写转换出来
      * @access public
      * @param array $info 字段信息

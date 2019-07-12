@@ -22,7 +22,7 @@ Db类：
 ~~~php
 use think\facade\Db;
 // 数据库配置信息设置（全局有效）
-Db::init([
+Db::setConfig([
     // 默认数据连接标识
     'default'     => 'mysql',
     // 数据库连接信息

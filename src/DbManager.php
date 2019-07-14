@@ -99,14 +99,14 @@ class DbManager
 
             if (is_null($isAutoWriteTimestamp)) {
                 // 自动写入时间戳
-                $model->isAutoWriteTimestamp($this->config['auto_timestamp'] ?? true);
+                $model->isAutoWriteTimestamp($this->getConfig('auto_timestamp', true));
             }
 
             $dateFormat = $model->getDateFormat();
 
             if (is_null($dateFormat)) {
                 // 设置时间戳格式
-                $model->setDateFormat($this->config['datetime_format'] ?? 'Y-m-d H:i:s');
+                $model->setDateFormat($this->getConfig('datetime_format', 'Y-m-d H:i:s'));
             }
         });
     }
@@ -117,7 +117,7 @@ class DbManager
      * @param array $config 连接配置
      * @return void
      */
-    public function setConfig(array $config = []): void
+    public function setConfig($config = []): void
     {
         $this->config = $config;
     }
@@ -174,15 +174,16 @@ class DbManager
      * 获取配置参数
      * @access public
      * @param  string $config 配置参数
+     * @param  mixed  $default 默认值
      * @return mixed
      */
-    public function getConfig($config = '')
+    public function getConfig(string $name = '', $default = null)
     {
         if ('' === $config) {
             return $this->config;
         }
 
-        return $this->config[$config] ?? null;
+        return $this->config[$name] ?? $default;
     }
 
     /**
@@ -204,8 +205,9 @@ class DbManager
         $class = $connection->getQueryClass();
         $query = new $class($connection);
 
-        if (!empty($this->config['time_query_rule'])) {
-            $query->timeRule($this->config['time_query_rule']);
+        $timeRule = $this->getConfig('time_query_rule');
+        if (!empty($timeRule)) {
+            $query->timeRule($timeRule);
         }
 
         return $query;
@@ -221,15 +223,16 @@ class DbManager
     protected function instance(string $name = null, bool $force = false): Connection
     {
         if (empty($name)) {
-            $name = $this->config['default'] ?? 'mysql';
+            $name = $this->getConfig('default', 'mysql');
         }
 
         if ($force || !isset($this->instance[$name])) {
-            if (!isset($this->config['connections'][$name])) {
+            $connections = $this->getConfig('connections');
+            if (!isset($connections[$name])) {
                 throw new InvalidArgumentException('Undefined db config:' . $name);
             }
 
-            $config = $this->config['connections'][$name];
+            $config = $connections[$name];
             $type   = !empty($config['type']) ? $config['type'] : 'mysql';
 
             if (strpos($type, '\\')) {

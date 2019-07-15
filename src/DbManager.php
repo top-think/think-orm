@@ -95,6 +95,10 @@ class DbManager
         Model::maker(function (Model $model) {
             $model->setDb($this);
 
+            if (is_object($this->event)) {
+                $model->setEvent($this->event);
+            }
+
             $isAutoWriteTimestamp = $model->getAutoWriteTimestamp();
 
             if (is_null($isAutoWriteTimestamp)) {

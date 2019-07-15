@@ -117,7 +117,7 @@ class DbManager
      * @param array $config 连接配置
      * @return void
      */
-    public function setConfig($config = []): void
+    public function setConfig($config): void
     {
         $this->config = $config;
     }

@@ -22,10 +22,27 @@ trait ModelEvent
 {
 
     /**
+     * Event对象
+     * @var object
+     */
+    protected $event;
+
+    /**
      * 是否需要事件响应
      * @var bool
      */
     protected $withEvent = true;
+
+    /**
+     * 设置Event对象
+     * @access public
+     * @param object $event Event对象
+     * @return void
+     */
+    public function setEvent($event)
+    {
+        $this->event = $event;
+    }
 
     /**
      * 当前操作的事件响应
@@ -56,6 +73,9 @@ trait ModelEvent
         try {
             if (method_exists(static::class, $call)) {
                 $result = call_user_func([static::class, $call], $this);
+            } elseif (is_object($this->event) && method_exists($this->event, 'trigger')) {
+                $result = $this->event->trigger(static::class . '.' . $event, $this);
+                $result = empty($result) ? true : end($result);
             } else {
                 $result = true;
             }

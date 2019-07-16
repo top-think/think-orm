@@ -183,7 +183,7 @@ class DbManager
      */
     public function getConfig(string $name = '', $default = null)
     {
-        if ('' === $config) {
+        if ('' === $name) {
             return $this->config;
         }
 

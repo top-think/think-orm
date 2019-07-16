@@ -177,7 +177,7 @@ class DbManager
     /**
      * 获取配置参数
      * @access public
-     * @param  string $config 配置参数
+     * @param  string $name 配置参数
      * @param  mixed  $default 默认值
      * @return mixed
      */

@@ -41,10 +41,10 @@ class DbManager
     protected $config = [];
 
     /**
-     * Event
-     * @var array
+     * Event对象或者数组
+     * @var array|object
      */
-    protected $event = [];
+    protected $event;
 
     /**
      * SQL监听

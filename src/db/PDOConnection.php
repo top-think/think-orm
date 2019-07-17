@@ -33,50 +33,53 @@ abstract class PDOConnection extends Connection
      */
     protected $config = [
         // 数据库类型
-        'type'            => '',
+        'type'              => '',
         // 服务器地址
-        'hostname'        => '',
+        'hostname'          => '',
         // 数据库名
-        'database'        => '',
+        'database'          => '',
         // 用户名
-        'username'        => '',
+        'username'          => '',
         // 密码
-        'password'        => '',
+        'password'          => '',
         // 端口
-        'hostport'        => '',
+        'hostport'          => '',
         // 连接dsn
-        'dsn'             => '',
+        'dsn'               => '',
         // 数据库连接参数
-        'params'          => [],
+        'params'            => [],
         // 数据库编码默认采用utf8
-        'charset'         => 'utf8',
+        'charset'           => 'utf8',
         // 数据库表前缀
-        'prefix'          => '',
+        'prefix'            => '',
         // 数据库调试模式
-        'debug'           => false,
+        'debug'             => false,
         // 数据库部署方式:0 集中式(单一服务器),1 分布式(主从服务器)
-        'deploy'          => 0,
+        'deploy'            => 0,
         // 数据库读写是否分离 主从式有效
-        'rw_separate'     => false,
+        'rw_separate'       => false,
         // 读写分离后 主服务器数量
-        'master_num'      => 1,
+        'master_num'        => 1,
         // 指定从服务器序号
-        'slave_no'        => '',
+        'slave_no'          => '',
         // 模型写入后自动读取主服务器
-        'read_master'     => false,
+        'read_master'       => false,
         // 是否严格检查字段是否存在
-        'fields_strict'   => true,
+        'fields_strict'     => true,
         // 是否需要进行SQL性能分析
-        'sql_explain'     => false,
+        'sql_explain'       => false,
         // Builder类
-        'builder'         => '',
+        'builder'           => '',
         // Query类
-        'query'           => '',
+        'query'             => '',
         // 是否需要断线重连
-        'break_reconnect' => false,
+        'break_reconnect'   => false,
         // 断线标识字符串
-        'break_match_str' => [],
+        'break_match_str'   => [],
+        // 字段缓存路径
+        'schema_cache_path' => '',
     ];
+
     /**
      * PDO操作实例
      * @var PDOStatement
@@ -295,17 +298,12 @@ abstract class PDOConnection extends Connection
 
         if (!isset($this->info[$schema])) {
             // 读取缓存
-            if ($this->cache) {
-                $cacheSchema = $this->cache->get('schema:' . $schema);
-            }
+            $cacheFile = $this->config['schema_cache_path'] . $schema . '.php';
 
-            if (!$this->config['debug'] && !empty($cacheSchema)) {
-                $info = $cacheSchema;
+            if (!$this->config['debug'] && is_file($cacheFile)) {
+                $info = include $cacheFile;
             } else {
                 $info = $this->getFields($tableName);
-                if ($this->cache) {
-                    $this->cache->set('schema:' . $schema, $info);
-                }
             }
 
             $fields = array_keys($info);

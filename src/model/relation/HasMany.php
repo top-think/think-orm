@@ -76,9 +76,10 @@ class HasMany extends Relation
      * @param  string  $relation    当前关联名
      * @param  array   $subRelation 子关联名
      * @param  Closure $closure     闭包
+     * @param  array   $cache       关联缓存
      * @return void
      */
-    public function eagerlyResultSet(array &$resultSet, string $relation, array $subRelation, Closure $closure = null): void
+    public function eagerlyResultSet(array &$resultSet, string $relation, array $subRelation, Closure $closure = null, array $cache = []): void
     {
         $localKey = $this->localKey;
         $range    = [];
@@ -93,7 +94,7 @@ class HasMany extends Relation
         if (!empty($range)) {
             $data = $this->eagerlyOneToMany([
                 [$this->foreignKey, 'in', $range],
-            ], $relation, $subRelation, $closure);
+            ], $relation, $subRelation, $closure, $cache);
 
             // 关联属性名
             $attr = Str::snake($relation);
@@ -117,9 +118,10 @@ class HasMany extends Relation
      * @param  string  $relation    当前关联名
      * @param  array   $subRelation 子关联名
      * @param  Closure $closure     闭包
+     * @param  array   $cache       关联缓存
      * @return void
      */
-    public function eagerlyResult(Model $result, string $relation, array $subRelation = [], Closure $closure = null): void
+    public function eagerlyResult(Model $result, string $relation, array $subRelation = [], Closure $closure = null, array $cache = []): void
     {
         $localKey = $this->localKey;
 
@@ -127,7 +129,7 @@ class HasMany extends Relation
             $pk   = $result->$localKey;
             $data = $this->eagerlyOneToMany([
                 [$this->foreignKey, '=', $pk],
-            ], $relation, $subRelation, $closure);
+            ], $relation, $subRelation, $closure, $cache);
 
             // 关联数据封装
             if (!isset($data[$pk])) {
@@ -193,9 +195,10 @@ class HasMany extends Relation
      * @param  string  $relation    关联名
      * @param  array   $subRelation 子关联
      * @param  Closure $closure
+     * @param  array   $cache       关联缓存
      * @return array
      */
-    protected function eagerlyOneToMany(array $where, string $relation, array $subRelation = [], Closure $closure = null): array
+    protected function eagerlyOneToMany(array $where, string $relation, array $subRelation = [], Closure $closure = null, array $cache = []): array
     {
         $foreignKey = $this->foreignKey;
 
@@ -207,7 +210,11 @@ class HasMany extends Relation
             $closure($this);
         }
 
-        $list = $this->query->where($where)->with($subRelation)->select();
+        $list = $this->query
+            ->where($where)
+            ->cache($cache[0] ?? false, $cache[1] ?? null, $cache[2] ?? null)
+            ->with($subRelation)
+            ->select();
 
         // 组装模型数据
         $data = [];

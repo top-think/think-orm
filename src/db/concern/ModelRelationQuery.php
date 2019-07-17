@@ -245,6 +245,43 @@ trait ModelRelationQuery
     }
 
     /**
+     * 关联缓存
+     * @access public
+     * @param string|array|bool $relation 关联方法名
+     * @param mixed             $key    缓存key
+     * @param integer|\DateTime $expire 缓存有效期
+     * @param string            $tag    缓存标签
+     * @return $this
+     */
+    public function withCache($relation = true, $key = true, $expire = null, string $tag = null)
+    {
+        if (false === $relation || false === $key || !$this->getConnection()->getCache()) {
+            return $this;
+        }
+
+        if ($key instanceof \DateTimeInterface || $key instanceof \DateInterval || (is_int($key) && is_null($expire))) {
+            $expire = $key;
+            $key    = true;
+        }
+
+        if (true === $relation || is_numeric($relation)) {
+            $this->options['with_cache'] = $relation;
+            return $this;
+        }
+
+        $relations = (array) $relation;
+        foreach ($relations as $name => $relation) {
+            if (!is_numeric($name)) {
+                $this->options['with_cache'][Str::snake($name)] = is_array($relation) ? $relation : [$key, $relation, $tag];
+            } else {
+                $this->options['with_cache'][Str::snake($relation)] = [$key, $expire, $tag];
+            }
+        }
+
+        return $this;
+    }
+
+    /**
      * 关联统计
      * @access public
      * @param string|array $relation 关联方法名
@@ -408,12 +445,12 @@ trait ModelRelationQuery
 
         // 预载入查询
         if (!$resultSet && !empty($options['with'])) {
-            $result->eagerlyResult($result, $options['with'], $withRelationAttr);
+            $result->eagerlyResult($result, $options['with'], $withRelationAttr, false, $options['with_cache'] ?? false);
         }
 
         // JOIN预载入查询
         if (!$resultSet && !empty($options['with_join'])) {
-            $result->eagerlyResult($result, $options['with_join'], $withRelationAttr, true);
+            $result->eagerlyResult($result, $options['with_join'], $withRelationAttr, true, $options['with_cache'] ?? false);
         }
 
         // 关联统计

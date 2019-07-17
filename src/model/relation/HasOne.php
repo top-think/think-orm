@@ -185,9 +185,10 @@ class HasOne extends OneToOne
      * @param  string  $relation    当前关联名
      * @param  array   $subRelation 子关联名
      * @param  Closure $closure     闭包
+     * @param  array   $cache       关联缓存
      * @return void
      */
-    protected function eagerlySet(array &$resultSet, string $relation, array $subRelation = [], Closure $closure = null): void
+    protected function eagerlySet(array &$resultSet, string $relation, array $subRelation = [], Closure $closure = null, array $cache = []): void
     {
         $localKey   = $this->localKey;
         $foreignKey = $this->foreignKey;
@@ -205,7 +206,7 @@ class HasOne extends OneToOne
 
             $data = $this->eagerlyWhere([
                 [$foreignKey, 'in', $range],
-            ], $foreignKey, $relation, $subRelation, $closure);
+            ], $foreignKey, $relation, $subRelation, $closure, $cache);
 
             // 关联属性名
             $attr = Str::snake($relation);
@@ -239,9 +240,10 @@ class HasOne extends OneToOne
      * @param  string  $relation    当前关联名
      * @param  array   $subRelation 子关联名
      * @param  Closure $closure     闭包
+     * @param  array   $cache       关联缓存
      * @return void
      */
-    protected function eagerlyOne(Model $result, string $relation, array $subRelation = [], Closure $closure = null): void
+    protected function eagerlyOne(Model $result, string $relation, array $subRelation = [], Closure $closure = null, array $cache = []): void
     {
         $localKey   = $this->localKey;
         $foreignKey = $this->foreignKey;
@@ -250,7 +252,7 @@ class HasOne extends OneToOne
 
         $data = $this->eagerlyWhere([
             [$foreignKey, '=', $result->$localKey],
-        ], $foreignKey, $relation, $subRelation, $closure);
+        ], $foreignKey, $relation, $subRelation, $closure, $cache);
 
         // 关联模型
         if (!isset($data[$result->$localKey])) {

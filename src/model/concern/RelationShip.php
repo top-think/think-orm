@@ -218,9 +218,10 @@ trait RelationShip
      * @param  string $relation  关联名
      * @param  array  $withRelationAttr 关联获取器
      * @param  bool   $join      是否为JOIN方式
+     * @param  mixed  $cache     关联缓存
      * @return void
      */
-    public function eagerlyResultSet(array &$resultSet, array $relations, array $withRelationAttr = [], bool $join = false): void
+    public function eagerlyResultSet(array &$resultSet, array $relations, array $withRelationAttr = [], bool $join = false, $cache = false): void
     {
         foreach ($relations as $key => $relation) {
             $subRelation = [];
@@ -249,20 +250,27 @@ trait RelationShip
                 $relationResult->getQuery()->withAttr($withRelationAttr[$relationName]);
             }
 
-            $relationResult->eagerlyResultSet($resultSet, $relation, $subRelation, $closure, $join);
+            if (is_scalar($cache)) {
+                $relationCache = [$cache];
+            } else {
+                $relationCache = $cache[$relationName] ?? [];
+            }
+
+            $relationResult->eagerlyResultSet($resultSet, $relation, $subRelation, $closure, $relationCache, $join);
         }
     }
 
     /**
      * 预载入关联查询 返回模型对象
      * @access public
-     * @param  Model    $result    数据对象
-     * @param  array    $relations 关联
-     * @param  array    $withRelationAttr 关联获取器
-     * @param  bool     $join      是否为JOIN方式
+     * @param  Model $result    数据对象
+     * @param  array $relations 关联
+     * @param  array $withRelationAttr 关联获取器
+     * @param  bool  $join      是否为JOIN方式
+     * @param  mixed $cache     关联缓存
      * @return void
      */
-    public function eagerlyResult(Model $result, array $relations, array $withRelationAttr = [], bool $join = false): void
+    public function eagerlyResult(Model $result, array $relations, array $withRelationAttr = [], bool $join = false, $cache = false): void
     {
         foreach ($relations as $key => $relation) {
             $subRelation = [];
@@ -291,7 +299,13 @@ trait RelationShip
                 $relationResult->getQuery()->withAttr($withRelationAttr[$relationName]);
             }
 
-            $relationResult->eagerlyResult($result, $relation, $subRelation, $closure, $join);
+            if (is_scalar($cache)) {
+                $relationCache = [$cache];
+            } else {
+                $relationCache = $cache[$relationName] ?? [];
+            }
+
+            $relationResult->eagerlyResult($result, $relation, $subRelation, $closure, $relationCache, $join);
         }
     }
 

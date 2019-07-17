@@ -184,10 +184,11 @@ class MorphTo extends Relation
      * @param  string  $relation    当前关联名
      * @param  array   $subRelation 子关联名
      * @param  Closure $closure     闭包
+     * @param  array   $cache       关联缓存
      * @return void
      * @throws Exception
      */
-    public function eagerlyResultSet(array &$resultSet, string $relation, array $subRelation, Closure $closure = null): void
+    public function eagerlyResultSet(array &$resultSet, string $relation, array $subRelation, Closure $closure = null, array $cache = []): void
     {
         $morphKey  = $this->morphKey;
         $morphType = $this->morphType;
@@ -209,8 +210,10 @@ class MorphTo extends Relation
                 $model = $this->parseModel($key);
                 $obj   = new $model;
                 $pk    = $obj->getPk();
-                $list  = $obj->all($val, $subRelation);
-                $data  = [];
+                $list  = $obj->with($subRelation)
+                    ->cache($cache[0] ?? false, $cache[1] ?? null, $cache[2] ?? null)
+                    ->select($val);
+                $data = [];
 
                 foreach ($list as $k => $vo) {
                     $data[$vo->$pk] = $vo;
@@ -242,14 +245,15 @@ class MorphTo extends Relation
      * @param  string  $relation    当前关联名
      * @param  array   $subRelation 子关联名
      * @param  Closure $closure     闭包
+     * @param  array   $cache       关联缓存
      * @return void
      */
-    public function eagerlyResult(Model $result, string $relation, array $subRelation = [], Closure $closure = null): void
+    public function eagerlyResult(Model $result, string $relation, array $subRelation = [], Closure $closure = null, array $cache = []): void
     {
         // 多态类型映射
         $model = $this->parseModel($result->{$this->morphType});
 
-        $this->eagerlyMorphToOne($model, $relation, $result, $subRelation);
+        $this->eagerlyMorphToOne($model, $relation, $result, $subRelation, $cache);
     }
 
     /**
@@ -271,13 +275,16 @@ class MorphTo extends Relation
      * @param  string $relation    关联名
      * @param  Model  $result
      * @param  array  $subRelation 子关联
+     * @param  array  $cache       关联缓存
      * @return void
      */
-    protected function eagerlyMorphToOne(string $model, string $relation, Model $result, array $subRelation = []): void
+    protected function eagerlyMorphToOne(string $model, string $relation, Model $result, array $subRelation = [], array $cache = []): void
     {
         // 预载入关联查询 支持嵌套预载入
         $pk   = $this->parent->{$this->morphKey};
-        $data = (new $model)->with($subRelation)->find($pk);
+        $data = (new $model)->with($subRelation)
+            ->cache($cache[0] ?? false, $cache[1] ?? null, $cache[2] ?? null)
+            ->find($pk);
 
         if ($data) {
             $data->setParent(clone $result);

@@ -305,6 +305,7 @@ class BelongsToMany extends Relation
      * @param  string  $relation    当前关联名
      * @param  array   $subRelation 子关联名
      * @param  Closure $closure     闭包
+     * @param  array   $cache       关联缓存
      * @return void
      */
     public function eagerlyResultSet(array &$resultSet, string $relation, array $subRelation, Closure $closure = null): void
@@ -324,7 +325,7 @@ class BelongsToMany extends Relation
             // 查询关联数据
             $data = $this->eagerlyManyToMany([
                 ['pivot.' . $localKey, 'in', $range],
-            ], $relation, $subRelation, $closure);
+            ], $relation, $subRelation, $closure, $cache);
 
             // 关联属性名
             $attr = Str::snake($relation);
@@ -347,9 +348,10 @@ class BelongsToMany extends Relation
      * @param  string  $relation    当前关联名
      * @param  array   $subRelation 子关联名
      * @param  Closure $closure     闭包
+     * @param  array   $cache       关联缓存
      * @return void
      */
-    public function eagerlyResult(Model $result, string $relation, array $subRelation, Closure $closure = null): void
+    public function eagerlyResult(Model $result, string $relation, array $subRelation, Closure $closure = null, array $cache = []): void
     {
         $pk = $result->getPk();
 
@@ -358,7 +360,7 @@ class BelongsToMany extends Relation
             // 查询管理数据
             $data = $this->eagerlyManyToMany([
                 ['pivot.' . $this->localKey, '=', $pk],
-            ], $relation, $subRelation, $closure);
+            ], $relation, $subRelation, $closure, $cache);
 
             // 关联数据封装
             if (!isset($data[$pk])) {
@@ -427,9 +429,10 @@ class BelongsToMany extends Relation
      * @param  string  $relation    关联名
      * @param  array   $subRelation 子关联
      * @param  Closure $closure     闭包
+     * @param  array   $cache       关联缓存
      * @return array
      */
-    protected function eagerlyManyToMany(array $where, string $relation, array $subRelation = [], Closure $closure = null): array
+    protected function eagerlyManyToMany(array $where, string $relation, array $subRelation = [], Closure $closure = null, array $cache = []): array
     {
         if ($closure) {
             $closure($this);
@@ -438,6 +441,7 @@ class BelongsToMany extends Relation
         // 预载入关联查询 支持嵌套预载入
         $list = $this->belongsToManyQuery($this->foreignKey, $this->localKey, $where)
             ->with($subRelation)
+            ->cache($cache[0] ?? false, $cache[1] ?? null, $cache[2] ?? null)
             ->select();
 
         // 组装模型数据

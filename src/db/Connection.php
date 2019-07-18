@@ -506,6 +506,42 @@ abstract class Connection
     }
 
     /**
+     * 启动XA事务
+     * @access public
+     * @param  string $xid XA事务id
+     * @return void
+     */
+    public function startTransXa(string $xid)
+    {}
+
+    /**
+     * 预编译XA事务
+     * @access public
+     * @param  string $xid XA事务id
+     * @return void
+     */
+    public function prepareXa(string $xid)
+    {}
+
+    /**
+     * 提交XA事务
+     * @access public
+     * @param  string $xid XA事务id
+     * @return void
+     */
+    public function commitXa(string $xid)
+    {}
+
+    /**
+     * 回滚XA事务
+     * @access public
+     * @param  string $xid XA事务id
+     * @return void
+     */
+    public function rollbackXa(string $xid)
+    {}
+
+    /**
      * 析构方法
      * @access public
      */

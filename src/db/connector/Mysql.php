@@ -162,4 +162,52 @@ class Mysql extends PDOConnection
         return true;
     }
 
+    /**
+     * 启动XA事务
+     * @access public
+     * @param  string $xid XA事务id
+     * @return void
+     */
+    public function startTransXa(string $xid)
+    {
+        $this->initConnect(true);
+        $this->linkID->execute("XA START '$xid'");
+    }
+
+    /**
+     * 预编译XA事务
+     * @access public
+     * @param  string $xid XA事务id
+     * @return void
+     */
+    public function prepareXa(string $xid)
+    {
+        $this->initConnect(true);
+        $this->linkID->execute("XA END '$xid'");
+        $this->linkID->execute("XA PREPARE '$xid'");
+    }
+
+    /**
+     * 提交XA事务
+     * @access public
+     * @param  string $xid XA事务id
+     * @return void
+     */
+    public function commitXa(string $xid)
+    {
+        $this->initConnect(true);
+        $this->linkID->execute("XA COMMIT '$xid'");
+    }
+
+    /**
+     * 回滚XA事务
+     * @access public
+     * @param  string $xid XA事务id
+     * @return void
+     */
+    public function rollbackXa(string $xid)
+    {
+        $this->initConnect(true);
+        $this->linkID->execute("XA ROLLBACK '$xid'");
+    }
 }

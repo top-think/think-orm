@@ -353,7 +353,7 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
     }
 
     /**
-     * 更新是否强制写入数据 而不做比较
+     * 更新是否强制写入数据 而不做比较（亦可用于软删除的强制删除）
      * @access public
      * @param bool $force
      * @return $this

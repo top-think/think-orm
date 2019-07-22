@@ -431,7 +431,7 @@ abstract class PDOConnection extends Connection
             return $this->links[$linkNum];
         } catch (\PDOException $e) {
             if ($autoConnection) {
-                $this->log->error($e->getMessage());
+                $this->log($e->getMessage(), 'error');
                 return $this->connect($autoConnection, $linkNum);
             } else {
                 throw $e;

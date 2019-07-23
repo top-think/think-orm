@@ -239,7 +239,7 @@ class DbManager
             $config = $connections[$name];
             $type   = !empty($config['type']) ? $config['type'] : 'mysql';
 
-            if (strpos($type, '\\')) {
+            if (false !== strpos($type, '\\')) {
                 $class = $type;
             } else {
                 $class = '\\think\\db\\connector\\' . ucfirst($type);

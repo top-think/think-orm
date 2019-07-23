@@ -422,10 +422,10 @@ abstract class Connection
     protected function cacheData(CacheItem $cacheItem)
     {
         if ($cacheItem->getTag() && method_exists($this->cache, 'tag')) {
-            $this->cache->tag($cacheItem->getTag());
+            $this->cache->tag($cacheItem->getTag())->set($cacheItem->getKey(), $cacheItem->get(), $cacheItem->getExpire());
+        } else {
+            $this->cache->set($cacheItem->getKey(), $cacheItem->get(), $cacheItem->getExpire());
         }
-
-        $this->cache->set($cacheItem->getKey(), $cacheItem->get(), $cacheItem->getExpire());
     }
 
     /**

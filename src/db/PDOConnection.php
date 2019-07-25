@@ -1033,7 +1033,7 @@ abstract class PDOConnection extends Connection
                 list($alias, $key) = explode('.', $key);
             }
 
-            $result = array_column($resultSet, $column, $key);
+            $result = array_column($resultSet, strpos($column, ',') ? null : $column, $key);
         }
 
         if (isset($cacheItem)) {

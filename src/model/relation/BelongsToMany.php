@@ -308,7 +308,7 @@ class BelongsToMany extends Relation
      * @param  array   $cache       关联缓存
      * @return void
      */
-    public function eagerlyResultSet(array &$resultSet, string $relation, array $subRelation, Closure $closure = null): void
+    public function eagerlyResultSet(array &$resultSet, string $relation, array $subRelation, Closure $closure = null, array $cache = []): void
     {
         $localKey = $this->localKey;
         $pk       = $resultSet[0]->getPk();

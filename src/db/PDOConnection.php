@@ -66,8 +66,6 @@ abstract class PDOConnection extends Connection
         'read_master'       => false,
         // 是否严格检查字段是否存在
         'fields_strict'     => true,
-        // 是否需要进行SQL性能分析
-        'sql_explain'       => false,
         // Builder类
         'builder'           => '',
         // Query类

@@ -105,6 +105,7 @@ class HasManyThrough extends Relation
         $throughKey    = $this->throughKey;
         $relation      = new $this->model;
         $relationTable = $relation->getTable();
+        $softDelete    = $this->query->getOptions('soft_delete');
 
         if ('*' != $id) {
             $id = $relationTable . '.' . $relation->getPk();
@@ -115,6 +116,9 @@ class HasManyThrough extends Relation
             ->field($model . '.*')
             ->join($throughTable, $throughTable . '.' . $this->foreignKey . '=' . $model . '.' . $this->localKey)
             ->join($relationTable, $relationTable . '.' . $throughKey . '=' . $throughTable . '.' . $this->throughPk)
+            ->when($softDelete, function ($query) use ($softDelete, $relationTable) {
+                $query->where($relationTable . strstr($softDelete[0], '.'), '=' == $softDelete[1][0] ? $softDelete[1][1] : null);
+            })
             ->group($relationTable . '.' . $this->throughKey)
             ->having('count(' . $id . ')' . $operator . $count);
     }
@@ -144,12 +148,16 @@ class HasManyThrough extends Relation
             $where = $this->query;
         }
 
-        $fields = $this->getRelationQueryFields($fields, $model);
+        $fields     = $this->getRelationQueryFields($fields, $model);
+        $softDelete = $this->query->getOptions('soft_delete');
 
         return $this->parent->db()
             ->alias($model)
             ->join($throughTable, $throughTable . '.' . $this->foreignKey . '=' . $model . '.' . $this->localKey)
             ->join($modelTable, $modelTable . '.' . $throughKey . '=' . $throughTable . '.' . $this->throughPk)
+            ->when($softDelete, function ($query) use ($softDelete, $relationTable) {
+                $query->where($relationTable . strstr($softDelete[0], '.'), '=' == $softDelete[1][0] ? $softDelete[1][1] : null);
+            })
             ->group($modelTable . '.' . $this->throughKey)
             ->where($where)
             ->field($fields);

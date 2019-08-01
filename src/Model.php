@@ -171,14 +171,13 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
      * @access public
      * @param mixed $method
      * @param array $vars 参数
-     * @param bool  $accessible 设置是否可访问
      * @return mixed
      */
-    public function invoke($method, array $vars = [], bool $accessible = false)
+    public function invoke($method, array $vars = [])
     {
         if (self::$invoker) {
             $call = self::$invoker;
-            return $call($method instanceof Closure ? $method : [$this, $method], $vars, $accessible);
+            return $call($method instanceof Closure ? $method : Closure::fromCallable([$this, $method]), $vars);
         } else {
             return call_user_func_array([$this, $method], $vars);
         }

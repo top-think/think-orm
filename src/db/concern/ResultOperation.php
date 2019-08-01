@@ -154,7 +154,7 @@ trait ResultOperation
         if (!empty($this->options['fail'])) {
             $this->throwNotFound();
         } elseif (!empty($this->options['allow_empty'])) {
-            return !empty($this->model) ? $this->model->newInstance()->setQuery($this) : [];
+            return !empty($this->model) ? $this->model->newInstance() : [];
         }
     }
 

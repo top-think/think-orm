@@ -25,7 +25,7 @@ trait ModelEvent
      * Event对象
      * @var object
      */
-    protected $event;
+    protected static $event;
 
     /**
      * 是否需要事件响应
@@ -39,9 +39,9 @@ trait ModelEvent
      * @param object $event Event对象
      * @return void
      */
-    public function setEvent($event)
+    public static function setEvent($event)
     {
-        $this->event = $event;
+        self::$event = $event;
     }
 
     /**
@@ -73,8 +73,8 @@ trait ModelEvent
         try {
             if (method_exists(static::class, $call)) {
                 $result = call_user_func([static::class, $call], $this);
-            } elseif (is_object($this->event) && method_exists($this->event, 'trigger')) {
-                $result = $this->event->trigger(static::class . '.' . $event, $this);
+            } elseif (is_object(self::$event) && method_exists(self::$event, 'trigger')) {
+                $result = self::$event->trigger(static::class . '.' . $event, $this);
                 $result = empty($result) ? true : end($result);
             } else {
                 $result = true;

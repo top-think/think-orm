@@ -49,7 +49,7 @@ trait ModelRelationQuery
      */
     public function getModel(bool $clear = true)
     {
-        return $this->model ? $this->model->setQuery($this, $clear) : null;
+        return $this->model ?: null;
     }
 
     /**
@@ -419,8 +419,7 @@ trait ModelRelationQuery
         }
 
         $result = $this->model
-            ->newInstance($result, $resultSet ? null : $this->getModelUpdateCondition($options))
-            ->setQuery($this);
+            ->newInstance($result, $resultSet ? null : $this->getModelUpdateCondition($options));
 
         // 动态获取器
         if (!empty($options['with_attr'])) {

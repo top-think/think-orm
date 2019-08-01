@@ -98,12 +98,6 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
     protected static $initialized = [];
 
     /**
-     * 查询对象实例
-     * @var Query
-     */
-    protected $queryInstance;
-
-    /**
      * 软删除字段默认值
      * @var mixed
      */
@@ -123,15 +117,15 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
 
     /**
      * Db对象
-     * @var Db
+     * @var DbManager
      */
-    protected $db;
+    protected static $db;
 
     /**
      * 容器对象的依赖注入方法
      * @var callable
      */
-    protected $invoker;
+    protected static $invoker;
 
     /**
      * 服务注入
@@ -156,9 +150,9 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
      * @param DbManager $db Db对象
      * @return void
      */
-    public function setDb(DbManager $db)
+    public static function setDb(DbManager $db)
     {
-        $this->db = $db;
+        self::$db = $db;
     }
 
     /**
@@ -167,9 +161,9 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
      * @param callable $callable 依赖注入方法
      * @return void
      */
-    public function setInvoker(callable $callable): void
+    public static function setInvoker(callable $callable): void
     {
-        $this->invoker = $callable;
+        self::$invoker = $callable;
     }
 
     /**
@@ -181,8 +175,8 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
      */
     public function invoke(string $method, array $vars = [])
     {
-        if ($this->invoker) {
-            $call = $this->invoker;
+        if (self::$invoker) {
+            $call = self::$invoker;
             return $call([$this, $method], $vars);
         } else {
             return call_user_func_array([$this, $method], $vars);
@@ -267,34 +261,6 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
     }
 
     /**
-     * 设置当前模型的数据库查询对象
-     * @access public
-     * @param Query $query 查询对象实例
-     * @param bool  $clear 是否需要清空查询条件
-     * @return $this
-     */
-    public function setQuery(Query $query, bool $clear = true)
-    {
-        $this->queryInstance = clone $query;
-
-        if ($clear) {
-            $this->queryInstance->removeOption();
-        }
-
-        return $this;
-    }
-
-    /**
-     * 获取当前模型的数据库查询对象
-     * @access public
-     * @return Query|null
-     */
-    public function getQuery()
-    {
-        return $this->queryInstance;
-    }
-
-    /**
      * 设置当前模型数据表的后缀
      * @access public
      * @param string $suffix 数据表后缀
@@ -325,13 +291,9 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
     public function db($scope = []): Query
     {
         /** @var Query $query */
-        if ($this->queryInstance) {
-            $query = $this->queryInstance;
-        } else {
-            $query = $this->db->connect($this->connection)
-                ->name($this->name . $this->suffix)
-                ->pk($this->pk);
-        }
+        $query = self::$db->connect($this->connection)
+            ->name($this->name . $this->suffix)
+            ->pk($this->pk);
 
         if (!empty($this->table)) {
             $query->table($this->table . $this->suffix);
@@ -887,17 +849,6 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
     public function __wakeup()
     {
         $this->initialize();
-    }
-
-    public function __debugInfo()
-    {
-        $attrs = get_object_vars($this);
-
-        foreach (['db', 'queryInstance', 'event'] as $name) {
-            unset($attrs[$name]);
-        }
-
-        return $attrs;
     }
 
     /**

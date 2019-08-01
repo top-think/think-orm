@@ -203,7 +203,7 @@ class Mongo extends BaseQuery
             }
         }
 
-        $this->data($field, ['$' . $op, $step]);
+        $this->data([$field], ['$' . $op, $step]);
 
         return $this;
     }

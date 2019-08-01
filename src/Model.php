@@ -128,6 +128,12 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
     protected $db;
 
     /**
+     * 容器对象的依赖注入方法
+     * @var callable
+     */
+    protected $invoker;
+
+    /**
      * 服务注入
      * @var Closure
      */
@@ -153,6 +159,34 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
     public function setDb(DbManager $db)
     {
         $this->db = $db;
+    }
+
+    /**
+     * 设置容器对象及依赖注入方法
+     * @access public
+     * @param callable $callable 依赖注入方法
+     * @return void
+     */
+    public function setInvoker(callable $callable): void
+    {
+        $this->invoker = $callable;
+    }
+
+    /**
+     * 调用反射执行模型方法 支持参数绑定
+     * @access public
+     * @param string $method
+     * @param array  $vars 参数
+     * @return mixed
+     */
+    public function invoke(string $method, array $vars = [])
+    {
+        if ($this->invoker) {
+            $call = $this->invoker;
+            return $call([$this, $method], $vars);
+        } else {
+            return call_user_func_array([$this, $method], $vars);
+        }
     }
 
     /**

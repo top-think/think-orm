@@ -363,7 +363,8 @@ trait Attribute
 
             if (method_exists($this, $method)) {
                 $array = $this->data;
-                $value = $this->$method($value, array_merge($this->data, $data));
+
+                $value = $this->invoke($method, [$value, array_merge($this->data, $data)]);
 
                 $this->set[$name] = true;
                 if (is_null($value) && $array !== $this->data) {
@@ -500,7 +501,7 @@ trait Attribute
                 $value = $this->getRelationValue($relation);
             }
 
-            $value = $this->$method($value, $this->data);
+            $value = $this->invoke($method, [$value, $this->data]);
         } elseif (isset($this->type[$fieldName])) {
             // 类型转换
             $value = $this->readTransform($value, $this->type[$fieldName]);

@@ -169,15 +169,16 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
     /**
      * 调用反射执行模型方法 支持参数绑定
      * @access public
-     * @param string $method
-     * @param array  $vars 参数
+     * @param mixed $method
+     * @param array $vars 参数
+     * @param bool  $accessible 设置是否可访问
      * @return mixed
      */
-    public function invoke(string $method, array $vars = [])
+    public function invoke($method, array $vars = [], bool $accessible = false)
     {
         if (self::$invoker) {
             $call = self::$invoker;
-            return $call([$this, $method], $vars);
+            return $call($method instanceof Closure ? $method : [$this, $method], $vars, $accessible);
         } else {
             return call_user_func_array([$this, $method], $vars);
         }

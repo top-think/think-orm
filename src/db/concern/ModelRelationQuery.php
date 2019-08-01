@@ -157,7 +157,7 @@ trait ModelRelationQuery
                 $method    = 'search' . Str::studly($fieldName) . 'Attr';
 
                 if (method_exists($this->model, $method)) {
-                    $this->model->invoke($method, [$this, $data[$field] ?? null, $data, $prefix]);
+                    $this->model->$method($this, $data[$field] ?? null, $data, $prefix);
                 }
             }
         }

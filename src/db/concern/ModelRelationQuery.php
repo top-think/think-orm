@@ -48,7 +48,7 @@ trait ModelRelationQuery
      */
     public function getModel()
     {
-        return $this->model ?: null;
+        return $this->model;
     }
 
     /**

@@ -12,6 +12,8 @@ declare (strict_types = 1);
 
 namespace think\model;
 
+use Closure;
+use ReflectionFunction;
 use think\db\BaseQuery as Query;
 use think\db\exception\DbException as Exception;
 use think\Model;
@@ -213,6 +215,21 @@ abstract class Relation
     {
         $this->withField = $field;
         return $this;
+    }
+
+    /**
+     * 执行关联的闭包查询
+     * @access protected
+     * @return void
+     */
+    protected function callClosure(Closure $closure, ...$param)
+    {
+        $reflect = new ReflectionFunction($closure);
+        $params  = $reflect->getParameters();
+        $type    = $params[0]->getType();
+
+        array_unshift($param, Relation::class == $type ? $this : $this->query);
+        $reflect->invokeArgs($param);
     }
 
     /**

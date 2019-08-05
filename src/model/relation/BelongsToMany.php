@@ -174,7 +174,7 @@ class BelongsToMany extends Relation
     public function getRelation(array $subRelation = [], Closure $closure = null): Collection
     {
         if ($closure) {
-            $closure($this);
+            $this->callClosure($closure);
         }
 
         $result = $this->buildQuery()
@@ -392,7 +392,7 @@ class BelongsToMany extends Relation
         $pk = $result->$pk;
 
         if ($closure) {
-            $closure($this, $name);
+            $this->callClosure($closure, $name);
         }
 
         return $this->belongsToManyQuery($this->foreignKey, $this->localKey, [
@@ -412,7 +412,7 @@ class BelongsToMany extends Relation
     public function getRelationCountQuery(Closure $closure = null, string $aggregate = 'count', string $field = '*', string &$name = null): string
     {
         if ($closure) {
-            $closure($this, $name);
+            $this->callClosure($closure, $name);
         }
 
         return $this->belongsToManyQuery($this->foreignKey, $this->localKey, [
@@ -435,7 +435,7 @@ class BelongsToMany extends Relation
     protected function eagerlyManyToMany(array $where, string $relation, array $subRelation = [], Closure $closure = null, array $cache = []): array
     {
         if ($closure) {
-            $closure($this);
+            $this->callClosure($closure);
         }
 
         // 预载入关联查询 支持嵌套预载入

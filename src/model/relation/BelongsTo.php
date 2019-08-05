@@ -85,7 +85,7 @@ class BelongsTo extends OneToOne
     public function getRelationCountQuery(Closure $closure = null, string $aggregate = 'count', string $field = '*', &$name = ''): string
     {
         if ($closure) {
-            $closure($this, $name);
+            $this->callClosure($closure, $name);
         }
 
         return $this->query

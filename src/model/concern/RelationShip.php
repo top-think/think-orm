@@ -156,7 +156,7 @@ trait RelationShip
             $relationResult = $this->$method();
 
             if (isset($withRelationAttr[$relationName])) {
-                $relationResult->getQuery()->withAttr($withRelationAttr[$relationName]);
+                $relationResult->withAttr($withRelationAttr[$relationName]);
             }
 
             $this->relation[$relation] = $relationResult->getRelation($subRelation, $closure);
@@ -247,7 +247,7 @@ trait RelationShip
             $relationResult = $this->$relation();
 
             if (isset($withRelationAttr[$relationName])) {
-                $relationResult->getQuery()->withAttr($withRelationAttr[$relationName]);
+                $relationResult->withAttr($withRelationAttr[$relationName]);
             }
 
             if (is_scalar($cache)) {
@@ -296,7 +296,7 @@ trait RelationShip
             $relationResult = $this->$relation();
 
             if (isset($withRelationAttr[$relationName])) {
-                $relationResult->getQuery()->withAttr($withRelationAttr[$relationName]);
+                $relationResult->withAttr($withRelationAttr[$relationName]);
             }
 
             if (is_scalar($cache)) {

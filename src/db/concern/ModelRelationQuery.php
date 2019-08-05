@@ -44,10 +44,9 @@ trait ModelRelationQuery
     /**
      * 获取当前的模型对象
      * @access public
-     * @param bool $clear 是否需要清空查询条件
      * @return Model|null
      */
-    public function getModel(bool $clear = true)
+    public function getModel()
     {
         return $this->model ?: null;
     }

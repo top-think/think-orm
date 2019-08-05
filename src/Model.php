@@ -156,7 +156,7 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
     }
 
     /**
-     * 设置容器对象及依赖注入方法
+     * 设置容器对象的依赖注入方法
      * @access public
      * @param callable $callable 依赖注入方法
      * @return void

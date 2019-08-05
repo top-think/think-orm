@@ -222,17 +222,17 @@ abstract class Relation
      * @access protected
      * @return mixed
      */
-    protected function callClosure(Closure $closure, ...$param)
+    protected function callClosure(Closure $closure, ...$vars)
     {
         $reflect = new ReflectionFunction($closure);
         $params  = $reflect->getParameters();
 
         if (!empty($params)) {
             $type = $params[0]->getType();
-            array_unshift($param, Relation::class == $type ? $this : $this->query);
+            array_unshift($vars, Relation::class == $type ? $this : $this->query);
         }
 
-        return $reflect->invokeArgs($param);
+        return $reflect->invokeArgs($vars);
     }
 
     /**

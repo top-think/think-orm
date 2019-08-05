@@ -55,7 +55,7 @@ class BelongsTo extends OneToOne
     public function getRelation(array $subRelation = [], Closure $closure = null)
     {
         if ($closure) {
-            $closure($this);
+            $this->callClosure($closure);
         }
 
         $foreignKey = $this->foreignKey;
@@ -113,7 +113,7 @@ class BelongsTo extends OneToOne
         }
 
         if ($closure) {
-            $closure($this, $name);
+            $this->callClosure($closure, $name);
         }
 
         return $this->query

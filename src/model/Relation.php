@@ -229,7 +229,7 @@ abstract class Relation
 
         if (!empty($params)) {
             $type = $params[0]->getType();
-            array_unshift($vars, Relation::class == $type ? $this : $this->query);
+            array_unshift($vars, Relation::class == $type || is_null($type) ? $this : $this->query);
         }
 
         return $reflect->invokeArgs($vars);

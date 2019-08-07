@@ -774,7 +774,7 @@ abstract class PDOConnection extends Connection
 
             $this->db->trigger('after_insert', $query);
 
-            if ($getLastInsID) {
+            if ($getLastInsID && $lastInsId) {
                 return $lastInsId;
             }
         }
@@ -1396,7 +1396,11 @@ abstract class PDOConnection extends Connection
      */
     public function getLastInsID(BaseQuery $query, string $sequence = null)
     {
-        $insertId = $this->linkID->lastInsertId($sequence);
+        try {
+            $insertId = $this->linkID->lastInsertId($sequence);
+        } catch (\Exception $e) {
+            $insertId = '';
+        }
 
         return $this->autoInsIDType($query, $insertId);
     }

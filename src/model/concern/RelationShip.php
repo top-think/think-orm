@@ -186,13 +186,14 @@ trait RelationShip
      * @param  integer $count    个数
      * @param  string  $id       关联表的统计字段
      * @param  string  $joinType JOIN类型
+     * @param  Query   $query    Query对象
      * @return Query
      */
-    public static function has(string $relation, string $operator = '>=', int $count = 1, string $id = '*', string $joinType = ''): Query
+    public static function has(string $relation, string $operator = '>=', int $count = 1, string $id = '*', string $joinType = '', Query $query = null): Query
     {
         return (new static())
             ->$relation()
-            ->has($operator, $count, $id, $joinType);
+            ->has($operator, $count, $id, $joinType, $query);
     }
 
     /**
@@ -202,13 +203,14 @@ trait RelationShip
      * @param  mixed  $where    查询条件（数组或者闭包）
      * @param  mixed  $fields   字段
      * @param  string $joinType JOIN类型
+     * @param  Query  $query    Query对象
      * @return Query
      */
-    public static function hasWhere(string $relation, $where = [], string $fields = '*', string $joinType = ''): Query
+    public static function hasWhere(string $relation, $where = [], string $fields = '*', string $joinType = '', Query $query = null): Query
     {
         return (new static())
             ->$relation()
-            ->hasWhere($where, $fields, $joinType);
+            ->hasWhere($where, $fields, $joinType, $query);
     }
 
     /**

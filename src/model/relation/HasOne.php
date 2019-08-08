@@ -127,9 +127,10 @@ class HasOne extends OneToOne
      * @param  integer $count    个数
      * @param  string  $id       关联表的统计字段
      * @param  string  $joinType JOIN类型
+     * @param  Query   $query    Query对象
      * @return Query
      */
-    public function has(string $operator = '>=', int $count = 1, string $id = '*', string $joinType = ''): Query
+    public function has(string $operator = '>=', int $count = 1, string $id = '*', string $joinType = '', Query $query = null): Query
     {
         $table      = $this->query->getTable();
         $model      = class_basename($this->parent);
@@ -137,17 +138,16 @@ class HasOne extends OneToOne
         $localKey   = $this->localKey;
         $foreignKey = $this->foreignKey;
         $softDelete = $this->query->getOptions('soft_delete');
+        $query      = $query ?: $this->parent->db()->alias($model);
 
-        return $this->parent->db()
-            ->alias($model)
-            ->whereExists(function ($query) use ($table, $model, $relation, $localKey, $foreignKey, $softDelete) {
-                $query->table([$table => $relation])
-                    ->field($relation . '.' . $foreignKey)
-                    ->whereExp($model . '.' . $localKey, '=' . $relation . '.' . $foreignKey)
-                    ->when($softDelete, function ($query) use ($softDelete, $relation) {
-                        $query->where($relation . strstr($softDelete[0], '.'), '=' == $softDelete[1][0] ? $softDelete[1][1] : null);
-                    });
-            });
+        return $query->whereExists(function ($query) use ($table, $model, $relation, $localKey, $foreignKey, $softDelete) {
+            $query->table([$table => $relation])
+                ->field($relation . '.' . $foreignKey)
+                ->whereExp($model . '.' . $localKey, '=' . $relation . '.' . $foreignKey)
+                ->when($softDelete, function ($query) use ($softDelete, $relation) {
+                    $query->where($relation . strstr($softDelete[0], '.'), '=' == $softDelete[1][0] ? $softDelete[1][1] : null);
+                });
+        });
     }
 
     /**
@@ -156,9 +156,10 @@ class HasOne extends OneToOne
      * @param  mixed  $where 查询条件（数组或者闭包）
      * @param  mixed  $fields   字段
      * @param  string $joinType JOIN类型
+     * @param  Query  $query    Query对象
      * @return Query
      */
-    public function hasWhere($where = [], $fields = null, string $joinType = ''): Query
+    public function hasWhere($where = [], $fields = null, string $joinType = '', Query $query = null): Query
     {
         $table    = $this->query->getTable();
         $model    = class_basename($this->parent);
@@ -175,10 +176,9 @@ class HasOne extends OneToOne
 
         $fields     = $this->getRelationQueryFields($fields, $model);
         $softDelete = $this->query->getOptions('soft_delete');
+        $query      = $query ?: $this->parent->db()->alias($model);
 
-        return $this->parent->db()
-            ->alias($model)
-            ->field($fields)
+        return $query->field($fields)
             ->join([$table => $relation], $model . '.' . $this->localKey . '=' . $relation . '.' . $this->foreignKey, $joinType ?: $this->joinType)
             ->when($softDelete, function ($query) use ($softDelete, $relation) {
                 $query->where($relation . strstr($softDelete[0], '.'), '=' == $softDelete[1][0] ? $softDelete[1][1] : null);

@@ -95,9 +95,10 @@ class HasManyThrough extends Relation
      * @param  integer $count    个数
      * @param  string  $id       关联表的统计字段
      * @param  string  $joinType JOIN类型
+     * @param  Query   $query    Query对象
      * @return Query
      */
-    public function has(string $operator = '>=', int $count = 1, string $id = '*', string $joinType = ''): Query
+    public function has(string $operator = '>=', int $count = 1, string $id = '*', string $joinType = '', Query $query = null): Query
     {
         $model         = Str::snake(class_basename($this->parent));
         $throughTable  = $this->through->getTable();
@@ -110,10 +111,9 @@ class HasManyThrough extends Relation
         if ('*' != $id) {
             $id = $relationTable . '.' . $relation->getPk();
         }
+        $query = $query ?: $this->parent->db()->alias($model);
 
-        return $this->parent->db()
-            ->alias($model)
-            ->field($model . '.*')
+        return $query->field($model . '.*')
             ->join($throughTable, $throughTable . '.' . $this->foreignKey . '=' . $model . '.' . $this->localKey)
             ->join($relationTable, $relationTable . '.' . $throughKey . '=' . $throughTable . '.' . $this->throughPk)
             ->when($softDelete, function ($query) use ($softDelete, $relationTable) {
@@ -129,9 +129,10 @@ class HasManyThrough extends Relation
      * @param  mixed  $where 查询条件（数组或者闭包）
      * @param  mixed  $fields 字段
      * @param  string $joinType JOIN类型
+     * @param  Query  $query    Query对象
      * @return Query
      */
-    public function hasWhere($where = [], $fields = null, $joinType = ''): Query
+    public function hasWhere($where = [], $fields = null, $joinType = '', Query $query = null): Query
     {
         $model        = Str::snake(class_basename($this->parent));
         $throughTable = $this->through->getTable();
@@ -150,10 +151,9 @@ class HasManyThrough extends Relation
 
         $fields     = $this->getRelationQueryFields($fields, $model);
         $softDelete = $this->query->getOptions('soft_delete');
+        $query      = $query ?: $this->parent->db()->alias($model);
 
-        return $this->parent->db()
-            ->alias($model)
-            ->join($throughTable, $throughTable . '.' . $this->foreignKey . '=' . $model . '.' . $this->localKey)
+        return $query->join($throughTable, $throughTable . '.' . $this->foreignKey . '=' . $model . '.' . $this->localKey)
             ->join($modelTable, $modelTable . '.' . $throughKey . '=' . $throughTable . '.' . $this->throughPk)
             ->when($softDelete, function ($query) use ($softDelete, $modelTable) {
                 $query->where($modelTable . strstr($softDelete[0], '.'), '=' == $softDelete[1][0] ? $softDelete[1][1] : null);

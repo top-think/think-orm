@@ -356,7 +356,7 @@ trait ModelRelationQuery
      */
     public function has(string $relation, string $operator = '>=', int $count = 1, string $id = '*', string $joinType = '')
     {
-        return $this->model->has($relation, $operator, $count, $id, $joinType);
+        return $this->model->has($relation, $operator, $count, $id, $joinType, $this);
     }
 
     /**
@@ -370,7 +370,7 @@ trait ModelRelationQuery
      */
     public function hasWhere(string $relation, $where = [], string $fields = '*', string $joinType = '')
     {
-        return $this->model->hasWhere($relation, $where, $fields, $joinType);
+        return $this->model->hasWhere($relation, $where, $fields, $joinType, $this);
     }
 
     /**

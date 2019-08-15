@@ -913,6 +913,10 @@ abstract class PDOConnection extends Connection
             $query->removeOption('field');
         }
 
+        if (isset($options['group'])) {
+            $query->group('');
+        }
+
         $query->setOption('field', (array) $field);
 
         if (!empty($options['cache'])) {
@@ -931,6 +935,10 @@ abstract class PDOConnection extends Connection
             $query->setOption('field', $options['field']);
         } else {
             $query->removeOption('field');
+        }
+
+        if (isset($options['group'])) {
+            $query->setOption('group', $options['group']);
         }
 
         // 执行查询操作
@@ -1027,11 +1035,17 @@ abstract class PDOConnection extends Connection
             $fields = array_keys($resultSet[0]);
             $key    = $key ?: array_shift($fields);
 
+            if (strpos($column, ',')) {
+                $column = null;
+            } elseif (strpos($column, '.')) {
+                list($alias, $column) = explode('.', $column);
+            }
+
             if (strpos($key, '.')) {
                 list($alias, $key) = explode('.', $key);
             }
 
-            $result = array_column($resultSet, strpos($column, ',') ? null : $column, $key);
+            $result = array_column($resultSet, $column, $key);
         }
 
         if (isset($cacheItem)) {

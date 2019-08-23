@@ -157,7 +157,9 @@ class Mongo extends Connection
             $this->links[$linkNum] = new Manager($config['dsn'], $config['params']);
 
             // 记录数据库连接信息
-            $this->log('[ MongoDb ] CONNECT :[ UseTime:' . number_format(microtime(true) - $startTime, 6) . 's ] ' . $config['dsn']);
+            if ($config['debug']) {
+                $this->log('[ MongoDb ] CONNECT :[ UseTime:' . number_format(microtime(true) - $startTime, 6) . 's ] ' . $config['dsn']);
+            }
 
         }
 
@@ -661,8 +663,9 @@ class Mongo extends Connection
         $manager = new Manager($this->buildUrl(), $this->config['params']);
 
         // 记录数据库连接信息
-        $this->log('[ MongoDB ] ReplicaSet CONNECT:[ UseTime:' . number_format(microtime(true) - $startTime, 6) . 's ] ' . $this->config['dsn']);
-
+        if ($this->config['debug']) {
+            $this->log('[ MongoDB ] ReplicaSet CONNECT:[ UseTime:' . number_format(microtime(true) - $startTime, 6) . 's ] ' . $this->config['dsn']);
+        }
         return $manager;
     }
 

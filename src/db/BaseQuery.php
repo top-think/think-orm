@@ -1446,7 +1446,7 @@ class BaseQuery
             $this->parsePkWhere($data);
         }
 
-        if (empty($this->options['where'])) {
+        if (empty($this->options['where']) && empty($this->options['order'])) {
             $result = [];
         } else {
             $result = $this->connection->find($this);

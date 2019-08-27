@@ -217,21 +217,21 @@ abstract class Relation
     }
 
     /**
-     * 执行关联的闭包查询
+     * 判断闭包的参数类型
      * @access protected
      * @return mixed
      */
-    protected function callClosure(Closure $closure, ...$vars)
+    protected function getClosureType(Closure $closure)
     {
         $reflect = new ReflectionFunction($closure);
         $params  = $reflect->getParameters();
 
         if (!empty($params)) {
             $type = $params[0]->getType();
-            array_unshift($vars, Relation::class == $type || is_null($type) ? $this : $this->query);
+            return Relation::class == $type || is_null($type) ? $this : $this->query;
         }
 
-        return $reflect->invokeArgs($vars);
+        return $this;
     }
 
     /**

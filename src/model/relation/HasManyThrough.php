@@ -74,7 +74,7 @@ class HasManyThrough extends Relation
     public function getRelation(array $subRelation = [], Closure $closure = null)
     {
         if ($closure) {
-            $this->callClosure($closure);
+            $closure($this->getClosureType($closure));
         }
 
         $this->baseQuery();
@@ -258,7 +258,7 @@ class HasManyThrough extends Relation
 
         if ($closure) {
             $this->baseQuery = true;
-            $this->callClosure($closure);
+            $closure($this->getClosureType($closure));
         }
 
         $list = $this->query
@@ -302,7 +302,7 @@ class HasManyThrough extends Relation
         }
 
         if ($closure) {
-            $this->callClosure($closure, $name);
+            $closure($this->getClosureType($closure), $name);
         }
 
         $alias        = Str::snake(class_basename($this->model));
@@ -335,7 +335,7 @@ class HasManyThrough extends Relation
     public function getRelationCountQuery(Closure $closure = null, string $aggregate = 'count', string $field = '*', string &$name = null): string
     {
         if ($closure) {
-            $this->callClosure($closure, $name);
+            $closure($this->getClosureType($closure), $name);
         }
 
         $alias        = Str::snake(class_basename($this->model));

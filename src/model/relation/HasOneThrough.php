@@ -31,7 +31,7 @@ class HasOneThrough extends HasManyThrough
     public function getRelation(array $subRelation = [], Closure $closure = null)
     {
         if ($closure) {
-            $this->callClosure($closure);
+            $closure($this->getClosureType($closure));
         }
 
         $this->baseQuery();
@@ -145,7 +145,7 @@ class HasOneThrough extends HasManyThrough
         $keys = $this->through->where($where)->column($this->throughPk, $this->foreignKey);
 
         if ($closure) {
-            $this->callClosure($closure);
+            $closure($this->getClosureType($closure));
         }
 
         $list = $this->query

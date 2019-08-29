@@ -71,7 +71,7 @@ class MorphMany extends Relation
     public function getRelation(array $subRelation = [], Closure $closure = null): Collection
     {
         if ($closure) {
-            $this->callClosure($closure);
+            $closure($this->getClosureType($closure));
         }
 
         $this->baseQuery();
@@ -208,7 +208,7 @@ class MorphMany extends Relation
         }
 
         if ($closure) {
-            $this->callClosure($closure, $name);
+            $closure($this->getClosureType($closure), $name);
         }
 
         return $this->query
@@ -231,7 +231,7 @@ class MorphMany extends Relation
     public function getRelationCountQuery(Closure $closure = null, string $aggregate = 'count', string $field = '*', string &$name = null): string
     {
         if ($closure) {
-            $this->callClosure($closure, $name);
+            $closure($this->getClosureType($closure), $name);
         }
 
         return $this->query
@@ -258,7 +258,7 @@ class MorphMany extends Relation
 
         if ($closure) {
             $this->baseQuery = true;
-            $this->callClosure($closure);
+            $closure($this->getClosureType($closure));
         }
 
         $list = $this->query

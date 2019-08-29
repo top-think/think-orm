@@ -55,7 +55,7 @@ class BelongsTo extends OneToOne
     public function getRelation(array $subRelation = [], Closure $closure = null)
     {
         if ($closure) {
-            $this->callClosure($closure);
+            $closure($this->getClosureType($closure));
         }
 
         $foreignKey = $this->foreignKey;
@@ -85,7 +85,7 @@ class BelongsTo extends OneToOne
     public function getRelationCountQuery(Closure $closure = null, string $aggregate = 'count', string $field = '*', &$name = ''): string
     {
         if ($closure) {
-            $this->callClosure($closure, $name);
+            $closure($this->getClosureType($closure), $name);
         }
 
         return $this->query
@@ -113,7 +113,7 @@ class BelongsTo extends OneToOne
         }
 
         if ($closure) {
-            $this->callClosure($closure, $name);
+            $closure($this->getClosureType($closure), $name);
         }
 
         return $this->query

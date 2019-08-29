@@ -86,13 +86,11 @@ class Sqlsrv extends PDOConnection
 
         $sql = "SELECT column_name FROM information_schema.key_column_usage WHERE table_name='$tableName'";
 
-        // 调试开始
-        $this->debug(true);
+        $this->queryStartTime = microtime(true);
 
         $pdo = $this->linkID->query($sql);
 
-        // 调试结束
-        $this->debug(false, $sql);
+        $this->trigger($sql);
 
         $result = $pdo->fetch(PDO::FETCH_ASSOC);
 

@@ -40,8 +40,6 @@ Db::setConfig([
             'charset'  => 'utf8',
             // 数据库表前缀
             'prefix'   => 'think_',
-            // 数据库调试模式
-            'debug'    => true,
         ],
         'mongo' => [
             // 数据库类型
@@ -56,8 +54,6 @@ Db::setConfig([
             'password'      => '',
             // 主键转换为Id
             'pk_convert_id' => true,
-            // 数据库调试模式
-            'debug'         => true,
             // 端口
             'hostport'      => '27017',
         ],

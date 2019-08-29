@@ -212,6 +212,7 @@ abstract class Connection
         if ('' === $config) {
             return $this->config;
         }
+
         return $this->config[$config] ?? null;
     }
 
@@ -401,16 +402,29 @@ abstract class Connection
     abstract protected function initConnect(bool $master = true);
 
     /**
-     * 记录SQL日志
+     * 数据库SQL监控
      * @access protected
-     * @param string $log  SQL日志信息
-     * @param string $type 日志类型
+     * @param string $sql    执行的SQL语句 留空自动获取
+     * @param bool   $master  主从标记
      * @return void
      */
-    protected function log($log, $type = 'sql')
+    protected function trigger(string $sql = '', bool $master = false): void
     {
-        if ($this->config['debug']) {
-            $this->db->log($log, $type);
+        $listen = $this->db->getListen();
+
+        if (!empty($listen)) {
+            $runtime = number_format((microtime(true) - $this->queryStartTime), 6);
+            $sql     = $sql ?: $this->getLastsql();
+
+            if (empty($this->config['deploy'])) {
+                $master = null;
+            }
+
+            foreach ($listen as $callback) {
+                if (is_callable($callback)) {
+                    $callback($sql, $runtime, $master);
+                }
+            }
         }
     }
 

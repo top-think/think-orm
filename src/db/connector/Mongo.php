@@ -69,8 +69,6 @@ class Mongo extends Connection
         'pk_type'         => 'ObjectID',
         // 数据库表前缀
         'prefix'          => '',
-        // 数据库调试模式
-        'debug'           => false,
         // 数据库部署方式:0 集中式(单一服务器),1 分布式(主从服务器)
         'deploy'          => 0,
         // 数据库读写是否分离 主从式有效
@@ -81,6 +79,10 @@ class Mongo extends Connection
         'slave_no'        => '',
         // 是否严格检查字段是否存在
         'fields_strict'   => true,
+        // 开启字段缓存
+        'fields_cache'    => false,
+        // 监听SQL
+        'trigger_sql'     => true,
         // 自动写入时间戳字段
         'auto_timestamp'  => false,
         // 时间字段取出后的默认时间格式
@@ -150,16 +152,12 @@ class Mongo extends Connection
                 $config['dsn'] = 'mongodb://' . ($config['username'] ? "{$config['username']}" : '') . ($config['password'] ? ":{$config['password']}@" : '') . $config['hostname'] . ($config['hostport'] ? ":{$config['hostport']}" : '');
             }
 
-            if ($config['debug']) {
-                $startTime = microtime(true);
-            }
+            $startTime = microtime(true);
 
             $this->links[$linkNum] = new Manager($config['dsn'], $config['params']);
 
             // 记录数据库连接信息
-            if ($config['debug']) {
-                $this->log('[ MongoDb ] CONNECT :[ UseTime:' . number_format(microtime(true) - $startTime, 6) . 's ] ' . $config['dsn']);
-            }
+            $this->db->log('[ MongoDb ] CONNECT :[ UseTime:' . number_format(microtime(true) - $startTime, 6) . 's ] ' . $config['dsn']);
 
         }
 
@@ -232,7 +230,7 @@ class Mongo extends Connection
             $namespace = $this->dbName . '.' . $namespace;
         }
 
-        if ($this->config['debug'] && !empty($this->queryStr)) {
+        if (!empty($this->queryStr)) {
             // 记录执行指令
             $this->queryStr = 'db' . strstr($namespace, '.') . '.' . $this->queryStr;
         }
@@ -241,12 +239,15 @@ class Mongo extends Connection
             $mongoQuery = $mongoQuery($query);
         }
 
-        $readPreference = $options['readPreference'] ?? null;
-        $this->debug(true);
+        $readPreference       = $options['readPreference'] ?? null;
+        $this->queryStartTime = microtime(true);
 
         $this->cursor = $this->mongo->executeQuery($namespace, $mongoQuery, $readPreference);
 
-        $this->debug(false);
+        // SQL监控
+        if (!empty($this->config['trigger_sql'])) {
+            $this->trigger('', $master);
+        }
 
         return $this->cursor;
     }
@@ -318,17 +319,20 @@ class Mongo extends Connection
             $namespace = $this->dbName . '.' . $namespace;
         }
 
-        if ($this->config['debug'] && !empty($this->queryStr)) {
+        if (!empty($this->queryStr)) {
             // 记录执行指令
             $this->queryStr = 'db' . strstr($namespace, '.') . '.' . $this->queryStr;
         }
 
-        $writeConcern = $options['writeConcern'] ?? null;
-        $this->debug(true);
+        $writeConcern         = $options['writeConcern'] ?? null;
+        $this->queryStartTime = microtime(true);
 
         $writeResult = $this->mongo->executeBulkWrite($namespace, $bulk, $writeConcern);
 
-        $this->debug(false);
+        // SQL监控
+        if (!empty($this->config['trigger_sql'])) {
+            $this->trigger();
+        }
 
         $this->numRows = $writeResult->getMatchedCount();
 
@@ -366,17 +370,20 @@ class Mongo extends Connection
         $this->initConnect(false);
         $this->db->updateQueryTimes();
 
-        $this->debug(true);
+        $this->queryStartTime = microtime(true);
 
         $dbName = $dbName ?: $this->dbName;
 
-        if ($this->config['debug'] && !empty($this->queryStr)) {
+        if (!empty($this->queryStr)) {
             $this->queryStr = 'db.' . $this->queryStr;
         }
 
         $this->cursor = $this->mongo->executeCommand($dbName, $command, $readPreference);
 
-        $this->debug(false);
+        // SQL监控
+        if (!empty($this->config['trigger_sql'])) {
+            $this->trigger('', $master);
+        }
 
         return $this->getResult($typeMap);
     }
@@ -437,7 +444,7 @@ class Mongo extends Connection
      */
     public function mongoLog(string $type, $data, array $options = [])
     {
-        if (!$this->config['debug']) {
+        if (!$this->config['trigger_sql']) {
             return;
         }
 
@@ -489,62 +496,6 @@ class Mongo extends Connection
     public function getLastSql(): string
     {
         return $this->queryStr;
-    }
-
-    /**
-     * 触发SQL事件
-     * @access protected
-     * @param  string $sql SQL语句
-     * @param  string $runtime SQL运行时间
-     * @param  bool   $master  主从标记
-     * @return void
-     */
-    protected function triggerSql(string $sql, string $runtime, bool $master = false): void
-    {
-        $listen = $this->db->getListen();
-
-        if (!empty($listen)) {
-            foreach ($listen as $callback) {
-                if (is_callable($callback)) {
-                    $callback($sql, $runtime, $master);
-                }
-            }
-        } else {
-            // 未注册监听则记录到日志中
-            if ($this->config['deploy']) {
-                // 分布式记录当前操作的主从
-                $master = $master ? 'master|' : 'slave|';
-            } else {
-                $master = '';
-            }
-            $this->log('[ SQL ] ' . $sql . ' [' . $master . ' RunTime:' . $runtime . 's ]');
-        }
-    }
-
-    /**
-     * 数据库调试 记录当前SQL及分析性能
-     * @access protected
-     * @param boolean $start 调试开始标记 true 开始 false 结束
-     * @param string  $sql 执行的SQL语句 留空自动获取
-     * @param bool    $master  主从标记
-     * @return void
-     */
-    protected function debug(bool $start, string $sql = '', bool $master = false)
-    {
-        if (!empty($this->config['debug'])) {
-            // 开启数据库调试模式
-            if ($start) {
-                $this->queryStartTime = microtime(true);
-            } else {
-                // 记录操作结束时间
-                $runtime = number_format((microtime(true) - $this->queryStartTime), 6);
-
-                $sql = $sql ?: $this->queryStr;
-
-                // SQL监听
-                $this->triggerSql($sql, $runtime, $master);
-            }
-        }
     }
 
     /**
@@ -654,18 +605,16 @@ class Mongo extends Connection
         $this->dbName  = $this->config['database'];
         $this->typeMap = $this->config['type_map'];
 
-        if ($this->config['debug']) {
-            $startTime = microtime(true);
-        }
+        $startTime = microtime(true);
 
         $this->config['params']['replicaSet'] = $this->config['database'];
 
         $manager = new Manager($this->buildUrl(), $this->config['params']);
 
         // 记录数据库连接信息
-        if ($this->config['debug']) {
-            $this->log('[ MongoDB ] ReplicaSet CONNECT:[ UseTime:' . number_format(microtime(true) - $startTime, 6) . 's ] ' . $this->config['dsn']);
-        }
+
+        $this->db->log('[ MongoDB ] ReplicaSet CONNECT:[ UseTime:' . number_format(microtime(true) - $startTime, 6) . 's ] ' . $this->config['dsn']);
+
         return $manager;
     }
 
@@ -1028,9 +977,8 @@ class Mongo extends Connection
     public function cmd(BaseQuery $query, $command, $extra = null, string $db = ''): array
     {
         if (is_array($command) || is_object($command)) {
-            if ($this->getConfig('debug')) {
-                $this->mongoLog('cmd', 'cmd', $command);
-            }
+
+            $this->mongoLog('cmd', 'cmd', $command);
 
             // 直接创建Command对象
             $command = new Command($command);

@@ -52,8 +52,6 @@ abstract class PDOConnection extends Connection
         'charset'           => 'utf8',
         // 数据库表前缀
         'prefix'            => '',
-        // 数据库调试模式
-        'debug'             => false,
         // 数据库部署方式:0 集中式(单一服务器),1 分布式(主从服务器)
         'deploy'            => 0,
         // 数据库读写是否分离 主从式有效
@@ -66,6 +64,10 @@ abstract class PDOConnection extends Connection
         'read_master'       => false,
         // 是否严格检查字段是否存在
         'fields_strict'     => true,
+        // 开启字段缓存
+        'fields_cache'      => false,
+        // 监听SQL
+        'trigger_sql'       => true,
         // Builder类
         'builder'           => '',
         // Query类
@@ -295,13 +297,22 @@ abstract class PDOConnection extends Connection
         }
 
         if (!isset($this->info[$schema])) {
-            // 读取缓存
+            // 读取字段缓存
             $cacheFile = $this->config['schema_cache_path'] . $schema . '.php';
 
-            if (!$this->config['debug'] && is_file($cacheFile)) {
+            if ($this->config['fields_cache'] && is_file($cacheFile)) {
                 $info = include $cacheFile;
             } else {
                 $info = $this->getFields($tableName);
+
+                if ($this->config['fields_cache']) {
+                    if (!is_dir($this->config['schema_cache_path'])) {
+                        mkdir($this->config['schema_cache_path'], 0755, true);
+                    }
+
+                    $content = '<?php ' . PHP_EOL . 'return ' . var_export($info, true) . ';';
+                    file_put_contents($cacheFile, $content);
+                }
             }
 
             $fields = array_keys($info);
@@ -421,15 +432,16 @@ abstract class PDOConnection extends Connection
                 $config['dsn'] = $this->parseDsn($config);
             }
 
-            $startTime             = microtime(true);
+            $startTime = microtime(true);
+
             $this->links[$linkNum] = $this->createPdo($config['dsn'], $config['username'], $config['password'], $params);
             // 记录数据库连接信息
-            $this->log('CONNECT:[ UseTime:' . number_format(microtime(true) - $startTime, 6) . 's ] ' . $config['dsn']);
+            $this->db->log('CONNECT:[ UseTime:' . number_format(microtime(true) - $startTime, 6) . 's ] ' . $config['dsn']);
 
             return $this->links[$linkNum];
         } catch (\PDOException $e) {
             if ($autoConnection) {
-                $this->log($e->getMessage(), 'error');
+                $this->db->log($e->getMessage(), 'error');
                 return $this->connect($autoConnection, $linkNum);
             } else {
                 throw $e;
@@ -585,8 +597,7 @@ abstract class PDOConnection extends Connection
         $this->db->updateQueryTimes();
 
         try {
-            // 调试开始
-            $this->debug(true);
+            $this->queryStartTime = microtime(true);
 
             // 预处理
             $this->PDOStatement = $this->linkID->prepare($sql);
@@ -601,8 +612,10 @@ abstract class PDOConnection extends Connection
             // 执行查询
             $this->PDOStatement->execute();
 
-            // 调试结束
-            $this->debug(false, '', $master);
+            // SQL监控
+            if (!empty($this->config['trigger_sql'])) {
+                $this->trigger('', $master);
+            }
 
             return $this->PDOStatement;
         } catch (\Throwable | \Exception $e) {
@@ -1472,61 +1485,6 @@ abstract class PDOConnection extends Connection
         }
 
         return $error;
-    }
-
-    /**
-     * 数据库调试 记录当前SQL及分析性能
-     * @access protected
-     * @param boolean $start  调试开始标记 true 开始 false 结束
-     * @param string  $sql    执行的SQL语句 留空自动获取
-     * @param bool    $master 主从标记
-     * @return void
-     */
-    protected function debug(bool $start, string $sql = '', bool $master = false): void
-    {
-        if (!empty($this->config['debug'])) {
-            // 开启数据库调试模式
-            if ($start) {
-                $this->queryStartTime = microtime(true);
-            } else {
-                // 记录操作结束时间
-                $runtime = number_format((microtime(true) - $this->queryStartTime), 6);
-                $sql     = $sql ?: $this->getLastsql();
-
-                // SQL监听
-                $this->triggerSql($sql, $runtime, $master);
-            }
-        }
-    }
-
-    /**
-     * 触发SQL事件
-     * @access protected
-     * @param string $sql     SQL语句
-     * @param string $runtime SQL运行时间
-     * @param bool   $master  主从标记
-     * @return void
-     */
-    protected function triggerSql(string $sql, string $runtime, bool $master = false): void
-    {
-        $listen = $this->db->getListen();
-        if (!empty($listen)) {
-            foreach ($listen as $callback) {
-                if (is_callable($callback)) {
-                    $callback($sql, $runtime, $master);
-                }
-            }
-        } else {
-            if ($this->config['deploy']) {
-                // 分布式记录当前操作的主从
-                $master = $master ? 'master|' : 'slave|';
-            } else {
-                $master = '';
-            }
-
-            // 未注册监听则记录到日志中
-            $this->log($sql . ' [ ' . $master . 'RunTime:' . $runtime . 's ]');
-        }
     }
 
     /**

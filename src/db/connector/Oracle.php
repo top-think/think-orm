@@ -10,12 +10,12 @@
 namespace think\db\connector;
 
 use PDO;
-use think\db\Connection;
+use think\db\PDOConnection;
 
 /**
  * Oracle数据库驱动
  */
-class Oracle extends Connection
+class Oracle extends PDOConnection
 {
     /**
      * 解析pdo连接的dsn信息
@@ -58,7 +58,8 @@ class Oracle extends Connection
 
         if ($result) {
             foreach ($result as $key => $val) {
-                $val                       = array_change_key_case($val);
+                $val = array_change_key_case($val);
+
                 $info[$val['column_name']] = [
                     'name'    => $val['column_name'],
                     'type'    => $val['data_type'],

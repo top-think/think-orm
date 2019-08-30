@@ -53,6 +53,12 @@ class BaseQuery
     protected $pk;
 
     /**
+     * 当前数据表自增主键
+     * @var string
+     */
+    protected $autoinc;
+
+    /**
      * 当前数据表前缀
      * @var string
      */
@@ -1176,6 +1182,18 @@ class BaseQuery
     }
 
     /**
+     * 指定数据表自增主键
+     * @access public
+     * @param string $autoinc 自增键
+     * @return $this
+     */
+    public function autoinc(string $autoinc)
+    {
+        $this->autoinc = $autoinc;
+        return $this;
+    }
+
+    /**
      * 获取当前数据表的主键
      * @access public
      * @return string|array
@@ -1187,6 +1205,20 @@ class BaseQuery
         }
 
         return $this->pk;
+    }
+
+    /**
+     * 获取当前数据表的自增主键
+     * @access public
+     * @return string
+     */
+    public function getAutoInc()
+    {
+        if (empty($this->autoinc)) {
+            $this->autoinc = $this->connection->getAutoInc($this->getTable());
+        }
+
+        return $this->autoinc;
     }
 
     /**

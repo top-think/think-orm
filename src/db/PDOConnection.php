@@ -139,13 +139,15 @@ abstract class PDOConnection extends Connection
      * @var array
      */
     protected $bindType = [
-        'string'  => PDO::PARAM_STR,
-        'str'     => PDO::PARAM_STR,
-        'integer' => PDO::PARAM_INT,
-        'int'     => PDO::PARAM_INT,
-        'boolean' => PDO::PARAM_BOOL,
-        'bool'    => PDO::PARAM_BOOL,
-        'float'   => self::PARAM_FLOAT,
+        'string'    => PDO::PARAM_STR,
+        'str'       => PDO::PARAM_STR,
+        'integer'   => PDO::PARAM_INT,
+        'int'       => PDO::PARAM_INT,
+        'boolean'   => PDO::PARAM_BOOL,
+        'bool'      => PDO::PARAM_BOOL,
+        'float'     => self::PARAM_FLOAT,
+        'datetime'  => PDO::PARAM_STR,
+        'timestamp' => PDO::PARAM_STR,
     ];
 
     /**
@@ -241,6 +243,33 @@ abstract class PDOConnection extends Connection
     }
 
     /**
+     * 获取字段类型
+     * @access protected
+     * @param string $type 字段类型
+     * @return string
+     */
+    protected function getFieldType(string $type): string
+    {
+        if (0 === strpos($type, 'set') || 0 === strpos($type, 'enum')) {
+            $result = 'string';
+        } elseif (preg_match('/(double|float|decimal|real|numeric)/is', $type)) {
+            $result = 'float';
+        } elseif (preg_match('/(int|serial|bit)/is', $type)) {
+            $result = 'int';
+        } elseif (preg_match('/bool/is', $type)) {
+            $result = 'bool';
+        } elseif (0 === strpos($type, 'timestamp')) {
+            $result = 'timestamp';
+        } elseif (0 === strpos($type, 'datetime')) {
+            $result = 'datetime';
+        } else {
+            $result = 'string';
+        }
+
+        return $result;
+    }
+
+    /**
      * 获取字段绑定类型
      * @access public
      * @param string $type 字段类型
@@ -278,13 +307,8 @@ abstract class PDOConnection extends Connection
             $tableName = key($tableName) ?: current($tableName);
         }
 
-        if (strpos($tableName, ',')) {
+        if (strpos($tableName, ',') || strpos($tableName, ')')) {
             // 多表不获取字段信息
-            return [];
-        }
-
-        // 修正子查询作为表名的问题
-        if (strpos($tableName, ')')) {
             return [];
         }
 
@@ -303,8 +327,7 @@ abstract class PDOConnection extends Connection
             if ($this->config['fields_cache'] && is_file($cacheFile)) {
                 $info = include $cacheFile;
             } else {
-                $info = $this->getFields($tableName);
-
+                $info = $this->getTableFieldsInfo($tableName);
                 if ($this->config['fields_cache']) {
                     if (!is_dir($this->config['schema_cache_path'])) {
                         mkdir($this->config['schema_cache_path'], 0755, true);
@@ -315,30 +338,62 @@ abstract class PDOConnection extends Connection
                 }
             }
 
-            $fields = array_keys($info);
-            $bind   = $type   = [];
+            $pk      = $info['_pk'] ?? null;
+            $autoinc = $info['_autoinc'] ?? null;
+            unset($info['_pk'], $info['_autoinc']);
 
-            foreach ($info as $key => $val) {
-                // 记录字段类型
-                $type[$key] = $val['type'];
-                $bind[$key] = $this->getFieldBindType($val['type']);
-
-                if (!empty($val['primary'])) {
-                    $pk[] = $key;
-                }
+            $bind = [];
+            foreach ($info as $name => $val) {
+                $bind[$name] = $this->getFieldBindType($val);
             }
 
-            if (isset($pk)) {
-                // 设置主键
-                $pk = count($pk) > 1 ? $pk : $pk[0];
-            } else {
-                $pk = null;
-            }
-
-            $this->info[$schema] = ['fields' => $fields, 'type' => $type, 'bind' => $bind, 'pk' => $pk];
+            $this->info[$schema] = [
+                'fields'  => array_keys($info),
+                'type'    => $info,
+                'bind'    => $bind,
+                'pk'      => $pk,
+                'autoinc' => $autoinc,
+            ];
         }
 
         return $fetch ? $this->info[$schema][$fetch] : $this->info[$schema];
+    }
+
+    /**
+     * 获取数据表的字段信息
+     * @access public
+     * @param string $tableName 数据表名
+     * @return array
+     */
+    public function getTableFieldsInfo(string $tableName): array
+    {
+        $fields = $this->getFields($tableName);
+        $info   = [];
+
+        foreach ($fields as $key => $val) {
+            // 记录字段类型
+            $info[$key] = $this->getFieldType($val['type']);
+
+            if (!empty($val['primary'])) {
+                $pk[] = $key;
+            }
+
+            if (!empty($val['autoinc'])) {
+                $autoinc = $key;
+            }
+        }
+
+        if (isset($pk)) {
+            // 设置主键
+            $pk          = count($pk) > 1 ? $pk : $pk[0];
+            $info['_pk'] = $pk;
+        }
+
+        if (isset($autoinc)) {
+            $info['_autoinc'] = $autoinc;
+        }
+
+        return $info;
     }
 
     /**
@@ -350,6 +405,17 @@ abstract class PDOConnection extends Connection
     public function getPk($tableName)
     {
         return $this->getTableInfo($tableName, 'pk');
+    }
+
+    /**
+     * 获取数据表的自增主键
+     * @access public
+     * @param mixed $tableName 数据表名
+     * @return string
+     */
+    public function getAutoInc($tableName)
+    {
+        return $this->getTableInfo($tableName, 'autoinc');
     }
 
     /**
@@ -777,8 +843,8 @@ abstract class PDOConnection extends Connection
             $data = $options['data'];
 
             if ($lastInsId) {
-                $pk = $query->getPk();
-                if (is_string($pk)) {
+                $pk = $query->getAutoInc();
+                if ($pk) {
                     $data[$pk] = $lastInsId;
                 }
             }
@@ -1441,9 +1507,9 @@ abstract class PDOConnection extends Connection
      */
     protected function autoInsIDType(BaseQuery $query, string $insertId)
     {
-        $pk = $query->getPk();
+        $pk = $query->getAutoInc();
 
-        if (is_string($pk)) {
+        if ($pk) {
             $type = $this->getFieldBindType($pk);
 
             if (PDO::PARAM_INT == $type) {

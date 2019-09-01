@@ -190,11 +190,17 @@ class DbManager
     /**
      * 获得查询日志（没有设置日志对象使用）
      * @access public
+     * @param bool $clear 是否清空
      * @return array
      */
-    public function getDbLog(): array
+    public function getDbLog(bool $clear = false): array
     {
-        return $this->dbLog;
+        $logs = $this->dbLog;
+        if ($clear) {
+            $this->dbLog = [];
+        }
+
+        return $logs;
     }
 
     /**
@@ -345,7 +351,7 @@ class DbManager
      */
     public function event(string $event, callable $callback): void
     {
-        $this->event[$event] = $callback;
+        $this->event[$event][] = $callback;
     }
 
     /**
@@ -353,13 +359,14 @@ class DbManager
      * @access public
      * @param string $event  事件名
      * @param mixed  $params 传入参数
-     * @param bool   $once
      * @return mixed
      */
-    public function trigger(string $event, $params = null, bool $once = false)
+    public function trigger(string $event, $params = null)
     {
         if (isset($this->event[$event])) {
-            return call_user_func_array($this->event[$event], [$this]);
+            foreach ($this->event[$event] as $callback) {
+                call_user_func_array($callback, [$this]);
+            }
         }
     }
 

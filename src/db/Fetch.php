@@ -61,7 +61,7 @@ class Fetch
     {
         $this->query->parseOptions();
 
-        $field = $aggregate . '(' . $this->builder->parseKey($this->query, $field) . ') AS tp_' . strtolower($aggregate);
+        $field = $aggregate . '(' . $this->builder->parseKey($this->query, $field) . ') AS think_' . strtolower($aggregate);
 
         return $this->value($field, 0, false);
     }

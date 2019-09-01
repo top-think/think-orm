@@ -578,9 +578,9 @@ abstract class PDOConnection extends Connection
     /**
      * 执行查询 返回数据集
      * @access public
-     * @param BaseQuery  $query 查询对象
-     * @param mixed  $sql   sql指令
-     * @param array  $bind  参数绑定
+     * @param BaseQuery $query 查询对象
+     * @param mixed     $sql   sql指令
+     * @param array     $bind  参数绑定
      * @return array
      * @throws BindParamException
      * @throws \PDOException
@@ -700,10 +700,10 @@ abstract class PDOConnection extends Connection
     /**
      * 执行语句
      * @access public
-     * @param BaseQuery  $query  查询对象
-     * @param string $sql    sql指令
-     * @param array  $bind   参数绑定
-     * @param bool   $origin 是否原生查询
+     * @param BaseQuery $query  查询对象
+     * @param string    $sql    sql指令
+     * @param array     $bind   参数绑定
+     * @param bool      $origin 是否原生查询
      * @return int
      * @throws BindParamException
      * @throws \PDOException
@@ -821,8 +821,8 @@ abstract class PDOConnection extends Connection
     /**
      * 插入记录
      * @access public
-     * @param BaseQuery   $query        查询对象
-     * @param boolean $getLastInsID 返回自增主键
+     * @param BaseQuery $query        查询对象
+     * @param boolean   $getLastInsID 返回自增主键
      * @return mixed
      */
     public function insert(BaseQuery $query, bool $getLastInsID = false)
@@ -864,9 +864,9 @@ abstract class PDOConnection extends Connection
     /**
      * 批量插入记录
      * @access public
-     * @param BaseQuery   $query   查询对象
-     * @param mixed   $dataSet 数据集
-     * @param integer $limit   每次写入数据限制
+     * @param BaseQuery $query   查询对象
+     * @param mixed     $dataSet 数据集
+     * @param integer   $limit   每次写入数据限制
      * @return integer
      * @throws \Exception
      * @throws \Throwable
@@ -910,9 +910,9 @@ abstract class PDOConnection extends Connection
     /**
      * 通过Select方式插入记录
      * @access public
-     * @param BaseQuery  $query  查询对象
-     * @param array  $fields 要插入的数据表字段名
-     * @param string $table  要插入的数据表名
+     * @param BaseQuery $query  查询对象
+     * @param array     $fields 要插入的数据表字段名
+     * @param string    $table  要插入的数据表名
      * @return integer
      * @throws PDOException
      */
@@ -978,10 +978,10 @@ abstract class PDOConnection extends Connection
     /**
      * 得到某个字段的值
      * @access public
-     * @param BaseQuery  $query   查询对象
-     * @param string $field   字段名
-     * @param mixed  $default 默认值
-     * @param bool   $one     返回一个值
+     * @param BaseQuery $query   查询对象
+     * @param string    $field   字段名
+     * @param mixed     $default 默认值
+     * @param bool      $one     返回一个值
      * @return mixed
      */
     public function value(BaseQuery $query, string $field, $default = null, bool $one = true)
@@ -1037,10 +1037,10 @@ abstract class PDOConnection extends Connection
     /**
      * 得到某个字段的值
      * @access public
-     * @param BaseQuery  $query     查询对象
-     * @param string $aggregate 聚合方法
-     * @param mixed  $field     字段名
-     * @param bool   $force     强制转为数字类型
+     * @param BaseQuery $query     查询对象
+     * @param string    $aggregate 聚合方法
+     * @param mixed     $field     字段名
+     * @param bool      $force     强制转为数字类型
      * @return mixed
      */
     public function aggregate(BaseQuery $query, string $aggregate, $field, bool $force = false)
@@ -1049,7 +1049,7 @@ abstract class PDOConnection extends Connection
             list($distinct, $field) = explode(' ', $field);
         }
 
-        $field = $aggregate . '(' . (!empty($distinct) ? 'DISTINCT ' : '') . $this->builder->parseKey($query, $field, true) . ') AS tp_' . strtolower($aggregate);
+        $field = $aggregate . '(' . (!empty($distinct) ? 'DISTINCT ' : '') . $this->builder->parseKey($query, $field, true) . ') AS think_' . strtolower($aggregate);
 
         $result = $this->value($query, $field, 0, false);
 
@@ -1059,9 +1059,9 @@ abstract class PDOConnection extends Connection
     /**
      * 得到某个列的数组
      * @access public
-     * @param BaseQuery  $query  查询对象
-     * @param string $column 字段名 多个字段用逗号分隔
-     * @param string $key    索引
+     * @param BaseQuery $query  查询对象
+     * @param string    $column 字段名 多个字段用逗号分隔
+     * @param string    $key    索引
      * @return array
      */
     public function column(BaseQuery $query, string $column, string $key = ''): array
@@ -1407,8 +1407,8 @@ abstract class PDOConnection extends Connection
      * 批处理的指令都认为是execute操作
      * @access public
      * @param BaseQuery $query    查询对象
-     * @param array $sqlArray SQL批处理指令
-     * @param array $bind     参数绑定
+     * @param array     $sqlArray SQL批处理指令
+     * @param array     $bind     参数绑定
      * @return bool
      */
     public function batchQuery(BaseQuery $query, array $sqlArray = [], array $bind = []): bool

@@ -28,6 +28,7 @@ use think\model\relation\HasOneThrough;
 use think\model\relation\MorphMany;
 use think\model\relation\MorphOne;
 use think\model\relation\MorphTo;
+use think\model\relation\OneToOne;
 
 /**
  * 模型关联处理
@@ -211,6 +212,30 @@ trait RelationShip
         return (new static())
             ->$relation()
             ->hasWhere($where, $fields, $joinType, $query);
+    }
+
+    /**
+     * 预载入关联查询 JOIN方式
+     * @access public
+     * @param  Query   $query    Query对象
+     * @param  string  $relation 关联方法名
+     * @param  mixed   $field    字段
+     * @param  string  $joinType JOIN类型
+     * @param  Closure $closure  闭包
+     * @param  bool    $first
+     * @return bool
+     */
+    public function eagerly(Query $query, string $relation, $field, string $joinType = '', Closure $closure = null, bool $first = false): bool
+    {
+        $relation = Str::camel($relation);
+        $class    = $this->$relation();
+
+        if ($class instanceof OneToOne) {
+            $class->eagerly($query, $relation, $field, $joinType, $closure, $first);
+            return true;
+        } else {
+            return false;
+        }
     }
 
     /**

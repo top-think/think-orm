@@ -183,7 +183,7 @@ trait ModelRelationQuery
     }
 
     /**
-     * 设置关联查询JOIN预查询
+     * 关联预载入 In方式
      * @access public
      * @param array|string $with 关联方法名称
      * @return $this
@@ -193,6 +193,53 @@ trait ModelRelationQuery
         if (!empty($with)) {
             $this->options['with'] = (array) $with;
         }
+
+        return $this;
+    }
+
+    /**
+     * 关联预载入 JOIN方式
+     * @access protected
+     * @param array|string $with     关联方法名
+     * @param string       $joinType JOIN方式
+     * @return $this
+     */
+    public function withJoin($with, string $joinType = '')
+    {
+        if (empty($with)) {
+            return $this;
+        }
+
+        $with  = (array) $with;
+        $first = true;
+
+        foreach ($with as $key => $relation) {
+            $closure = null;
+            $field   = true;
+
+            if ($relation instanceof Closure) {
+                // 支持闭包查询过滤关联条件
+                $closure  = $relation;
+                $relation = $key;
+            } elseif (is_array($relation)) {
+                $field    = $relation;
+                $relation = $key;
+            } elseif (is_string($relation) && strpos($relation, '.')) {
+                $relation = strstr($relation, '.', true);
+            }
+
+            $result = $this->model->eagerly($this, $relation, $field, $joinType, $closure, $first);
+
+            if (!$result) {
+                unset($with[$key]);
+            } else {
+                $first = false;
+            }
+        }
+
+        $this->via();
+
+        $this->options['with_join'] = $with;
 
         return $this;
     }

@@ -406,12 +406,12 @@ trait ModelRelationQuery
 
         if (!empty($this->options['with'])) {
             // 预载入
-            $result->eagerlyResultSet($resultSet, $this->options['with'], $withRelationAttr);
+            $result->eagerlyResultSet($resultSet, $this->options['with'], $withRelationAttr, false, $this->options['with_cache'] ?? false);
         }
 
         if (!empty($this->options['with_join'])) {
             // 预载入
-            $result->eagerlyResultSet($resultSet, $this->options['with_join'], $withRelationAttr, true);
+            $result->eagerlyResultSet($resultSet, $this->options['with_join'], $withRelationAttr, true, $this->options['with_cache'] ?? false);
         }
 
         // 模型数据集转换

@@ -255,7 +255,7 @@ trait RelationShip
             if (is_scalar($cache)) {
                 $relationCache = [$cache];
             } else {
-                $relationCache = $cache[$relationName] ?? [];
+                $relationCache = $cache[$relationName] ?? $cache;
             }
 
             $relationResult->eagerlyResultSet($resultSet, $relation, $subRelation, $closure, $relationCache, $join);

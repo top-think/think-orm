@@ -365,13 +365,13 @@ trait RelationShip
     /**
      * 关联统计
      * @access public
-     * @param  Model    $result     数据对象
+     * @param  Query    $query      查询对象
      * @param  array    $relations  关联名
      * @param  string   $aggregate  聚合查询方法
      * @param  string   $field      字段
      * @return void
      */
-    public function relationCount(Model $result, array $relations, string $aggregate = 'sum', string $field = '*'): void
+    public function relationCount(Query $query, array $relations, string $aggregate = 'sum', string $field = '*', bool $useSubQuery = true): void
     {
         foreach ($relations as $key => $relation) {
             $closure = $name = null;
@@ -385,13 +385,22 @@ trait RelationShip
             }
 
             $relation = Str::camel($relation);
-            $count    = $this->$relation()->relationCount($result, $closure, $aggregate, $field, $name);
+
+            if ($useSubQuery) {
+                $count = $this->$relation()->getRelationCountQuery($closure, $aggregate, $field, $name);
+            } else {
+                $count = $this->$relation()->relationCount($this, $closure, $aggregate, $field, $name);
+            }
 
             if (empty($name)) {
                 $name = Str::snake($relation) . '_' . $aggregate;
             }
 
-            $result->setAttr($name, $count);
+            if ($useSubQuery) {
+                $query->field(['(' . $count . ')' => $name]);
+            } else {
+                $this->setAttr($name, $count);
+            }
         }
     }
 

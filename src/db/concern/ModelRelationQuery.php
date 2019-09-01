@@ -262,29 +262,7 @@ trait ModelRelationQuery
                 $this->field('*');
             }
 
-            foreach ((array) $relations as $key => $relation) {
-                $closure = $aggregateField = null;
-
-                if ($relation instanceof Closure) {
-                    $closure  = $relation;
-                    $relation = $key;
-                } elseif (!is_int($key)) {
-                    $aggregateField = $relation;
-                    $relation       = $key;
-                }
-
-                $relation = Str::camel($relation);
-
-                $count = $this->model
-                    ->$relation()
-                    ->getRelationCountQuery($closure, $aggregate, $field, $aggregateField);
-
-                if (empty($aggregateField)) {
-                    $aggregateField = Str::snake($relation) . '_' . $aggregate;
-                }
-
-                $this->field(['(' . $count . ')' => $aggregateField]);
-            }
+            $this->model->relationCount($this, (array) $relations, $aggregate, $field, true);
         }
 
         return $this;
@@ -530,7 +508,7 @@ trait ModelRelationQuery
         // 关联统计
         if (!empty($options['with_count'])) {
             foreach ($options['with_count'] as $val) {
-                $result->relationCount($result, (array) $val[0], $val[1], $val[2]);
+                $result->relationCount($this, (array) $val[0], $val[1], $val[2], false);
             }
         }
     }

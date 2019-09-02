@@ -453,7 +453,7 @@ abstract class Connection
         if (!empty($query->getOptions('key'))) {
             $key = 'think:' . $this->getConfig('database') . '.' . $query->getTable() . '|' . $query->getOptions('key');
         } else {
-            $key = md5($this->getConfig('database') . serialize($query->getOptions()));
+            $key = $query->getQueryGuid();
         }
 
         return $key;

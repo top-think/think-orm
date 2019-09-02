@@ -494,7 +494,7 @@ class BaseQuery
             // 延迟写入
             $condition = $this->options['where'] ?? [];
 
-            $guid = md5($this->getTable() . '_' . $field . '_' . serialize($condition));
+            $guid = md5($this->getTable() . '_' . $field . '_' . $this->getQueryGuid($condition));
             $step = $this->connection->lazyWrite($op, $guid, $step, $lazyTime);
 
             if (false === $step) {
@@ -1246,6 +1246,17 @@ class BaseQuery
         }
 
         return $this->options[$name] ?? null;
+    }
+
+    /**
+     * 获取当前的查询标识
+     * @access public
+     * @param mixed $data 要序列化的数据
+     * @return string
+     */
+    public function getQueryGuid($data = null): string
+    {
+        return md5($this->getConfig('database') . serialize(var_export($data ?: $this->options, true)) . serialize($this->getBind(false)));
     }
 
     /**

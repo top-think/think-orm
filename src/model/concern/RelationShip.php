@@ -365,10 +365,11 @@ trait RelationShip
     /**
      * 关联统计
      * @access public
-     * @param  Query    $query      查询对象
-     * @param  array    $relations  关联名
-     * @param  string   $aggregate  聚合查询方法
-     * @param  string   $field      字段
+     * @param  Query  $query       查询对象
+     * @param  array  $relations   关联名
+     * @param  string $aggregate   聚合查询方法
+     * @param  string $field       字段
+     * @param  bool   $useSubQuery 子查询
      * @return void
      */
     public function relationCount(Query $query, array $relations, string $aggregate = 'sum', string $field = '*', bool $useSubQuery = true): void

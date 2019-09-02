@@ -1634,21 +1634,4 @@ abstract class PDOConnection extends Connection
         return $this->connect($dbConfig, $r, $r == $m ? false : $dbMaster);
     }
 
-    /**
-     * 分析缓存Key
-     * @access protected
-     * @param BaseQuery $query 查询对象
-     * @return string
-     */
-    protected function getCacheKey(BaseQuery $query): string
-    {
-        if (!empty($query->getOptions('key'))) {
-            $key = 'think:' . $this->getConfig('database') . '.' . $query->getTable() . '|' . $query->getOptions('key');
-        } else {
-            $key = md5($this->getConfig('database') . serialize($query->getOptions()) . serialize($query->getBind(false)));
-        }
-
-        return $key;
-    }
-
 }

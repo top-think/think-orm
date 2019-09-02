@@ -195,7 +195,7 @@ class Mongo extends BaseQuery
             // 延迟写入
             $condition = $this->options['where'] ?? [];
 
-            $guid = md5($this->getTable() . '_' . $field . '_' . serialize($condition));
+            $guid = md5($this->getTable() . '_' . $field . '_' . $this->getQueryGuid($condition));
             $step = $this->connection->lazyWrite($op, $guid, $step, $lazyTime);
 
             if (false === $step) {

@@ -218,7 +218,7 @@ class Mongo extends Connection
      * @throws ConnectionException
      * @throws RuntimeException
      */
-    public function getCursor(BaseQuery $query, $mongoQuery): Cursor
+    public function getCursor(BaseQuery $query, $mongoQuery, bool $master = false): Cursor
     {
         $this->initConnect(false);
         $this->db->updateQueryTimes();
@@ -365,7 +365,7 @@ class Mongo extends Connection
      * @throws ConnectionException
      * @throws RuntimeException
      */
-    public function command(Command $command, string $dbName = '', ReadPreference $readPreference = null, $typeMap = null): array
+    public function command(Command $command, string $dbName = '', ReadPreference $readPreference = null, $typeMap = null, bool $master = false): array
     {
         $this->initConnect(false);
         $this->db->updateQueryTimes();

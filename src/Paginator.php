@@ -42,13 +42,13 @@ abstract class Paginator implements ArrayAccess, Countable, IteratorAggregate, J
 
     /**
      * 当前页
-     * @var integer
+     * @var int
      */
     protected $currentPage;
 
     /**
      * 最后一页
-     * @var integer
+     * @var int
      */
     protected $lastPage;
 
@@ -60,7 +60,7 @@ abstract class Paginator implements ArrayAccess, Countable, IteratorAggregate, J
 
     /**
      * 每页数量
-     * @var integer
+     * @var int
      */
     protected $listRows;
 
@@ -351,6 +351,11 @@ abstract class Paginator implements ArrayAccess, Countable, IteratorAggregate, J
         return $this->items->all();
     }
 
+    /**
+     * 获取数据集
+     *
+     * @return Collection|\think\model\Collection
+     */
     public function getCollection()
     {
         return $this->items;

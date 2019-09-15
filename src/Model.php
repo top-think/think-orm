@@ -677,10 +677,16 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
 
         if (is_string($pk) && isset($this->data[$pk])) {
             $where = [[$pk, '=', $this->data[$pk]]];
-        } elseif (!empty($this->updateWhere)) {
-            $where = $this->updateWhere;
-        } else {
-            $where = null;
+        } elseif (is_array($pk)) {
+            foreach ($pk as $field) {
+                if (isset($this->data[$field])) {
+                    $where[] = [$field, '=', $this->data[$field]];
+                }
+            }
+        }
+
+        if (empty($where)) {
+            $where = empty($this->updateWhere) ? null : $this->updateWhere;
         }
 
         return $where;

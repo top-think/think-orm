@@ -368,7 +368,7 @@ abstract class Builder
 
             if ($value instanceof Closure) {
                 // 使用闭包查询
-                $where[] = $this->parseClousreWhere($query, $value, $logic);
+                $where[] = $this->parseClosureWhere($query, $value, $logic);
             } elseif (is_array($field)) {
                 $where[] = $this->parseMultiWhereField($query, $value, $field, $logic, $binds);
             } elseif ($field instanceof Raw) {
@@ -437,14 +437,15 @@ abstract class Builder
      * @param  string  $logic Logic
      * @return string
      */
-    protected function parseClousreWhere(Query $query, Closure $value, string $logic): string
+    protected function parseClosureWhere(Query $query, Closure $value, string $logic): string
     {
         $newQuery = $query->newQuery()->setConnection($this->connection);
         $value($newQuery);
-        $whereClause = $this->buildWhere($query, $newQuery->getOptions('where') ?: []);
+        $whereClosure = $this->buildWhere($newQuery, $newQuery->getOptions('where') ?: []);
 
-        if (!empty($whereClause)) {
-            $where = ' ' . $logic . ' ( ' . $whereClause . ' )';
+        if (!empty($whereClosure)) {
+            $query->bind($newQuery->getBind(false));
+            $where = ' ' . $logic . ' ( ' . $whereClosure . ' )';
         }
 
         return $where ?? '';

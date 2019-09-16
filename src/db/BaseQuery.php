@@ -1172,10 +1172,10 @@ class BaseQuery
     /**
      * 指定数据表主键
      * @access public
-     * @param string $pk 主键
+     * @param string|array $pk 主键
      * @return $this
      */
-    public function pk(string $pk)
+    public function pk($pk)
     {
         $this->pk = $pk;
         return $this;

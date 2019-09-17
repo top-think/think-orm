@@ -84,14 +84,8 @@ class Sqlsrv extends PDOConnection
             }
         }
 
-        $sql = "SELECT column_name FROM information_schema.key_column_usage WHERE table_name='$tableName'";
-
-        $this->queryStartTime = microtime(true);
-
-        $pdo = $this->linkID->query($sql);
-
-        $this->trigger($sql);
-
+        $sql    = "SELECT column_name FROM information_schema.key_column_usage WHERE table_name='$tableName'";
+        $pdo    = $this->linkID->query($sql);
         $result = $pdo->fetch(PDO::FETCH_ASSOC);
 
         if ($result) {

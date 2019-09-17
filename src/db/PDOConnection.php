@@ -501,8 +501,11 @@ abstract class PDOConnection extends Connection
             $startTime = microtime(true);
 
             $this->links[$linkNum] = $this->createPdo($config['dsn'], $config['username'], $config['password'], $params);
-            // 记录数据库连接信息
-            $this->db->log('CONNECT:[ UseTime:' . number_format(microtime(true) - $startTime, 6) . 's ] ' . $config['dsn']);
+
+            // SQL监控
+            if (!empty($config['trigger_sql'])) {
+                $this->trigger('CONNECT:[ UseTime:' . number_format(microtime(true) - $startTime, 6) . 's ] ' . $config['dsn']);
+            }
 
             return $this->links[$linkNum];
         } catch (\PDOException $e) {

@@ -53,13 +53,6 @@ interface ConnectionInterface
     public function setCache(CacheInterface $cache);
 
     /**
-     * 获取当前的缓存对象
-     * @access public
-     * @return CacheInterface|null
-     */
-    public function getCache();
-
-    /**
      * 获取数据库的配置参数
      * @access public
      * @param string $config 配置名称

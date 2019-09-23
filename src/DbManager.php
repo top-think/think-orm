@@ -16,7 +16,7 @@ use InvalidArgumentException;
 use Psr\Log\LoggerInterface;
 use Psr\SimpleCache\CacheInterface;
 use think\db\BaseQuery;
-use think\db\Connection;
+use think\db\ConnectionInterface;
 use think\db\Query;
 use think\db\Raw;
 
@@ -157,7 +157,7 @@ class DbManager
     /**
      * 设置缓存对象
      * @access public
-     * @param  CacheInterface $cache 缓存对象
+     * @param CacheInterface $cache 缓存对象
      * @return void
      */
     public function setCache(CacheInterface $cache): void
@@ -168,7 +168,7 @@ class DbManager
     /**
      * 设置日志对象
      * @access public
-     * @param  LoggerInterface $log 日志对象
+     * @param LoggerInterface $log 日志对象
      * @return void
      */
     public function setLog(LoggerInterface $log): void
@@ -211,8 +211,8 @@ class DbManager
     /**
      * 获取配置参数
      * @access public
-     * @param  string $name 配置参数
-     * @param  mixed  $default 默认值
+     * @param string $name    配置参数
+     * @param mixed  $default 默认值
      * @return mixed
      */
     public function getConfig(string $name = '', $default = null)
@@ -227,7 +227,7 @@ class DbManager
     /**
      * 创建/切换数据库连接查询
      * @access public
-     * @param string|null $name 连接配置标识
+     * @param string|null $name  连接配置标识
      * @param bool        $force 强制重新连接
      * @return BaseQuery
      */
@@ -251,39 +251,51 @@ class DbManager
      * @access protected
      * @param string|null $name  连接标识
      * @param bool        $force 强制重新连接
-     * @return Connection
+     * @return ConnectionInterface
      */
-    protected function instance(string $name = null, bool $force = false): Connection
+    protected function instance(string $name = null, bool $force = false): ConnectionInterface
     {
         if (empty($name)) {
             $name = $this->getConfig('default', 'mysql');
         }
 
         if ($force || !isset($this->instance[$name])) {
-            $connections = $this->getConfig('connections');
-            if (!isset($connections[$name])) {
-                throw new InvalidArgumentException('Undefined db config:' . $name);
-            }
-
-            $config = $connections[$name];
-            $type   = !empty($config['type']) ? $config['type'] : 'mysql';
-
-            if (false !== strpos($type, '\\')) {
-                $class = $type;
-            } else {
-                $class = '\\think\\db\\connector\\' . ucfirst($type);
-            }
-
-            $connection = new $class($config);
-            $connection->setDb($this);
-
-            if ($this->cache) {
-                $connection->setCache($this->cache);
-            }
-            $this->instance[$name] = $connection;
+            $this->instance[$name] = $this->createConnection($name);
         }
 
         return $this->instance[$name];
+    }
+
+    /**
+     * 创建连接
+     * @param $name
+     * @return ConnectionInterface
+     */
+    protected function createConnection($name)
+    {
+        $connections = $this->getConfig('connections');
+        if (!isset($connections[$name])) {
+            throw new InvalidArgumentException('Undefined db config:' . $name);
+        }
+
+        $config = $connections[$name];
+        $type   = !empty($config['type']) ? $config['type'] : 'mysql';
+
+        if (false !== strpos($type, '\\')) {
+            $class = $type;
+        } else {
+            $class = '\\think\\db\\connector\\' . ucfirst($type);
+        }
+
+        /** @var ConnectionInterface $connection */
+        $connection = new $class($config);
+        $connection->setDb($this);
+
+        if ($this->cache) {
+            $connection->setCache($this->cache);
+        }
+
+        return $connection;
     }
 
     /**

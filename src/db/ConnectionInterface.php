@@ -85,13 +85,6 @@ interface ConnectionInterface
     public function find(BaseQuery $query): array;
 
     /**
-     * 使用游标查询记录
-     * @access public
-     * @param BaseQuery $query 查询对象
-     */
-    public function cursor(BaseQuery $query);
-
-    /**
      * 查找记录
      * @access public
      * @param BaseQuery $query 查询对象

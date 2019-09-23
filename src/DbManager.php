@@ -267,19 +267,30 @@ class DbManager
     }
 
     /**
-     * 创建连接
-     * @param $name
-     * @return ConnectionInterface
+     * 获取连接配置
+     * @param string $name
+     * @return array
      */
-    protected function createConnection($name)
+    protected function getConnectionConfig(string $name): array
     {
         $connections = $this->getConfig('connections');
         if (!isset($connections[$name])) {
             throw new InvalidArgumentException('Undefined db config:' . $name);
         }
 
-        $config = $connections[$name];
-        $type   = !empty($config['type']) ? $config['type'] : 'mysql';
+        return $connections[$name];
+    }
+
+    /**
+     * 创建连接
+     * @param $name
+     * @return ConnectionInterface
+     */
+    protected function createConnection(string $name): ConnectionInterface
+    {
+        $config = $this->getConnectionConfig($name);
+
+        $type = !empty($config['type']) ? $config['type'] : 'mysql';
 
         if (false !== strpos($type, '\\')) {
             $class = $type;

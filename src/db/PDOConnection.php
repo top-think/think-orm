@@ -23,7 +23,7 @@ use think\db\exception\PDOException;
 /**
  * 数据库连接基础类
  */
-abstract class PDOConnection extends Connection
+abstract class PDOConnection extends Connection implements ConnectionInterface
 {
     const PARAM_FLOAT = 21;
 
@@ -173,6 +173,23 @@ abstract class PDOConnection extends Connection
      * @var array
      */
     protected $bind = [];
+
+    /**
+     * 架构函数 读取数据库配置信息
+     * @access public
+     * @param array $config 数据库配置数组
+     */
+    public function __construct(array $config = [])
+    {
+        if (!empty($config)) {
+            $this->config = array_merge($this->config, $config);
+        }
+
+        // 创建Builder对象
+        $class = $this->getBuilderClass();
+
+        $this->builder = new $class($this);
+    }
 
     /**
      * 获取当前连接器类对应的Query类
@@ -1526,16 +1543,6 @@ abstract class PDOConnection extends Connection
     }
 
     /**
-     * 获取返回或者影响的记录数
-     * @access public
-     * @return integer
-     */
-    public function getNumRows(): int
-    {
-        return $this->numRows;
-    }
-
-    /**
      * 获取最近的错误信息
      * @access public
      * @return string
@@ -1637,4 +1644,39 @@ abstract class PDOConnection extends Connection
         return $this->connect($dbConfig, $r, $r == $m ? false : $dbMaster);
     }
 
+    /**
+     * 启动XA事务
+     * @access public
+     * @param  string $xid XA事务id
+     * @return void
+     */
+    public function startTransXa(string $xid)
+    {}
+
+    /**
+     * 预编译XA事务
+     * @access public
+     * @param  string $xid XA事务id
+     * @return void
+     */
+    public function prepareXa(string $xid)
+    {}
+
+    /**
+     * 提交XA事务
+     * @access public
+     * @param  string $xid XA事务id
+     * @return void
+     */
+    public function commitXa(string $xid)
+    {}
+
+    /**
+     * 回滚XA事务
+     * @access public
+     * @param  string $xid XA事务id
+     * @return void
+     */
+    public function rollbackXa(string $xid)
+    {}
 }

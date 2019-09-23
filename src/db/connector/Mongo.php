@@ -32,7 +32,7 @@ use think\db\Mongo as Query;
 /**
  * Mongo数据库驱动
  */
-class Mongo extends Connection
+class Mongo extends Connection implements ConnectionInterface
 {
 
     // 查询数据类型
@@ -92,6 +92,23 @@ class Mongo extends Connection
         // typeMap
         'type_map'        => ['root' => 'array', 'document' => 'array'],
     ];
+
+    /**
+     * 架构函数 读取数据库配置信息
+     * @access public
+     * @param array $config 数据库配置数组
+     */
+    public function __construct(array $config = [])
+    {
+        if (!empty($config)) {
+            $this->config = array_merge($this->config, $config);
+        }
+
+        // 创建Builder对象
+        $class = $this->getBuilderClass();
+
+        $this->builder = new $class($this);
+    }
 
     /**
      * 获取当前连接器类对应的Query类
@@ -692,9 +709,10 @@ class Mongo extends Connection
     /**
      * 获取最近插入的ID
      * @access public
+     * @param BaseQuery $query 查询对象
      * @return mixed
      */
-    public function getLastInsID(BaseQuery $query, string $sequence = null)
+    public function getLastInsID(BaseQuery $query)
     {
         $id = $this->builder->getLastInsID();
 
@@ -995,40 +1013,6 @@ class Mongo extends Connection
         return $this->command($command, $db);
     }
 
-    // 获取当前数据表字段信息
-    public function getTableFields(string $tableName)
-    {
-        return [];
-    }
-
-    // 获取当前数据表字段类型
-    public function getFieldsType(string $tableName)
-    {
-        return [];
-    }
-
-    /**
-     * 获取数据表绑定信息
-     * @access public
-     * @param mixed $tableName 数据表名
-     * @return array
-     */
-    public function getFieldsBind($tableName): array
-    {
-        return [];
-    }
-
-    /**
-     * 获取字段绑定类型
-     * @access public
-     * @param string $type 字段类型
-     * @return integer
-     */
-    public function getFieldBindType(string $type): int
-    {
-        return 1;
-    }
-
     /**
      * 执行数据库事务
      * @access public
@@ -1069,16 +1053,4 @@ class Mongo extends Connection
     public function rollback()
     {}
 
-    /**
-     * 析构方法
-     * @access public
-     */
-    public function __destruct()
-    {
-        // 释放查询
-        $this->free();
-
-        // 关闭连接
-        $this->close();
-    }
 }

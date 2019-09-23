@@ -234,11 +234,6 @@ class DbManager
     public function connect(string $name = null, bool $force = false): BaseQuery
     {
         $connection = $this->instance($name, $force);
-        $connection->setDb($this);
-
-        if ($this->cache) {
-            $connection->setCache($this->cache);
-        }
 
         $class = $connection->getQueryClass();
         $query = new $class($connection);
@@ -279,7 +274,13 @@ class DbManager
                 $class = '\\think\\db\\connector\\' . ucfirst($type);
             }
 
-            $this->instance[$name] = new $class($config);
+            $connection = new $class($config);
+            $connection->setDb($this);
+
+            if ($this->cache) {
+                $connection->setCache($this->cache);
+            }
+            $this->instance[$name] = $connection;
         }
 
         return $this->instance[$name];

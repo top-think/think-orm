@@ -353,23 +353,6 @@ class Mongo extends BaseQuery
     }
 
     /**
-     * 获取执行的SQL语句而不进行实际的查询
-     * @access public
-     * @param bool $fetch 是否返回sql
-     * @return $this|Fetch
-     */
-    public function fetchSql(bool $fetch = true)
-    {
-        $this->options['fetch_sql'] = $fetch;
-
-        if ($fetch) {
-            throw new Exception('Mongo not support fetchSql');
-        }
-
-        return $this;
-    }
-
-    /**
      * 设置返回字段
      * @access public
      * @param  mixed $field 字段信息
@@ -505,6 +488,17 @@ class Mongo extends BaseQuery
         $this->parseOptions();
 
         return $this->connection->getCursor($this);
+    }
+
+    /**
+     * 获取当前的查询标识
+     * @access public
+     * @param mixed $data 要序列化的数据
+     * @return string
+     */
+    public function getQueryGuid($data = null): string
+    {
+        return md5($this->getConfig('database') . serialize(var_export($data ?: $this->options, true)));
     }
 
     /**

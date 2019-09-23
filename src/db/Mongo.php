@@ -185,25 +185,11 @@ class Mongo extends BaseQuery
      * @access public
      * @param string  $field 字段名
      * @param float   $step  增长值
-     * @param integer $lazyTime 延时时间(s)
-     * @param string  $op inc/dec
      * @return $this
      */
-    public function inc(string $field, float $step = 1, int $lazyTime = 0, string $op = 'inc')
+    public function inc(string $field, float $step = 1)
     {
-        if ($lazyTime > 0) {
-            // 延迟写入
-            $condition = $this->options['where'] ?? [];
-
-            $guid = md5($this->getTable() . '_' . $field . '_' . $this->getQueryGuid($condition));
-            $step = $this->connection->lazyWrite($op, $guid, $step, $lazyTime);
-
-            if (false === $step) {
-                return $this;
-            }
-        }
-
-        $this->options['data'][$field] = ['$' . $op, $step];
+        $this->options['data'][$field] = ['$inc', $step];
 
         return $this;
     }
@@ -213,12 +199,11 @@ class Mongo extends BaseQuery
      * @access public
      * @param  string  $field 字段名
      * @param  float   $step  减少值
-     * @param  integer $lazyTime 延时时间(s)
      * @return $this
      */
-    public function dec(string $field, float $step = 1, int $lazyTime = 0)
+    public function dec(string $field, float $step = 1)
     {
-        return $this->inc($field, -1 * $step, $lazyTime);
+        return $this->inc($field, -1 * $step);
     }
 
     /**

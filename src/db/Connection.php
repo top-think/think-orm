@@ -170,17 +170,6 @@ abstract class Connection
     }
 
     /**
-     * 设置数据库的配置参数
-     * @access public
-     * @param array $config 配置
-     * @return void
-     */
-    public function setConfig(array $config)
-    {
-        $this->config = array_merge($this->config, $config);
-    }
-
-    /**
      * 数据库SQL监控
      * @access protected
      * @param string $sql    执行的SQL语句 留空自动获取
@@ -262,40 +251,6 @@ abstract class Connection
         }
 
         return $cacheItem;
-    }
-
-    /**
-     * 延时更新检查 返回false表示需要延时
-     * 否则返回实际写入的数值
-     * @access public
-     * @param string  $type     自增或者自减
-     * @param string  $guid     写入标识
-     * @param float   $step     写入步进值
-     * @param integer $lazyTime 延时时间(s)
-     * @return false|integer
-     */
-    public function lazyWrite(string $type, string $guid, float $step, int $lazyTime)
-    {
-        if (!$this->cache || !method_exists($this->cache, $type)) {
-            return $step;
-        }
-
-        if (!$this->cache->has($guid . '_time')) {
-            // 计时开始
-            $this->cache->set($guid . '_time', time(), 0);
-            $this->cache->$type($guid, $step);
-        } elseif (time() > $this->cache->get($guid . '_time') + $lazyTime) {
-            // 删除缓存
-            $value = $this->cache->$type($guid, $step);
-            $this->cache->delete($guid);
-            $this->cache->delete($guid . '_time');
-            return 0 === $value ? false : $value;
-        } else {
-            // 更新缓存
-            $this->cache->$type($guid, $step);
-        }
-
-        return false;
     }
 
     /**

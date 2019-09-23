@@ -269,9 +269,6 @@ abstract class Connection
      */
     public function __destruct()
     {
-        // 释放查询
-        $this->free();
-
         // 关闭连接
         $this->close();
     }

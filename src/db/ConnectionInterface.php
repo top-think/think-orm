@@ -61,12 +61,6 @@ interface ConnectionInterface
     public function getConfig(string $config = '');
 
     /**
-     * 释放查询结果
-     * @access public
-     */
-    public function free();
-
-    /**
      * 关闭数据库（或者重新连接）
      * @access public
      * @return $this

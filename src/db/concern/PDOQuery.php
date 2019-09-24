@@ -14,12 +14,140 @@ namespace think\db\concern;
 
 use PDOStatement;
 use think\db\Fetch;
+use think\db\Raw;
+use think\helper\Str;
+
 /**
  * PDO查询支持
  */
 trait PDOQuery
 {
     use JoinAndViewQuery, ParamsBind, TableFieldInfo;
+
+    /**
+     * 利用__call方法实现一些特殊的Model方法
+     * @access public
+     * @param string $method 方法名称
+     * @param array  $args   调用参数
+     * @return mixed
+     * @throws Exception
+     */
+    public function __call(string $method, array $args)
+    {
+        if (strtolower(substr($method, 0, 5)) == 'getby') {
+            // 根据某个字段获取记录
+            $field = Str::snake(substr($method, 5));
+            return $this->where($field, '=', $args[0])->find();
+        } elseif (strtolower(substr($method, 0, 10)) == 'getfieldby') {
+            // 根据某个字段获取记录的某个值
+            $name = Str::snake(substr($method, 10));
+            return $this->where($name, '=', $args[0])->value($args[1]);
+        } elseif (strtolower(substr($method, 0, 7)) == 'whereor') {
+            $name = Str::snake(substr($method, 7));
+            array_unshift($args, $name);
+            return call_user_func_array([$this, 'whereOr'], $args);
+        } elseif (strtolower(substr($method, 0, 5)) == 'where') {
+            $name = Str::snake(substr($method, 5));
+            array_unshift($args, $name);
+            return call_user_func_array([$this, 'where'], $args);
+        } elseif ($this->model && method_exists($this->model, 'scope' . $method)) {
+            // 动态调用命名范围
+            $method = 'scope' . $method;
+            array_unshift($args, $this);
+
+            call_user_func_array([$this->model, $method], $args);
+            return $this;
+        } else {
+            throw new Exception('method not exist:' . static::class . '->' . $method);
+        }
+    }
+
+    /**
+     * 表达式方式指定Field排序
+     * @access public
+     * @param string $field 排序字段
+     * @param array  $bind  参数绑定
+     * @return $this
+     */
+    public function orderRaw(string $field, array $bind = [])
+    {
+        if (!empty($bind)) {
+            $this->bindParams($field, $bind);
+        }
+
+        $this->options['order'][] = new Raw($field);
+
+        return $this;
+    }
+
+    /**
+     * 表达式方式指定查询字段
+     * @access public
+     * @param string $field 字段名
+     * @return $this
+     */
+    public function fieldRaw(string $field)
+    {
+        $this->options['field'][] = new Raw($field);
+
+        return $this;
+    }
+
+    /**
+     * 指定Field排序 orderField('id',[1,2,3],'desc')
+     * @access public
+     * @param string $field  排序字段
+     * @param array  $values 排序值
+     * @param string $order  排序 desc/asc
+     * @return $this
+     */
+    public function orderField(string $field, array $values, string $order = '')
+    {
+        if (!empty($values)) {
+            $values['sort'] = $order;
+
+            $this->options['order'][$field] = $values;
+        }
+
+        return $this;
+    }
+
+    /**
+     * 随机排序
+     * @access public
+     * @return $this
+     */
+    public function orderRand()
+    {
+        $this->options['order'][] = '[rand]';
+        return $this;
+    }
+
+    /**
+     * 使用表达式设置数据
+     * @access public
+     * @param string $field 字段名
+     * @param string $value 字段值
+     * @return $this
+     */
+    public function exp(string $field, string $value)
+    {
+        $this->options['data'][$field] = new Raw($value);
+        return $this;
+    }
+
+    /**
+     * 表达式方式指定当前操作的数据表
+     * @access public
+     * @param mixed $table 表名
+     * @return $this
+     */
+    public function tableRaw(string $table)
+    {
+        $this->options['table'] = new Raw($table);
+
+        return $this;
+    }
 
     /**
      * 执行查询 返回数据集
@@ -285,6 +413,33 @@ trait PDOQuery
     }
 
     /**
+     * 字段值增长
+     * @access public
+     * @param string  $field    字段名
+     * @param float   $step     增长值
+     * @return $this
+     */
+    public function inc(string $field, float $step = 1)
+    {
+        $this->options['data'][$field] = ['INC', $step];
+
+        return $this;
+    }
+
+    /**
+     * 字段值减少
+     * @access public
+     * @param string  $field    字段名
+     * @param float   $step     增长值
+     * @return $this
+     */
+    public function dec(string $field, float $step = 1)
+    {
+        $this->options['data'][$field] = ['DEC', $step];
+        return $this;
+    }
+
+    /**
      * 获取当前的查询标识
      * @access public
      * @param mixed $data 要序列化的数据
@@ -325,4 +480,62 @@ trait PDOQuery
         return $connection->cursor($this);
     }
 
+    /**
+     * 分批数据返回处理
+     * @access public
+     * @param integer      $count    每次处理的数据数量
+     * @param callable     $callback 处理回调方法
+     * @param string|array $column   分批处理的字段名
+     * @param string       $order    字段排序
+     * @return bool
+     * @throws Exception
+     */
+    public function chunk(int $count, callable $callback, $column = null, string $order = 'asc'): bool
+    {
+        $options = $this->getOptions();
+        $column  = $column ?: $this->getPk();
+
+        if (isset($options['order'])) {
+            unset($options['order']);
+        }
+
+        $bind = $this->bind;
+
+        if (is_array($column)) {
+            $times = 1;
+            $query = $this->options($options)->page($times, $count);
+        } else {
+            $query = $this->options($options)->limit($count);
+
+            if (strpos($column, '.')) {
+                list($alias, $key) = explode('.', $column);
+            } else {
+                $key = $column;
+            }
+        }
+
+        $resultSet = $query->order($column, $order)->select();
+
+        while (count($resultSet) > 0) {
+            if (false === call_user_func($callback, $resultSet)) {
+                return false;
+            }
+
+            if (isset($times)) {
+                $times++;
+                $query = $this->options($options)->page($times, $count);
+            } else {
+                $end    = $resultSet->pop();
+                $lastId = is_array($end) ? $end[$key] : $end->getData($key);
+
+                $query = $this->options($options)
+                    ->limit($count)
+                    ->where($column, 'asc' == strtolower($order) ? '>' : '<', $lastId);
+            }
+
+            $resultSet = $query->bind($bind)->order($column, $order)->select();
+        }
+
+        return true;
+    }
 }

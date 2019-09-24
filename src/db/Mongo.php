@@ -23,23 +23,23 @@ use MongoDB\Driver\WriteConcern;
 use think\Collection;
 use think\db\connector\Mongo as Connection;
 use think\db\exception\DbException as Exception;
-use think\db\Query as BaseQuery;
+use think\Paginator;
 
 class Mongo extends BaseQuery
 {
     /**
      * 执行查询 返回数据集
      * @access public
-     * @param  MongoQuery     $query 查询对象
+     * @param  MongoQuery $query 查询对象
      * @return mixed
      * @throws AuthenticationException
      * @throws InvalidArgumentException
      * @throws ConnectionException
      * @throws RuntimeException
      */
-    public function mongoQuery(MongoQuery $query)
+    public function query(MongoQuery $query)
     {
-        return $this->connection->mongoQuery($this, $query);
+        return $this->connection->query($this, $query);
     }
 
     /**
@@ -63,7 +63,7 @@ class Mongo extends BaseQuery
     /**
      * 执行语句
      * @access public
-     * @param  BulkWrite     $bulk
+     * @param  BulkWrite $bulk
      * @return int
      * @throws AuthenticationException
      * @throws InvalidArgumentException
@@ -71,9 +71,9 @@ class Mongo extends BaseQuery
      * @throws RuntimeException
      * @throws BulkWriteException
      */
-    public function mongoExecute(BulkWrite $bulk)
+    public function execute(BulkWrite $bulk)
     {
-        return $this->connection->mongoExecute($this, $bulk);
+        return $this->connection->execute($this, $bulk);
     }
 
     /**
@@ -86,6 +86,7 @@ class Mongo extends BaseQuery
      */
     public function cmd($command, $extra = null, string $db = ''): array
     {
+        $this->parseOptions();
         return $this->connection->cmd($this, $command, $extra, $db);
     }
 
@@ -121,12 +122,11 @@ class Mongo extends BaseQuery
     /**
      * COUNT查询
      * @access public
+     * @param  string $field 字段名
      * @return integer
      */
     public function count(string $field = null): int
     {
-        $this->parseOptions();
-
         $result = $this->cmd('count');
 
         return $result[0]['n'];
@@ -142,11 +142,8 @@ class Mongo extends BaseQuery
      */
     public function aggregate(string $aggregate, $field, bool $force = false)
     {
-        $this->parseOptions();
-
         $result = $this->cmd('aggregate', [strtolower($aggregate), $field]);
-
-        $value = $result[0]['aggregate'] ?? 0;
+        $value  = $result[0]['aggregate'] ?? 0;
 
         if ($force) {
             $value += 0;
@@ -164,8 +161,6 @@ class Mongo extends BaseQuery
      */
     public function multiAggregate(array $aggregate, array $groupBy): array
     {
-        $this->parseOptions();
-
         $result = $this->cmd('multiAggregate', [$aggregate, $groupBy]);
 
         foreach ($result as &$row) {
@@ -484,6 +479,119 @@ class Mongo extends BaseQuery
     public function getQueryGuid($data = null): string
     {
         return md5($this->getConfig('database') . serialize(var_export($data ?: $this->options, true)));
+    }
+
+    /**
+     * 分页查询
+     * @access public
+     * @param int|array $listRows 每页数量 数组表示配置参数
+     * @param int|bool  $simple   是否简洁模式或者总记录数
+     * @return Paginator
+     * @throws Exception
+     */
+    public function paginate($listRows = null, $simple = false): Paginator
+    {
+        if (is_int($simple)) {
+            $total  = $simple;
+            $simple = false;
+        }
+
+        $defaultConfig = [
+            'query'     => [], //url额外参数
+            'fragment'  => '', //url锚点
+            'var_page'  => 'page', //分页变量
+            'list_rows' => 15, //每页数量
+        ];
+
+        if (is_array($listRows)) {
+            $config   = array_merge($defaultConfig, $listRows);
+            $listRows = intval($config['list_rows']);
+        } else {
+            $config   = $defaultConfig;
+            $listRows = intval($listRows ?: $config['list_rows']);
+        }
+
+        $page = isset($config['page']) ? (int) $config['page'] : Paginator::getCurrentPage($config['var_page']);
+
+        $page = $page < 1 ? 1 : $page;
+
+        $config['path'] = $config['path'] ?? Paginator::getCurrentPath();
+
+        if (!isset($total) && !$simple) {
+            $options = $this->getOptions();
+
+            unset($this->options['order'], $this->options['limit'], $this->options['page'], $this->options['field']);
+
+            $total   = $this->count();
+            $results = $this->options($options)->page($page, $listRows)->select();
+        } elseif ($simple) {
+            $results = $this->limit(($page - 1) * $listRows, $listRows + 1)->select();
+            $total   = null;
+        } else {
+            $results = $this->page($page, $listRows)->select();
+        }
+
+        $this->removeOption('limit');
+        $this->removeOption('page');
+
+        return Paginator::make($results, $listRows, $page, $total, $simple, $config);
+    }
+
+    /**
+     * 分批数据返回处理
+     * @access public
+     * @param integer      $count    每次处理的数据数量
+     * @param callable     $callback 处理回调方法
+     * @param string|array $column   分批处理的字段名
+     * @param string       $order    字段排序
+     * @return bool
+     * @throws Exception
+     */
+    public function chunk(int $count, callable $callback, $column = null, string $order = 'asc'): bool
+    {
+        $options = $this->getOptions();
+        $column  = $column ?: $this->getPk();
+
+        if (isset($options['order'])) {
+            unset($options['order']);
+        }
+
+        if (is_array($column)) {
+            $times = 1;
+            $query = $this->options($options)->page($times, $count);
+        } else {
+            $query = $this->options($options)->limit($count);
+
+            if (strpos($column, '.')) {
+                list($alias, $key) = explode('.', $column);
+            } else {
+                $key = $column;
+            }
+        }
+
+        $resultSet = $query->order($column, $order)->select();
+
+        while (count($resultSet) > 0) {
+            if (false === call_user_func($callback, $resultSet)) {
+                return false;
+            }
+
+            if (isset($times)) {
+                $times++;
+                $query = $this->options($options)->page($times, $count);
+            } else {
+                $end    = $resultSet->pop();
+                $lastId = is_array($end) ? $end[$key] : $end->getData($key);
+
+                $query = $this->options($options)
+                    ->limit($count)
+                    ->where($column, 'asc' == strtolower($order) ? '>' : '<', $lastId);
+            }
+
+            $resultSet = $query->order($column, $order)->select();
+        }
+
+        return true;
     }
 
     /**

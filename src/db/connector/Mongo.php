@@ -174,8 +174,10 @@ class Mongo extends Connection implements ConnectionInterface
 
             $this->links[$linkNum] = new Manager($config['dsn'], $config['params']);
 
-            // 记录数据库连接信息
-            $this->db->log('[ MongoDb ] CONNECT :[ UseTime:' . number_format(microtime(true) - $startTime, 6) . 's ] ' . $config['dsn']);
+            if (!empty($config['trigger_sql'])) {
+                // 记录数据库连接信息
+                $this->trigger('CONNECT:[ UseTime:' . number_format(microtime(true) - $startTime, 6) . 's ] ' . $config['dsn']);
+            }
 
         }
 
@@ -284,7 +286,7 @@ class Mongo extends Connection implements ConnectionInterface
      * @throws ConnectionException
      * @throws RuntimeException
      */
-    public function mongoQuery(BaseQuery $query, $mongoQuery): array
+    public function query(BaseQuery $query, $mongoQuery): array
     {
         $options = $query->parseOptions();
 
@@ -329,7 +331,7 @@ class Mongo extends Connection implements ConnectionInterface
      * @throws RuntimeException
      * @throws BulkWriteException
      */
-    public function mongoExecute(BaseQuery $query, BulkWrite $bulk)
+    public function execute(BaseQuery $query, BulkWrite $bulk)
     {
         $this->initConnect(true);
         $this->db->updateQueryTimes();
@@ -414,7 +416,7 @@ class Mongo extends Connection implements ConnectionInterface
     /**
      * 获得数据集
      * @access protected
-     * @param  string|array      $typeMap 指定返回的typeMap
+     * @param  string|array $typeMap 指定返回的typeMap
      * @return mixed
      */
     protected function getResult($typeMap = null): array
@@ -519,15 +521,6 @@ class Mongo extends Connection implements ConnectionInterface
     public function getLastSql(): string
     {
         return $this->queryStr;
-    }
-
-    /**
-     * 释放查询结果
-     * @access public
-     */
-    public function free()
-    {
-        $this->cursor = null;
     }
 
     /**
@@ -683,7 +676,7 @@ class Mongo extends Connection implements ConnectionInterface
         // 生成bulk对象
         $bulk = $this->builder->insert($query);
 
-        $writeResult = $this->mongoExecute($query, $bulk);
+        $writeResult = $this->execute($query, $bulk);
         $result      = $writeResult->getInsertedCount();
 
         if ($result) {
@@ -754,7 +747,7 @@ class Mongo extends Connection implements ConnectionInterface
         // 生成bulkWrite对象
         $bulk = $this->builder->insertAll($query, $dataSet);
 
-        $writeResult = $this->mongoExecute($query, $bulk);
+        $writeResult = $this->execute($query, $bulk);
 
         return $writeResult->getInsertedCount();
     }
@@ -778,7 +771,7 @@ class Mongo extends Connection implements ConnectionInterface
         // 生成bulkWrite对象
         $bulk = $this->builder->update($query);
 
-        $writeResult = $this->mongoExecute($query, $bulk);
+        $writeResult = $this->execute($query, $bulk);
 
         $result = $writeResult->getModifiedCount();
 
@@ -810,7 +803,7 @@ class Mongo extends Connection implements ConnectionInterface
         $bulk = $this->builder->delete($query);
 
         // 执行操作
-        $writeResult = $this->mongoExecute($query, $bulk);
+        $writeResult = $this->execute($query, $bulk);
 
         $result = $writeResult->getDeletedCount();
 
@@ -838,7 +831,7 @@ class Mongo extends Connection implements ConnectionInterface
         $resultSet = $this->db->trigger('before_select', $query);
 
         if (!$resultSet) {
-            $resultSet = $this->mongoQuery($query, function ($query) {
+            $resultSet = $this->query($query, function ($query) {
                 return $this->builder->select($query);
             });
         }
@@ -865,7 +858,7 @@ class Mongo extends Connection implements ConnectionInterface
 
         if (!$result) {
             // 执行查询
-            $resultSet = $this->mongoQuery($query, function ($query) {
+            $resultSet = $this->query($query, function ($query) {
                 return $this->builder->select($query, true);
             });
 
@@ -910,7 +903,7 @@ class Mongo extends Connection implements ConnectionInterface
         }
 
         // 执行查询操作
-        $resultSet = $this->mongoQuery($query, $mongoQuery);
+        $resultSet = $this->query($query, $mongoQuery);
 
         if (!empty($resultSet)) {
             $data   = array_shift($resultSet);
@@ -970,7 +963,7 @@ class Mongo extends Connection implements ConnectionInterface
         }
 
         // 执行查询操作
-        $resultSet = $this->mongoQuery($query, $mongoQuery);
+        $resultSet = $this->query($query, $mongoQuery);
 
         if (('*' == $field || strpos($field, ',')) && $key) {
             $result = array_column($resultSet, null, $key);

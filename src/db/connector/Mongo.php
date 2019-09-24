@@ -26,6 +26,7 @@ use MongoDB\Driver\ReadPreference;
 use think\db\BaseQuery;
 use think\db\builder\Mongo as Builder;
 use think\db\Connection;
+use think\db\ConnectionInterface;
 use think\db\exception\DbException as Exception;
 use think\db\Mongo as Query;
 

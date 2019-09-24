@@ -202,7 +202,20 @@ class Mongo extends BaseQuery
     }
 
     /**
-     * 指定当前操作的collection
+     * 指定当前操作的Collection
+     * @access public
+     * @param string $table 表名
+     * @return $this
+     */
+    public function table($table)
+    {
+        $this->options['table'] = $table;
+
+        return $this;
+    }
+
+    /**
+     * table方法的别名
      * @access public
      * @param  string $collection
      * @return $this
@@ -336,10 +349,9 @@ class Mongo extends BaseQuery
      * 设置返回字段
      * @access public
      * @param  mixed $field 字段信息
-     * @param  bool  $except 是否排除
      * @return $this
      */
-    public function field($field, bool $except = false)
+    public function field($field)
     {
         if (empty($field) || '*' == $field) {
             return $this;
@@ -352,7 +364,7 @@ class Mongo extends BaseQuery
         $projection = [];
         foreach ($field as $key => $val) {
             if (is_numeric($key)) {
-                $projection[$val] = $except ? 0 : 1;
+                $projection[$val] = 1;
             } else {
                 $projection[$key] = $val;
             }
@@ -360,6 +372,35 @@ class Mongo extends BaseQuery
 
         $this->options['projection'] = $projection;
 
+        return $this;
+    }
+
+    /**
+     * 指定要排除的查询字段
+     * @access public
+     * @param array|string $field 要排除的字段
+     * @return $this
+     */
+    public function withoutField($field)
+    {
+        if (empty($field) || '*' == $field) {
+            return $this;
+        }
+
+        if (is_string($field)) {
+            $field = array_map('trim', explode(',', $field));
+        }
+
+        $projection = [];
+        foreach ($field as $key => $val) {
+            if (is_numeric($key)) {
+                $projection[$val] = 0;
+            } else {
+                $projection[$key] = $val;
+            }
+        }
+
+        $this->options['projection'] = $projection;
         return $this;
     }
 

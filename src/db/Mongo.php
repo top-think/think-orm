@@ -346,6 +346,17 @@ class Mongo extends BaseQuery
     }
 
     /**
+     * 设置是否REPLACE
+     * @access public
+     * @param bool $replace 是否使用REPLACE写入数据
+     * @return $this
+     */
+    public function replace(bool $replace = true)
+    {
+        return $this;
+    }
+
+    /**
      * 设置返回字段
      * @access public
      * @param  mixed $field 字段信息

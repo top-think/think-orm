@@ -492,6 +492,10 @@ class Mongo extends Connection implements ConnectionInterface
                     $this->queryStr .= '.sort(' . json_encode($options['sort']) . ')';
                 }
 
+                if (isset($options['skip'])) {
+                    $this->queryStr .= '.skip(' . $options['skip'] . ')';
+                }
+
                 if (isset($options['limit'])) {
                     $this->queryStr .= '.limit(' . $options['limit'] . ')';
                 }
@@ -628,8 +632,9 @@ class Mongo extends Connection implements ConnectionInterface
         $manager = new Manager($this->buildUrl(), $this->config['params']);
 
         // 记录数据库连接信息
-
-        $this->db->log('[ MongoDB ] ReplicaSet CONNECT:[ UseTime:' . number_format(microtime(true) - $startTime, 6) . 's ] ' . $this->config['dsn']);
+        if (!empty($config['trigger_sql'])) {
+            $this->trigger('CONNECT:ReplicaSet[ UseTime:' . number_format(microtime(true) - $startTime, 6) . 's ] ' . $this->config['dsn']);
+        }
 
         return $manager;
     }

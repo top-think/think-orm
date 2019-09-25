@@ -67,6 +67,11 @@ class BelongsTo extends OneToOne
             ->find();
 
         if ($relationModel) {
+            if (!empty($this->bindAttr)) {
+                // 绑定关联属性
+                $this->bindAttr($relationModel, $this->parent);
+            }
+
             $relationModel->setParent(clone $this->parent);
         }
 

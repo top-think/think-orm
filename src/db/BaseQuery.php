@@ -81,6 +81,44 @@ abstract class BaseQuery
     }
 
     /**
+     * 利用__call方法实现一些特殊的Model方法
+     * @access public
+     * @param string $method 方法名称
+     * @param array  $args   调用参数
+     * @return mixed
+     * @throws Exception
+     */
+    public function __call(string $method, array $args)
+    {
+        if (strtolower(substr($method, 0, 5)) == 'getby') {
+            // 根据某个字段获取记录
+            $field = Str::snake(substr($method, 5));
+            return $this->where($field, '=', $args[0])->find();
+        } elseif (strtolower(substr($method, 0, 10)) == 'getfieldby') {
+            // 根据某个字段获取记录的某个值
+            $name = Str::snake(substr($method, 10));
+            return $this->where($name, '=', $args[0])->value($args[1]);
+        } elseif (strtolower(substr($method, 0, 7)) == 'whereor') {
+            $name = Str::snake(substr($method, 7));
+            array_unshift($args, $name);
+            return call_user_func_array([$this, 'whereOr'], $args);
+        } elseif (strtolower(substr($method, 0, 5)) == 'where') {
+            $name = Str::snake(substr($method, 5));
+            array_unshift($args, $name);
+            return call_user_func_array([$this, 'where'], $args);
+        } elseif ($this->model && method_exists($this->model, 'scope' . $method)) {
+            // 动态调用命名范围
+            $method = 'scope' . $method;
+            array_unshift($args, $this);
+
+            call_user_func_array([$this->model, $method], $args);
+            return $this;
+        } else {
+            throw new Exception('method not exist:' . static::class . '->' . $method);
+        }
+    }
+
+    /**
      * 创建一个新的查询对象
      * @access public
      * @return BaseQuery
@@ -182,6 +220,16 @@ abstract class BaseQuery
     public function getLastSql(): string
     {
         return $this->connection->getLastSql();
+    }
+
+    /**
+     * 获取返回或者影响的记录数
+     * @access public
+     * @return integer
+     */
+    public function getNumRows(): int
+    {
+        return $this->connection->getNumRows();
     }
 
     /**

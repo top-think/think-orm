@@ -10,6 +10,7 @@
 namespace think\db\connector;
 
 use PDO;
+use think\db\BaseQuery;
 use think\db\PDOConnection;
 
 /**
@@ -97,10 +98,11 @@ class Oracle extends PDOConnection
     /**
      * 获取最近插入的ID
      * @access public
-     * @param string $sequence 自增序列名
-     * @return string
+     * @param BaseQuery $query    查询对象
+     * @param string    $sequence 自增序列名
+     * @return mixed
      */
-    public function getLastInsID(string $sequence = null): string
+    public function getLastInsID(BaseQuery $query, string $sequence = null)
     {
         $pdo    = $this->linkID->query("select {$sequence}.currval as id from dual");
         $result = $pdo->fetchColumn();

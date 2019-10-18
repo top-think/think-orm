@@ -899,6 +899,10 @@ abstract class PDOConnection extends Connection implements ConnectionInterface
 
         $query->parseOptions();
 
+        if (0 === $limit && count($dataSet) >= 5000) {
+            $limit = 1000;
+        }
+
         if ($limit) {
             // 分批写入 自动启动事务支持
             $this->startTrans();

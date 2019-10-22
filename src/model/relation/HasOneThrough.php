@@ -73,10 +73,7 @@ class HasOneThrough extends HasManyThrough
 
             $data = $this->eagerlyWhere([
                 [$this->foreignKey, 'in', $range],
-            ], $foreignKey, $relation, $subRelation, $closure, $cache);
-
-            // 关联属性名
-            $attr = Str::snake($relation);
+            ], $foreignKey, $subRelation, $closure, $cache);
 
             // 关联数据封装
             foreach ($resultSet as $result) {
@@ -90,7 +87,7 @@ class HasOneThrough extends HasManyThrough
                 }
 
                 // 设置关联属性
-                $result->setRelation($attr, $relationModel);
+                $result->setRelation($relation, $relationModel);
             }
         }
     }
@@ -114,7 +111,7 @@ class HasOneThrough extends HasManyThrough
 
         $data = $this->eagerlyWhere([
             [$foreignKey, '=', $result->$localKey],
-        ], $foreignKey, $relation, $subRelation, $closure, $cache);
+        ], $foreignKey, $subRelation, $closure, $cache);
 
         // 关联模型
         if (!isset($data[$result->$localKey])) {
@@ -125,7 +122,7 @@ class HasOneThrough extends HasManyThrough
             $relationModel->exists(true);
         }
 
-        $result->setRelation(Str::snake($relation), $relationModel);
+        $result->setRelation($relation, $relationModel);
     }
 
     /**
@@ -133,13 +130,12 @@ class HasOneThrough extends HasManyThrough
      * @access public
      * @param  array   $where       关联预查询条件
      * @param  string  $key         关联键名
-     * @param  string  $relation    关联名
      * @param  array   $subRelation 子关联
      * @param  Closure $closure
      * @param  array   $cache       关联缓存
      * @return array
      */
-    protected function eagerlyWhere(array $where, string $key, string $relation, array $subRelation = [], Closure $closure = null, array $cache = []): array
+    protected function eagerlyWhere(array $where, string $key, array $subRelation = [], Closure $closure = null, array $cache = []): array
     {
         // 预载入关联查询 支持嵌套预载入
         $keys = $this->through->where($where)->column($this->throughPk, $this->foreignKey);

@@ -260,7 +260,7 @@ abstract class OneToOne extends Relation
             $relationModel = null;
         }
 
-        $result->setRelation(Str::snake($relation), $relationModel);
+        $result->setRelation($relation, $relationModel);
     }
 
     /**
@@ -290,13 +290,12 @@ abstract class OneToOne extends Relation
      * @access public
      * @param  array   $where       关联预查询条件
      * @param  string  $key         关联键名
-     * @param  string  $relation    关联名
      * @param  array   $subRelation 子关联
      * @param  Closure $closure
      * @param  array   $cache       关联缓存
      * @return array
      */
-    protected function eagerlyWhere(array $where, string $key, string $relation, array $subRelation = [], Closure $closure = null, array $cache = [])
+    protected function eagerlyWhere(array $where, string $key, array $subRelation = [], Closure $closure = null, array $cache = [])
     {
         // 预载入关联查询 支持嵌套预载入
         if ($closure) {

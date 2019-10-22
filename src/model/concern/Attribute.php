@@ -179,7 +179,7 @@ trait Attribute
 
     /**
      * 获取实际的字段名
-     * @access public
+     * @access protected
      * @param  string $name 字段名
      * @return string
      */

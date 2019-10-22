@@ -144,10 +144,7 @@ class MorphMany extends Relation
                 [$morphKey, 'in', $range],
                 [$morphType, '=', $type],
             ];
-            $data = $this->eagerlyMorphToMany($where, $relation, $subRelation, $closure, $cache);
-
-            // 关联属性名
-            $attr = Str::snake($relation);
+            $data = $this->eagerlyMorphToMany($where, $subRelation, $closure, $cache);
 
             // 关联数据封装
             foreach ($resultSet as $result) {
@@ -155,7 +152,7 @@ class MorphMany extends Relation
                     $data[$result->$pk] = [];
                 }
 
-                $result->setRelation($attr, $this->resultSetBuild($data[$result->$pk], clone $this->parent));
+                $result->setRelation($relation, $this->resultSetBuild($data[$result->$pk], clone $this->parent));
             }
         }
     }
@@ -179,13 +176,13 @@ class MorphMany extends Relation
             $data = $this->eagerlyMorphToMany([
                 [$this->morphKey, '=', $key],
                 [$this->morphType, '=', $this->type],
-            ], $relation, $subRelation, $closure, $cache);
+            ], $subRelation, $closure, $cache);
 
             if (!isset($data[$key])) {
                 $data[$key] = [];
             }
 
-            $result->setRelation(Str::snake($relation), $this->resultSetBuild($data[$key], clone $this->parent));
+            $result->setRelation($relation, $this->resultSetBuild($data[$key], clone $this->parent));
         }
     }
 
@@ -245,13 +242,12 @@ class MorphMany extends Relation
      * 多态一对多 关联模型预查询
      * @access protected
      * @param  array   $where       关联预查询条件
-     * @param  string  $relation    关联名
      * @param  array   $subRelation 子关联
      * @param  Closure $closure     闭包
      * @param  array   $cache       关联缓存
      * @return array
      */
-    protected function eagerlyMorphToMany(array $where, string $relation, array $subRelation = [], Closure $closure = null, array $cache = []): array
+    protected function eagerlyMorphToMany(array $where, array $subRelation = [], Closure $closure = null, array $cache = []): array
     {
         // 预载入关联查询 支持嵌套预载入
         $this->query->removeOption('where');

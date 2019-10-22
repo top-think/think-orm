@@ -120,7 +120,7 @@ trait RelationShip
             $value = $this->$method($value, array_merge($this->data, $data));
         }
 
-        $this->relation[$name] = $value;
+        $this->relation[$this->getRealFieldName($name)] = $value;
 
         return $this;
     }
@@ -268,8 +268,8 @@ trait RelationShip
                 $subRelation = [$subRelation];
             }
 
+            $relationName = $relation;
             $relation     = Str::camel($relation);
-            $relationName = Str::snake($relation);
 
             $relationResult = $this->$relation();
 
@@ -283,7 +283,7 @@ trait RelationShip
                 $relationCache = $cache[$relationName] ?? $cache;
             }
 
-            $relationResult->eagerlyResultSet($resultSet, $relation, $subRelation, $closure, $relationCache, $join);
+            $relationResult->eagerlyResultSet($resultSet, $relationName, $subRelation, $closure, $relationCache, $join);
         }
     }
 
@@ -317,8 +317,8 @@ trait RelationShip
                 $subRelation = [$subRelation];
             }
 
+            $relationName = $relation;
             $relation     = Str::camel($relation);
-            $relationName = Str::snake($relation);
 
             $relationResult = $this->$relation();
 
@@ -332,7 +332,7 @@ trait RelationShip
                 $relationCache = $cache[$relationName] ?? [];
             }
 
-            $relationResult->eagerlyResult($result, $relation, $subRelation, $closure, $relationCache, $join);
+            $relationResult->eagerlyResult($result, $relationName, $subRelation, $closure, $relationCache, $join);
         }
     }
 

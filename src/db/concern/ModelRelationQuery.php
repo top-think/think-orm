@@ -296,9 +296,9 @@ trait ModelRelationQuery
         $relations = (array) $relation;
         foreach ($relations as $name => $relation) {
             if (!is_numeric($name)) {
-                $this->options['with_cache'][Str::snake($name)] = is_array($relation) ? $relation : [$key, $relation, $tag];
+                $this->options['with_cache'][$name] = is_array($relation) ? $relation : [$key, $relation, $tag];
             } else {
-                $this->options['with_cache'][Str::snake($relation)] = [$key, $expire, $tag];
+                $this->options['with_cache'][$relation] = [$key, $expire, $tag];
             }
         }
 

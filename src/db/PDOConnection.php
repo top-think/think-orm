@@ -857,24 +857,21 @@ abstract class PDOConnection extends Connection implements ConnectionInterface
         $result = '' == $sql ? 0 : $this->execute($query, $sql, $query->getBind());
 
         if ($result) {
-            $sequence  = $options['sequence'] ?? null;
-            $lastInsId = $this->getLastInsID($query, $sequence);
-
             $data = $options['data'];
-
-            if ($lastInsId) {
-                $pk = $query->getAutoInc();
-                if ($pk) {
-                    $data[$pk] = $lastInsId;
-                }
-            }
-
             $query->setOption('data', $data);
 
             $this->db->trigger('after_insert', $query);
 
-            if ($getLastInsID && $lastInsId) {
-                return $lastInsId;
+            if ($getLastInsID) {
+                $sequence  = $options['sequence'] ?? null;
+                $lastInsId = $this->getLastInsID($query, $sequence);
+                if ($lastInsId) {
+                    $pk = $query->getAutoInc();
+                    if ($pk) {
+                        $data[$pk] = $lastInsId;
+                    }
+                    return $lastInsId;
+                }
             }
         }
 

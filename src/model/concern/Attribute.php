@@ -278,8 +278,8 @@ trait Attribute
 
         if (array_key_exists($fieldName, $this->data)) {
             return $this->data[$fieldName];
-        } elseif (array_key_exists($name, $this->relation)) {
-            return $this->relation[$name];
+        } elseif (array_key_exists($fieldName, $this->relation)) {
+            return $this->relation[$fieldName];
         }
 
         throw new InvalidArgumentException('property not exists:' . static::class . '->' . $name);

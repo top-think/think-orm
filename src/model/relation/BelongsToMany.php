@@ -206,12 +206,11 @@ class BelongsToMany extends Relation
      * @access public
      * @param  int|array $listRows
      * @param  int|bool  $simple
-     * @param  array     $config
      * @return Paginator
      */
-    public function paginate($listRows = null, $simple = false, $config = []): Paginator
+    public function paginate($listRows = null, $simple = false): Paginator
     {
-        $result = $this->buildQuery()->paginate($listRows, $simple, $config);
+        $result = $this->buildQuery()->paginate($listRows, $simple);
         $this->hydratePivot($result);
 
         return $result;

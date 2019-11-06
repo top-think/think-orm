@@ -384,7 +384,7 @@ trait WhereQuery
         } elseif ($field instanceof Closure) {
             $where = $field;
         } elseif (is_string($field)) {
-            if (preg_match('/[,=\<\'\"\(\s]/', $field)) {
+            if (preg_match('/[,=\<\>\'\"\(\s]/', $field)) {
                 return $this->whereRaw($field, is_array($op) ? $op : [], $logic);
             } elseif (is_string($op) && strtolower($op) == 'exp') {
                 $bind = isset($param[2]) && is_array($param[2]) ? $param[2] : [];

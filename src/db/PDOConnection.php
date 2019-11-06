@@ -99,6 +99,12 @@ abstract class PDOConnection extends Connection implements ConnectionInterface
     protected $transTimes = 0;
 
     /**
+     * 重连次数
+     * @var int
+     */
+    protected $reConnectTimes = 0;
+
+    /**
      * 查询结果类型
      * @var int
      */
@@ -703,9 +709,12 @@ abstract class PDOConnection extends Connection implements ConnectionInterface
                 $this->trigger('', $master);
             }
 
+            $this->reConnectTimes = 0;
+
             return $this->PDOStatement;
         } catch (\Throwable | \Exception $e) {
-            if ($this->isBreak($e)) {
+            if ($this->reConnectTimes < 4 && $this->isBreak($e)) {
+                ++$this->reConnectTimes;
                 return $this->close()->getPDOStatement($sql, $bind, $master, $procedure);
             }
 
@@ -1348,9 +1357,11 @@ abstract class PDOConnection extends Connection implements ConnectionInterface
                     $this->parseSavepoint('trans' . $this->transTimes)
                 );
             }
+            $this->reConnectTimes = 0;
         } catch (\Exception $e) {
-            if ($this->isBreak($e)) {
+            if ($this->reConnectTimes < 4 && $this->isBreak($e)) {
                 --$this->transTimes;
+                ++$this->reConnectTimes;
                 $this->close()->startTrans();
             }
             throw $e;

@@ -133,7 +133,7 @@ class BelongsToMany extends Relation
 
             foreach ($model->getData() as $key => $val) {
                 if (strpos($key, '__')) {
-                    list($name, $attr) = explode('__', $key, 2);
+                    [$name, $attr] = explode('__', $key, 2);
 
                     if ('pivot' == $name) {
                         $pivot[$attr] = $val;
@@ -447,7 +447,7 @@ class BelongsToMany extends Relation
             $pivot = [];
             foreach ($set->getData() as $key => $val) {
                 if (strpos($key, '__')) {
-                    list($name, $attr) = explode('__', $key, 2);
+                    [$name, $attr] = explode('__', $key, 2);
                     if ('pivot' == $name) {
                         $pivot[$attr] = $val;
                         unset($set->$key);

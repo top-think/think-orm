@@ -615,7 +615,7 @@ class Mongo extends BaseQuery
             $query = $this->options($options)->limit($count);
 
             if (strpos($column, '.')) {
-                list($alias, $key) = explode('.', $column);
+                [$alias, $key] = explode('.', $column);
             } else {
                 $key = $column;
             }

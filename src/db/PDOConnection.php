@@ -335,7 +335,7 @@ abstract class PDOConnection extends Connection implements ConnectionInterface
             return [];
         }
 
-        list($tableName) = explode(' ', $tableName);
+        [$tableName] = explode(' ', $tableName);
 
         if (!strpos($tableName, '.')) {
             $schema = $this->getConfig('database') . '.' . $tableName;
@@ -1079,7 +1079,7 @@ abstract class PDOConnection extends Connection implements ConnectionInterface
     public function aggregate(BaseQuery $query, string $aggregate, $field, bool $force = false)
     {
         if (is_string($field) && 0 === stripos($field, 'DISTINCT ')) {
-            list($distinct, $field) = explode(' ', $field);
+            [$distinct, $field] = explode(' ', $field);
         }
 
         $field = $aggregate . '(' . (!empty($distinct) ? 'DISTINCT ' : '') . $this->builder->parseKey($query, $field, true) . ') AS think_' . strtolower($aggregate);
@@ -1150,11 +1150,11 @@ abstract class PDOConnection extends Connection implements ConnectionInterface
             if (strpos($column, ',')) {
                 $column = null;
             } elseif (strpos($column, '.')) {
-                list($alias, $column) = explode('.', $column);
+                [$alias, $column] = explode('.', $column);
             }
 
             if (strpos($key, '.')) {
-                list($alias, $key) = explode('.', $key);
+                [$alias, $key] = explode('.', $key);
             }
 
             $result = array_column($resultSet, $column, $key);

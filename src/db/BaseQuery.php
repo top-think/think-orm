@@ -750,10 +750,10 @@ abstract class BaseQuery
      * @access public
      * @param mixed             $key    缓存key
      * @param integer|\DateTime $expire 缓存有效期
-     * @param string            $tag    缓存标签
+     * @param string|array      $tag    缓存标签
      * @return $this
      */
-    public function cache($key = true, $expire = null, string $tag = null)
+    public function cache($key = true, $expire = null, $tag = null)
     {
         if (false === $key || !$this->getConnection()->getCache()) {
             return $this;

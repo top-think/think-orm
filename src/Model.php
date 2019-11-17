@@ -645,14 +645,15 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
             $result = $db->strict(false)
                 ->field($allowFields)
                 ->replace($this->replace)
-                ->insert($this->data, false, $sequence);
+                ->sequence($sequence)
+                ->insert($this->data, true);
 
             // 获取自动增长主键
-            if ($result && $insertId = $db->getLastInsID($sequence)) {
+            if ($result) {
                 $pk = $this->getPk();
 
                 if (is_string($pk) && (!isset($this->data[$pk]) || '' == $this->data[$pk])) {
-                    $this->data[$pk] = $insertId;
+                    $this->data[$pk] = $result;
                 }
             }
 

@@ -269,6 +269,28 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
     }
 
     /**
+     * 设置当前模型的数据库连接
+     * @access public
+     * @param string $connection 数据表连接标识
+     * @return $this
+     */
+    public function setConnection(string $connection)
+    {
+        $this->connection = $connection;
+        return $this;
+    }
+
+    /**
+     * 获取当前模型的数据库连接标识
+     * @access public
+     * @return string
+     */
+    public function getConnection(): string
+    {
+        return $this->connection ?: '';
+    }
+
+    /**
      * 设置当前模型数据表的后缀
      * @access public
      * @param string $suffix 数据表后缀
@@ -960,6 +982,20 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
     {
         $model = new static();
         $model->setSuffix($suffix);
+
+        return $model;
+    }
+
+    /**
+     * 切换后缀进行查询
+     * @access public
+     * @param string $suffix 切换的表后缀
+     * @return Model
+     */
+    public static function connect(string $connection)
+    {
+        $model = new static();
+        $model->setConnection($connection);
 
         return $model;
     }

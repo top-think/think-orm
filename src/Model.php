@@ -987,9 +987,9 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
     }
 
     /**
-     * 切换后缀进行查询
+     * 切换数据库连接进行查询
      * @access public
-     * @param string $suffix 切换的表后缀
+     * @param string $connection 数据库连接标识
      * @return Model
      */
     public static function connect(string $connection)

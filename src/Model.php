@@ -708,13 +708,13 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
     {
         $pk = $this->getPk();
 
-        if (is_string($pk) && isset($this->data[$pk])) {
-            $where     = [[$pk, '=', $this->data[$pk]]];
-            $this->key = $this->data[$pk];
+        if (is_string($pk) && isset($this->origin[$pk])) {
+            $where     = [[$pk, '=', $this->origin[$pk]]];
+            $this->key = $this->origin[$pk];
         } elseif (is_array($pk)) {
             foreach ($pk as $field) {
-                if (isset($this->data[$field])) {
-                    $where[] = [$field, '=', $this->data[$field]];
+                if (isset($this->origin[$field])) {
+                    $where[] = [$field, '=', $this->origin[$field]];
                 }
             }
         }

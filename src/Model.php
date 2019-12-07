@@ -245,11 +245,22 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
      */
     public function newInstance(array $data = [], $where = null): Model
     {
-        if (empty($data)) {
-            return new static();
+        $model = new static($data);
+
+        if ($this->connection) {
+            $model->setConnection($this->connection);
         }
 
-        $model = (new static($data))->exists(true);
+        if ($this->suffix) {
+            $model->setSuffix($this->suffix);
+        }
+
+        if (empty($data)) {
+            return $model;
+        }
+
+        $model->exists(true);
+
         $model->setUpdateWhere($where);
 
         $model->trigger('AfterRead');

@@ -112,13 +112,13 @@ abstract class Paginator implements ArrayAccess, Countable, IteratorAggregate, J
         }
 
         if ($simple) {
-            $this->currentPage = $this->setCurrentPage($currentPage);
+            $this->currentPage = $currentPage;
             $this->hasMore     = count($items) > ($this->listRows);
             $items             = $items->slice(0, $this->listRows);
         } else {
             $this->total       = $total;
             $this->lastPage    = (int) ceil($total / $listRows);
-            $this->currentPage = $this->setCurrentPage($currentPage);
+            $this->currentPage = $currentPage;
             $this->hasMore     = $this->currentPage < $this->lastPage;
         }
         $this->items = $items;
@@ -146,15 +146,6 @@ abstract class Paginator implements ArrayAccess, Countable, IteratorAggregate, J
     public static function maker(Closure $resolver)
     {
         static::$maker = $resolver;
-    }
-
-    protected function setCurrentPage(int $currentPage): int
-    {
-        if (!$this->simple && $currentPage > $this->lastPage) {
-            return $this->lastPage > 0 ? $this->lastPage : 1;
-        }
-
-        return $currentPage;
     }
 
     /**

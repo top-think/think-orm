@@ -654,7 +654,6 @@ trait RelationShip
      * @param  string       $middle 中间表名/模型名
      * @param  string|array $morph 多态字段信息
      * @param  string       $foreignKey 关联外键
-     * @param  array        $alias 多态别名定义
      * @return MorphToMany
      */
     public function morphByMany(string $model, string $middle, $morph = null, string $foreignKey = null): MorphToMany

@@ -642,7 +642,8 @@ trait RelationShip
         }
 
         $model    = $this->parseModel($model);
-        $localKey = $localKey ?: $this->getForeignKey($this->name);
+        $name     = Str::snake(class_basename($model));
+        $localKey = $localKey ?: $this->getForeignKey($name);
 
         return new MorphToMany($this, $model, $middle, $morphType, $morphKey, $localKey);
     }

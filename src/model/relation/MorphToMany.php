@@ -295,19 +295,19 @@ class MorphToMany extends BelongsToMany
             $id = $data;
         } elseif ($data instanceof Model) {
             // 根据关联表主键直接写入中间表
-            $relationFk = $data->getPk();
-            $id         = $data->$relationFk;
+            $id = $data->getKey();
         }
 
         if (!empty($id)) {
             // 保存中间表数据
-            $pk                      = $this->parent->getPk();
-            $pivot[$this->morphKey]  = $this->parent->$pk;
+            $pivot[$this->inverse ? $this->localKey : $this->morphKey] = $this->parent->getKey();
+
             $pivot[$this->morphType] = $this->morphClass;
             $ids                     = (array) $id;
 
             foreach ($ids as $id) {
-                $pivot[$this->foreignKey] = $id;
+                $pivot[$this->inverse ? $this->morphKey : $this->localKey] = $id;
+
                 $this->pivot->replace()
                     ->exists(false)
                     ->data([])
@@ -341,9 +341,9 @@ class MorphToMany extends BelongsToMany
         }
 
         $pivot = $this->pivot
-            ->where($this->morphKey, $this->parent->getKey())
+            ->where($this->inverse ? $this->localKey : $this->morphKey, $this->parent->getKey())
             ->where($this->morphType, $this->morphClass)
-            ->where($this->foreignKey, $id)
+            ->where($this->inverse ? $this->morphKey : $this->localKey, $id)
             ->find();
 
         return $pivot ?: false;
@@ -365,20 +365,17 @@ class MorphToMany extends BelongsToMany
             $id = $data;
         } elseif ($data instanceof Model) {
             // 根据关联表主键直接写入中间表
-            $relationFk = $data->getPk();
-            $id         = $data->$relationFk;
+            $id = $data->getKey();
         }
 
         // 删除中间表数据
-        $pk = $this->parent->getPk();
-
         $pivot = [
-            [$this->morphKey, '=', $this->parent->$pk],
+            [$this->inverse ? $this->localKey : $this->morphKey, '=', $this->parent->getKey()],
             [$this->morphType, '=', $this->morphClass],
         ];
 
         if (isset($id)) {
-            $pivot[] = [$this->foreignKey, is_array($id) ? 'in' : '=', $id];
+            $pivot[] = [$this->inverse ? $this->morphKey : $this->localKey, is_array($id) ? 'in' : '=', $id];
         }
 
         $result = $this->pivot->where($pivot)->delete();
@@ -407,12 +404,10 @@ class MorphToMany extends BelongsToMany
             'updated'  => [],
         ];
 
-        $pk = $this->parent->getPk();
-
         $current = $this->pivot
-            ->where($this->morphKey, $this->parent->$pk)
+            ->where($this->inverse ? $this->localKey : $this->morphKey, $this->parent->getKey())
             ->where($this->morphType, $this->morphClass)
-            ->column($this->foreignKey);
+            ->column($this->inverse ? $this->morphKey : $this->localKey);
 
         $records = [];
 
@@ -450,18 +445,13 @@ class MorphToMany extends BelongsToMany
      */
     protected function buildQuery(): Query
     {
-        $foreignKey = $this->foreignKey;
-        $localKey   = $this->localKey;
-
         // 关联查询
-        $pk = $this->parent->getPk();
-
         $condition = [
-            ['pivot.' . $this->morphKey, '=', $this->parent->$pk],
+            ['pivot.' . $this->morphKey, '=', $this->parent->getKey()],
             ['pivot.' . $this->morphType, '=', $this->morphClass],
         ];
 
-        return $this->belongsToManyQuery($foreignKey, $localKey, $condition);
+        return $this->belongsToManyQuery($this->morphKey, $this->localKey, $condition);
     }
 
     /**
@@ -472,10 +462,8 @@ class MorphToMany extends BelongsToMany
     protected function baseQuery(): void
     {
         if (empty($this->baseQuery) && $this->parent->getData()) {
-            $pk = $this->parent->getPk();
-
             $this->query->where([
-                [$this->morphKey, '=', $this->parent->$pk],
+                [$this->morphKey, '=', $this->parent->getKey()],
                 [$this->morphType, '=', $this->morphClass],
             ]);
 

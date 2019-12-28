@@ -356,6 +356,55 @@ class MorphToMany extends BelongsToMany
     }
 
     /**
+     * 多对多 关联模型预查询
+     * @access protected
+     * @param  array   $where       关联预查询条件
+     * @param  array   $subRelation 子关联
+     * @param  Closure $closure     闭包
+     * @param  array   $cache       关联缓存
+     * @return array
+     */
+    protected function eagerlyManyToMany(array $where, array $subRelation = [], Closure $closure = null, array $cache = []): array
+    {
+        if ($closure) {
+            $closure($this->getClosureType($closure));
+        }
+
+        // 预载入关联查询 支持嵌套预载入
+        $list = $this->belongsToManyQuery($this->morphKey, $this->localKey, $where)
+            ->with($subRelation)
+            ->cache($cache[0] ?? false, $cache[1] ?? null, $cache[2] ?? null)
+            ->select();
+
+        // 组装模型数据
+        $data = [];
+        foreach ($list as $set) {
+            $pivot = [];
+            foreach ($set->getData() as $key => $val) {
+                if (strpos($key, '__')) {
+                    [$name, $attr] = explode('__', $key, 2);
+                    if ('pivot' == $name) {
+                        $pivot[$attr] = $val;
+                        unset($set->$key);
+                    }
+                }
+            }
+
+            $key = $pivot[$this->morphKey];
+
+            if ($this->withLimit && isset($data[$key]) && count($data[$key]) >= $this->withLimit) {
+                continue;
+            }
+
+            $set->setRelation($this->pivotDataName, $this->newPivot($pivot));
+
+            $data[$key][] = $set;
+        }
+
+        return $data;
+    }
+
+    /**
      * 创建关联查询Query对象
      * @access protected
      * @return Query

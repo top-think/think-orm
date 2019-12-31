@@ -64,6 +64,10 @@ class Mongo
     protected static $info = [];
     // 数据库日志
     protected static $log = [];
+    // sessions会话列表当前会话数组key 随机生成
+    protected $session_uuid;
+    // 会话列表
+    protected $sessions = [];
     // 数据库连接参数配置
     protected $config = [
         // 数据库类型
@@ -280,6 +284,35 @@ class Mongo
     }
 
     /**
+     * 执行数据库事务
+     * @access public
+     * @param callable $callback 数据操作方法回调
+     * @return mixed
+     * @throws \PDOException
+     * @throws \Exception
+     * @throws \Throwable
+     * @author klinson <klinson@163.com>
+     */
+    public function transaction($callback)
+    {
+        $this->startTrans();
+        try {
+            $result = null;
+            if (is_callable($callback)) {
+                $result = call_user_func_array($callback, [$this]);
+            }
+            $this->commit();
+            return $result;
+        } catch (\Exception $e) {
+            $this->rollback();
+            throw $e;
+        } catch (\Throwable $e) {
+            $this->rollback();
+            throw $e;
+        }
+    }
+
+    /**
      * 启动事务
      * @access public
      * @return void
@@ -287,7 +320,13 @@ class Mongo
      * @throws \Exception
      */
     public function startTrans()
-    {}
+    {
+        $this->initConnect(true);
+        $this->session_uuid = uniqid();
+        $this->sessions[$this->session_uuid] = $this->getMongo()->startSession();
+
+        $this->sessions[$this->session_uuid]->startTransaction([]);
+    }
 
     /**
      * 用于非自动提交状态下面的查询提交
@@ -296,7 +335,12 @@ class Mongo
      * @throws PDOException
      */
     public function commit()
-    {}
+    {
+        if ($session = $this->getSession()) {
+            $session->commitTransaction();
+            $this->setLastSession();
+        }
+    }
 
     /**
      * 事务回滚
@@ -305,7 +349,42 @@ class Mongo
      * @throws PDOException
      */
     public function rollback()
-    {}
+    {
+        if ($session = $this->getSession()) {
+            $session->abortTransaction();
+            $this->setLastSession();
+        }
+    }
+
+    /**
+     * 结束当前会话,设置上一个会话为当前会话
+     * @author klinson <klinson@163.com>
+     */
+    protected function setLastSession()
+    {
+        if ($session = $this->getSession()) {
+            $session->endSession();
+            unset($this->sessions[$this->session_uuid]);
+            if (empty($this->sessions)) {
+                $this->session_uuid = null;
+            } else {
+                end($this->sessions);
+                $this->session_uuid = key($this->sessions);
+            }
+        }
+    }
+
+    /**
+     * 获取当前会话
+     * @return \MongoDB\Driver\Session|null
+     * @author klinson <klinson@163.com>
+     */
+    public function getSession()
+    {
+        return ($this->session_uuid && isset($this->sessions[$this->session_uuid]))
+            ? $this->sessions[$this->session_uuid]
+            : null;
+    }
 
     /**
      * 执行查询
@@ -337,7 +416,14 @@ class Mongo
 
         $this->debug(true);
 
-        $this->cursor = $this->mongo->executeQuery($namespace, $query, $readPreference);
+        if ($session = $this->getSession()) {
+            $this->cursor = $this->mongo->executeQuery($namespace, $query, [
+                'readPreference' => is_null($readPreference) ? new ReadPreference(ReadPreference::RP_PRIMARY) : $readPreference,
+                'session' => $session
+            ]);
+        } else {
+            $this->cursor = $this->mongo->executeQuery($namespace, $query, $readPreference);
+        }
 
         $this->debug(false);
 
@@ -371,7 +457,14 @@ class Mongo
             $this->queryStr = 'db.' . $this->queryStr;
         }
 
-        $this->cursor = $this->mongo->executeCommand($dbName, $command, $readPreference);
+        if ($session = $this->getSession()) {
+            $this->cursor = $this->mongo->executeCommand($dbName, $command, [
+                'readPreference' => is_null($readPreference) ? new ReadPreference(ReadPreference::RP_PRIMARY) : $readPreference,
+                'session' => $session
+            ]);
+        } else {
+            $this->cursor = $this->mongo->executeCommand($dbName, $command, $readPreference);
+        }
 
         $this->debug(false);
 
@@ -460,7 +553,14 @@ class Mongo
 
         $this->debug(true);
 
-        $writeResult = $this->mongo->executeBulkWrite($namespace, $bulk, $writeConcern);
+        if ($session = $this->getSession()) {
+            $writeResult = $this->mongo->executeBulkWrite($namespace, $bulk, [
+                'session' => $session,
+                'writeConcern' => is_null($writeConcern) ? new WriteConcern(1) : $writeConcern
+            ]);
+        } else {
+            $writeResult = $this->mongo->executeBulkWrite($namespace, $bulk, $writeConcern);
+        }
 
         $this->debug(false);
 

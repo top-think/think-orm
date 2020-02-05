@@ -759,11 +759,13 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
 
             $result = [];
 
+            $suffix = $this->getSuffix();
+
             foreach ($dataSet as $key => $data) {
                 if ($this->exists || (!empty($auto) && isset($data[$pk]))) {
-                    $result[$key] = self::update($data);
+                    $result[$key] = self::update($data, [], [], $suffix);
                 } else {
-                    $result[$key] = self::create($data, $this->field, $this->replace);
+                    $result[$key] = self::create($data, $this->field, $this->replace, $suffix);
                 }
             }
 
@@ -819,17 +821,22 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
     /**
      * 写入数据
      * @access public
-     * @param array $data       数据数组
-     * @param array $allowField 允许字段
-     * @param bool  $replace    使用Replace
+     * @param array  $data       数据数组
+     * @param array  $allowField 允许字段
+     * @param bool   $replace    使用Replace
+     * @param string $suffix     数据表后缀
      * @return static
      */
-    public static function create(array $data, array $allowField = [], bool $replace = false): Model
+    public static function create(array $data, array $allowField = [], bool $replace = false, string $suffix = ''): Model
     {
         $model = new static();
 
         if (!empty($allowField)) {
             $model->allowField($allowField);
+        }
+
+        if (!empty($suffix)) {
+            $model->setSuffix($suffix);
         }
 
         $model->replace($replace)->save($data);
@@ -840,12 +847,13 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
     /**
      * 更新数据
      * @access public
-     * @param array $data       数据数组
-     * @param mixed $where      更新条件
-     * @param array $allowField 允许字段
+     * @param array  $data       数据数组
+     * @param mixed  $where      更新条件
+     * @param array  $allowField 允许字段
+     * @param string $suffix     数据表后缀
      * @return static
      */
-    public static function update(array $data, $where = [], array $allowField = [])
+    public static function update(array $data, $where = [], array $allowField = [], string $suffix = '')
     {
         $model = new static();
 
@@ -855,6 +863,10 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
 
         if (!empty($where)) {
             $model->setUpdateWhere($where);
+        }
+
+        if (!empty($suffix)) {
+            $model->setSuffix($suffix);
         }
 
         $model->exists(true)->save($data);

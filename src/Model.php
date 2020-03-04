@@ -140,6 +140,12 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
     protected static $maker = [];
 
     /**
+     * 方法注入
+     * @var Closure[]
+     */
+    protected static $macro = [];
+
+    /**
      * 设置服务注入
      * @access public
      * @param Closure $maker
@@ -148,6 +154,18 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
     public static function maker(Closure $maker)
     {
         static::$maker[] = $maker;
+    }
+
+    /**
+     * 设置方法注入
+     * @access public
+     * @param string  $method
+     * @param Closure $closure
+     * @return void
+     */
+    public static function macro(string $method, Closure $closure)
+    {
+        static::$macro[$method] = $closure;
     }
 
     /**
@@ -1025,6 +1043,10 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
 
     public function __call($method, $args)
     {
+        if (isset(static::$macro[$method])) {
+            return call_user_func_array(static::$macro[$method], $args);
+        }
+
         if ('withattr' == strtolower($method)) {
             return call_user_func_array([$this, 'withAttribute'], $args);
         }
@@ -1034,6 +1056,10 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
 
     public static function __callStatic($method, $args)
     {
+        if (isset(static::$macro[$method])) {
+            return call_user_func_array(static::$macro[$method], $args);
+        }
+
         $model = new static();
 
         return call_user_func_array([$model->db(), $method], $args);

@@ -1044,7 +1044,7 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
     public function __call($method, $args)
     {
         if (isset(static::$macro[$method])) {
-            return call_user_func_array(static::$macro[$method], $args);
+            return call_user_func_array(static::$macro[$method]->bindTo($this, static::class), $args);
         }
 
         if ('withattr' == strtolower($method)) {
@@ -1057,7 +1057,7 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
     public static function __callStatic($method, $args)
     {
         if (isset(static::$macro[$method])) {
-            return call_user_func_array(static::$macro[$method], $args);
+            return call_user_func_array(static::$macro[$method]->bindTo(null, static::class), $args);
         }
 
         $model = new static();

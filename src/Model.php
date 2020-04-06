@@ -166,7 +166,7 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
     public static function macro(string $method, Closure $closure)
     {
         if (!isset(static::$macro[static::class])) {
-            static::$macro[static::class] = []
+            static::$macro[static::class] = [];
         }
         static::$macro[static::class][$method] = $closure;
     }

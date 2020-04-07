@@ -784,9 +784,9 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
 
             foreach ($dataSet as $key => $data) {
                 if ($this->exists || (!empty($auto) && isset($data[$pk]))) {
-                    $result[$key] = self::update($data, [], [], $suffix);
+                    $result[$key] = static::update($data, [], [], $suffix);
                 } else {
-                    $result[$key] = self::create($data, $this->field, $this->replace, $suffix);
+                    $result[$key] = static::create($data, $this->field, $this->replace, $suffix);
                 }
             }
 

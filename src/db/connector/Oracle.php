@@ -50,17 +50,26 @@ class Oracle extends PDOConnection
      */
     public function getFields(string $tableName): array
     {
+        $owner = $dblink = '';
         [$tableName] = explode(' ', $tableName);
-        $sql         = "select a.column_name,data_type,DECODE (nullable, 'Y', 0, 1) notnull,data_default, DECODE (A .column_name,b.column_name,1,0) pk from all_tab_columns a,(select column_name from all_constraints c, all_cons_columns col where c.constraint_name = col.constraint_name and c.constraint_type = 'P' and c.table_name = '" . strtoupper($tableName) . "' ) b where table_name = '" . strtoupper($tableName) . "' and a.column_name = b.column_name (+)";
-
-        $pdo    = $this->getPDOStatement($sql);
-        $result = $pdo->fetchAll(PDO::FETCH_ASSOC);
-        $info   = [];
+        if (false !== strrpos($tableName, '@')) {
+            [$tableName,$dblink] = explode('@', $tableName);
+        }
+        if (false !== strrpos($tableName, '.')) {
+            [$owner,$tableName] = explode('.', $tableName);
+        }
+        
+        $ifownerC = strlen($owner)>0  ? " and c.owner='" . strtoupper($owner) . "'":'';
+        $ifowner  = strlen($owner)>0  ? " and owner='" . strtoupper($owner) . "'":'';
+        $ifdblink = strlen($dblink)>0 ? "@$dblink":'';
+        $sql      = "select a.column_name, data_type, DECODE (nullable, 'Y', 0, 1) notnull, data_default, DECODE (A .column_name,b.column_name,1,0) pk from all_tab_columns" . $ifdblink . " a, (select column_name from all_constraints" . $ifdblink . " c, all_cons_columns" . $ifdblink . " col where c.constraint_name = col.constraint_name and c.constraint_type = 'P' and c.table_name = '" . strtoupper($tableName) . "' " . $ifownerC . ") b where table_name = '" . strtoupper($tableName) . "' $ifowner and a.column_name = b.column_name (+)";
+        $pdo      = $this->getPDOStatement($sql);
+        $result   = $pdo->fetchAll(PDO::FETCH_ASSOC);
+        $info     = [];
 
         if ($result) {
             foreach ($result as $key => $val) {
-                $val = array_change_key_case($val);
-
+                $val                       = array_change_key_case($val);
                 $info[$val['column_name']] = [
                     'name'    => $val['column_name'],
                     'type'    => $val['data_type'],

@@ -1151,6 +1151,8 @@ abstract class PDOConnection extends Connection implements ConnectionInterface
 
             if (strpos($column, ',')) {
                 $column = null;
+            } elseif (strpos($column, ' ')) {
+                $column = substr(strrchr(trim($column), ' '), 1);
             } elseif (strpos($column, '.')) {
                 [$alias, $column] = explode('.', $column);
             }

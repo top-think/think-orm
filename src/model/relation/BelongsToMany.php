@@ -695,4 +695,14 @@ class BelongsToMany extends Relation
         return $changes;
     }
 
+    public function __call($method, $args)
+    {
+        if ($this->query) {
+            $result = call_user_func_array([$this->buildQuery(), $method], $args);
+
+            return $result === $this->query ? $this : $result;
+        }
+
+        throw new Exception('method not exists:' . __CLASS__ . '->' . $method);
+    }
 }

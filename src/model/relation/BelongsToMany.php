@@ -491,8 +491,8 @@ class BelongsToMany extends Relation
 
         if (empty($this->baseQuery)) {
             $relationFk = $this->query->getPk();
-            $query->join([$table => 'pivot'], 'pivot.' . $foreignKey . '=' . $tableName . '.' . $relationFk)
-                ->where($condition);
+            $query->join([$table => 'pivot'], 'pivot.' . $foreignKey . '=' . $tableName . '.' . $relationFk);
+               // ->where($condition);
         }
 
         return $query;
@@ -693,6 +693,15 @@ class BelongsToMany extends Relation
         }
 
         return $changes;
+    }
+
+    /**
+     * 获取中间表名称
+     * @return string
+     */
+    public function getMiddle()
+    {
+        return $this->middle;
     }
 
     public function __call($method, $args)

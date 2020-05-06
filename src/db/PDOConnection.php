@@ -285,6 +285,8 @@ abstract class PDOConnection extends Connection implements ConnectionInterface
             $result = 'timestamp';
         } elseif (0 === strpos($type, 'datetime')) {
             $result = 'datetime';
+        } elseif (0 === strpos($type, 'date')) {
+            $result = 'date';
         } else {
             $result = 'string';
         }

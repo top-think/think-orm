@@ -78,6 +78,8 @@ abstract class PDOConnection extends Connection implements ConnectionInterface
         'break_match_str'   => [],
         // 字段缓存路径
         'schema_cache_path' => '',
+        // 字段缓存规则 支持闭包
+        'schema_cache_rule' => '',
     ];
 
     /**
@@ -320,6 +322,24 @@ abstract class PDOConnection extends Connection implements ConnectionInterface
     }
 
     /**
+     * 获取数据表信息缓存文件名
+     * @access protected
+     * @param string $schema 数据表名称
+     * @return string
+     */
+    protected function getSchemaFileName(string $schema): string
+    {
+        if (!empty($this->config['schema_cache_rule']) && is_callable($this->config['schema_cache_rule'])) {
+            $rule = $this->config['schema_cache_rule'];
+            $name = $rule($schema);
+        } else {
+            $name = str_replace('.', DIRECTORY_SEPARATOR, $schema);
+        }
+
+        return $this->config['schema_cache_path'] . $name . '.php';
+    }
+
+    /**
      * 获取数据表信息
      * @access public
      * @param mixed  $tableName 数据表名 留空自动获取
@@ -347,15 +367,16 @@ abstract class PDOConnection extends Connection implements ConnectionInterface
 
         if (!isset($this->info[$schema])) {
             // 读取字段缓存
-            $cacheFile = $this->config['schema_cache_path'] . $schema . '.php';
+            $cacheFile = $this->getSchemaFileName($schema);
 
             if ($this->config['fields_cache'] && is_file($cacheFile)) {
                 $info = include $cacheFile;
             } else {
                 $info = $this->getTableFieldsInfo($tableName);
                 if ($this->config['fields_cache']) {
-                    if (!is_dir($this->config['schema_cache_path'])) {
-                        mkdir($this->config['schema_cache_path'], 0755, true);
+                    $path = dirname($cacheFile);
+                    if (!is_dir($path)) {
+                        mkdir($path, 0755, true);
                     }
 
                     $content = '<?php ' . PHP_EOL . 'return ' . var_export($info, true) . ';';

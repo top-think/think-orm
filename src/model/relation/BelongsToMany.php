@@ -451,13 +451,9 @@ class BelongsToMany extends Relation
 
         $this->query
             ->field($fields)
-            ->tableField(true, $table, 'pivot', 'pivot__');
-
-        if (empty($this->baseQuery)) {
-            $relationFk = $this->query->getPk();
-            $this->query->join([$table => 'pivot'], 'pivot.' . $foreignKey . '=' . $tableName . '.' . $relationFk)
-                ->where($condition);
-        }
+            ->tableField(true, $table, 'pivot', 'pivot__')
+            ->join([$table => 'pivot'], 'pivot.' . $foreignKey . '=' . $tableName . '.' . $this->query->getPk())
+            ->where($condition);
 
         return $this->query;
     }

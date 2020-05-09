@@ -439,22 +439,6 @@ class MorphToMany extends BelongsToMany
     }
 
     /**
-     * 创建关联查询Query对象
-     * @access protected
-     * @return Query
-     */
-    protected function buildQuery(): Query
-    {
-        // 关联查询
-        $condition = [
-            ['pivot.' . $this->morphKey, '=', $this->parent->getKey()],
-            ['pivot.' . $this->morphType, '=', $this->morphClass],
-        ];
-
-        return $this->belongsToManyQuery($this->morphKey, $this->localKey, $condition);
-    }
-
-    /**
      * 执行基础查询（仅执行一次）
      * @access protected
      * @return void

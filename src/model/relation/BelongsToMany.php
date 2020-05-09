@@ -147,22 +147,6 @@ class BelongsToMany extends Relation
     }
 
     /**
-     * 创建关联查询Query对象
-     * @access protected
-     * @return Query
-     */
-    protected function buildQuery(): Query
-    {
-        $foreignKey = $this->foreignKey;
-        $localKey   = $this->localKey;
-
-        // 关联查询
-        $condition = ['pivot.' . $localKey, '=', $this->parent->getKey()];
-
-        return $this->belongsToManyQuery($foreignKey, $localKey, [$condition]);
-    }
-
-    /**
      * 延迟获取关联数据
      * @access public
      * @param  array    $subRelation 子关联名
@@ -175,8 +159,7 @@ class BelongsToMany extends Relation
             $closure($this->getClosureType($closure));
         }
 
-        $result = $this->buildQuery()
-            ->relation($subRelation)
+        $result = $this->relation($subRelation)
             ->select()
             ->setParent(clone $this->parent);
 
@@ -193,7 +176,8 @@ class BelongsToMany extends Relation
      */
     public function select($data = null): Collection
     {
-        $result = $this->buildQuery()->select($data);
+        $this->baseQuery();
+        $result = $this->query->select($data);
         $this->hydratePivot($result);
 
         return $result;
@@ -208,7 +192,8 @@ class BelongsToMany extends Relation
      */
     public function paginate($listRows = null, $simple = false): Paginator
     {
-        $result = $this->buildQuery()->paginate($listRows, $simple);
+        $this->baseQuery();
+        $result = $this->query->paginate($listRows, $simple);
         $this->hydratePivot($result);
 
         return $result;
@@ -222,35 +207,14 @@ class BelongsToMany extends Relation
      */
     public function find($data = null)
     {
-        $result = $this->buildQuery()->find($data);
+        $this->baseQuery();
+        $result = $this->query->find($data);
 
         if ($result && !$result->isEmpty()) {
             $this->hydratePivot([$result]);
         }
 
         return $result;
-    }
-
-    /**
-     * 查找多条记录 如果不存在则抛出异常
-     * @access public
-     * @param  array|string|Query|\Closure $data
-     * @return Collection
-     */
-    public function selectOrFail($data = null): Collection
-    {
-        return $this->buildQuery()->failException(true)->select($data);
-    }
-
-    /**
-     * 查找单条记录 如果不存在则抛出异常
-     * @access public
-     * @param  array|string|Query|\Closure $data
-     * @return Model
-     */
-    public function findOrFail($data = null): Model
-    {
-        return $this->buildQuery()->failException(true)->find($data);
     }
 
     /**
@@ -485,17 +449,17 @@ class BelongsToMany extends Relation
             $this->query->limit($this->withLimit);
         }
 
-        $query = $this->query
+        $this->query
             ->field($fields)
             ->tableField(true, $table, 'pivot', 'pivot__');
 
         if (empty($this->baseQuery)) {
             $relationFk = $this->query->getPk();
-            $query->join([$table => 'pivot'], 'pivot.' . $foreignKey . '=' . $tableName . '.' . $relationFk)
+            $this->query->join([$table => 'pivot'], 'pivot.' . $foreignKey . '=' . $tableName . '.' . $relationFk)
                 ->where($condition);
         }
 
-        return $query;
+        return $this->query;
     }
 
     /**
@@ -695,14 +659,24 @@ class BelongsToMany extends Relation
         return $changes;
     }
 
-    public function __call($method, $args)
+    /**
+     * 执行基础查询（仅执行一次）
+     * @access protected
+     * @return void
+     */
+    protected function baseQuery(): void
     {
-        if ($this->query) {
-            $result = call_user_func_array([$this->buildQuery(), $method], $args);
+        if (empty($this->baseQuery)) {
+            $foreignKey = $this->foreignKey;
+            $localKey   = $this->localKey;
 
-            return $result === $this->query ? $this : $result;
+            // 关联查询
+            $condition = ['pivot.' . $localKey, '=', $this->parent->getKey()];
+
+            $this->belongsToManyQuery($foreignKey, $localKey, [$condition]);
+
+            $this->baseQuery = true;
         }
-
-        throw new Exception('method not exists:' . __CLASS__ . '->' . $method);
     }
+
 }

@@ -646,8 +646,10 @@ abstract class PDOConnection extends Connection implements ConnectionInterface
             $cacheItem = $this->parseCache($query, $query->getOptions('cache'));
             $key       = $cacheItem->getKey();
 
-            if ($this->cache->has($key)) {
-                return $this->cache->get($key);
+            $data = $this->cache->get($key);
+
+            if ($data !== null) {
+                return $data;
             }
         }
 

@@ -14,7 +14,6 @@ namespace think\db;
 
 use Psr\SimpleCache\CacheInterface;
 use think\DbManager;
-use think\db\CacheItem;
 
 /**
  * 数据库连接基础类
@@ -108,7 +107,7 @@ abstract class Connection
 
     /**
      * 缓存对象
-     * @var Cache
+     * @var CacheInterface
      */
     protected $cache;
 
@@ -214,7 +213,7 @@ abstract class Connection
      * 分析缓存Key
      * @access protected
      * @param BaseQuery $query 查询对象
-     * @param string    $method查询方法
+     * @param string    $method 查询方法
      * @return string
      */
     protected function getCacheKey(BaseQuery $query, string $method = ''): string
@@ -233,7 +232,7 @@ abstract class Connection
      * @access protected
      * @param BaseQuery $query 查询对象
      * @param array     $cache 缓存信息
-     * @param string    $method查询方法
+     * @param string    $method 查询方法
      * @return CacheItem
      */
     protected function parseCache(BaseQuery $query, array $cache, string $method = ''): CacheItem

@@ -16,7 +16,6 @@ use think\Collection;
 use think\db\BaseQuery as Query;
 use think\db\exception\DbException as Exception;
 use think\db\Raw;
-use think\helper\Str;
 use think\Model;
 use think\model\Pivot;
 use think\model\Relation;

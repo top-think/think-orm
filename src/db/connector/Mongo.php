@@ -27,14 +27,13 @@ use MongoDB\Driver\WriteConcern;
 use think\db\BaseQuery;
 use think\db\builder\Mongo as Builder;
 use think\db\Connection;
-use think\db\ConnectionInterface;
 use think\db\exception\DbException as Exception;
 use think\db\Mongo as Query;
 
 /**
  * Mongo数据库驱动
  */
-class Mongo extends Connection implements ConnectionInterface
+class Mongo extends Connection
 {
 
     // 查询数据类型
@@ -44,6 +43,9 @@ class Mongo extends Connection implements ConnectionInterface
     protected $cursor; // MongoCursor Object
     protected $session_uuid; // sessions会话列表当前会话数组key 随机生成
     protected $sessions = []; // 会话列表
+
+    /** @var Builder */
+    protected $builder;
 
     // 数据库连接参数配置
     protected $config = [
@@ -98,23 +100,6 @@ class Mongo extends Connection implements ConnectionInterface
     ];
 
     /**
-     * 架构函数 读取数据库配置信息
-     * @access public
-     * @param array $config 数据库配置数组
-     */
-    public function __construct(array $config = [])
-    {
-        if (!empty($config)) {
-            $this->config = array_merge($this->config, $config);
-        }
-
-        // 创建Builder对象
-        $class = $this->getBuilderClass();
-
-        $this->builder = new $class($this);
-    }
-
-    /**
      * 获取当前连接器类对应的Query类
      * @access public
      * @return string
@@ -129,7 +114,7 @@ class Mongo extends Connection implements ConnectionInterface
      * @access public
      * @return Builder
      */
-    public function getBuilder(): Builder
+    public function getBuilder()
     {
         return $this->builder;
     }
@@ -200,8 +185,8 @@ class Mongo extends Connection implements ConnectionInterface
     /**
      * 设置/获取当前操作的database
      * @access public
-     * @param  string  $db db
-     * @throws Exception
+     * @param string $db db
+     * @return string
      */
     public function db(string $db = null)
     {
@@ -215,10 +200,10 @@ class Mongo extends Connection implements ConnectionInterface
     /**
      * 执行查询但只返回Cursor对象
      * @access public
-     * @param  BaseQuery $query 查询对象
+     * @param Query $query 查询对象
      * @return Cursor
      */
-    public function cursor(BaseQuery $query)
+    public function cursor($query)
     {
         // 分析查询表达式
         $options = $query->parseOptions();

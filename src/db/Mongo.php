@@ -20,13 +20,17 @@ use MongoDB\Driver\Exception\RuntimeException;
 use MongoDB\Driver\Query as MongoQuery;
 use MongoDB\Driver\ReadPreference;
 use MongoDB\Driver\WriteConcern;
-use think\Collection;
-use think\db\connector\Mongo as Connection;
 use think\db\exception\DbException as Exception;
 use think\Paginator;
 
 class Mongo extends BaseQuery
 {
+    /**
+     * 当前数据库连接对象
+     * @var \think\db\connector\Mongo
+     */
+    protected $connection;
+
     /**
      * 执行查询 返回数据集
      * @access public
@@ -699,12 +703,13 @@ class Mongo extends BaseQuery
 
         if (isset($options['page'])) {
             // 根据页数计算limit
-            list($page, $listRows) = $options['page'];
-            $page                  = $page > 0 ? $page : 1;
-            $listRows              = $listRows > 0 ? $listRows : (is_numeric($options['limit']) ? $options['limit'] : 20);
-            $offset                = $listRows * ($page - 1);
-            $options['skip']       = intval($offset);
-            $options['limit']      = intval($listRows);
+            [$page, $listRows] = $options['page'];
+
+            $page             = $page > 0 ? $page : 1;
+            $listRows         = $listRows > 0 ? $listRows : (is_numeric($options['limit']) ? $options['limit'] : 20);
+            $offset           = $listRows * ($page - 1);
+            $options['skip']  = intval($offset);
+            $options['limit'] = intval($listRows);
         }
 
         $this->options = $options;

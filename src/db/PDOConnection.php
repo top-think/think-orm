@@ -23,7 +23,7 @@ use think\db\exception\PDOException;
 /**
  * 数据库连接基础类
  */
-abstract class PDOConnection extends Connection implements ConnectionInterface
+abstract class PDOConnection extends Connection
 {
     const PARAM_FLOAT = 21;
 
@@ -182,22 +182,6 @@ abstract class PDOConnection extends Connection implements ConnectionInterface
      */
     protected $bind = [];
 
-    /**
-     * 架构函数 读取数据库配置信息
-     * @access public
-     * @param array $config 数据库配置数组
-     */
-    public function __construct(array $config = [])
-    {
-        if (!empty($config)) {
-            $this->config = array_merge($this->config, $config);
-        }
-
-        // 创建Builder对象
-        $class = $this->getBuilderClass();
-
-        $this->builder = new $class($this);
-    }
 
     /**
      * 获取当前连接器类对应的Query类

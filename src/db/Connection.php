@@ -18,7 +18,7 @@ use think\DbManager;
 /**
  * 数据库连接基础类
  */
-abstract class Connection
+abstract class Connection implements ConnectionInterface
 {
 
     /**
@@ -89,7 +89,7 @@ abstract class Connection
 
     /**
      * Db对象
-     * @var Db
+     * @var DbManager
      */
     protected $db;
 
@@ -112,6 +112,23 @@ abstract class Connection
     protected $cache;
 
     /**
+     * 架构函数 读取数据库配置信息
+     * @access public
+     * @param array $config 数据库配置数组
+     */
+    public function __construct(array $config = [])
+    {
+        if (!empty($config)) {
+            $this->config = array_merge($this->config, $config);
+        }
+
+        // 创建Builder对象
+        $class = $this->getBuilderClass();
+
+        $this->builder = new $class($this);
+    }
+
+    /**
      * 获取当前的builder实例对象
      * @access public
      * @return Builder
@@ -119,6 +136,25 @@ abstract class Connection
     public function getBuilder()
     {
         return $this->builder;
+    }
+
+
+    /**
+     * 创建查询对象
+     */
+    public function newQuery()
+    {
+        $class = $this->getQueryClass();
+
+        /** @var BaseQuery $query */
+        $query = new $class($this);
+
+        $timeRule = $this->db->getConfig('time_query_rule');
+        if (!empty($timeRule)) {
+            $query->timeRule($timeRule);
+        }
+
+        return $query;
     }
 
     /**

@@ -13,6 +13,9 @@ declare (strict_types = 1);
 namespace think\db;
 
 use Psr\SimpleCache\CacheInterface;
+use think\db\exception\DataNotFoundException;
+use think\db\exception\DbException;
+use think\db\exception\ModelNotFoundException;
 use think\DbManager;
 
 /**
@@ -26,6 +29,11 @@ interface ConnectionInterface
      * @return string
      */
     public function getQueryClass(): string;
+
+    /**
+     * 创建查询对象
+     */
+    public function newQuery();
 
     /**
      * 连接数据库方法
@@ -114,8 +122,8 @@ interface ConnectionInterface
      * @access public
      * @param BaseQuery $query 查询对象
      * @return integer
-     * @throws Exception
-     * @throws PDOException
+     * @throws \Exception
+     * @throws \PDOException
      */
     public function update(BaseQuery $query): int;
 
@@ -124,8 +132,8 @@ interface ConnectionInterface
      * @access public
      * @param BaseQuery $query 查询对象
      * @return int
-     * @throws Exception
-     * @throws PDOException
+     * @throws \Exception
+     * @throws \PDOException
      */
     public function delete(BaseQuery $query): int;
 
@@ -135,7 +143,6 @@ interface ConnectionInterface
      * @param BaseQuery  $query   查询对象
      * @param string $field   字段名
      * @param mixed  $default 默认值
-     * @param bool   $one     返回一个值
      * @return mixed
      */
     public function value(BaseQuery $query, string $field, $default = null);
@@ -155,7 +162,7 @@ interface ConnectionInterface
      * @access public
      * @param callable $callback 数据操作方法回调
      * @return mixed
-     * @throws PDOException
+     * @throws \PDOException
      * @throws \Exception
      * @throws \Throwable
      */
@@ -174,7 +181,7 @@ interface ConnectionInterface
      * 用于非自动提交状态下面的查询提交
      * @access public
      * @return void
-     * @throws PDOException
+     * @throws \PDOException
      */
     public function commit();
 
@@ -182,7 +189,7 @@ interface ConnectionInterface
      * 事务回滚
      * @access public
      * @return void
-     * @throws PDOException
+     * @throws \PDOException
      */
     public function rollback();
 

@@ -33,11 +33,7 @@ class Query extends BaseQuery
      */
     public function orderRaw(string $field, array $bind = [])
     {
-        if (!empty($bind)) {
-            $this->bindParams($field, $bind);
-        }
-
-        $this->options['order'][] = new Raw($field);
+        $this->options['order'][] = new Raw($field, $bind);
 
         return $this;
     }

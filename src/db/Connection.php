@@ -158,6 +158,26 @@ abstract class Connection implements ConnectionInterface
     }
 
     /**
+     * 指定表名开始查询
+     * @param $table
+     * @return BaseQuery
+     */
+    public function table($table)
+    {
+        return $this->newQuery()->table($table);
+    }
+
+    /**
+     * 指定表名开始查询(不带前缀)
+     * @param $name
+     * @return BaseQuery
+     */
+    public function name($name)
+    {
+        return $this->newQuery()->name($name);
+    }
+
+    /**
      * 设置当前的数据库Db对象
      * @access public
      * @param DbManager $db

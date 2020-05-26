@@ -17,7 +17,6 @@ use Psr\Log\LoggerInterface;
 use Psr\SimpleCache\CacheInterface;
 use think\db\BaseQuery;
 use think\db\ConnectionInterface;
-use think\db\ConnectionProxy;
 use think\db\Query;
 use think\db\Raw;
 
@@ -230,13 +229,11 @@ class DbManager
      * @access public
      * @param string|null $name  连接配置标识
      * @param bool        $force 强制重新连接
-     * @return ConnectionProxy
+     * @return ConnectionInterface
      */
     public function connect(string $name = null, bool $force = false)
     {
-        $connection = $this->instance($name, $force);
-
-        return new ConnectionProxy($connection);
+        return $this->instance($name, $force);
     }
 
     /**

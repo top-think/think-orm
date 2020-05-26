@@ -16,8 +16,7 @@ use Closure;
 use PDO;
 use PDOStatement;
 use think\db\exception\BindParamException;
-use think\db\exception\DataNotFoundException;
-use think\db\exception\ModelNotFoundException;
+use think\db\exception\DbException;
 use think\db\exception\PDOException;
 
 /**
@@ -793,8 +792,6 @@ abstract class PDOConnection extends Connection
      * @param BaseQuery $query 查询对象
      * @return array
      * @throws DbException
-     * @throws ModelNotFoundException
-     * @throws DataNotFoundException
      */
     public function find(BaseQuery $query): array
     {
@@ -839,8 +836,6 @@ abstract class PDOConnection extends Connection
      * @param BaseQuery $query 查询对象
      * @return array
      * @throws DbException
-     * @throws ModelNotFoundException
-     * @throws DataNotFoundException
      */
     public function select(BaseQuery $query): array
     {

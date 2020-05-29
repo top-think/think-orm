@@ -195,8 +195,14 @@ trait Conversion
             [$key, $attr] = explode('.', $name);
             // 追加关联对象属性
             $relation   = $this->getRelation($key, true);
-            $item[$key] = $relation ? $relation->append([$attr])
+            $data = $relation ? $relation->append([$attr])
                 ->toArray() : [];
+            
+            if (array_key_exists($key, $item)) {
+                $item[$key] = array_merge($item[$key], $data);
+            } else {
+                $item[$key] = $data;
+            }
         } else {
             $value       = $this->getAttr($name);
             $item[$name] = $value;

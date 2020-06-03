@@ -312,37 +312,24 @@ abstract class PDOConnection extends Connection
     }
 
     /**
-     * 获取数据表信息
-     * @access public
-     * @param mixed  $tableName 数据表名 留空自动获取
-     * @param string $fetch     获取信息类型 包括 fields type bind pk
-     * @return mixed
+     * @param string $tableName 数据表名称
+     * @param bool $force 强制从数据库获取
+     * @return array
      */
-    public function getTableInfo($tableName, string $fetch = '')
+    public function getSchemaInfo(string $tableName, $force = false)
     {
-        if (is_array($tableName)) {
-            $tableName = key($tableName) ?: current($tableName);
-        }
-
-        if (strpos($tableName, ',') || strpos($tableName, ')')) {
-            // 多表不获取字段信息
-            return [];
-        }
-
-        [$tableName] = explode(' ', $tableName);
-
         if (!strpos($tableName, '.')) {
             $schema = $this->getConfig('database') . '.' . $tableName;
         } else {
             $schema = $tableName;
         }
 
-        if (!isset($this->info[$schema])) {
+        if (!isset($this->info[$schema]) || $force) {
             // 读取字段缓存
             $cacheKey   = $this->getSchemaCacheKey($schema);
             $cacheField = $this->config['fields_cache'] && !empty($this->cache);
 
-            if ($cacheField) {
+            if ($cacheField && !$force) {
                 $info = $this->cache->get($cacheKey);
             }
 
@@ -371,7 +358,32 @@ abstract class PDOConnection extends Connection
             ];
         }
 
-        return $fetch ? $this->info[$schema][$fetch] : $this->info[$schema];
+        return $this->info[$schema];
+    }
+
+    /**
+     * 获取数据表信息
+     * @access public
+     * @param mixed  $tableName 数据表名 留空自动获取
+     * @param string $fetch     获取信息类型 包括 fields type bind pk
+     * @return mixed
+     */
+    public function getTableInfo($tableName, string $fetch = '')
+    {
+        if (is_array($tableName)) {
+            $tableName = key($tableName) ?: current($tableName);
+        }
+
+        if (strpos($tableName, ',') || strpos($tableName, ')')) {
+            // 多表不获取字段信息
+            return [];
+        }
+
+        [$tableName] = explode(' ', $tableName);
+
+        $info = $this->getSchemaInfo($tableName);
+
+        return $fetch ? $info[$fetch] : $info;
     }
 
     /**

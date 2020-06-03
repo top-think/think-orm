@@ -75,10 +75,6 @@ abstract class PDOConnection extends Connection
         'break_reconnect'   => false,
         // 断线标识字符串
         'break_match_str'   => [],
-        // 字段缓存路径
-        'schema_cache_path' => '',
-        // 字段缓存规则 支持闭包
-        'schema_cache_rule' => '',
     ];
 
     /**
@@ -305,21 +301,14 @@ abstract class PDOConnection extends Connection
     }
 
     /**
-     * 获取数据表信息缓存文件名
+     * 获取数据表信息缓存key
      * @access protected
      * @param string $schema 数据表名称
      * @return string
      */
-    protected function getSchemaFileName(string $schema): string
+    protected function getSchemaCacheKey(string $schema): string
     {
-        if (!empty($this->config['schema_cache_rule']) && is_callable($this->config['schema_cache_rule'])) {
-            $rule = $this->config['schema_cache_rule'];
-            $name = $rule($schema);
-        } else {
-            $name = str_replace('.', DIRECTORY_SEPARATOR, $schema);
-        }
-
-        return $this->config['schema_cache_path'] . $name . '.php';
+        return $this->getConfig('hostname') . ':' . $this->getConfig('hostport') . '@' . $schema;
     }
 
     /**
@@ -350,20 +339,17 @@ abstract class PDOConnection extends Connection
 
         if (!isset($this->info[$schema])) {
             // 读取字段缓存
-            $cacheFile = $this->getSchemaFileName($schema);
+            $cacheKey   = $this->getSchemaCacheKey($schema);
+            $cacheField = $this->config['fields_cache'] && !empty($this->cache);
 
-            if ($this->config['fields_cache'] && is_file($cacheFile)) {
-                $info = include $cacheFile;
-            } else {
+            if ($cacheField) {
+                $info = $this->cache->get($cacheKey);
+            }
+
+            if (empty($info)) {
                 $info = $this->getTableFieldsInfo($tableName);
-                if ($this->config['fields_cache']) {
-                    $path = dirname($cacheFile);
-                    if (!is_dir($path)) {
-                        mkdir($path, 0755, true);
-                    }
-
-                    $content = '<?php ' . PHP_EOL . 'return ' . var_export($info, true) . ';';
-                    file_put_contents($cacheFile, $content);
+                if ($cacheField) {
+                    $this->cache->set($cacheKey, $info);
                 }
             }
 

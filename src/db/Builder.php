@@ -165,7 +165,7 @@ abstract class Builder
                 }
             } elseif (is_null($val)) {
                 $result[$item] = 'NULL';
-            } elseif (is_array($val) && !empty($val)) {
+            } elseif (is_array($val) && !empty($val) && is_string($val[0])) {
                 switch (strtoupper($val[0])) {
                     case 'INC':
                         $result[$item] = $item . ' + ' . floatval($val[1]);

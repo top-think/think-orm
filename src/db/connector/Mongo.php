@@ -155,7 +155,7 @@ class Mongo extends Connection
             }
 
             if (empty($config['dsn'])) {
-                $config['dsn'] = 'mongodb://' . ($config['username'] ? "{$config['username']}" : '') . ($config['password'] ? ":{$config['password']}@" : '') . $config['hostname'] . ($config['hostport'] ? ":{$config['hostport']}" : '');
+                $config['dsn'] = 'mongodb://' . ($config['username'] ? "{$config['username']}" : '') . ($config['password'] ? ":{$config['password']}@" : '') . $config['hostname'] . ($config['hostport'] ? ":{$config['hostport']}" : '').($config['database'] ? "/{$config['database']}" : '');
             }
 
             $startTime = microtime(true);

@@ -32,49 +32,49 @@ abstract class PDOConnection extends Connection
      */
     protected $config = [
         // 数据库类型
-        'type'              => '',
+        'type'            => '',
         // 服务器地址
-        'hostname'          => '',
+        'hostname'        => '',
         // 数据库名
-        'database'          => '',
+        'database'        => '',
         // 用户名
-        'username'          => '',
+        'username'        => '',
         // 密码
-        'password'          => '',
+        'password'        => '',
         // 端口
-        'hostport'          => '',
+        'hostport'        => '',
         // 连接dsn
-        'dsn'               => '',
+        'dsn'             => '',
         // 数据库连接参数
-        'params'            => [],
+        'params'          => [],
         // 数据库编码默认采用utf8
-        'charset'           => 'utf8',
+        'charset'         => 'utf8',
         // 数据库表前缀
-        'prefix'            => '',
+        'prefix'          => '',
         // 数据库部署方式:0 集中式(单一服务器),1 分布式(主从服务器)
-        'deploy'            => 0,
+        'deploy'          => 0,
         // 数据库读写是否分离 主从式有效
-        'rw_separate'       => false,
+        'rw_separate'     => false,
         // 读写分离后 主服务器数量
-        'master_num'        => 1,
+        'master_num'      => 1,
         // 指定从服务器序号
-        'slave_no'          => '',
+        'slave_no'        => '',
         // 模型写入后自动读取主服务器
-        'read_master'       => false,
+        'read_master'     => false,
         // 是否严格检查字段是否存在
-        'fields_strict'     => true,
+        'fields_strict'   => true,
         // 开启字段缓存
-        'fields_cache'      => false,
+        'fields_cache'    => false,
         // 监听SQL
-        'trigger_sql'       => true,
+        'trigger_sql'     => true,
         // Builder类
-        'builder'           => '',
+        'builder'         => '',
         // Query类
-        'query'             => '',
+        'query'           => '',
         // 是否需要断线重连
-        'break_reconnect'   => false,
+        'break_reconnect' => false,
         // 断线标识字符串
-        'break_match_str'   => [],
+        'break_match_str' => [],
     ];
 
     /**
@@ -176,7 +176,6 @@ abstract class PDOConnection extends Connection
      * @var array
      */
     protected $bind = [];
-
 
     /**
      * 获取当前连接器类对应的Query类
@@ -608,6 +607,34 @@ abstract class PDOConnection extends Connection
     /**
      * 执行查询 返回数据集
      * @access public
+     * @param string $sql  sql指令
+     * @param array  $bind 参数绑定
+     * @return array
+     * @throws BindParamException
+     * @throws \PDOException
+     */
+    public function query(string $sql, array $bind = []): array
+    {
+        return $this->pdoQuery($this->newQuery(), $sql, $bind);
+    }
+
+    /**
+     * 执行语句
+     * @access public
+     * @param string $sql  sql指令
+     * @param array  $bind 参数绑定
+     * @return int
+     * @throws BindParamException
+     * @throws \PDOException
+     */
+    public function execute(string $sql, array $bind = []): int
+    {
+        return $this->pdoExecute($this->newQuery(), $sql, $bind, true);
+    }
+
+    /**
+     * 执行查询 返回数据集
+     * @access protected
      * @param BaseQuery $query 查询对象
      * @param mixed     $sql   sql指令
      * @param array     $bind  参数绑定
@@ -617,7 +644,7 @@ abstract class PDOConnection extends Connection
      * @throws \Exception
      * @throws \Throwable
      */
-    public function query(BaseQuery $query, $sql, array $bind = []): array
+    protected function pdoQuery(BaseQuery $query, $sql, array $bind = []): array
     {
         // 分析查询表达式
         $query->parseOptions();
@@ -629,7 +656,7 @@ abstract class PDOConnection extends Connection
 
             $data = $this->cache->get($key);
 
-            if ($data !== null) {
+            if (null !== $data) {
                 return $data;
             }
         }
@@ -734,7 +761,7 @@ abstract class PDOConnection extends Connection
 
     /**
      * 执行语句
-     * @access public
+     * @access protected
      * @param BaseQuery $query  查询对象
      * @param string    $sql    sql指令
      * @param array     $bind   参数绑定
@@ -745,7 +772,7 @@ abstract class PDOConnection extends Connection
      * @throws \Exception
      * @throws \Throwable
      */
-    public function execute(BaseQuery $query, string $sql, array $bind = [], bool $origin = false): int
+    protected function pdoExecute(BaseQuery $query, string $sql, array $bind = [], bool $origin = false): int
     {
         if ($origin) {
             $query->parseOptions();
@@ -798,7 +825,7 @@ abstract class PDOConnection extends Connection
 
         if (!$result) {
             // 执行查询
-            $resultSet = $this->query($query, function ($query) {
+            $resultSet = $this->pdoQuery($query, function ($query) {
                 return $this->builder->select($query, true);
             });
 
@@ -841,7 +868,7 @@ abstract class PDOConnection extends Connection
 
         if (!$resultSet) {
             // 执行查询操作
-            $resultSet = $this->query($query, function ($query) {
+            $resultSet = $this->pdoQuery($query, function ($query) {
                 return $this->builder->select($query);
             });
         }
@@ -865,7 +892,7 @@ abstract class PDOConnection extends Connection
         $sql = $this->builder->insert($query);
 
         // 执行操作
-        $result = '' == $sql ? 0 : $this->execute($query, $sql, $query->getBind());
+        $result = '' == $sql ? 0 : $this->pdoExecute($query, $sql, $query->getBind());
 
         if ($result) {
             $sequence  = $options['sequence'] ?? null;
@@ -925,7 +952,7 @@ abstract class PDOConnection extends Connection
 
                 foreach ($array as $item) {
                     $sql = $this->builder->insertAll($query, $item, $replace);
-                    $count += $this->execute($query, $sql, $query->getBind());
+                    $count += $this->pdoExecute($query, $sql, $query->getBind());
                 }
 
                 // 提交事务
@@ -940,7 +967,7 @@ abstract class PDOConnection extends Connection
 
         $sql = $this->builder->insertAll($query, $dataSet, $replace);
 
-        return $this->execute($query, $sql, $query->getBind());
+        return $this->pdoExecute($query, $sql, $query->getBind());
     }
 
     /**
@@ -959,7 +986,7 @@ abstract class PDOConnection extends Connection
 
         $sql = $this->builder->selectInsert($query, $fields, $table);
 
-        return $this->execute($query, $sql, $query->getBind());
+        return $this->pdoExecute($query, $sql, $query->getBind());
     }
 
     /**
@@ -977,7 +1004,7 @@ abstract class PDOConnection extends Connection
         $sql = $this->builder->update($query);
 
         // 执行操作
-        $result = '' == $sql ? 0 : $this->execute($query, $sql, $query->getBind());
+        $result = '' == $sql ? 0 : $this->pdoExecute($query, $sql, $query->getBind());
 
         if ($result) {
             $this->db->trigger('after_update', $query);
@@ -1002,7 +1029,7 @@ abstract class PDOConnection extends Connection
         $sql = $this->builder->delete($query);
 
         // 执行操作
-        $result = $this->execute($query, $sql, $query->getBind());
+        $result = $this->pdoExecute($query, $sql, $query->getBind());
 
         if ($result) {
             $this->db->trigger('after_delete', $query);
@@ -1459,7 +1486,7 @@ abstract class PDOConnection extends Connection
 
         try {
             foreach ($sqlArray as $sql) {
-                $this->execute($query, $sql, $bind);
+                $this->pdoExecute($query, $sql, $bind);
             }
             // 提交事务
             $this->commit();

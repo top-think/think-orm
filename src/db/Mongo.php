@@ -9,15 +9,12 @@
 declare (strict_types = 1);
 namespace think\db;
 
-use MongoDB\Driver\BulkWrite;
 use MongoDB\Driver\Command;
 use MongoDB\Driver\Cursor;
 use MongoDB\Driver\Exception\AuthenticationException;
-use MongoDB\Driver\Exception\BulkWriteException;
 use MongoDB\Driver\Exception\ConnectionException;
 use MongoDB\Driver\Exception\InvalidArgumentException;
 use MongoDB\Driver\Exception\RuntimeException;
-use MongoDB\Driver\Query as MongoQuery;
 use MongoDB\Driver\ReadPreference;
 use MongoDB\Driver\WriteConcern;
 use think\db\exception\DbException as Exception;
@@ -30,21 +27,6 @@ class Mongo extends BaseQuery
      * @var \think\db\connector\Mongo
      */
     protected $connection;
-
-    /**
-     * 执行查询 返回数据集
-     * @access public
-     * @param  MongoQuery $query 查询对象
-     * @return mixed
-     * @throws AuthenticationException
-     * @throws InvalidArgumentException
-     * @throws ConnectionException
-     * @throws RuntimeException
-     */
-    public function query(MongoQuery $query)
-    {
-        return $this->connection->query($this, $query);
-    }
 
     /**
      * 执行指令 返回数据集
@@ -62,22 +44,6 @@ class Mongo extends BaseQuery
     public function command(Command $command, string $dbName = '', ReadPreference $readPreference = null, $typeMap = null)
     {
         return $this->connection->command($command, $dbName, $readPreference, $typeMap);
-    }
-
-    /**
-     * 执行语句
-     * @access public
-     * @param  BulkWrite $bulk
-     * @return int
-     * @throws AuthenticationException
-     * @throws InvalidArgumentException
-     * @throws ConnectionException
-     * @throws RuntimeException
-     * @throws BulkWriteException
-     */
-    public function execute(BulkWrite $bulk)
-    {
-        return $this->connection->execute($this, $bulk);
     }
 
     /**

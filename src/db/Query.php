@@ -108,34 +108,6 @@ class Query extends BaseQuery
     }
 
     /**
-     * 执行查询 返回数据集
-     * @access public
-     * @param string $sql  sql指令
-     * @param array  $bind 参数绑定
-     * @return array
-     * @throws BindParamException
-     * @throws PDOException
-     */
-    public function query(string $sql, array $bind = []): array
-    {
-        return $this->connection->query($this, $sql, $bind);
-    }
-
-    /**
-     * 执行语句
-     * @access public
-     * @param string $sql  sql指令
-     * @param array  $bind 参数绑定
-     * @return int
-     * @throws BindParamException
-     * @throws PDOException
-     */
-    public function execute(string $sql, array $bind = []): int
-    {
-        return $this->connection->execute($this, $sql, $bind, true);
-    }
-
-    /**
      * 获取执行的SQL语句而不进行实际的查询
      * @access public
      * @param bool $fetch 是否返回sql

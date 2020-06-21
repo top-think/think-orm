@@ -545,6 +545,17 @@ abstract class PDOConnection extends Connection
     }
 
     /**
+     * 视图查询
+     * @access public
+     * @param array $args
+     * @return BaseQuery
+     */
+    public function view(...$args)
+    {
+        return $this->newQuery()->view(...$args);
+    }
+
+    /**
      * 创建PDO实例
      * @param $dsn
      * @param $username
@@ -609,13 +620,14 @@ abstract class PDOConnection extends Connection
      * @access public
      * @param string $sql  sql指令
      * @param array  $bind 参数绑定
+     * @param bool   $master 主库读取
      * @return array
      * @throws BindParamException
      * @throws \PDOException
      */
-    public function query(string $sql, array $bind = []): array
+    public function query(string $sql, array $bind = [], bool $master = false): array
     {
-        return $this->pdoQuery($this->newQuery(), $sql, $bind);
+        return $this->pdoQuery($this->newQuery(), $sql, $bind, $master);
     }
 
     /**
@@ -638,13 +650,14 @@ abstract class PDOConnection extends Connection
      * @param BaseQuery $query 查询对象
      * @param mixed     $sql   sql指令
      * @param array     $bind  参数绑定
+     * @param bool      $master 主库读取
      * @return array
      * @throws BindParamException
      * @throws \PDOException
      * @throws \Exception
      * @throws \Throwable
      */
-    protected function pdoQuery(BaseQuery $query, $sql, array $bind = []): array
+    protected function pdoQuery(BaseQuery $query, $sql, array $bind = [], bool $master = null): array
     {
         // 分析查询表达式
         $query->parseOptions();
@@ -666,7 +679,10 @@ abstract class PDOConnection extends Connection
             $bind = $query->getBind();
         }
 
-        $master    = $query->getOptions('master') ? true : false;
+        if (!isset($master)) {
+            $master = $query->getOptions('master') ? true : false;
+        }
+
         $procedure = $query->getOptions('procedure') ? true : in_array(strtolower(substr(trim($sql), 0, 4)), ['call', 'exec']);
 
         $this->getPDOStatement($sql, $bind, $master, $procedure);

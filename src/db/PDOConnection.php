@@ -728,16 +728,13 @@ abstract class PDOConnection extends Connection
      */
     public function getPDOStatement(string $sql, array $bind = [], bool $master = false, bool $procedure = false): PDOStatement
     {
-        $this->initConnect($this->readMaster ?: $master);
-
-        // 记录SQL语句
-        $this->queryStr = $sql;
-
-        $this->bind = $bind;
-
-        $this->db->updateQueryTimes();
-
         try {
+            $this->initConnect($this->readMaster ?: $master);
+            // 记录SQL语句
+            $this->queryStr = $sql;
+            $this->bind     = $bind;
+
+            $this->db->updateQueryTimes();
             $this->queryStartTime = microtime(true);
 
             // 预处理
@@ -1394,11 +1391,11 @@ abstract class PDOConnection extends Connection
      */
     public function startTrans(): void
     {
-        $this->initConnect(true);
-
-        ++$this->transTimes;
-
         try {
+            $this->initConnect(true);
+
+            ++$this->transTimes;
+
             if (1 == $this->transTimes) {
                 $this->linkID->beginTransaction();
             } elseif ($this->transTimes > 1 && $this->supportSavepoint()) {

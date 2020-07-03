@@ -669,7 +669,11 @@ class BelongsToMany extends Relation
             $localKey   = $this->localKey;
 
             // 关联查询
-            $condition = ['pivot.' . $localKey, '=', $this->parent->getKey()];
+            if (null === $this->parent->getKey()) {
+                $condition = ['pivot.' . $localKey, 'exp', new Raw('=' . $this->parent->getTable() . '.' . $this->parent->getPk())];
+            } else {
+                $condition = ['pivot.' . $localKey, '=', $this->parent->getKey()];
+            }
 
             $this->belongsToManyQuery($foreignKey, $localKey, [$condition]);
 

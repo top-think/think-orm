@@ -308,7 +308,7 @@ abstract class OneToOne extends Relation
         }
 
         if ($this->query->getOptions('order')) {
-            $this->query->group($key);
+            $this->query->order($this->query->getOptions('order'));
         }
 
         $list = $this->query

@@ -302,7 +302,7 @@ trait Attribute
 
         // 只读字段不允许更新
         foreach ($this->readonly as $key => $field) {
-            if (isset($data[$field])) {
+            if (array_key_exists($field, $data)) {
                 unset($data[$field]);
             }
         }

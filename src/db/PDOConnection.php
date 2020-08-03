@@ -1409,7 +1409,7 @@ abstract class PDOConnection extends Connection
                 --$this->transTimes;
                 ++$this->reConnectTimes;
                 $this->close()->startTrans();
-            }else {
+            } else {
                 throw $e;
             }
         }

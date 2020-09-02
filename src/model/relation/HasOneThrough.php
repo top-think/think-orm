@@ -151,10 +151,10 @@ class HasOneThrough extends HasManyThrough
 
         // 组装模型数据
         $data = [];
-        $keys = array_flip($keys);
 
-        foreach ($list as $set) {
-            $data[$keys[$set->{$this->throughKey}]] = $set;
+        $set = $list->dictionary(null, $this->throughKey);
+        foreach ($keys as $k => $v){
+            $data[$k] = $set[$v];
         }
 
         return $data;

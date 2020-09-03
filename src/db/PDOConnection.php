@@ -203,7 +203,7 @@ abstract class PDOConnection extends Connection
      * @param array $config 连接信息
      * @return string
      */
-    abstract protected function parseDsn(array $config);
+    abstract protected function parseDsn(array $config): string;
 
     /**
      * 取得数据表的字段信息
@@ -211,7 +211,7 @@ abstract class PDOConnection extends Connection
      * @param string $tableName 数据表名称
      * @return array
      */
-    abstract public function getFields(string $tableName);
+    abstract public function getFields(string $tableName): array;
 
     /**
      * 取得数据库的表信息
@@ -219,7 +219,7 @@ abstract class PDOConnection extends Connection
      * @param string $dbName 数据库名称
      * @return array
      */
-    abstract public function getTables(string $dbName);
+    abstract public function getTables(string $dbName = ''): array;
 
     /**
      * 对返数据表字段信息进行大小写转换出来

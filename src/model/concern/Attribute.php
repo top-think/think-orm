@@ -292,12 +292,12 @@ trait Attribute
      */
     public function getChangedData(): array
     {
-        $data = $this->force ? $this->data : array_udiff_assoc($this->data, $this->origin, function ($a, $b) {
-            if ((empty($a) || empty($b)) && $a !== $b) {
+        $data = $this->force ? $this->data : array_udiff_assoc($this->data, $this->origin, function ($new, $origin) {
+            if ((empty($new) || empty($origin)) && !is_numeric($origin) && $new !== $origin) {
                 return 1;
             }
 
-            return is_object($a) || $a != $b ? 1 : 0;
+            return is_object($new) || $new != $origin ? 1 : 0;
         });
 
         // 只读字段不允许更新

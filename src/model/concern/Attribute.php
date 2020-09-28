@@ -185,7 +185,11 @@ trait Attribute
      */
     protected function getRealFieldName(string $name): string
     {
-        return $this->strict ? $name : Str::snake($name);
+        if ($this->convertNameToCamel || !$this->strict) {
+            return Str::snake($name);
+        }
+
+        return $name;
     }
 
     /**

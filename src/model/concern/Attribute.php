@@ -374,9 +374,6 @@ trait Attribute
                 if (is_null($value) && $array !== $this->data) {
                     return;
                 }
-            } elseif (isset($this->type[$name])) {
-                // 类型转换
-                $value = $this->writeTransform($value, $this->type[$name]);
             }
         }
 
@@ -506,9 +503,6 @@ trait Attribute
             }
 
             $value = $this->$method($value, $this->data);
-        } elseif (isset($this->type[$fieldName])) {
-            // 类型转换
-            $value = $this->readTransform($value, $this->type[$fieldName]);
         } elseif ($this->autoWriteTimestamp && in_array($fieldName, [$this->createTime, $this->updateTime])) {
             $value = $this->getTimestampValue($value);
         } elseif ($relation) {
@@ -518,6 +512,38 @@ trait Attribute
         }
 
         return $value;
+    }
+
+    /**
+     * 读取数据类型处理
+     * @access protected
+     * @param  array $data 数据
+     * @return void
+     */
+    protected function readDataType(array $data): void
+    {
+        foreach ($data as $name => &$value) {
+            if (isset($this->type[$name])) {
+                // 类型转换
+                $value = $this->readTransform($value, $this->type[$name]);
+            }
+        }
+    }
+
+    /**
+     * 写入数据类型处理
+     * @access protected
+     * @param  array $data 数据
+     * @return void
+     */
+    protected function writeDataType(array $data): void
+    {
+        foreach ($data as $name => &$value) {
+            if (isset($this->type[$name])) {
+                // 类型转换
+                $value = $this->writeTransform($value, $this->type[$name]);
+            }
+        }
     }
 
     /**

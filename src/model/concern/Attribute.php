@@ -520,7 +520,7 @@ trait Attribute
      * @param  array $data 数据
      * @return void
      */
-    protected function readDataType(array $data): void
+    protected function readDataType(array &$data): void
     {
         foreach ($data as $name => &$value) {
             if (isset($this->type[$name])) {
@@ -536,7 +536,7 @@ trait Attribute
      * @param  array $data 数据
      * @return void
      */
-    protected function writeDataType(array $data): void
+    protected function writeDataType(array &$data): void
     {
         foreach ($data as $name => &$value) {
             if (isset($this->type[$name])) {

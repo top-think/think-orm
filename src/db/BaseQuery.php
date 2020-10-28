@@ -798,8 +798,20 @@ abstract class BaseQuery
             $this->options['alias'] = $alias;
         } else {
             $table = $this->getTable();
+            
+            /**
+             * 当使用withJoin与haswhere时，会出现 $table 为数组
+             */
 
+            // 改动前：
             $this->options['alias'][$table] = $alias;
+
+            // 改动后
+            if (is_array($table)){
+                $this->options['alias'] = $table;
+            }else{
+                $this->options['alias'][$table] = $alias;
+            }
         }
 
         return $this;

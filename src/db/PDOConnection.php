@@ -1191,7 +1191,7 @@ abstract class PDOConnection extends Connection
                 $key = null;
             }
 
-            if (strpos($column, ',')) {
+            if ('*' == $column || strpos($column, ',')) {
                 $column = null;
             } elseif (strpos($column, ' ')) {
                 $column = substr(strrchr(trim($column), ' '), 1);

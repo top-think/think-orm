@@ -15,7 +15,11 @@ namespace think\model\concern;
 use InvalidArgumentException;
 use think\db\Raw;
 use think\helper\Str;
+use think\model\contracts\FieldTypeTransform;
 use think\model\Relation;
+use function class_exists;
+use function is_string;
+use function is_subclass_of;
 
 /**
  * 模型数据处理
@@ -439,9 +443,13 @@ trait Attribute
                 $value = serialize($value);
                 break;
             default:
-                if (is_object($value) && false !== strpos($type, '\\') && method_exists($value, '__toString')) {
-                    // 对象类型
-                    $value = $value->__toString();
+                if (class_exists($type)) {
+                    if (is_subclass_of($type, FieldTypeTransform::class)) {
+                        $value = $type::modelWriteValue($value, $this);
+                    } elseif (is_object($value) && method_exists($value, '__toString')) {
+                        // 对象类型
+                        $value = $value->__toString();
+                    }
                 }
         }
 
@@ -615,9 +623,13 @@ trait Attribute
                 }
                 break;
             default:
-                if (false !== strpos($type, '\\')) {
-                    // 对象类型
-                    $value = new $type($value);
+                if (class_exists($type)) {
+                    if (is_subclass_of($type, FieldTypeTransform::class)) {
+                        $value = $type::modelReadValue($value, $this);
+                    } else {
+                        // 对象类型
+                        $value = new $type($value);
+                    }
                 }
         }
 

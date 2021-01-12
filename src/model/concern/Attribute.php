@@ -17,9 +17,6 @@ use think\db\Raw;
 use think\helper\Str;
 use think\model\contracts\FieldTypeTransform;
 use think\model\Relation;
-use function class_exists;
-use function is_string;
-use function is_subclass_of;
 
 /**
  * 模型数据处理
@@ -385,14 +382,15 @@ trait Attribute
     /**
      * 数据写入 类型转换
      * @access protected
-     * @param  mixed        $value 值
-     * @param  string|array $type  要转换的类型
+     * @param string       $name
+     * @param mixed        $value 值
+     * @param string|array $type  要转换的类型
      * @return mixed
      */
-    protected function writeTransform($value, $type)
+    protected function writeTransform($name, $value, $type)
     {
-        if (is_null($value)) {
-            return;
+        if (null === $value) {
+            return null;
         }
 
         if ($value instanceof Raw) {
@@ -443,10 +441,10 @@ trait Attribute
                 $value = serialize($value);
                 break;
             default:
-                if (class_exists($type)) {
-                    if (is_subclass_of($type, FieldTypeTransform::class)) {
-                        $value = $type::modelWriteValue($value, $this);
-                    } elseif (is_object($value) && method_exists($value, '__toString')) {
+                if (\class_exists($type)) {
+                    if (\is_subclass_of($type, FieldTypeTransform::class)) {
+                        $value = $type::modelWriteValue($name, $value, $this);
+                    } elseif (\is_object($value) && \method_exists($value, '__toString')) {
                         // 对象类型
                         $value = $value->__toString();
                     }
@@ -514,7 +512,7 @@ trait Attribute
             $value = $this->$method($value, $this->data);
         } elseif (isset($this->type[$fieldName])) {
             // 类型转换
-            $value = $this->readTransform($value, $this->type[$fieldName]);
+            $value = $this->readTransform($fieldName, $value, $this->type[$fieldName]);
         } elseif ($this->autoWriteTimestamp && in_array($fieldName, [$this->createTime, $this->updateTime])) {
             $value = $this->getTimestampValue($value);
         } elseif ($relation) {
@@ -564,14 +562,15 @@ trait Attribute
     /**
      * 数据读取 类型转换
      * @access protected
-     * @param  mixed        $value 值
-     * @param  string|array $type  要转换的类型
+     * @param string       $name
+     * @param mixed        $value 值
+     * @param string|array $type  要转换的类型
      * @return mixed
      */
-    protected function readTransform($value, $type)
+    protected function readTransform($name, $value, $type)
     {
-        if (is_null($value)) {
-            return;
+        if (null === $value) {
+            return null;
         }
 
         if (is_array($type)) {
@@ -623,9 +622,9 @@ trait Attribute
                 }
                 break;
             default:
-                if (class_exists($type)) {
-                    if (is_subclass_of($type, FieldTypeTransform::class)) {
-                        $value = $type::modelReadValue($value, $this);
+                if (\class_exists($type)) {
+                    if (\is_subclass_of($type, FieldTypeTransform::class)) {
+                        $value = $type::modelReadValue($name, $value, $this);
                     } else {
                         // 对象类型
                         $value = new $type($value);

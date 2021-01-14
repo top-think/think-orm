@@ -755,7 +755,14 @@ abstract class Builder
         } elseif ($value instanceof Raw) {
             $value = $this->parseRaw($query, $value);
         } else {
-            $value = array_unique(is_array($value) ? $value : explode(',', $value));
+            if (is_array($value)) {
+                if (is_string($value[0]) && strtolower($value[0]) == 'in' && isset($value[1]) && is_array($value[1])) {
+                    $value = $value[1];
+                }
+            } else {
+                $value = explode(',', $value);
+            }
+            $value = array_unique($value);
             $array = [];
 
             foreach ($value as $v) {

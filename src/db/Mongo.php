@@ -9,9 +9,11 @@
 declare (strict_types = 1);
 namespace think\db;
 
+use MongoDB\Driver\BulkWrite;
 use MongoDB\Driver\Command;
 use MongoDB\Driver\Cursor;
 use MongoDB\Driver\Exception\AuthenticationException;
+use MongoDB\Driver\Exception\BulkWriteException;
 use MongoDB\Driver\Exception\ConnectionException;
 use MongoDB\Driver\Exception\InvalidArgumentException;
 use MongoDB\Driver\Exception\RuntimeException;
@@ -44,6 +46,21 @@ class Mongo extends BaseQuery
     public function command(Command $command, string $dbName = '', ReadPreference $readPreference = null, $typeMap = null)
     {
         return $this->connection->command($command, $dbName, $readPreference, $typeMap);
+    }
+
+    /**
+     * 执行语句
+     * @access public
+     * @param  BulkWrite $bulk
+     * @return int
+     * @throws AuthenticationException
+     * @throws InvalidArgumentException
+     * @throws ConnectionException
+     * @throws RuntimeException
+     * @throws BulkWriteException
+     */
+    public function execute(BulkWrite $bulkWrite){
+        return $this->connection->execute($this, $bulkWrite);
     }
 
     /**

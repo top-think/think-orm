@@ -1184,8 +1184,6 @@ abstract class PDOConnection extends Connection
 
         if (empty($resultSet)) {
             $result = [];
-        } elseif (('*' == $column || strpos($column, ',')) && $key) {
-            $result = array_column($resultSet, null, $key);
         } else {
             if (empty($key)) {
                 $key = null;

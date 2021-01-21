@@ -1195,7 +1195,9 @@ abstract class PDOConnection extends Connection
                 $column = null;
             } elseif (strpos($column, ' ')) {
                 $column = substr(strrchr(trim($column), ' '), 1);
-            } elseif (strpos($column, '.')) {
+            }
+
+            if (strpos($column, '.')) {
                 [$alias, $column] = explode('.', $column);
             }
 
@@ -1228,7 +1230,7 @@ abstract class PDOConnection extends Connection
             $value = is_array($val) ? $val[0] : $val;
             $type  = is_array($val) ? $val[1] : PDO::PARAM_STR;
 
-            if ((self::PARAM_FLOAT == $type || PDO::PARAM_STR == $type) && is_string($value)) {
+            if (self::PARAM_FLOAT == $type || PDO::PARAM_STR == $type) {
                 $value = '\'' . addslashes($value) . '\'';
             } elseif (PDO::PARAM_INT == $type && '' === $value) {
                 $value = 0;

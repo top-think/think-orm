@@ -1135,12 +1135,12 @@ abstract class PDOConnection extends Connection
     /**
      * 得到某个列的数组
      * @access public
-     * @param BaseQuery $query  查询对象
-     * @param string    $column 字段名 多个字段用逗号分隔
-     * @param string    $key    索引
+     * @param BaseQuery     $query  查询对象
+     * @param string|array  $column 字段名 多个字段用逗号分隔
+     * @param string        $key    索引
      * @return array
      */
-    public function column(BaseQuery $query, string $column, string $key = ''): array
+    public function column(BaseQuery $query, $column, string $key = ''): array
     {
         $options = $query->parseOptions();
 
@@ -1148,14 +1148,25 @@ abstract class PDOConnection extends Connection
             $query->removeOption('field');
         }
 
-        if ($key && '*' != $column) {
-            $field = $key . ',' . $column;
-        } else {
-            $field = $column;
+        if (empty($key) || trim($key) === '') {
+            $key = null;
         }
-
-        $field = array_map('trim', explode(',', $field));
-
+        if (\is_string($column)) {
+            $column = \trim($column);
+            if ($column !== '*') {
+                $column = \array_map('\trim', \explode(',', $column));
+            }
+        } elseif (\is_array($column)) {
+            if (\in_array('*', $column)) {
+                $column = '*';
+            }
+        } else {
+            throw new DbException('not support type');
+        }
+        $field = $column;
+        if ($column !== '*' && $key && !\in_array($key, $column)) {
+            $field[] = $key;
+        }
         $query->setOption('field', $field);
 
         if (!empty($options['cache'])) {
@@ -1184,28 +1195,12 @@ abstract class PDOConnection extends Connection
 
         if (empty($resultSet)) {
             $result = [];
-        } elseif (('*' == $column || strpos($column, ',')) && $key) {
-            $result = array_column($resultSet, null, $key);
+        } elseif ($field !== '*' && \count($field) === 1) {
+            $result = \array_column($resultSet, \array_shift($field), $key);
+        } elseif ($key) {
+            $result = \array_column($resultSet, null, $key);
         } else {
-            if (empty($key)) {
-                $key = null;
-            }
-
-            if ('*' == $column || strpos($column, ',')) {
-                $column = null;
-            } elseif (strpos($column, ' ')) {
-                $column = substr(strrchr(trim($column), ' '), 1);
-            }
-
-            if (strpos($column, '.')) {
-                [$alias, $column] = explode('.', $column);
-            }
-
-            if (is_string($key) && strpos($key, '.')) {
-                [$alias, $key] = explode('.', $key);
-            }
-
-            $result = array_column($resultSet, $column, $key);
+            $result = $resultSet;
         }
 
         if (isset($cacheItem)) {

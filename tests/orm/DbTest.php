@@ -8,6 +8,7 @@ use think\facade\Db;
 use function array_column;
 use function array_keys;
 use function array_values;
+use function tests\array_column_ex;
 
 class DbTest extends TestCase
 {
@@ -26,24 +27,34 @@ SQL
         );
     }
 
+
+
     public function testColumn()
     {
         Db::execute('TRUNCATE TABLE `test_user`;');
         $users = [
-            ['id' => '1', 'type' => '3', 'username' => 'qweqwe', 'nickname' => 'asdasd', 'password' => '123123'],
-            ['id' => '2', 'type' => '2', 'username' => 'rtyrty', 'nickname' => 'fghfgh', 'password' => '456456'],
-            ['id' => '3', 'type' => '1', 'username' => 'uiouio', 'nickname' => 'jkljkl', 'password' => '789789'],
+            ['id' => 1, 'type' => 3, 'username' => 'qweqwe', 'nickname' => 'asdasd', 'password' => '123123'],
+            ['id' => 2, 'type' => 2, 'username' => 'rtyrty', 'nickname' => 'fghfgh', 'password' => '456456'],
+            ['id' => 3, 'type' => 1, 'username' => 'uiouio', 'nickname' => 'jkljkl', 'password' => '789789'],
+            ['id' => 5, 'type' => 2, 'username' => 'qazqaz', 'nickname' => 'wsxwsx', 'password' => '098098'],
+            ['id' => 7, 'type' => 2, 'username' => 'rfvrfv', 'nickname' => 'tgbtgb', 'password' => '765765'],
         ];
 
+        // 获取全部列
         Db::table('test_user')->insertAll($users);
         $result = Db::table('test_user')->column('*', 'id');
 
-        $this->assertCount(3, $result);
+        $this->assertCount(5, $result);
         $this->assertEquals($users, array_values($result));
         $this->assertEquals(array_column($users, 'id'), array_keys($result));
 
+        // 获取某一个字段
         $result = Db::table('test_user')->column('username');
-
         $this->assertEquals(array_column($users, 'username'), $result);
+
+        // 获取若干列
+        $result = Db::table('test_user')->column('username,nickname', 'id');
+        $expected = array_column_ex($users, ['username', 'nickname', 'id'], 'id');
+        $this->assertEquals($expected, $result);
     }
 }

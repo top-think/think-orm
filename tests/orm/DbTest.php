@@ -4,11 +4,13 @@ declare(strict_types=1);
 namespace tests\orm;
 
 use PHPUnit\Framework\TestCase;
+use think\db\Raw;
 use think\facade\Db;
 use function array_column;
 use function array_keys;
 use function array_values;
 use function tests\array_column_ex;
+use function tests\array_value_sort;
 
 class DbTest extends TestCase
 {
@@ -55,6 +57,46 @@ SQL
         // 获取若干列
         $result = Db::table('test_user')->column('username,nickname', 'id');
         $expected = array_column_ex($users, ['username', 'nickname', 'id'], 'id');
+        $this->assertEquals($expected, $result);
+
+        // 获取若干列不指定key时不报错
+        $result = Db::table('test_user')->column('username,nickname,id');
+        $expected = array_column_ex($users, ['username', 'nickname', 'id']);
+        $this->assertEquals($expected, $result);
+
+        // 数组方式获取
+        $result = Db::table('test_user')->column(['username', 'nickname', 'type'], 'id');
+        $expected = array_column_ex($users, ['username', 'nickname', 'type', 'id'], 'id');
+        $this->assertEquals($expected, $result);
+
+        // 数组方式获取（重命名字段）
+        $result = Db::table('test_user')->column(['username' => 'my_name', 'nickname'], 'id');
+        $expected = array_column_ex($users, ['username' => 'my_name', 'nickname', 'id'], 'id');
+        array_value_sort($result);
+        array_value_sort($expected);
+        $this->assertEquals($expected, $result);
+
+        // 数组方式获取（定义表达式）
+        $result = Db::table('test_user')
+            ->column([
+                'username' => 'my_name',
+                'nickname',
+                new Raw('`type`+1000 as type2'),
+            ], 'id');
+        $expected = array_column_ex(
+            $users,
+            [
+                'username' => 'my_name',
+                'nickname',
+                'type2' => function ($value) {
+                    return $value['type'] + 1000;
+                },
+                'id'
+            ],
+            'id'
+        );
+        array_value_sort($result);
+        array_value_sort($expected);
         $this->assertEquals($expected, $result);
     }
 }

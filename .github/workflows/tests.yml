@@ -1,0 +1,73 @@
+name: tests
+
+on: [push, pull_request]
+
+jobs:
+  phpunit:
+    runs-on: ubuntu-latest
+    continue-on-error: ${{ matrix.experimental }}
+    strategy:
+      fail-fast: false
+      matrix:
+        php:
+          - 7.1
+          - 7.2
+          - 7.3
+          - 7.4
+        experimental: [false]
+        include:
+          - php: 8.0
+            experimental: true
+    services:
+      mysql:
+        image: mysql:5.7
+        env:
+          MYSQL_ROOT_PASSWORD: password
+          MYSQL_DATABASE: testing
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: pdo, pdo_mysql, mbstring #optional, setup extensions
+          coverage: none #optional, setup coverage driver
+
+      - name: Check Version
+        run: |
+          php -v
+          php -m
+          composer -V
+
+      - name: Validate composer.json and composer.lock
+        run: composer validate
+
+      - name: Get composer cache directory
+        id: composercache
+        run: echo "::set-output name=dir::$(composer config cache-files-dir)"
+
+      - name: Cache vendor
+        uses: actions/cache@v2
+        env:
+          cache-name: composer-cache
+        with:
+          path: ${{ steps.composercache.outputs.dir }}
+          key: ${{ runner.os }}-${{ matrix.php }}-build-${{ env.cache-name }}
+
+      - name: Install dependencies (composer.lock)
+        run: composer install --prefer-dist --no-progress --no-suggest
+
+      - name: Run test suite
+        run: composer exec -- phpunit -v
+        env:
+          TESTS_DB_MYSQL_HOST: 127.0.0.1
+          TESTS_DB_MYSQL_PORT: 3306
+          TESTS_DB_MYSQL_USERNAME: root
+          TESTS_DB_MYSQL_PASSWORD: password
+          TESTS_DB_MYSQL_DATABASE: testing

@@ -8,6 +8,7 @@ use think\db\Raw;
 use think\facade\Db;
 use function array_column;
 use function array_keys;
+use function array_unique;
 use function array_values;
 use function tests\array_column_ex;
 use function tests\array_value_sort;
@@ -53,6 +54,21 @@ SQL
         // 获取某一个字段
         $result = Db::table('test_user')->column('username');
         $this->assertEquals(array_column($users, 'username'), $result);
+
+        // 获取某字段唯一
+        $result = Db::table('test_user')->distinct(true)->column('type');
+        $expected = array_unique(array_column($users, 'type'));
+        $this->assertEquals($expected, $result);
+
+        // 字段别名
+        $result = Db::table('test_user')->column('username as name2');
+        $expected = array_column($users, 'username');
+        $this->assertEquals($expected, $result);
+
+        // 表别名
+        $result = Db::table('test_user')->alias('test2')->column('test2.username');
+        $expected = array_column($users, 'username');
+        $this->assertEquals($expected, $result);
 
         // 获取若干列
         $result = Db::table('test_user')->column('username,nickname', 'id');

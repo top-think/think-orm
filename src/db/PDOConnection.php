@@ -1151,9 +1151,10 @@ abstract class PDOConnection extends Connection
         if (empty($key) || trim($key) === '') {
             $key = null;
         }
+
         if (\is_string($column)) {
             $column = \trim($column);
-            if ($column !== '*') {
+            if ('*' !== $column) {
                 $column = \array_map('\trim', \explode(',', $column));
             }
         } elseif (\is_array($column)) {
@@ -1163,10 +1164,12 @@ abstract class PDOConnection extends Connection
         } else {
             throw new DbException('not support type');
         }
+
         $field = $column;
-        if ($column !== '*' && $key && !\in_array($key, $column)) {
+        if ('*' !== $column && $key && !\in_array($key, $column)) {
             $field[] = $key;
         }
+
         $query->setOption('field', $field);
 
         if (!empty($options['cache'])) {
@@ -1189,14 +1192,26 @@ abstract class PDOConnection extends Connection
         }
 
         // 执行查询操作
-        $pdo = $this->getPDOStatement($sql, $query->getBind(), $options['master']);
-
+        $pdo       = $this->getPDOStatement($sql, $query->getBind(), $options['master']);
         $resultSet = $pdo->fetchAll(PDO::FETCH_ASSOC);
+
+        if (is_string($key) && strpos($key, '.')) {
+            [$alias, $key] = explode('.', $key);
+        }
 
         if (empty($resultSet)) {
             $result = [];
-        } elseif ($field !== '*' && \count($field) === 1) {
-            $result = \array_column($resultSet, \array_shift($field), $key);
+        } elseif ('*' !== $field && \count($field) === 1) {
+            $column = \array_shift($field);
+            if (strpos($column, ' ')) {
+                $column = substr(strrchr(trim($column), ' '), 1);
+            }
+
+            if (strpos($column, '.')) {
+                [$alias, $column] = explode('.', $column);
+            }
+
+            $result = \array_column($resultSet, $column, $key);
         } elseif ($key) {
             $result = \array_column($resultSet, null, $key);
         } else {

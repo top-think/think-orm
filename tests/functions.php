@@ -5,14 +5,23 @@ namespace tests;
 use function array_column;
 use function array_combine;
 use function array_map;
+use function call_user_func;
+use function is_callable;
+use function is_int;
 use function sort;
 
 function array_column_ex(array $arr, array $column, ?string $key = null): array
 {
     $result = array_map(function ($val) use ($column) {
         $item = [];
-        foreach ($column as $key) {
-            $item[$key] = $val[$key];
+        foreach ($column as $index => $key) {
+            if (is_callable($key)) {
+                $item[$index] = call_user_func($key, $val);
+            } elseif (is_int($index)) {
+                $item[$key] = $val[$key];
+            } else {
+                $item[$key] = $val[$index];
+            }
         }
         return $item;
     }, $arr);

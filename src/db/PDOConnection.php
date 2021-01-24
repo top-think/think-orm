@@ -1203,12 +1203,12 @@ abstract class PDOConnection extends Connection
             $result = [];
         } elseif ('*' !== $field && \count($field) === 1) {
             $column = \array_shift($field);
-            if (strpos($column, ' ')) {
-                $column = substr(strrchr(trim($column), ' '), 1);
+            if (\strpos($column, ' ')) {
+                $column = \substr(\strrchr(\trim($column), ' '), 1);
             }
 
-            if (strpos($column, '.')) {
-                [$alias, $column] = explode('.', $column);
+            if (\strpos($column, '.')) {
+                [$alias, $column] = \explode('.', $column);
             }
 
             $result = \array_column($resultSet, $column, $key);

@@ -1237,19 +1237,19 @@ abstract class PDOConnection extends Connection
     public function getRealSql(string $sql, array $bind = []): string
     {
         foreach ($bind as $key => $val) {
-            $value = is_array($val) ? $val[0] : $val;
+            $value = strval(is_array($val) ? $val[0] : $val);
             $type  = is_array($val) ? $val[1] : PDO::PARAM_STR;
 
             if (self::PARAM_FLOAT == $type || PDO::PARAM_STR == $type) {
                 $value = '\'' . addslashes($value) . '\'';
             } elseif (PDO::PARAM_INT == $type && '' === $value) {
-                $value = 0;
+                $value = '0';
             }
 
             // 判断占位符
             $sql = is_numeric($key) ?
-            substr_replace($sql, (string) $value, strpos($sql, '?'), 1) :
-            substr_replace($sql, (string) $value, strpos($sql, ':' . $key), strlen(':' . $key));
+            substr_replace($sql, $value, strpos($sql, '?'), 1) :
+            substr_replace($sql, $value, strpos($sql, ':' . $key), strlen(':' . $key));
         }
 
         return rtrim($sql);

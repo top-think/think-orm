@@ -1201,8 +1201,8 @@ abstract class PDOConnection extends Connection
 
         if (empty($resultSet)) {
             $result = [];
-        } elseif ('*' !== $field && \count($field) === 1) {
-            $column = \array_shift($field);
+        } elseif ('*' !== $column && \count($column) === 1) {
+            $column = \array_shift($column);
             if (\strpos($column, ' ')) {
                 $column = \substr(\strrchr(\trim($column), ' '), 1);
             }

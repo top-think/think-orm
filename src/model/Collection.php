@@ -118,6 +118,21 @@ class Collection extends BaseCollection
     }
 
     /**
+     * 根据追加场景设置需要附加的输出属性
+     * @access public
+     * @param  string $scene   追加场景名称
+     * @return $this
+     */
+    public function appendByScene(string $scene = '')
+    {
+        $this->each(function (Model $model) use ($scene) {
+            $model->appendByScene($scene);
+        });
+
+        return $this;
+    }
+
+    /**
      * 设置父模型
      * @access public
      * @param  Model $parent 父模型

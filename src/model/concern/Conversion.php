@@ -255,11 +255,11 @@ trait Conversion
             $value       = $this->getAttr($name);
             $item[$name] = $value;
 
-            $this->getBindAttr($name, $value, $item);
+            $this->getBindAttrValue($name, $value, $item);
         }
     }
 
-    protected function getBindAttr(string $name, $value, array &$item = [])
+    protected function getBindAttrValue(string $name, $value, array &$item = [])
     {
         $relation = $this->isRelationAttr($name);
         if (!$relation) {

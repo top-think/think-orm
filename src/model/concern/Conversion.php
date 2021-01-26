@@ -80,8 +80,21 @@ trait Conversion
      */
     public function append(array $append = [])
     {
-        $this->append = $append;
+        $this->append = array_unique(array_merge($this->append,$append));
 
+        return $this;
+    }
+
+    /**
+     * 根据追加场景设置需要附加的输出属性
+     * @access public
+     * @param  string $scene   追加场景名称
+     * @return $this
+     */
+    public function appendByScene(string $scene = '')
+    {
+        $appends = $this->getAppendsFieldsByScene($scene);
+        $this->append($appends);
         return $this;
     }
 

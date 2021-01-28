@@ -43,6 +43,12 @@ trait Conversion
     protected $append = [];
 
     /**
+     * 场景
+     * @var array
+     */
+    protected $scene = [];
+
+    /**
      * 数据输出字段映射
      * @var array
      */
@@ -80,21 +86,28 @@ trait Conversion
      */
     public function append(array $append = [])
     {
-        $this->append = array_unique(array_merge($this->append,$append));
+        $this->append = $append;
 
         return $this;
     }
 
     /**
-     * 根据追加场景设置需要附加的输出属性
+     * 设置输出层场景
      * @access public
-     * @param  string $scene   追加场景名称
+     * @param  string $scene  场景名称
      * @return $this
      */
-    public function appendByScene(string $scene = '')
+    public function scene(string $scene)
     {
-        $appends = $this->getAppendsFieldsByScene($scene);
-        $this->append($appends);
+        if (isset($this->scene[$scene])) {
+            $data = $this->scene[$scene];
+            foreach (['append', 'hidden', 'visible'] as $name) {
+                if (isset($data[$name])) {
+                    $this->$name($data[$name]);
+                }
+            }
+        }
+
         return $this;
     }
 

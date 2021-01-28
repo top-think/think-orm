@@ -118,15 +118,15 @@ class Collection extends BaseCollection
     }
 
     /**
-     * 根据追加场景设置需要附加的输出属性
+     * 设置模型输出场景
      * @access public
-     * @param  string $scene   追加场景名称
+     * @param  string $scene   场景名称
      * @return $this
      */
-    public function appendByScene(string $scene = '')
+    public function scene(string $scene)
     {
         $this->each(function (Model $model) use ($scene) {
-            $model->appendByScene($scene);
+            $model->scene($scene);
         });
 
         return $this;

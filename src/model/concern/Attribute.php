@@ -95,12 +95,6 @@ trait Attribute
     protected $strict = true;
 
     /**
-     * 获取器场景 [sceneFilter:string => appendFieldNotInTable[]][]
-     * @var array
-     */
-    protected $appendsScene = [];
-
-    /**
      * 修改器执行记录
      * @var array
      */
@@ -682,18 +676,6 @@ trait Attribute
         }
 
         return $this;
-    }
-
-    /**
-     * 获取场景下的获取器字段
-     * @access public
-     * @param string $scene
-     * @return array|mixed
-     */
-    public function getAppendsFieldsByScene(string $scene = ''):array
-    {
-        $scene = empty($scene) ? 'default' : $scene;
-        return $this->appendsScene[$scene] ?? [];
     }
 
 }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace tests\orm;
 
 use PHPUnit\Framework\TestCase;
+use think\Collection;
 use think\db\Raw;
 use think\facade\Db;
 use function array_column;
@@ -15,6 +16,8 @@ use function tests\array_value_sort;
 
 class DbTest extends TestCase
 {
+    protected static $testUserData;
+
     public static function setUpBeforeClass(): void
     {
         Db::execute('DROP TABLE IF EXISTS `test_user`;');
@@ -30,21 +33,24 @@ SQL
         );
     }
 
-
-
-    public function testColumn()
+    public function setUp(): void
     {
         Db::execute('TRUNCATE TABLE `test_user`;');
-        $users = [
+        self::$testUserData = [
             ['id' => 1, 'type' => 3, 'username' => 'qweqwe', 'nickname' => 'asdasd', 'password' => '123123'],
             ['id' => 2, 'type' => 2, 'username' => 'rtyrty', 'nickname' => 'fghfgh', 'password' => '456456'],
             ['id' => 3, 'type' => 1, 'username' => 'uiouio', 'nickname' => 'jkljkl', 'password' => '789789'],
             ['id' => 5, 'type' => 2, 'username' => 'qazqaz', 'nickname' => 'wsxwsx', 'password' => '098098'],
             ['id' => 7, 'type' => 2, 'username' => 'rfvrfv', 'nickname' => 'tgbtgb', 'password' => '765765'],
         ];
+        Db::table('test_user')->insertAll(self::$testUserData);
+    }
+
+    public function testColumn()
+    {
+        $users = self::$testUserData;
 
         // 获取全部列
-        Db::table('test_user')->insertAll($users);
         $result = Db::table('test_user')->column('*', 'id');
 
         $this->assertCount(5, $result);
@@ -114,5 +120,30 @@ SQL
         array_value_sort($result);
         array_value_sort($expected);
         $this->assertEquals($expected, $result);
+    }
+
+    public function testWhereIn()
+    {
+        $sqlLogs = [];
+        Db::listen(function ($sql) use (&$sqlLogs) {
+            $sqlLogs[] = $sql;
+        });
+
+        $expected = Collection::make(self::$testUserData)->whereIn('type', [1, 3])->values()->toArray();
+        $result = Db::table('test_user')->whereIn('type', [1, 3])->column('*');
+        $this->assertEquals($expected, $result);
+
+        $expected = Collection::make(self::$testUserData)->whereIn('type', [1])->values()->toArray();
+        $result = Db::table('test_user')->whereIn('type', [1])->column('*');
+        $this->assertEquals($expected, $result);
+
+        $result = Db::table('test_user')->whereIn('type', [])->column('*');
+        $this->assertEquals([], $result);
+
+        $this->assertEquals([
+            "SELECT * FROM `test_user` WHERE  `type` IN (1,3)",
+            "SELECT * FROM `test_user` WHERE  `type` = 1",
+            "SELECT * FROM `test_user` WHERE  `type` IN ('')",
+        ], $sqlLogs);
     }
 }

@@ -92,8 +92,6 @@ class DbManager
      */
     protected function modelMaker()
     {
-        $this->triggerSql();
-
         Model::setDb($this);
 
         if (is_object($this->event)) {
@@ -114,32 +112,6 @@ class DbManager
                 // 设置时间戳格式
                 $model->setDateFormat($this->getConfig('datetime_format', 'Y-m-d H:i:s'));
             }
-        });
-    }
-
-    /**
-     * 监听SQL
-     * @access protected
-     * @return void
-     */
-    protected function triggerSql(): void
-    {
-        // 监听SQL
-        $this->listen(function ($sql, $time, $master) {
-            if (0 === strpos($sql, 'CONNECT:')) {
-                $this->log($sql);
-                return;
-            }
-
-            // 记录SQL
-            if (is_bool($master)) {
-                // 分布式记录当前操作的主从
-                $master = $master ? 'master|' : 'slave|';
-            } else {
-                $master = '';
-            }
-
-            $this->log($sql . ' [ ' . $master . 'RunTime:' . $time . 's ]');
         });
     }
 

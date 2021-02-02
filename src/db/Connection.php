@@ -264,7 +264,6 @@ abstract class Connection implements ConnectionInterface
                 $callback($sql, $runtime, $master);
             }
         }
-
     }
 
     /**

@@ -116,6 +116,14 @@ class DbManager
     }
 
     /**
+     * 监听SQL
+     * @access protected
+     * @return void
+     */
+    public function triggerSql(): void
+    {}
+
+    /**
      * 初始化配置参数
      * @access public
      * @param array $config 连接配置

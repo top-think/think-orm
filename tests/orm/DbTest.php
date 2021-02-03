@@ -5,7 +5,9 @@ namespace tests\orm;
 
 use PHPUnit\Framework\TestCase;
 use think\Collection;
+use think\db\exception\DbException;
 use think\db\Raw;
+use think\Exception as ThinkException;
 use think\facade\Db;
 use function array_column;
 use function array_keys;
@@ -150,5 +152,16 @@ SQL
             "SELECT * FROM `test_user` WHERE  `type` IN (1,0)",
             "SELECT * FROM `test_user` WHERE  0 = 1",
         ], $sqlLogs);
+    }
+
+    public function testException()
+    {
+        $this->expectException(DbException::class);
+        try {
+            Db::query("wrong syntax");
+        } catch (DbException $exception) {
+            $this->assertInstanceOf(ThinkException::class, $exception);
+            throw $exception;
+        }
     }
 }

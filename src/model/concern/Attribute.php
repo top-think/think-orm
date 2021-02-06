@@ -537,9 +537,6 @@ trait Attribute
             if (isset($this->type[$name])) {
                 // 类型转换
                 $value = $this->writeTransform($value, $this->type[$name]);
-            } elseif (is_null($value) && $this->autoWriteTimestamp && in_array($name, [$this->createTime, $this->updateTime])) {
-                // 自动写入的时间戳字段
-                $value = $this->autoWriteTimestamp();
             }
         }
 

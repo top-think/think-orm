@@ -266,9 +266,8 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
      */
     public function newInstance(array $data = [], $where = null): Model
     {
-        $this->readDataType($data);
-
         $model = new static($data);
+        $model->readDataType();
 
         if ($this->connection) {
             $model->setConnection($this->connection);

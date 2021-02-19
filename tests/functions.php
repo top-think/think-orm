@@ -2,6 +2,8 @@
 
 namespace tests;
 
+use think\db\ConnectionInterface;
+use think\facade\Db;
 use function array_column;
 use function array_combine;
 use function array_map;
@@ -38,4 +40,15 @@ function array_value_sort(array $arr)
     foreach ($arr as &$value) {
         sort($value);
     }
+}
+
+function query_mysql_connection_id(ConnectionInterface $connect): int
+{
+    $cid = $connect->query('SELECT CONNECTION_ID() as cid')[0]['cid'];
+    return (int) $cid;
+}
+
+function mysql_kill_connection(string $name, $cid)
+{
+    Db::connect($name)->execute("KILL {$cid}");
 }

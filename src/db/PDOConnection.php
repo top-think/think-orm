@@ -18,6 +18,7 @@ use PDOStatement;
 use think\db\exception\BindParamException;
 use think\db\exception\DbException;
 use think\db\exception\PDOException;
+use think\Model;
 
 /**
  * 数据库连接基础类
@@ -173,6 +174,26 @@ abstract class PDOConnection extends Connection
         'Error writing data to the connection',
         'Resource deadlock avoided',
         'failed with errno',
+        'child connection forced to terminate due to client_idle_limit',
+        'query_wait_timeout',
+        'reset by peer',
+        'Physical connection is not usable',
+        'TCP Provider: Error code 0x68',
+        'ORA-03114',
+        'Packets out of order. Expected',
+        'Adaptive Server connection failed',
+        'Communication link failure',
+        'connection is no longer usable',
+        'Login timeout expired',
+        'SQLSTATE[HY000] [2002] Connection refused',
+        'running with the --read-only option so it cannot execute this statement',
+        'The connection is broken and recovery is not possible. The connection is marked by the client driver as unrecoverable. No attempt was made to restore the connection.',
+        'SQLSTATE[HY000] [2002] php_network_getaddresses: getaddrinfo failed: Try again',
+        'SQLSTATE[HY000] [2002] php_network_getaddresses: getaddrinfo failed: Name or service not known',
+        'SQLSTATE[HY000]: General error: 7 SSL SYSCALL error: EOF detected',
+        'SQLSTATE[HY000] [2002] Connection timed out',
+        'SSL: Connection timed out',
+        'SQLSTATE[HY000]: General error: 1105 The last transaction was aborted due to Seamless Scaling. Please retry.',
     ];
 
     /**
@@ -584,7 +605,7 @@ abstract class PDOConnection extends Connection
     /**
      * 获取PDO对象
      * @access public
-     * @return \PDO|false
+     * @return PDO|false
      */
     public function getPdo()
     {
@@ -598,12 +619,13 @@ abstract class PDOConnection extends Connection
     /**
      * 执行查询 使用生成器返回数据
      * @access public
-     * @param BaseQuery    $query     查询对象
-     * @param string       $sql       sql指令
-     * @param array        $bind      参数绑定
-     * @param \think\Model $model     模型对象实例
-     * @param array        $condition 查询条件
+     * @param BaseQuery  $query     查询对象
+     * @param string     $sql       sql指令
+     * @param array      $bind      参数绑定
+     * @param Model|null $model     模型对象实例
+     * @param null       $condition 查询条件
      * @return \Generator
+     * @throws DbException
      */
     public function getCursor(BaseQuery $query, string $sql, array $bind = [], $model = null, $condition = null)
     {
@@ -622,12 +644,11 @@ abstract class PDOConnection extends Connection
     /**
      * 执行查询 返回数据集
      * @access public
-     * @param string $sql  sql指令
-     * @param array  $bind 参数绑定
+     * @param string $sql    sql指令
+     * @param array  $bind   参数绑定
      * @param bool   $master 主库读取
      * @return array
-     * @throws BindParamException
-     * @throws \PDOException
+     * @throws DbException
      */
     public function query(string $sql, array $bind = [], bool $master = false): array
     {
@@ -640,8 +661,7 @@ abstract class PDOConnection extends Connection
      * @param string $sql  sql指令
      * @param array  $bind 参数绑定
      * @return int
-     * @throws BindParamException
-     * @throws \PDOException
+     * @throws DbException
      */
     public function execute(string $sql, array $bind = []): int
     {
@@ -651,15 +671,12 @@ abstract class PDOConnection extends Connection
     /**
      * 执行查询 返回数据集
      * @access protected
-     * @param BaseQuery $query 查询对象
-     * @param mixed     $sql   sql指令
-     * @param array     $bind  参数绑定
+     * @param BaseQuery $query  查询对象
+     * @param mixed     $sql    sql指令
+     * @param array     $bind   参数绑定
      * @param bool      $master 主库读取
      * @return array
-     * @throws BindParamException
-     * @throws \PDOException
-     * @throws \Exception
-     * @throws \Throwable
+     * @throws DbException
      */
     protected function pdoQuery(BaseQuery $query, $sql, array $bind = [], bool $master = null): array
     {
@@ -707,6 +724,7 @@ abstract class PDOConnection extends Connection
      * @access public
      * @param BaseQuery $query 查询对象
      * @return \PDOStatement
+     * @throws DbException
      */
     public function pdo(BaseQuery $query): PDOStatement
     {
@@ -725,10 +743,7 @@ abstract class PDOConnection extends Connection
      * @param bool   $master    是否在主服务器读操作
      * @param bool   $procedure 是否为存储过程调用
      * @return PDOStatement
-     * @throws BindParamException
-     * @throws \PDOException
-     * @throws \Exception
-     * @throws \Throwable
+     * @throws DbException
      */
     public function getPDOStatement(string $sql, array $bind = [], bool $master = false, bool $procedure = false): PDOStatement
     {
@@ -762,17 +777,19 @@ abstract class PDOConnection extends Connection
             $this->reConnectTimes = 0;
 
             return $this->PDOStatement;
-        } catch (\Throwable | \Exception $e) {
-            if ($this->reConnectTimes < 4 && $this->isBreak($e)) {
-                ++$this->reConnectTimes;
-                return $this->close()->getPDOStatement($sql, $bind, $master, $procedure);
+        } catch (\PDOException $e) {
+            if ($this->transTimes > 0) {
+                // 事务活动中时不应该进行重试，应直接中断执行，防止造成污染。
+                $this->transTimes = 0;
+                $this->reConnectTimes = 0;
+            } else {
+                if ($this->reConnectTimes < 4 && $this->isBreak($e)) {
+                    ++$this->reConnectTimes;
+                    return $this->close()->getPDOStatement($sql, $bind, $master, $procedure);
+                }
             }
 
-            if ($e instanceof \PDOException) {
-                throw new PDOException($e, $this->config, $this->getLastsql());
-            } else {
-                throw $e;
-            }
+            throw new PDOException($e, $this->config, $this->getLastsql());
         }
     }
 
@@ -784,10 +801,7 @@ abstract class PDOConnection extends Connection
      * @param array     $bind   参数绑定
      * @param bool      $origin 是否原生查询
      * @return int
-     * @throws BindParamException
-     * @throws \PDOException
-     * @throws \Exception
-     * @throws \Throwable
+     * @throws DbException
      */
     protected function pdoExecute(BaseQuery $query, string $sql, array $bind = [], bool $origin = false): int
     {
@@ -819,6 +833,13 @@ abstract class PDOConnection extends Connection
         return $this->numRows;
     }
 
+    /**
+     * @param BaseQuery $query
+     * @param string    $sql
+     * @param array     $bind
+     * @return PDOStatement
+     * @throws DbException
+     */
     protected function queryPDOStatement(BaseQuery $query, string $sql, array $bind = []): PDOStatement
     {
         $options   = $query->getOptions();
@@ -1420,12 +1441,13 @@ abstract class PDOConnection extends Connection
                 );
             }
             $this->reConnectTimes = 0;
-        } catch (\Exception $e) {
-            if ($this->reConnectTimes < 4 && $this->isBreak($e)) {
+        } catch (\PDOException $e) {
+            if ($this->transTimes === 1 && $this->reConnectTimes < 4 && $this->isBreak($e)) {
                 --$this->transTimes;
                 ++$this->reConnectTimes;
                 $this->close()->startTrans();
             } else {
+                $this->transTimes = 0;
                 throw $e;
             }
         }
@@ -1539,6 +1561,7 @@ abstract class PDOConnection extends Connection
         $this->linkWrite = null;
         $this->linkRead  = null;
         $this->links     = [];
+        $this->transTimes = 0;
 
         $this->free();
 

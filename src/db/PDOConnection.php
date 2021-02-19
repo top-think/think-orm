@@ -21,6 +21,10 @@ use think\db\exception\PDOException;
 
 /**
  * 数据库连接基础类
+ * @property PDO[] $links
+ * @property PDO   $linkID
+ * @property PDO   $linkRead
+ * @property PDO   $linkWrite
  */
 abstract class PDOConnection extends Connection
 {

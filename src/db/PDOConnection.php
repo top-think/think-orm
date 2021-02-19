@@ -1431,7 +1431,7 @@ abstract class PDOConnection extends Connection
      * 用于非自动提交状态下面的查询提交
      * @access public
      * @return void
-     * @throws PDOException
+     * @throws \PDOException
      */
     public function commit(): void
     {
@@ -1448,7 +1448,7 @@ abstract class PDOConnection extends Connection
      * 事务回滚
      * @access public
      * @return void
-     * @throws PDOException
+     * @throws \PDOException
      */
     public function rollback(): void
     {

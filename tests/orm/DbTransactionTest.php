@@ -4,7 +4,6 @@ declare(strict_types=1);
 namespace tests\orm;
 
 use PHPUnit\Framework\TestCase;
-use think\db\exception\DbException;
 use think\facade\Db;
 use function tests\mysql_kill_connection;
 use function tests\query_mysql_connection_id;
@@ -112,7 +111,7 @@ SQL
                 'username' => '3-7-b',
             ]);
             Db::table('test_tran_a')->commit();
-        } catch (DbException $exception) {
+        } catch (\Throwable | \Exception $exception) {
             try {
                 Db::table('test_tran_a')->rollback();
             } catch (\Exception $rollbackException) {
@@ -208,7 +207,7 @@ SQL
             Db::table('test_tran_a')->commit();
             // tran 0
             Db::table('test_tran_a')->commit();
-        } catch (DbException | \PDOException $exception) {
+        } catch (\Throwable | \Exception $exception) {
             try {
                 Db::table('test_tran_a')->rollback();
             } catch (\Exception $rollbackException) {

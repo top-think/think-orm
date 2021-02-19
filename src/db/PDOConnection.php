@@ -777,11 +777,13 @@ abstract class PDOConnection extends Connection
             $this->reConnectTimes = 0;
 
             return $this->PDOStatement;
-        } catch (\PDOException $e) {
+        } catch (\Throwable | \Exception $e) {
             if ($this->transTimes > 0) {
                 // 事务活动中时不应该进行重试，应直接中断执行，防止造成污染。
-                $this->transTimes = 0;
-                $this->reConnectTimes = 0;
+                if ($this->isBreak($e)) {
+                    // 尝试对事务计数进行重置
+                    $this->transTimes = 0;
+                }
             } else {
                 if ($this->reConnectTimes < 4 && $this->isBreak($e)) {
                     ++$this->reConnectTimes;
@@ -789,7 +791,11 @@ abstract class PDOConnection extends Connection
                 }
             }
 
-            throw new PDOException($e, $this->config, $this->getLastsql());
+            if ($e instanceof \PDOException) {
+                throw new PDOException($e, $this->config, $this->getLastsql());
+            } else {
+                throw $e;
+            }
         }
     }
 
@@ -1441,13 +1447,16 @@ abstract class PDOConnection extends Connection
                 );
             }
             $this->reConnectTimes = 0;
-        } catch (\PDOException $e) {
+        } catch (\Throwable | \Exception $e) {
             if ($this->transTimes === 1 && $this->reConnectTimes < 4 && $this->isBreak($e)) {
                 --$this->transTimes;
                 ++$this->reConnectTimes;
                 $this->close()->startTrans();
             } else {
-                $this->transTimes = 0;
+                if ($this->isBreak($e)) {
+                    // 尝试对事务计数进行重置
+                    $this->transTimes = 0;
+                }
                 throw $e;
             }
         }

@@ -3,12 +3,14 @@ declare(strict_types=1);
 
 namespace tests\orm;
 
-use PHPUnit\Framework\TestCase;
+use Exception;
+use tests\Base;
 use think\facade\Db;
+use Throwable;
 use function tests\mysql_kill_connection;
 use function tests\query_mysql_connection_id;
 
-class DbTransactionTest extends TestCase
+class DbTransactionTest extends Base
 {
     protected static $testData;
 
@@ -111,18 +113,18 @@ SQL
                 'username' => '3-7-b',
             ]);
             Db::table('test_tran_a')->commit();
-        } catch (\Throwable | \Exception $exception) {
+        } catch (Throwable | Exception $exception) {
             try {
                 Db::table('test_tran_a')->rollback();
-            } catch (\Exception $rollbackException) {
+            } catch (Exception $rollbackException) {
                 // Ignore exception
-                $this->assertMatchesRegularExpression(
+                $this->proxyAssertMatchesRegularExpression(
                     '~(server has gone away)~',
                     $rollbackException->getMessage()
                 );
             }
             // Ignore exception
-            $this->assertMatchesRegularExpression(
+            $this->proxyAssertMatchesRegularExpression(
                 '~(server has gone away)~',
                 $exception->getMessage()
             );
@@ -207,18 +209,18 @@ SQL
             Db::table('test_tran_a')->commit();
             // tran 0
             Db::table('test_tran_a')->commit();
-        } catch (\Throwable | \Exception $exception) {
+        } catch (Throwable | Exception $exception) {
             try {
                 Db::table('test_tran_a')->rollback();
-            } catch (\Exception $rollbackException) {
+            } catch (Exception $rollbackException) {
                 // Ignore exception
-                $this->assertMatchesRegularExpression(
+                $this->proxyAssertMatchesRegularExpression(
                     '~(server has gone away)~',
                     $rollbackException->getMessage()
                 );
             }
             // Ignore exception
-            $this->assertMatchesRegularExpression(
+            $this->proxyAssertMatchesRegularExpression(
                 '~(server has gone away)~',
                 $exception->getMessage()
             );

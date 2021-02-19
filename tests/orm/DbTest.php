@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace tests\orm;
 
-use PHPUnit\Framework\TestCase;
+use tests\Base;
 use think\Collection;
 use think\db\exception\DbException;
 use think\db\Raw;
@@ -16,7 +16,7 @@ use function array_values;
 use function tests\array_column_ex;
 use function tests\array_value_sort;
 
-class DbTest extends TestCase
+class DbTest extends Base
 {
     protected static $testUserData;
 

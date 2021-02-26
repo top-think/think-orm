@@ -64,7 +64,7 @@ SQL
         $this->assertEquals(array_column($users, 'username'), $result);
 
         // 获取某字段唯一
-        $result = Db::table('test_user')->distinct(true)->column('type');
+        $result = Db::table('test_user')->column('DISTINCT type');
         $expected = array_unique(array_column($users, 'type'));
         $this->assertEquals($expected, $result);
 

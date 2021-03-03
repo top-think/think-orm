@@ -64,7 +64,7 @@ SQL
         $this->assertEquals(array_column($users, 'username'), $result);
 
         // 获取某字段唯一
-        $result = Db::table('test_user')->distinct(true)->column('type');
+        $result = Db::table('test_user')->column('DISTINCT type');
         $expected = array_unique(array_column($users, 'type'));
         $this->assertEquals($expected, $result);
 
@@ -146,11 +146,21 @@ SQL
         $result = Db::table('test_user')->whereIn('type', [])->column('*');
         $this->assertEquals([], $result);
 
+        $expected = Collection::make(self::$testUserData)->whereNotIn('type', [1, 3])->values()->toArray();
+        $result = Db::table('test_user')->whereNotIn('type', [1, 3])->column('*');
+        $this->assertEquals($expected, $result);
+
+        $expected = Collection::make(self::$testUserData)->values()->toArray();
+        $result = Db::table('test_user')->whereNotIn('type', [])->column('*');
+        $this->assertEquals($expected, $result);
+
         $this->assertEquals([
             "SELECT * FROM `test_user` WHERE  `type` IN (1,3)",
             "SELECT * FROM `test_user` WHERE  `type` = 1",
             "SELECT * FROM `test_user` WHERE  `type` IN (1,0)",
             "SELECT * FROM `test_user` WHERE  0 = 1",
+            "SELECT * FROM `test_user` WHERE  `type` NOT IN (1,3)",
+            "SELECT * FROM `test_user` WHERE  1 = 1",
         ], $sqlLogs);
     }
 

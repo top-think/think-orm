@@ -547,6 +547,7 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
         // 重新记录原始数据
         $this->origin   = $this->data;
         $this->set      = [];
+        $this->get      = [];
         $this->lazySave = false;
 
         return true;
@@ -709,6 +710,7 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
                 $pk = $this->getPk();
 
                 if (is_string($pk) && (!isset($this->data[$pk]) || '' == $this->data[$pk])) {
+                    unset($this->get[$pk]);
                     $this->data[$pk] = $result;
                 }
             }

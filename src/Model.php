@@ -657,10 +657,10 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
             if (!empty($this->relationWrite)) {
                 $this->autoRelationUpdate();
             }
+            
+            // 更新回调
+            $this->trigger('AfterUpdate');
         });
-
-        // 更新回调
-        $this->trigger('AfterUpdate');
 
         return true;
     }
@@ -719,13 +719,13 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
             if (!empty($this->relationWrite)) {
                 $this->autoRelationInsert();
             }
+            
+            // 标记数据已经存在
+            $this->exists = true;
+
+            // 新增回调
+            $this->trigger('AfterInsert');
         });
-
-        // 标记数据已经存在
-        $this->exists = true;
-
-        // 新增回调
-        $this->trigger('AfterInsert');
 
         return true;
     }

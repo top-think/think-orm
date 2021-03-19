@@ -723,6 +723,7 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
 
         // 标记数据已经存在
         $this->exists = true;
+        $this->origin = $this->data;
 
         // 新增回调
         $this->trigger('AfterInsert');

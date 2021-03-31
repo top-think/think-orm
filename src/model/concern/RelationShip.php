@@ -810,19 +810,20 @@ trait RelationShip
     /**
      * 自动关联数据删除（支持一对一及一对多关联）
      * @access protected
+     * @param  bool $force 强制删除
      * @return void
      */
-    protected function autoRelationDelete(): void
+    protected function autoRelationDelete($force = false): void
     {
         foreach ($this->relationWrite as $key => $name) {
             $name   = is_numeric($key) ? $name : $key;
             $result = $this->getRelation($name, true);
 
             if ($result instanceof Model) {
-                $result->delete();
+                $result->force($force)->delete();
             } elseif ($result instanceof Collection) {
                 foreach ($result as $model) {
-                    $model->delete();
+                    $model->force($force)->delete();
                 }
             }
         }

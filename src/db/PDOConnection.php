@@ -865,7 +865,7 @@ abstract class PDOConnection extends Connection
     public function find(BaseQuery $query): array
     {
         // 事件回调
-        $result = $this->db->trigger('before_find', $query);
+        $result = $this->db->trigger('before_find', $query, $once = true);
 
         if (!$result) {
             // 执行查询
@@ -908,7 +908,7 @@ abstract class PDOConnection extends Connection
      */
     public function select(BaseQuery $query): array
     {
-        $resultSet = $this->db->trigger('before_select', $query);
+        $resultSet = $this->db->trigger('before_select', $query, $once = true);
 
         if (!$resultSet) {
             // 执行查询操作

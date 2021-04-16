@@ -136,7 +136,7 @@ trait RelationShip
     public function relationQuery(array $relations, array $withRelationAttr = []): void
     {
         foreach ($relations as $key => $relation) {
-            $subRelation = '';
+            $subRelation = [];
             $closure     = null;
 
             if ($relation instanceof Closure) {
@@ -161,7 +161,7 @@ trait RelationShip
                 $relationResult->withAttr($withRelationAttr[$relationName]);
             }
 
-            $this->relation[$relation] = $relationResult->getRelation($subRelation, $closure);
+            $this->relation[$relation] = $relationResult->getRelation((array) $subRelation, $closure);
         }
     }
 

@@ -1125,7 +1125,7 @@ abstract class Builder
                 $this->parseTable($query, $options['table']),
                 $this->parseDistinct($query, $options['distinct']),
                 $this->parseExtra($query, $options['extra']),
-                $this->parseField($query, $options['field']),
+                $this->parseField($query, $options['field'] ?? '*'),
                 $this->parseJoin($query, $options['join']),
                 $this->parseWhere($query, $options['where']),
                 $this->parseGroup($query, $options['group']),

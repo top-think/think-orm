@@ -89,7 +89,7 @@ class Mysql extends Builder
                 $this->parsePartition($query, $options['partition']),
                 $this->parseDistinct($query, $options['distinct']),
                 $this->parseExtra($query, $options['extra']),
-                $this->parseField($query, $options['field']),
+                $this->parseField($query, $options['field'] ?? '*'),
                 $this->parseJoin($query, $options['join']),
                 $this->parseWhere($query, $options['where']),
                 $this->parseGroup($query, $options['group']),

@@ -136,7 +136,7 @@ abstract class Builder
         }
 
         if (empty($fields)) {
-            if ('*' == $options['field']) {
+            if (empty($options['field']) || '*' == $options['field']) {
                 $fields = array_keys($bind);
             } else {
                 $fields = $options['field'];
@@ -1187,7 +1187,7 @@ abstract class Builder
         $bind = $query->getFieldsBindType();
 
         // 获取合法的字段
-        if ('*' == $options['field']) {
+        if (empty($options['field']) || '*' == $options['field']) {
             $allowFields = array_keys($bind);
         } else {
             $allowFields = $options['field'];

@@ -577,7 +577,11 @@ class Mongo
         }
 
         foreach ($aggregate as $fun => $field) {
-            $groups[$field . '_' . $fun] = ['$' . $fun => '$' . $field];
+            if(is_numeric($field[1])){
+                $groups[$fun] = ['$' . $field[0] =>$field[1]];  //为了支持 计数等特殊需要
+            }else{
+                $groups[$fun] = ['$' . $field[0] => '$' . $field[1]];
+            }
         }
 
         $pipeline = [

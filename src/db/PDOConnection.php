@@ -690,7 +690,7 @@ abstract class PDOConnection extends Connection
 
             $data = $this->cache->get($key);
 
-            if (null !== $data) {
+            if (null !== $data && false !==$data) {
                 return $data;
             }
         }

@@ -160,7 +160,7 @@ trait SoftDelete
         } elseif ($data instanceof \Closure) {
             call_user_func_array($data, [ & $query]);
             $data = null;
-        } elseif (is_null($data)) {
+        } elseif (is_null($data) ||empty($data) ) {
             return false;
         }
 

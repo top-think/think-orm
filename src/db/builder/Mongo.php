@@ -605,7 +605,7 @@ class Mongo
         }
 
         $command = new Command($cmd);
-        $this->log('group', $cmd);
+        $this->log('aggregate', $cmd);
 
         return $command;
     }

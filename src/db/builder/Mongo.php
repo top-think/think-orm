@@ -579,7 +579,7 @@ class Mongo
 
         foreach ($aggregate as  $field) {
             $fun = $field[2] ?? $field[1];
-            if (is_numeric($field[1])) {
+            if (is_int($field[1])) {
                 $groups[$fun] = ['$' . $field[0] => $field[1]];  //为了支持 计数等特殊需要
             } else {
                 $groups[$fun] = ['$' . $field[0] => '$' . $field[1]];

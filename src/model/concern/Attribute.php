@@ -15,7 +15,7 @@ namespace think\model\concern;
 use InvalidArgumentException;
 use think\db\Raw;
 use think\helper\Str;
-use think\model\contracts\FieldTypeTransform;
+use think\model\contracts\AttrType;
 use think\model\Relation;
 
 /**
@@ -371,7 +371,7 @@ trait Attribute
             }
         } elseif (isset($this->type[$name])) {
             // 类型转换
-            $value = $this->writeTransform($value, $this->type[$name]);
+            $value = $this->writeTransform($name, $value, $this->type[$name]);
         }
 
         // 设置数据对象属性
@@ -442,8 +442,8 @@ trait Attribute
                 break;
             default:
                 if (\class_exists($type)) {
-                    if (\is_subclass_of($type, FieldTypeTransform::class)) {
-                        $value = $type::modelWriteValue($name, $value, $this);
+                    if ($object = $this->resolveTransformClass($type)) {
+                        $object->writeValue($this, $name, $value, $this->data);
                     } elseif (\is_object($value) && \method_exists($value, '__toString')) {
                         // 对象类型
                         $value = $value->__toString();
@@ -623,8 +623,8 @@ trait Attribute
                 break;
             default:
                 if (\class_exists($type)) {
-                    if (\is_subclass_of($type, FieldTypeTransform::class)) {
-                        $value = $type::modelReadValue($name, $value, $this);
+                    if ($object = $this->resolveTransformClass($type)) {
+                        $object->readValue($this, $name, $value, $this->data);
                     } else {
                         // 对象类型
                         $value = new $type($value);
@@ -633,6 +633,30 @@ trait Attribute
         }
 
         return $value;
+    }
+
+    protected function resolveTransformClass(string $type): ?AttrType
+    {
+        if (strpos($type, '::') !== false) {
+            [$type, $method] = \explode('::', $type, 2);
+        }
+        $arguments = [];
+        if (\strpos($type, ':') !== false) {
+            $segments = \explode(':', $type, 2);
+            $type = $segments[0];
+            $arguments = \explode(',', $segments[1]);
+        }
+        if (!\is_subclass_of($type, AttrType::class)) {
+            return null;
+        }
+        if (isset($method)) {
+            return new $type::$method($arguments);
+        }
+        if (\strpos($type, ':') !== false) {
+            return new $type(...$arguments);
+        } else {
+            return new $type();
+        }
     }
 
     /**

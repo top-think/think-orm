@@ -127,11 +127,12 @@ class Mongo extends BaseQuery
      *
      * @param  array $aggregate 聚合指令, 可以聚合多个参数, 如 [ ['sum','field1'，as1], ['sum','field2'，'as1'], ['avg','field2'，‘as3’],  ['sum',1，'count']]
      * @param  array $groupBy 类似mysql里面的group字段, 可以传入多个字段, 如 ['field_a', 'field_b', 'field_c']
+     * @param  array $project 字段过滤 ['new_time_stamp' => ['$substr' => ['$playTime', 11, 2]], "_id" => 0, 'playTimes' => 1]]
      * @return array 查询结果
      */
-    public function multiAggregate(array $aggregate, array $groupBy): array
+    public function multiAggregate(array $aggregate, array $groupBy=[],array $project=[]): array
     {
-        $result = $this->cmd('multiAggregate', [$aggregate, $groupBy]);
+        $result = $this->cmd('multiAggregate', [$aggregate, $groupBy,$project]);
 
         foreach ($result as &$row) {
             if (isset($row['_id']) && !empty($row['_id'])) {

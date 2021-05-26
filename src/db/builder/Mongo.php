@@ -569,7 +569,7 @@ class Mongo
     {
         $options = $query->getOptions();
 
-        [$aggregate, $groupBy] = $extra;
+        [$aggregate, $groupBy, $project] = $extra;
 
         $groups = ['_id' => []];
 
@@ -586,10 +586,15 @@ class Mongo
             }
         }
 
-        $pipeline = [
-            ['$match' => (object)$this->parseWhere($query, $options['where'])],
-            ['$group' => $groups],
-        ];
+//        $pipeline = [
+//            ['$match' => (object)$this->parseWhere($query, $options['where'])],
+//            ['$group' => $groups],
+//        ];
+        $pipeline = [['$match' => (object)$this->parseWhere($query, $options['where'])]];
+        if($project)
+            $pipeline[] = ['$project' => $project];
+        $pipeline[] = ['$group' => $groups];
+
 
         $cmd = [
             'aggregate' => $options['table'],

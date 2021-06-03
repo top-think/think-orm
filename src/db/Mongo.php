@@ -121,7 +121,18 @@ class Mongo extends BaseQuery
 
         return $value;
     }
+    /**
+     * mongo子元素分组查询
+     * @param array $match 分组数组（字段）条件
+     * @return array
+     */
+    public function aggregateSelect( array $match = [] ): array
+    {
 
+        $result = $this->cmd('aggregateSelect', [$match]);
+
+        return $result[0]['data']??[];
+    }
     /**
      * 多聚合操作
      *

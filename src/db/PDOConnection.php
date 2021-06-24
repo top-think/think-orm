@@ -1244,7 +1244,13 @@ abstract class PDOConnection extends Connection
 
             $result = \array_column($resultSet, $column, $key);
         } elseif ($key) {
-            $result = \array_column($resultSet, null, $key);
+            $resultSet = \array_column($resultSet, null, $key);
+            if ('*' !== $column && \in_array($key, $field) && !\in_array($key, $column)) {
+                \array_walk($resultSet, function(&$item) use($key) {
+                    unset($item[$key]);
+                });
+            }
+            $result = $resultSet;
         } else {
             $result = $resultSet;
         }

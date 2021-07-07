@@ -15,6 +15,7 @@ namespace think\model\concern;
 use InvalidArgumentException;
 use think\db\Raw;
 use think\helper\Str;
+use think\model\contracts\AttrType;
 use think\model\Relation;
 
 /**
@@ -370,7 +371,7 @@ trait Attribute
             }
         } elseif (isset($this->type[$name])) {
             // 类型转换
-            $value = $this->writeTransform($value, $this->type[$name]);
+            $value = $this->writeTransform($name, $value, $this->type[$name]);
         }
 
         // 设置数据对象属性
@@ -381,14 +382,15 @@ trait Attribute
     /**
      * 数据写入 类型转换
      * @access protected
-     * @param  mixed        $value 值
-     * @param  string|array $type  要转换的类型
+     * @param string       $name
+     * @param mixed        $value 值
+     * @param string|array $type  要转换的类型
      * @return mixed
      */
-    protected function writeTransform($value, $type)
+    protected function writeTransform($name, $value, $type)
     {
-        if (is_null($value)) {
-            return;
+        if (null === $value) {
+            return null;
         }
 
         if ($value instanceof Raw) {
@@ -439,9 +441,13 @@ trait Attribute
                 $value = serialize($value);
                 break;
             default:
-                if (is_object($value) && false !== strpos($type, '\\') && method_exists($value, '__toString')) {
-                    // 对象类型
-                    $value = $value->__toString();
+                if (\class_exists($type)) {
+                    if ($object = $this->resolveTransformClass($type)) {
+                        $object->writeValue($this, $name, $value, $this->data);
+                    } elseif (\is_object($value) && \method_exists($value, '__toString')) {
+                        // 对象类型
+                        $value = $value->__toString();
+                    }
                 }
         }
 
@@ -506,7 +512,7 @@ trait Attribute
             $value = $this->$method($value, $this->data);
         } elseif (isset($this->type[$fieldName])) {
             // 类型转换
-            $value = $this->readTransform($value, $this->type[$fieldName]);
+            $value = $this->readTransform($fieldName, $value, $this->type[$fieldName]);
         } elseif ($this->autoWriteTimestamp && in_array($fieldName, [$this->createTime, $this->updateTime])) {
             $value = $this->getTimestampValue($value);
         } elseif ($relation) {
@@ -556,14 +562,15 @@ trait Attribute
     /**
      * 数据读取 类型转换
      * @access protected
-     * @param  mixed        $value 值
-     * @param  string|array $type  要转换的类型
+     * @param string       $name
+     * @param mixed        $value 值
+     * @param string|array $type  要转换的类型
      * @return mixed
      */
-    protected function readTransform($value, $type)
+    protected function readTransform($name, $value, $type)
     {
-        if (is_null($value)) {
-            return;
+        if (null === $value) {
+            return null;
         }
 
         if (is_array($type)) {
@@ -615,13 +622,41 @@ trait Attribute
                 }
                 break;
             default:
-                if (false !== strpos($type, '\\')) {
-                    // 对象类型
-                    $value = new $type($value);
+                if (\class_exists($type)) {
+                    if ($object = $this->resolveTransformClass($type)) {
+                        $object->readValue($this, $name, $value, $this->data);
+                    } else {
+                        // 对象类型
+                        $value = new $type($value);
+                    }
                 }
         }
 
         return $value;
+    }
+
+    protected function resolveTransformClass(string $type): ?AttrType
+    {
+        if (strpos($type, '::') !== false) {
+            [$type, $method] = \explode('::', $type, 2);
+        }
+        $arguments = [];
+        if (\strpos($type, ':') !== false) {
+            $segments = \explode(':', $type, 2);
+            $type = $segments[0];
+            $arguments = \explode(',', $segments[1]);
+        }
+        if (!\is_subclass_of($type, AttrType::class)) {
+            return null;
+        }
+        if (isset($method)) {
+            return new $type::$method($arguments);
+        }
+        if (\strpos($type, ':') !== false) {
+            return new $type(...$arguments);
+        } else {
+            return new $type();
+        }
     }
 
     /**

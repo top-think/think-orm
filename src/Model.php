@@ -34,6 +34,7 @@ use think\db\BaseQuery as Query;
  * @method void onAfterDelete(Model $model) static after_delete事件定义
  * @method void onBeforeRestore(Model $model) static before_restore事件定义
  * @method void onAfterRestore(Model $model) static after_restore事件定义
+ * @method self extra(string $string) extra方法定义
  */
 abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonable
 {

@@ -1158,7 +1158,7 @@ abstract class PDOConnection extends Connection
 
         $field = $aggregate . '(' . (!empty($distinct) ? 'DISTINCT ' : '') . $this->builder->parseKey($query, $field, true) . ') AS think_' . strtolower($aggregate);
 
-        $result = $this->value($query, $field, 0, false);
+        $result = $this->value($query, $field, 0);
 
         return $force ? (float) $result : $result;
     }
@@ -1448,7 +1448,7 @@ abstract class PDOConnection extends Connection
             }
             $this->reConnectTimes = 0;
         } catch (\Throwable | \Exception $e) {
-            if ($this->transTimes === 1 && $this->reConnectTimes < 4 && $this->isBreak($e)) {
+            if (1 === $this->transTimes && $this->reConnectTimes < 4 && $this->isBreak($e)) {
                 --$this->transTimes;
                 ++$this->reConnectTimes;
                 $this->close()->startTrans();
@@ -1566,10 +1566,10 @@ abstract class PDOConnection extends Connection
      */
     public function close()
     {
-        $this->linkID    = null;
-        $this->linkWrite = null;
-        $this->linkRead  = null;
-        $this->links     = [];
+        $this->linkID     = null;
+        $this->linkWrite  = null;
+        $this->linkRead   = null;
+        $this->links      = [];
         $this->transTimes = 0;
 
         $this->free();

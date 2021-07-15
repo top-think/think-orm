@@ -59,11 +59,7 @@ trait Virtual
         // 写入回调
         $this->trigger('AfterWrite');
 
-        // 重新记录原始数据
-        $this->origin   = $this->data;
-        $this->get      = [];
-        $this->lazySave = false;
-        $this->exists   = true;
+        $this->exists(true);
 
         return true;
     }
@@ -75,7 +71,7 @@ trait Virtual
      */
     public function delete(): bool
     {
-        if (!$this->exists || $this->isEmpty() || false === $this->trigger('BeforeDelete')) {
+        if (!$this->isExists() || $this->isEmpty() || false === $this->trigger('BeforeDelete')) {
             return false;
         }
 
@@ -86,8 +82,7 @@ trait Virtual
 
         $this->trigger('AfterDelete');
 
-        $this->exists   = false;
-        $this->lazySave = false;
+        $this->exists(false);
 
         return true;
     }

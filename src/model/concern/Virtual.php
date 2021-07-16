@@ -56,35 +56,12 @@ trait Virtual
             return false;
         }
 
-        if ($this->autoWriteTimestamp) {
-            $this->appendTimestamp($data);
-        }
-
         // 写入回调
         $this->trigger('AfterWrite');
 
         $this->exists(true);
 
         return true;
-    }
-
-    /**
-     * 追加时间字段数据
-     * @access private
-     * @param array  $data     数据
-     * @return void
-     */
-    private function appendTimestamp(array $data)
-    {
-        if ($this->updateTime && !isset($data[$this->updateTime])) {
-            $updateTime = $this->autoWriteTimestamp();
-            $this->set($this->updateTime, $this->getTimestampValue($updateTime));
-        }
-
-        if (!$this->isExists() && $this->createTime && !isset($data[$this->createTime])) {
-            $createTime = $this->autoWriteTimestamp();
-            $this->set($this->createTime, $this->getTimestampValue($createTime));
-        }
     }
 
     /**

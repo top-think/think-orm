@@ -389,16 +389,17 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
     {
         if (!isset(static::$initialized[static::class])) {
             static::$initialized[static::class] = true;
-            static::init();
+            static::init($this);
         }
     }
 
     /**
      * 初始化处理
      * @access protected
+     * @param $model 模型当前
      * @return void
      */
-    protected static function init()
+    protected static function init($model)
     {
     }
 

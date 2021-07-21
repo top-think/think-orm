@@ -16,6 +16,7 @@ use Closure;
 use PDO;
 use PDOStatement;
 use think\db\exception\BindParamException;
+use think\db\exception\DbEventException;
 use think\db\exception\DbException;
 use think\db\exception\PDOException;
 use think\Model;
@@ -865,7 +866,9 @@ abstract class PDOConnection extends Connection
     public function find(BaseQuery $query): array
     {
         // 事件回调
-        if (false === $this->db->trigger('before_find', $query)) {
+        try {
+            $this->db->trigger('before_find', $query);
+        } catch (DbEventException $e) {
             return [];
         }
 
@@ -906,7 +909,9 @@ abstract class PDOConnection extends Connection
      */
     public function select(BaseQuery $query): array
     {
-        if (false === $this->db->trigger('before_select', $query)) {
+        try {
+            $this->db->trigger('before_select', $query);
+        } catch (DbEventException $e) {
             return [];
         }
 

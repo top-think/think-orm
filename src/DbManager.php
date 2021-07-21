@@ -17,6 +17,7 @@ use Psr\Log\LoggerInterface;
 use Psr\SimpleCache\CacheInterface;
 use think\db\BaseQuery;
 use think\db\ConnectionInterface;
+use think\db\exception\DbEventException;
 use think\db\Query;
 use think\db\Raw;
 
@@ -362,10 +363,14 @@ class DbManager
      */
     public function trigger(string $event, $params = null)
     {
-        if (isset($this->event[$event])) {
-            foreach ($this->event[$event] as $callback) {
-                call_user_func_array($callback, [$this]);
+        try {
+            if (isset($this->event[$event])) {
+                foreach ($this->event[$event] as $callback) {
+                    call_user_func_array($callback, [$params]);
+                }
             }
+        } catch (DbEventException $e) {
+            return false;
         }
     }
 

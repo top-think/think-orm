@@ -865,18 +865,16 @@ abstract class PDOConnection extends Connection
     public function find(BaseQuery $query): array
     {
         // 事件回调
-        $result = $this->db->trigger('before_find', $query);
-
-        if (!$result) {
-            // 执行查询
-            $resultSet = $this->pdoQuery($query, function ($query) {
-                return $this->builder->select($query, true);
-            });
-
-            $result = $resultSet[0] ?? [];
+        if (false === $this->db->trigger('before_find', $query)) {
+            return [];
         }
 
-        return $result;
+        // 执行查询
+        $resultSet = $this->pdoQuery($query, function ($query) {
+            return $this->builder->select($query, true);
+        });
+
+        return $resultSet[0] ?? [];
     }
 
     /**
@@ -908,16 +906,14 @@ abstract class PDOConnection extends Connection
      */
     public function select(BaseQuery $query): array
     {
-        $resultSet = $this->db->trigger('before_select', $query);
-
-        if (!$resultSet) {
-            // 执行查询操作
-            $resultSet = $this->pdoQuery($query, function ($query) {
-                return $this->builder->select($query);
-            });
+        if (false === $this->db->trigger('before_select', $query)) {
+            return [];
         }
 
-        return $resultSet;
+        // 执行查询操作
+        return $this->pdoQuery($query, function ($query) {
+            return $this->builder->select($query);
+        });
     }
 
     /**

@@ -755,7 +755,7 @@ abstract class Builder
         } elseif ($value instanceof Raw) {
             $value = $this->parseRaw($query, $value);
         } else {
-            $value = array_unique(is_array($value) ? $value : explode(',', $value));
+            $value = array_unique(is_array($value) ? $value : explode(',', (string) $value));
             if (count($value) === 0) {
                 return 'IN' == $exp ? '0 = 1' : '1 = 1';
             }
@@ -969,8 +969,8 @@ abstract class Builder
         $sort = in_array($sort, ['ASC', 'DESC'], true) ? ' ' . $sort : '';
         $bind = $query->getFieldsBindType();
 
-        foreach ($val as $item) {
-            $val[] = $this->parseDataBind($query, $key, $item, $bind);
+        foreach ($val as $k => $item) {
+            $val[$k] = $this->parseDataBind($query, $key, $item, $bind);
         }
 
         return 'field(' . $this->parseKey($query, $key, true) . ',' . implode(',', $val) . ')' . $sort;

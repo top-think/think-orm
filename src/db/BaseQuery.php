@@ -741,7 +741,7 @@ abstract class BaseQuery
 
         return [
             'data'   => $result,
-            'lastId' => $last[$key],
+            'lastId' => $last ? $last[$key] : null,
         ];
     }
 

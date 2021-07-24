@@ -613,7 +613,7 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
         if ($this->autoWriteTimestamp && $this->updateTime) {
             // 自动写入更新时间
             $data[$this->updateTime]       = $this->autoWriteTimestamp();
-            $this->data[$this->updateTime] = $this->getTimestampValue($data[$this->updateTime]);
+            $this->data[$this->updateTime] = $data[$this->updateTime];
         }
 
         // 检查允许字段
@@ -678,12 +678,12 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
         if ($this->autoWriteTimestamp) {
             if ($this->createTime && !isset($data[$this->createTime])) {
                 $data[$this->createTime]       = $this->autoWriteTimestamp();
-                $this->data[$this->createTime] = $this->getTimestampValue($data[$this->createTime]);
+                $this->data[$this->createTime] = $data[$this->createTime];
             }
 
             if ($this->updateTime && !isset($data[$this->updateTime])) {
                 $data[$this->updateTime]       = $this->autoWriteTimestamp();
-                $this->data[$this->updateTime] = $this->getTimestampValue($data[$this->updateTime]);
+                $this->data[$this->updateTime] = $data[$this->updateTime];
             }
         }
 

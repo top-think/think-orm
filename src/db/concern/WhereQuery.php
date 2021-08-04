@@ -49,7 +49,7 @@ trait WhereQuery
      */
     protected function parseQueryWhere(BaseQuery $query): void
     {
-        $this->options['where'] = $query->getOptions('where');
+        $this->options['where'] = $query->getOptions('where') ?? [];
 
         if ($query->getOptions('via')) {
             $via = $query->getOptions('via');

@@ -195,30 +195,6 @@ abstract class Relation
     }
 
     /**
-     * 更新数据
-     * @access public
-     * @param  array $data 更新数据
-     * @return integer
-     */
-    public function update(array $data = []): int
-    {
-        return $this->query->update($data);
-    }
-
-    /**
-     * 删除记录
-     * @access public
-     * @param  mixed $data 表达式 true 表示强制删除
-     * @return int
-     * @throws Exception
-     * @throws PDOException
-     */
-    public function delete($data = null): int
-    {
-        return $this->query->delete($data);
-    }
-
-    /**
      * 限制关联数据的数量
      * @access public
      * @param  int $limit 关联数量限制

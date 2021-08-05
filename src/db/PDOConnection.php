@@ -1756,12 +1756,63 @@ abstract class PDOConnection extends Connection
     }
 
     /**
+     * 执行数据库Xa事务
+     * @access public
+     * @param  callable $callback 数据操作方法回调
+     * @param  array    $dbs      多个查询对象或者连接对象
+     * @return mixed
+     * @throws PDOException
+     * @throws \Exception
+     * @throws \Throwable
+     */
+    public function transactionXa(callable $callback, array $dbs = [])
+    {
+        $xid = uniqid('xa');
+
+        if (empty($dbs)) {
+            $dbs[] = $this;
+        }
+
+        foreach ($dbs as $key => $db) {
+            if ($db instanceof BaseQuery) {
+                $db = $db->getConnection();
+
+                $dbs[$key] = $db;
+            }
+
+            $db->startTransXa($xid);
+        }
+
+        try {
+            $result = null;
+            if (is_callable($callback)) {
+                $result = $callback($this);
+            }
+
+            foreach ($dbs as $db) {
+                $db->prepareXa($xid);
+            }
+
+            foreach ($dbs as $db) {
+                $db->commitXa($xid);
+            }
+
+            return $result;
+        } catch (\Exception | \Throwable $e) {
+            foreach ($dbs as $db) {
+                $db->rollbackXa($xid);
+            }
+            throw $e;
+        }
+    }
+
+    /**
      * 启动XA事务
      * @access public
      * @param  string $xid XA事务id
      * @return void
      */
-    public function startTransXa(string $xid)
+    public function startTransXa(string $xid): void
     {}
 
     /**
@@ -1770,7 +1821,7 @@ abstract class PDOConnection extends Connection
      * @param  string $xid XA事务id
      * @return void
      */
-    public function prepareXa(string $xid)
+    public function prepareXa(string $xid): void
     {}
 
     /**
@@ -1779,7 +1830,7 @@ abstract class PDOConnection extends Connection
      * @param  string $xid XA事务id
      * @return void
      */
-    public function commitXa(string $xid)
+    public function commitXa(string $xid): void
     {}
 
     /**
@@ -1788,6 +1839,6 @@ abstract class PDOConnection extends Connection
      * @param  string $xid XA事务id
      * @return void
      */
-    public function rollbackXa(string $xid)
+    public function rollbackXa(string $xid): void
     {}
 }

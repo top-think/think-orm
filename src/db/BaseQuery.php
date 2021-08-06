@@ -621,14 +621,15 @@ abstract class BaseQuery
 
             $bind    = $this->bind;
             $total   = $this->count();
-            
-            if (!empty($this->model)) {
-                $emptyCollection = new \think\model\Collection([]);
+            if ($total > 0) {
+                $results =  $this->options($options)->bind($bind)->page($page, $listRows)->select();
             } else {
-                $emptyCollection = new \think\Collection([]);
+                if (!empty($this->model)) {
+                    $results = new \think\model\Collection([]);
+                } else {
+                    $results = new \think\Collection([]);
+                }
             }
-
-            $results = $total > 0 ? $this->options($options)->bind($bind)->page($page, $listRows)->select() :  $emptyCollection;
         } elseif ($simple) {
             $results = $this->limit(($page - 1) * $listRows, $listRows + 1)->select();
             $total   = null;

@@ -866,8 +866,7 @@ abstract class PDOConnection extends Connection
     {
         // 事件回调
         $result = $this->db->trigger('before_find', $query);
-        $result = $result[0] ?? [];
-        
+
         if (!$result) {
             // 执行查询
             $resultSet = $this->pdoQuery($query, function ($query) {

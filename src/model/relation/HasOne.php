@@ -181,7 +181,8 @@ class HasOne extends OneToOne
 
         $fields     = $this->getRelationQueryFields($fields, $model);
         $softDelete = $this->query->getOptions('soft_delete');
-        $query      = $query ? $query->alias($model) : $this->parent->db()->alias($model);
+        $query      = $query ?: $this->parent->db();
+        $query->alias($model);
 
         return $query->field($fields)
             ->join([$table => $relation], $model . '.' . $this->localKey . '=' . $relation . '.' . $this->foreignKey, $joinType ?: $this->joinType)

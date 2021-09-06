@@ -73,9 +73,10 @@ trait ResultOperation
      * 处理数据集
      * @access public
      * @param array $resultSet 数据集
+     * @param bool  $toCollection 是否转为对象
      * @return void
      */
-    protected function resultSet(array &$resultSet): void
+    protected function resultSet(array &$resultSet, bool $toCollection = true): void
     {
         if (!empty($this->options['json'])) {
             foreach ($resultSet as &$result) {
@@ -96,7 +97,9 @@ trait ResultOperation
         }
 
         // 返回Collection对象
-        $resultSet = new Collection($resultSet);
+        if ($toCollection) {
+            $resultSet = new Collection($resultSet);
+        }
     }
 
     /**

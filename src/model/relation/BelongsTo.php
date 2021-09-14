@@ -73,6 +73,8 @@ class BelongsTo extends OneToOne
             }
 
             $relationModel->setParent(clone $this->parent);
+        } else {
+            $relationModel = $this->getDefaultModel();
         }
 
         return $relationModel;
@@ -227,7 +229,7 @@ class BelongsTo extends OneToOne
             foreach ($resultSet as $result) {
                 // 关联模型
                 if (!isset($data[$result->$foreignKey])) {
-                    $relationModel = null;
+                    $relationModel = $this->getDefaultModel();
                 } else {
                     $relationModel = $data[$result->$foreignKey];
                     $relationModel->setParent(clone $result);
@@ -268,7 +270,7 @@ class BelongsTo extends OneToOne
 
         // 关联模型
         if (!isset($data[$result->$foreignKey])) {
-            $relationModel = null;
+            $relationModel = $this->getDefaultModel();
         } else {
             $relationModel = $data[$result->$foreignKey];
             $relationModel->setParent(clone $result);

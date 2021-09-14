@@ -86,6 +86,12 @@ abstract class Relation
     protected $withoutField;
 
     /**
+     * 默认数据
+     * @var mixed
+     */
+    protected $default;
+
+    /**
      * 获取关联的所属模型
      * @access public
      * @return Model
@@ -232,6 +238,38 @@ abstract class Relation
 
         $this->withoutField = $field;
         return $this;
+    }
+
+    /**
+     * 设置关联数据不存在的时候默认值
+     * @access public
+     * @param  mixed $data 默认值
+     * @return $this
+     */
+    public function withDefault($data = null)
+    {
+        $this->default = $data;
+        return $this;
+    }
+
+    /**
+     * 获取关联数据默认值
+     * @access protected
+     * @return mixed
+     */
+    protected function getDefaultModel()
+    {
+        if (is_array($this->default)) {
+            $model = (new $this->model)->data($this->default);
+        } elseif ($this->default instanceof Closure) {
+            $closure = $this->default;
+            $model   = new $this->model;
+            $closure($model);
+        } else {
+            $model = $this->default;
+        }
+
+        return $model;
     }
 
     /**

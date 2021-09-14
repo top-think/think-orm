@@ -72,6 +72,8 @@ class HasOne extends OneToOne
             }
 
             $relationModel->setParent(clone $this->parent);
+        } else {
+            $relationModel = $this->getDefaultModel();
         }
 
         return $relationModel;
@@ -226,7 +228,7 @@ class HasOne extends OneToOne
             foreach ($resultSet as $result) {
                 // 关联模型
                 if (!isset($data[$result->$localKey])) {
-                    $relationModel = null;
+                    $relationModel = $this->getDefaultModel();
                 } else {
                     $relationModel = $data[$result->$localKey];
                     $relationModel->setParent(clone $result);
@@ -267,7 +269,7 @@ class HasOne extends OneToOne
 
         // 关联模型
         if (!isset($data[$result->$localKey])) {
-            $relationModel = null;
+            $relationModel = $this->getDefaultModel();
         } else {
             $relationModel = $data[$result->$localKey];
             $relationModel->setParent(clone $result);

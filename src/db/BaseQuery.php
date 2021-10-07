@@ -535,7 +535,17 @@ abstract class BaseQuery
 
         return $this;
     }
-
+    /**
+     * 指定group查询
+     * @access public
+     * @param  string|array $group GROUP
+     * @return $this
+     */
+    public function group($group)
+    {
+        $this->options['group'] = $group;
+        return $this;
+    }
     /**
      * 指定排序 order('id','desc') 或者 order(['id'=>'desc','create_time'=>'desc'])
      * @access public

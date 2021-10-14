@@ -295,8 +295,8 @@ class HasMany extends Relation
     {
         $table = $this->query->getTable();
 
-        $model    = class_basename($this->parent);
-        $relation = class_basename($this->model);
+        $model    = $this->parent->db()->getTable();
+        $relation = $table;
 
         if ('*' != $id) {
             $id = $relation . '.' . (new $this->model)->getPk();
@@ -326,8 +326,8 @@ class HasMany extends Relation
     public function hasWhere($where = [], $fields = null, string $joinType = '', Query $query = null): Query
     {
         $table    = $this->query->getTable();
-        $model    = class_basename($this->parent);
-        $relation = class_basename($this->model);
+        $model    = $this->parent->db()->getTable();
+        $relation = $table;
 
         if (is_array($where)) {
             $this->getQueryWhere($where, $relation);

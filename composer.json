@@ -1,6 +1,6 @@
 {
-    "name": "topthink/think-orm",
-    "description": "think orm",
+    "name": "nandiao/think-orm",
+    "description": "think orm,nandiao fork修改版",
     "keywords": [
         "orm",
         "database"

@@ -278,7 +278,9 @@ abstract class BaseQuery
     public function column($field, string $key = ''): array
     {
         $result = $this->connection->column($this, $field, $key);
-        $this->resultSet($result, false);
+        if (count($result) != count($result, 1)) {
+            $this->resultSet($result, false);
+        }
         return $result;
     }
 

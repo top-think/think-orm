@@ -121,6 +121,29 @@ class BelongsToMany extends Relation
     }
 
     /**
+     * 解析中间表数据
+     * @access protected
+     * @param  Model $model
+     */
+    protected function getPivotData(Model $model)
+    {
+        $pivot = [];
+
+        foreach ($model->getData() as $key => $val) {
+            if (strpos($key, '__')) {
+                [$name, $attr] = explode('__', $key, 2);
+
+                if ('pivot' == $name) {
+                    $pivot[$attr] = $val;
+                    unset($model->$key);
+                }
+            }
+        }
+
+        return $pivot;
+    }
+
+    /**
      * 合成中间表模型
      * @access protected
      * @param  array|Collection|Paginator $models
@@ -128,18 +151,7 @@ class BelongsToMany extends Relation
     protected function hydratePivot(iterable $models)
     {
         foreach ($models as $model) {
-            $pivot = [];
-
-            foreach ($model->getData() as $key => $val) {
-                if (strpos($key, '__')) {
-                    [$name, $attr] = explode('__', $key, 2);
-
-                    if ('pivot' == $name) {
-                        $pivot[$attr] = $val;
-                        unset($model->$key);
-                    }
-                }
-            }
+            $pivot = $this->getPivotData($model);
 
             $model->setRelation($this->pivotDataName, $this->newPivot($pivot));
         }
@@ -163,55 +175,6 @@ class BelongsToMany extends Relation
             ->setParent(clone $this->parent);
 
         $this->hydratePivot($result);
-
-        return $result;
-    }
-
-    /**
-     * 重载select方法
-     * @access public
-     * @param  mixed $data
-     * @return Collection
-     */
-    public function select($data = null): Collection
-    {
-        $this->baseQuery();
-        $result = $this->query->select($data);
-        $this->hydratePivot($result);
-
-        return $result;
-    }
-
-    /**
-     * 重载paginate方法
-     * @access public
-     * @param  int|array $listRows
-     * @param  int|bool  $simple
-     * @return Paginator
-     */
-    public function paginate($listRows = null, $simple = false): Paginator
-    {
-        $this->baseQuery();
-        $result = $this->query->paginate($listRows, $simple);
-        $this->hydratePivot($result);
-
-        return $result;
-    }
-
-    /**
-     * 重载find方法
-     * @access public
-     * @param  mixed $data
-     * @return Model
-     */
-    public function find($data = null)
-    {
-        $this->baseQuery();
-        $result = $this->query->find($data);
-
-        if ($result && !$result->isEmpty()) {
-            $this->hydratePivot([$result]);
-        }
 
         return $result;
     }
@@ -672,6 +635,11 @@ class BelongsToMany extends Relation
         if (empty($this->baseQuery)) {
             $foreignKey = $this->foreignKey;
             $localKey   = $this->localKey;
+
+            $this->model->filter(function ($result, $options) {
+                $pivot = $this->getPivotData($result);
+                $result->setRelation($this->pivotDataName, $this->newPivot($pivot));
+            });
 
             // 关联查询
             if (null === $this->parent->getKey()) {

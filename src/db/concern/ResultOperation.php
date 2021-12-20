@@ -75,6 +75,8 @@ trait ResultOperation
      */
     protected function result(array &$result): void
     {
+        $this->jsonResult($result, $this->options['json'], true);
+
         foreach ($this->options['filter'] as $filter) {
             call_user_func($filter, $result);
         }

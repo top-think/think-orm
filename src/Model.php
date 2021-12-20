@@ -244,11 +244,6 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
         }
 
         $this->filter(function ($result, $options) {
-            // JSON 数据处理
-            if (!empty($options['json'])) {
-                $this->jsonResult($result, $options['json'], $options['json_assoc'], $options['with_relation_attr']);
-            }
-
             // 动态获取器
             if (!empty($options['with_attr'])) {
                 $result->withAttribute($options['with_attr']);

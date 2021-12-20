@@ -445,7 +445,7 @@ trait ModelRelationQuery
         $withRelationAttr = $this->getWithRelationAttr();
         foreach ($resultSet as $key => &$result) {
             // 数据转换为模型对象
-            $this->resultToModel($result, $this->options, true, $withRelationAttr);
+            $this->resultToModel($result, $this->options, true);
         }
 
         if (!empty($this->options['with'])) {
@@ -495,12 +495,16 @@ trait ModelRelationQuery
      * @param array $result           查询数据
      * @param array $options          查询参数
      * @param bool  $resultSet        是否为数据集查询
-     * @param array $withRelationAttr 关联字段获取器
      * @return void
      */
-    protected function resultToModel(array &$result, array $options = [], bool $resultSet = false, array $withRelationAttr = []): void
+    protected function resultToModel(array &$result, array $options = [], bool $resultSet = false): void
     {
         $options['with_relation_attr'] = $this->getWithRelationAttr();
+
+        // JSON 数据处理
+        if (!empty($options['json'])) {
+            $this->jsonResult($result, $options['json'], $options['json_assoc'], $options['with_relation_attr']);
+        }
 
         $result = $this->model->newInstance($result, $resultSet ? null : $this->getModelUpdateCondition($options), $options);
     }

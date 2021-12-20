@@ -869,10 +869,6 @@ abstract class BaseQuery
     {
         $this->options['json']       = $json;
         $this->options['json_assoc'] = $assoc;
-
-        return $this->filter(function (&$result) use ($json) {
-            $this->jsonResult($result, $json, true);
-        }, 'json');
     }
 
     /**

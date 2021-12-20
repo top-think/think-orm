@@ -137,7 +137,7 @@ abstract class BaseQuery
             $query->name($this->name);
         }
 
-        if (isset($this->options['json'])) {
+        if (!empty($this->options['json'])) {
             $query->json($this->options['json'], $this->options['json_assoc']);
         }
 
@@ -1179,7 +1179,7 @@ abstract class BaseQuery
             $this->parseView($options);
         }
 
-        foreach (['data', 'order', 'join', 'union', 'filter'] as $name) {
+        foreach (['data', 'order', 'join', 'union', 'filter', 'json'] as $name) {
             if (!isset($options[$name])) {
                 $options[$name] = [];
             }

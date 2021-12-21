@@ -218,7 +218,7 @@ abstract class Relation
      * @param  array|string $field 关联字段限制
      * @return $this
      */
-    public function withField(array $field)
+    public function withField($field)
     {
         if (is_string($field)) {
             $field = array_map('trim', explode(',', $field));

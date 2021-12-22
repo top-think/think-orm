@@ -485,7 +485,7 @@ trait ModelRelationQuery
         }
 
         foreach ($this->options['filter'] as $filter) {
-            call_user_func($filter, $result);
+            $result = call_user_func($filter, $result);
         }
 
         $result = $this->model->newInstance($result, $resultSet ? null : $this->getModelUpdateCondition($options), $options);

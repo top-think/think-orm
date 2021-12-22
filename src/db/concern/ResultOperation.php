@@ -80,7 +80,7 @@ trait ResultOperation
         }
 
         foreach ($this->options['filter'] as $filter) {
-            call_user_func($filter, $result);
+            $result = call_user_func($filter, $result);
         }
 
         if (!empty($this->options['visible'])) {

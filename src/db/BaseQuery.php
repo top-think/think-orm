@@ -1127,7 +1127,7 @@ abstract class BaseQuery
      * 查找单条记录
      * @access public
      * @param mixed $data 查询数据
-     * @return array|Model|null|static
+     * @return array|Model|null|static|mixed
      * @throws Exception
      * @throws ModelNotFoundException
      * @throws DataNotFoundException

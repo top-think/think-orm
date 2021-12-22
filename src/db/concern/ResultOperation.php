@@ -149,7 +149,7 @@ trait ResultOperation
      * 查找单条记录 不存在返回空数据（或者空模型）
      * @access public
      * @param mixed $data 数据
-     * @return array|Model|static
+     * @return array|Model|static|mixed
      */
     public function findOrEmpty($data = null)
     {
@@ -221,7 +221,7 @@ trait ResultOperation
      * 查找单条记录 如果不存在则抛出异常
      * @access public
      * @param array|string|Query|Closure $data 数据
-     * @return array|Model|static
+     * @return array|Model|static|mixed
      * @throws ModelNotFoundException
      * @throws DataNotFoundException
      */

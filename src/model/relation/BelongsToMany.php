@@ -19,7 +19,6 @@ use think\db\Raw;
 use think\Model;
 use think\model\Pivot;
 use think\model\Relation;
-use think\Paginator;
 
 /**
  * 多对多关联类
@@ -123,38 +122,25 @@ class BelongsToMany extends Relation
     /**
      * 解析中间表数据
      * @access protected
-     * @param  Model $model
+     * @param  array $result
      */
-    protected function getPivotData(Model $model)
+    protected function getPivotData(array $result): array
     {
         $pivot = [];
 
-        foreach ($model->getData() as $key => $val) {
+        foreach ($result as $key => $val) {
             if (strpos($key, '__')) {
                 [$name, $attr] = explode('__', $key, 2);
 
                 if ('pivot' == $name) {
                     $pivot[$attr] = $val;
-                    unset($model->$key);
+                    unset($result[$key]);
                 }
             }
         }
 
-        return $pivot;
-    }
-
-    /**
-     * 合成中间表模型
-     * @access protected
-     * @param  array|Collection|Paginator $models
-     */
-    protected function hydratePivot(iterable $models)
-    {
-        foreach ($models as $model) {
-            $pivot = $this->getPivotData($model);
-
-            $model->setRelation($this->pivotDataName, $this->newPivot($pivot));
-        }
+        $result[$this->pivotDataName] = $this->newPivot($pivot);
+        return $result;
     }
 
     /**
@@ -170,13 +156,9 @@ class BelongsToMany extends Relation
             $closure($this->getClosureType($closure));
         }
 
-        $result = $this->relation($subRelation)
+        return $this->relation($subRelation)
             ->select()
             ->setParent(clone $this->parent);
-
-        $this->hydratePivot($result);
-
-        return $result;
     }
 
     /**
@@ -636,9 +618,21 @@ class BelongsToMany extends Relation
             $foreignKey = $this->foreignKey;
             $localKey   = $this->localKey;
 
-            $this->model->filter(function ($result, $options) {
-                $pivot = $this->getPivotData($result);
-                $result->setRelation($this->pivotDataName, $this->newPivot($pivot));
+            $this->query->filter(function (&$result) {
+                $pivot = [];
+
+                foreach ($result as $key => $val) {
+                    if (strpos($key, '__')) {
+                        [$name, $attr] = explode('__', $key, 2);
+
+                        if ('pivot' == $name) {
+                            $pivot[$attr] = $val;
+                            unset($result[$key]);
+                        }
+                    }
+                }
+
+                $result[$this->pivotDataName] = $this->newPivot($pivot);
             });
 
             // 关联查询

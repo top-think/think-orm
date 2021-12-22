@@ -60,10 +60,7 @@ trait ModelRelationQuery
     public function hidden(array $hidden)
     {
         $this->options['hidden'] = $hidden;
-
-        return $this->filter(function (&$result) {
-            $result = $this->dataVisibleFilter($result);
-        }, 'visible');
+        return $this;
     }
 
     /**
@@ -75,26 +72,7 @@ trait ModelRelationQuery
     public function visible(array $visible)
     {
         $this->options['visible'] = $visible;
-
-        return $this->filter(function (&$result) {
-            $result = $this->dataVisibleFilter($result);
-        }, 'visible');
-    }
-
-    protected function dataVisibleFilter($result)
-    {
-        if (!empty($this->options['visible'])) {
-            foreach ($this->options['visible'] as $key) {
-                $array[] = $key;
-            }
-            $result = array_intersect_key($result, array_flip($array));
-        } elseif (!empty($this->options['hidden'])) {
-            foreach ($this->options['hidden'] as $key) {
-                $array[] = $key;
-            }
-            $result = array_diff_key($result, array_flip($array));
-        }
-        return $result;
+        return $this;
     }
 
     /**
@@ -504,6 +482,10 @@ trait ModelRelationQuery
         // JSON 数据处理
         if (!empty($options['json'])) {
             $this->jsonResult($result, $options['json'], $options['json_assoc'], $options['with_relation_attr']);
+        }
+
+        foreach ($this->options['filter'] as $filter) {
+            call_user_func($filter, $result);
         }
 
         $result = $this->model->newInstance($result, $resultSet ? null : $this->getModelUpdateCondition($options), $options);

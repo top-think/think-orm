@@ -82,6 +82,18 @@ trait ResultOperation
         foreach ($this->options['filter'] as $filter) {
             call_user_func($filter, $result);
         }
+
+        if (!empty($this->options['visible'])) {
+            foreach ($this->options['visible'] as $key) {
+                $array[] = $key;
+            }
+            $result = array_intersect_key($result, array_flip($array));
+        } elseif (!empty($this->options['hidden'])) {
+            foreach ($this->options['hidden'] as $key) {
+                $array[] = $key;
+            }
+            $result = array_diff_key($result, array_flip($array));
+        }
     }
 
     /**

@@ -120,30 +120,6 @@ class BelongsToMany extends Relation
     }
 
     /**
-     * 解析中间表数据
-     * @access protected
-     * @param  array $result
-     */
-    protected function getPivotData(array $result): array
-    {
-        $pivot = [];
-
-        foreach ($result as $key => $val) {
-            if (strpos($key, '__')) {
-                [$name, $attr] = explode('__', $key, 2);
-
-                if ('pivot' == $name) {
-                    $pivot[$attr] = $val;
-                    unset($result[$key]);
-                }
-            }
-        }
-
-        $result[$this->pivotDataName] = $this->newPivot($pivot);
-        return $result;
-    }
-
-    /**
      * 延迟获取关联数据
      * @access public
      * @param  array    $subRelation 子关联名
@@ -618,21 +594,21 @@ class BelongsToMany extends Relation
             $foreignKey = $this->foreignKey;
             $localKey   = $this->localKey;
 
-            $this->query->filter(function (&$result) {
+            $this->query->getModel()->filter(function ($result, $options) {
                 $pivot = [];
 
-                foreach ($result as $key => $val) {
+                foreach ($result->getData() as $key => $val) {
                     if (strpos($key, '__')) {
                         [$name, $attr] = explode('__', $key, 2);
 
                         if ('pivot' == $name) {
                             $pivot[$attr] = $val;
-                            unset($result[$key]);
+                            unset($result->$key);
                         }
                     }
                 }
 
-                $result[$this->pivotDataName] = $this->newPivot($pivot);
+                $result->setRelation($this->pivotDataName, $this->newPivot($pivot));
             });
 
             // 关联查询

@@ -869,6 +869,8 @@ abstract class BaseQuery
     {
         $this->options['json']       = $json;
         $this->options['json_assoc'] = $assoc;
+
+        return $this;
     }
 
     /**

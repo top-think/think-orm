@@ -52,42 +52,6 @@ trait ModelRelationQuery
     }
 
     /**
-     * 设置需要隐藏的输出属性
-     * @access public
-     * @param array $hidden 需要隐藏的字段名
-     * @return $this
-     */
-    public function hidden(array $hidden)
-    {
-        $this->options['hidden'] = $hidden;
-        return $this;
-    }
-
-    /**
-     * 设置需要输出的属性
-     * @access public
-     * @param array $visible 需要输出的属性
-     * @return $this
-     */
-    public function visible(array $visible)
-    {
-        $this->options['visible'] = $visible;
-        return $this;
-    }
-
-    /**
-     * 设置需要追加输出的属性
-     * @access public
-     * @param array $append 需要追加的属性
-     * @return $this
-     */
-    public function append(array $append)
-    {
-        $this->options['append'] = $append;
-        return $this;
-    }
-
-    /**
      * 添加查询范围
      * @access public
      * @param array|string|Closure $scope 查询范围定义

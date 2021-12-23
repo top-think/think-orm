@@ -249,17 +249,6 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
                 $result->withAttribute($options['with_attr']);
             }
 
-            // 输出属性控制
-            if (!empty($options['visible'])) {
-                $result->visible($options['visible']);
-            } elseif (!empty($options['hidden'])) {
-                $result->hidden($options['hidden']);
-            }
-
-            if (!empty($options['append'])) {
-                $result->append($options['append']);
-            }
-
             // 关联查询
             if (!empty($options['relation'])) {
                 $result->relationQuery($options['relation'], $options['with_relation_attr']);

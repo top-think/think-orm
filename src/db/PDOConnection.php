@@ -1273,7 +1273,7 @@ abstract class PDOConnection extends Connection
             $type  = is_array($val) ? $val[1] : PDO::PARAM_STR;
 
             if (self::PARAM_FLOAT == $type || PDO::PARAM_STR == $type) {
-                $value = '\'' . addslashes($value) . '\'';
+                $value = '\'' . addcslashes($value, "'") . '\'';
             } elseif (PDO::PARAM_INT == $type && '' === $value) {
                 $value = '0';
             }

@@ -151,8 +151,8 @@ trait ModelRelationQuery
             $this->options['with_attr'][$name] = $callback;
         }
 
-        return $this->filter(function (&$result) {
-            $this->getResultAttr($result, $this->options['with_attr']);
+        return $this->filter(function ($result) {
+            return $this->getResultAttr($result, $this->options['with_attr']);
         }, 'with_attr');
     }
 

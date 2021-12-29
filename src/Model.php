@@ -244,11 +244,6 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
         }
 
         $this->filter(function ($result, $options) {
-            // 动态获取器
-            if (!empty($options['with_attr'])) {
-                $result->withAttribute($options['with_attr']);
-            }
-
             // 关联查询
             if (!empty($options['relation'])) {
                 $result->relationQuery($options['relation'], $options['with_relation_attr']);
@@ -1073,10 +1068,6 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
     {
         if (isset(static::$macro[static::class][$method])) {
             return call_user_func_array(static::$macro[static::class][$method]->bindTo($this, static::class), $args);
-        }
-
-        if ('withattr' == strtolower($method)) {
-            return call_user_func_array([$this, 'withAttribute'], $args);
         }
 
         return call_user_func_array([$this->db(), $method], $args);

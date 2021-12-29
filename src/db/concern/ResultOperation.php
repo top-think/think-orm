@@ -108,9 +108,9 @@ trait ResultOperation
      * @access protected
      * @param array $result   查询数据
      * @param array $withAttr 字段获取器
-     * @return void
+     * @return array
      */
-    protected function getResultAttr(array &$result, array $withAttr = []): void
+    protected function getResultAttr(array $result, array $withAttr = []): array
     {
         foreach ($withAttr as $name => $closure) {
             $name = Str::snake($name);
@@ -126,6 +126,8 @@ trait ResultOperation
                 $result[$name] = $closure($result[$name] ?? null, $result);
             }
         }
+
+        return $result;
     }
 
     /**

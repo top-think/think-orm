@@ -657,11 +657,11 @@ trait Attribute
      * @param  callable     $callback   闭包获取器
      * @return $this
      */
-    public function withAttribute($name, callable $callback = null)
+    public function withAttr($name, callable $callback = null)
     {
         if (is_array($name)) {
             foreach ($name as $key => $val) {
-                $this->withAttribute($key, $val);
+                $this->withAttr($key, $val);
             }
         } else {
             $name = $this->getRealFieldName($name);

@@ -250,12 +250,12 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
             }
 
             // 预载入查询
-            if (empty($optios['is_resultSet']) && !empty($options['with'])) {
+            if (empty($options['is_resultSet']) && !empty($options['with'])) {
                 $result->eagerlyResult($result, $options['with'], $options['with_relation_attr'], false, $options['with_cache'] ?? false);
             }
 
             // JOIN预载入查询
-            if (empty($optios['is_resultSet']) && !empty($options['with_join'])) {
+            if (empty($options['is_resultSet']) && !empty($options['with_join'])) {
                 $result->eagerlyResult($result, $options['with_join'], $options['with_relation_attr'], true, $options['with_cache'] ?? false);
             }
 

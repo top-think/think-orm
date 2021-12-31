@@ -442,6 +442,7 @@ trait ModelRelationQuery
     protected function resultToModel(array &$result, array $options = [], bool $resultSet = false): void
     {
         $options['with_relation_attr'] = $this->getWithRelationAttr();
+        $options['is_resultSet']       = $resultSet;
 
         // JSON 数据处理
         if (!empty($options['json'])) {

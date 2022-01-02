@@ -449,11 +449,12 @@ trait ModelRelationQuery
             $this->jsonResult($result, $options['json'], $options['json_assoc'], $options['with_relation_attr']);
         }
 
-        foreach ($this->options['filter'] as $filter) {
-            $result = call_user_func($filter, $result);
-        }
-
         $result = $this->model->newInstance($result, $resultSet ? null : $this->getModelUpdateCondition($options), $options);
+
+        // 模型数据处理
+        foreach ($this->options['filter'] as $filter) {
+            call_user_func($filter, $result);
+        }
     }
 
     /**

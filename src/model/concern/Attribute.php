@@ -107,12 +107,6 @@ trait Attribute
     private $withAttr = [];
 
     /**
-     * 数据处理
-     * @var array
-     */
-    private $filter = [];
-
-    /**
      * 获取模型对象的主键
      * @access public
      * @return string|array
@@ -179,24 +173,6 @@ trait Attribute
     public function readOnly(array $field)
     {
         $this->readonly = $field;
-
-        return $this;
-    }
-
-    /**
-     * 设置模型数据处理
-     * @access public
-     * @param callable $filter 数据处理Callable
-     * @param string   $index  索引（唯一）
-     * @return $this
-     */
-    public function filter(callable $filter, string $index = null)
-    {
-        if ($index) {
-            $this->filter[$index] = $filter;
-        } else {
-            $this->filter[] = $filter;
-        }
 
         return $this;
     }

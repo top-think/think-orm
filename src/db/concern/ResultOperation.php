@@ -27,7 +27,7 @@ use think\Model;
 trait ResultOperation
 {
     /**
-     * 设置数据处理
+     * 设置数据处理（支持模型）
      * @access public
      * @param callable $filter 数据处理Callable
      * @param string   $index  索引（唯一）
@@ -79,6 +79,7 @@ trait ResultOperation
             $this->jsonResult($result, $this->options['json'], true);
         }
 
+        // 查询数据处理
         foreach ($this->options['filter'] as $filter) {
             $result = call_user_func($filter, $result);
         }

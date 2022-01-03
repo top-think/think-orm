@@ -291,7 +291,6 @@ trait RelationShip
     /**
      * 预载入关联查询 返回模型对象
      * @access public
-     * @param  Model $result    数据对象
      * @param  array $relations 关联
      * @param  array $withRelationAttr 关联获取器
      * @param  bool  $join      是否为JOIN方式

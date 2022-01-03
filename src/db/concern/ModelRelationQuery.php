@@ -94,11 +94,13 @@ trait ModelRelationQuery
      */
     public function relation(array $relation)
     {
-        if (!empty($relation)) {
-            $this->options['relation'] = $relation;
+        if (empty($this->model) || empty($relation)) {
+            return $this;
         }
 
-        return $this;
+        return $this->filter(function ($result, $options) use ($relation) {
+            $result->relationQuery($relation, $this->options['with_relation_attr']);
+        });
     }
 
     /**
@@ -145,15 +147,30 @@ trait ModelRelationQuery
      */
     public function withAttr($name, callable $callback = null)
     {
-        if (is_array($name)) {
-            $this->options['with_attr'] = $name;
-        } else {
-            $this->options['with_attr'][$name] = $callback;
+        if (empty($this->model)) {
+            if (is_array($name)) {
+                $this->options['with_attr'] = $name;
+            } else {
+                $this->options['with_attr'][$name] = $callback;
+            }
+            return $this->filter(function ($result) {
+                return $this->getResultAttr($result, $this->options['with_attr']);
+            }, 'with_attr');
         }
 
-        return $this->filter(function ($result) {
-            return $this->getResultAttr($result, $this->options['with_attr']);
-        }, 'with_attr');
+        if (is_array($name)) {
+            foreach ($name as $key => $val) {
+                if (strpos($key, '.')) {
+                    [$relation, $field] = explode('.', $key);
+
+                    $this->options['with_relation_attr'][$relation][$field] = $val;
+                }
+            }
+        } else {
+            $this->options['with_relation_attr'][$name] = $callback;
+        }
+
+        return $this;
     }
 
     /**
@@ -164,11 +181,17 @@ trait ModelRelationQuery
      */
     public function with($with)
     {
-        if (!empty($with)) {
-            $this->options['with'] = (array) $with;
+        if (empty($this->model) || empty($with)) {
+            return $this;
         }
 
-        return $this;
+        $with                  = (array) $with;
+        $this->options['with'] = $with;
+        return $this->filter(function ($result) use ($with) {
+            if (empty($this->options['is_resultSet'])) {
+                $result->eagerlyResult($with, $this->options['with_relation_attr'], false, $this->options['with_cache'] ?? false);
+            }
+        }, 'with');
     }
 
     /**
@@ -180,7 +203,7 @@ trait ModelRelationQuery
      */
     public function withJoin($with, string $joinType = '')
     {
-        if (empty($with)) {
+        if (empty($this->model) || empty($with)) {
             return $this;
         }
 
@@ -212,10 +235,14 @@ trait ModelRelationQuery
         }
 
         $this->via();
-
         $this->options['with_join'] = $with;
 
-        return $this;
+        return $this->filter(function ($result) use ($with) {
+            // JOIN预载入查询
+            if (empty($this->options['is_resultSet'])) {
+                $result->eagerlyResult($with, $this->options['with_relation_attr'], true, $this->options['with_cache'] ?? false);
+            }
+        }, 'with_join');
     }
 
     /**
@@ -229,16 +256,24 @@ trait ModelRelationQuery
      */
     protected function withAggregate($relations, string $aggregate = 'count', $field = '*', bool $subQuery = true)
     {
-        if (!$subQuery) {
-            $this->options['with_count'][] = [$relations, $aggregate, $field];
-        } else {
-            if (!isset($this->options['field'])) {
-                $this->field('*');
-            }
-
-            $this->model->relationCount($this, (array) $relations, $aggregate, $field, true);
+        if (empty($this->model)) {
+            return $this;
         }
 
+        if (!$subQuery) {
+            $this->options['with_aggregate'][] = [$relations, $aggregate, $field];
+            return $this->filter(function ($result) use ($withAggregate) {
+                foreach ($this->options['with_aggregate'] as $val) {
+                    $result->relationCount($this, (array) $val[0], $val[1], $val[2], false);
+                }
+            });
+        }
+
+        if (!isset($this->options['field'])) {
+            $this->field('*');
+        }
+
+        $this->model->relationCount($this, (array) $relations, $aggregate, $field, true);
         return $this;
     }
 
@@ -253,6 +288,10 @@ trait ModelRelationQuery
      */
     public function withCache($relation = true, $key = true, $expire = null, string $tag = null)
     {
+        if (empty($this->model)) {
+            return $this;
+        }
+
         if (false === $relation || false === $key || !$this->getConnection()->getCache()) {
             return $this;
         }
@@ -373,6 +412,34 @@ trait ModelRelationQuery
     }
 
     /**
+     * JSON字段数据转换
+     * @access protected
+     * @param Model $result           查询数据
+     * @param array $json             JSON字段
+     * @param bool  $assoc            是否转换为数组
+     * @return void
+     */
+    protected function jsonModelResult(Model $result, array $json = [], bool $assoc = false): void
+    {
+        $withRelationAttr = $this->options['with_relation_attr'];
+        foreach ($json as $name) {
+            if (!isset($result->$name)) {
+                continue;
+            }
+
+            $jsonData = json_decode($result->getData($name), true);
+
+            if (isset($withRelationAttr[$name])) {
+                foreach ($withRelationAttr[$name] as $key => $closure) {
+                    $jsonData[$key] = $closure($jsonData[$key] ?? null, $jsonData);
+                }
+            }
+
+            $result->set($name, !$assoc ? (object) $jsonData : $jsonData);
+        }
+    }
+
+    /**
      * 查询数据转换为模型数据集对象
      * @access protected
      * @param array $resultSet 数据集
@@ -384,20 +451,20 @@ trait ModelRelationQuery
             return $this->model->toCollection();
         }
 
-        $withRelationAttr = $this->getWithRelationAttr();
+        $this->options['is_resultSet'] = true;
         foreach ($resultSet as $key => &$result) {
             // 数据转换为模型对象
-            $this->resultToModel($result, $this->options, true);
+            $this->resultToModel($result);
         }
 
         if (!empty($this->options['with'])) {
             // 预载入
-            $result->eagerlyResultSet($resultSet, $this->options['with'], $withRelationAttr, false, $this->options['with_cache'] ?? false);
+            $result->eagerlyResultSet($resultSet, $this->options['with'], $this->options['with_relation_attr'], false, $this->options['with_cache'] ?? false);
         }
 
         if (!empty($this->options['with_join'])) {
             // 预载入
-            $result->eagerlyResultSet($resultSet, $this->options['with_join'], $withRelationAttr, true, $this->options['with_cache'] ?? false);
+            $result->eagerlyResultSet($resultSet, $this->options['with_join'], $this->options['with_relation_attr'], true, $this->options['with_cache'] ?? false);
         }
 
         // 模型数据集转换
@@ -405,56 +472,24 @@ trait ModelRelationQuery
     }
 
     /**
-     * 检查动态获取器
-     * @access protected
-     * @return array
-     */
-    protected function getWithRelationAttr(): array
-    {
-        if (isset($this->options['with_relation_attr'])) {
-            return $this->options['with_relation_attr'];
-        }
-
-        $withRelationAttr = [];
-        if (!empty($this->options['with_attr'])) {
-            foreach ($this->options['with_attr'] as $name => $val) {
-                if (strpos($name, '.')) {
-                    [$relation, $field] = explode('.', $name);
-
-                    $withRelationAttr[$relation][$field] = $val;
-                    unset($this->options['with_attr'][$name]);
-                }
-            }
-        }
-
-        $this->options['with_relation_attr'] = $withRelationAttr;
-        return $withRelationAttr;
-    }
-
-    /**
      * 查询数据转换为模型对象
      * @access protected
      * @param array $result           查询数据
-     * @param array $options          查询参数
-     * @param bool  $resultSet        是否为数据集查询
      * @return void
      */
-    protected function resultToModel(array &$result, array $options = [], bool $resultSet = false): void
+    protected function resultToModel(array &$result): void
     {
-        $options['with_relation_attr'] = $this->getWithRelationAttr();
-        $options['is_resultSet']       = $resultSet;
+        $options = $this->options;
 
-        // JSON 数据处理
-        if (!empty($options['json'])) {
-            $this->jsonResult($result, $options['json'], $options['json_assoc'], $options['with_relation_attr']);
-        }
-
-        $result = $this->model->newInstance($result, $resultSet ? null : $this->getModelUpdateCondition($options), $options);
+        $result = $this->model->newInstance($result, !empty($options['is_resultSet']) ? null : $this->getModelUpdateCondition($options), $options);
 
         // 模型数据处理
         foreach ($this->options['filter'] as $filter) {
-            call_user_func($filter, $result);
+            call_user_func_array($filter, [$result, $options]);
         }
+
+        // 刷新原始数据
+        $result->refreshOrigin();
     }
 
     /**

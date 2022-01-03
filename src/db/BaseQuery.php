@@ -876,7 +876,19 @@ abstract class BaseQuery
         $this->options['json']       = $json;
         $this->options['json_assoc'] = $assoc;
 
-        return $this;
+        if ($this->model) {
+            return $this->filter(function ($result) use ($json, $assoc) {
+                if (!empty($json)) {
+                    $this->jsonModelResult($result, $json, $assoc);
+                }
+            });
+        }
+
+        return $this->filter(function ($result) use ($json) {
+            if (!empty($json)) {
+                $this->jsonResult($result, $json);
+            }
+        });
     }
 
     /**
@@ -1187,7 +1199,7 @@ abstract class BaseQuery
             $this->parseView($options);
         }
 
-        foreach (['data', 'order', 'join', 'union', 'filter', 'json'] as $name) {
+        foreach (['data', 'order', 'join', 'union', 'filter', 'json', 'with_relation_attr'] as $name) {
             if (!isset($options[$name])) {
                 $options[$name] = [];
             }
@@ -1197,7 +1209,7 @@ abstract class BaseQuery
             $options['strict'] = $this->connection->getConfig('fields_strict');
         }
 
-        foreach (['master', 'lock', 'fetch_sql', 'array', 'distinct', 'procedure'] as $name) {
+        foreach (['master', 'lock', 'fetch_sql', 'array', 'distinct', 'procedure', 'with_cache'] as $name) {
             if (!isset($options[$name])) {
                 $options[$name] = false;
             }

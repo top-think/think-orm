@@ -251,6 +251,17 @@ trait Attribute
     }
 
     /**
+     * 刷新对象原始数据（为当前数据）
+     * @access public
+     * @return $this
+     */
+    public function refreshOrigin()
+    {
+        $this->origin = $this->data;
+        return $this;
+    }
+
+    /**
      * 获取对象原始数据 如果不存在指定字段返回null
      * @access public
      * @param  string $name 字段名 留空获取全部

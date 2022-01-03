@@ -75,13 +75,9 @@ trait ResultOperation
      */
     protected function result(array &$result): void
     {
-        if (!empty($this->options['json'])) {
-            $this->jsonResult($result, $this->options['json'], true);
-        }
-
         // 查询数据处理
         foreach ($this->options['filter'] as $filter) {
-            $result = call_user_func($filter, $result);
+            $result = call_user_func_array($filter, [$result, $this->options]);
         }
     }
 
@@ -164,11 +160,9 @@ trait ResultOperation
      * @access protected
      * @param array $result           查询数据
      * @param array $json             JSON字段
-     * @param bool  $assoc            是否转换为数组
-     * @param array $withRelationAttr 关联获取器
      * @return void
      */
-    protected function jsonResult(array &$result, array $json = [], bool $assoc = false, array $withRelationAttr = []): void
+    protected function jsonResult(array &$result, array $json = []): void
     {
         foreach ($json as $name) {
             if (!isset($result[$name])) {
@@ -176,16 +170,6 @@ trait ResultOperation
             }
 
             $result[$name] = json_decode($result[$name], true);
-
-            if (isset($withRelationAttr[$name])) {
-                foreach ($withRelationAttr[$name] as $key => $closure) {
-                    $result[$name][$key] = $closure($result[$name][$key] ?? null, $result[$name]);
-                }
-            }
-
-            if (!$assoc) {
-                $result[$name] = (object) $result[$name];
-            }
         }
     }
 

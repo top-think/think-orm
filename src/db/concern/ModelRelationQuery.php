@@ -99,7 +99,7 @@ trait ModelRelationQuery
         }
 
         return $this->filter(function ($result, $options) use ($relation) {
-            $result->relationQuery($relation, $this->options['with_relation_attr']);
+            $result->relationQuery($relation, $this->options['with_attr']);
         });
     }
 
@@ -163,14 +163,16 @@ trait ModelRelationQuery
                 if (strpos($key, '.')) {
                     [$relation, $field] = explode('.', $key);
 
-                    $this->options['with_relation_attr'][$relation][$field] = $val;
+                    $this->options['with_attr'][$relation][$field] = $val;
                 }
             }
         } else {
-            $this->options['with_relation_attr'][$name] = $callback;
+            $this->options['with_attr'][$name] = $callback;
         }
 
-        return $this;
+        return $this->filter(function ($result) {
+            $result->withAttr($this->options['with_attr']);
+        }, 'with_attr');
     }
 
     /**
@@ -189,7 +191,7 @@ trait ModelRelationQuery
         $this->options['with'] = $with;
         return $this->filter(function ($result) use ($with) {
             if (empty($this->options['is_resultSet'])) {
-                $result->eagerlyResult($with, $this->options['with_relation_attr'], false, $this->options['with_cache'] ?? false);
+                $result->eagerlyResult($with, $this->options['with_attr'], false, $this->options['with_cache'] ?? false);
             }
         }, 'with');
     }
@@ -240,7 +242,7 @@ trait ModelRelationQuery
         return $this->filter(function ($result) use ($with) {
             // JOIN预载入查询
             if (empty($this->options['is_resultSet'])) {
-                $result->eagerlyResult($with, $this->options['with_relation_attr'], true, $this->options['with_cache'] ?? false);
+                $result->eagerlyResult($with, $this->options['with_attr'], true, $this->options['with_cache'] ?? false);
             }
         }, 'with_join');
     }
@@ -421,7 +423,7 @@ trait ModelRelationQuery
      */
     protected function jsonModelResult(Model $result, array $json = [], bool $assoc = false): void
     {
-        $withRelationAttr = $this->options['with_relation_attr'];
+        $withRelationAttr = $this->options['with_attr'];
         foreach ($json as $name) {
             if (!isset($result->$name)) {
                 continue;
@@ -459,12 +461,12 @@ trait ModelRelationQuery
 
         if (!empty($this->options['with'])) {
             // 预载入
-            $result->eagerlyResultSet($resultSet, $this->options['with'], $this->options['with_relation_attr'], false, $this->options['with_cache'] ?? false);
+            $result->eagerlyResultSet($resultSet, $this->options['with'], $this->options['with_attr'], false, $this->options['with_cache'] ?? false);
         }
 
         if (!empty($this->options['with_join'])) {
             // 预载入
-            $result->eagerlyResultSet($resultSet, $this->options['with_join'], $this->options['with_relation_attr'], true, $this->options['with_cache'] ?? false);
+            $result->eagerlyResultSet($resultSet, $this->options['with_join'], $this->options['with_attr'], true, $this->options['with_cache'] ?? false);
         }
 
         // 模型数据集转换

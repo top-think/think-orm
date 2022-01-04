@@ -141,18 +141,17 @@ trait ModelRelationQuery
     /**
      * 设置数据字段获取器
      * @access public
-     * @param string    $name     字段名
-     * @param callable  $callback 闭包获取器
+     * @param string|array  $name     字段名
+     * @param callable      $callback 闭包获取器
      * @return $this
      */
-    public function withAttr(string $name, callable $callback)
+    public function withAttr($name, callable $callback = null)
     {
-        if (empty($this->model)) {
-            $this->options['with_attr'][$name] = $callback;
-
-            return $this->filter(function ($result) {
-                return $this->getResultAttr($result, $this->options['with_attr']);
-            }, 'with_attr');
+        if (is_array($name)) {
+            foreach ($name as $key => $val) {
+                $this->withAttr($key, $val);
+            }
+            return $this;
         }
 
         $this->options['with_attr'][$name] = $callback;
@@ -160,7 +159,18 @@ trait ModelRelationQuery
         if (strpos($name, '.')) {
             [$relation, $field] = explode('.', $name);
 
-            $this->options['with_relatioin_attr'][$relation][$field] = $callback;
+            if (!empty($this->options['json']) && in_array($relation, $this->options['json'])) {
+
+            } else {
+                $this->options['with_relatioin_attr'][$relation][$field] = $callback;
+                unset($this->options['with_attr'][$name]);
+            }
+        }
+
+        if (empty($this->model)) {
+            return $this->filter(function ($result) {
+                return $this->getResultAttr($result, $this->options['with_attr']);
+            }, 'with_attr');
         }
 
         return $this->filter(function ($result) {

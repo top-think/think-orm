@@ -542,6 +542,10 @@ trait Attribute
      */
     protected function getJsonValue($name, $value)
     {
+        if (is_null($value)) {
+            return $value;
+        }
+
         foreach ($this->withAttr[$name] as $key => $closure) {
             if ($this->jsonAssoc) {
                 $value[$key] = $closure($value[$key], $value);

@@ -270,8 +270,13 @@ abstract class BaseQuery
 
         $array[$field] = $result;
 
-        $this->jsonResult($array, $this->options['json']);
-        $array = $this->getResultAttr($array, $this->options['with_attr']);
+        if (!empty($this->options['json'])) {
+            $this->jsonResult($array, $this->options['json']);
+        }
+
+        if (!empty($this->options['with_attr'])) {
+            $array = $this->getResultAttr($array, $this->options['with_attr']);
+        }
 
         return $array[$field];
     }
@@ -289,10 +294,16 @@ abstract class BaseQuery
 
         if (count($result) != count($result, 1)) {
             foreach ($result as &$val) {
-                $this->jsonResult($val, $this->options['json']);
-                $val = $this->getResultAttr($val, $this->options['with_attr']);
+                if (!empty($this->options['json'])) {
+                    $this->jsonResult($val, $this->options['json']);
+                }
+
+                if (!empty($this->options['with_attr'])) {
+                    $val = $this->getResultAttr($val, $this->options['with_attr']);
+                }
             }
         }
+
         return $result;
     }
 
@@ -1205,7 +1216,7 @@ abstract class BaseQuery
             $this->parseView($options);
         }
 
-        foreach (['data', 'order', 'join', 'union', 'filter', 'json', 'with_attr'] as $name) {
+        foreach (['data', 'order', 'join', 'union', 'filter', 'json', 'with_attr', 'with_relatioin_attr'] as $name) {
             if (!isset($options[$name])) {
                 $options[$name] = [];
             }

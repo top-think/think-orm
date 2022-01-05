@@ -52,6 +52,45 @@ trait ModelRelationQuery
     }
 
     /**
+     * 设置需要隐藏的输出属性
+     * @access public
+     * @param  array $hidden   属性列表
+     * @return $this
+     */
+    public function hidden(array $hidden = [])
+    {
+        $this->options['hidden'] = $hidden;
+
+        return $this;
+    }
+
+    /**
+     * 设置需要输出的属性
+     * @access public
+     * @param  array $visible
+     * @return $this
+     */
+    public function visible(array $visible = [])
+    {
+        $this->options['visible'] = $visible;
+
+        return $this;
+    }
+
+    /**
+     * 设置需要附加的输出属性
+     * @access public
+     * @param  array $append   属性列表
+     * @return $this
+     */
+    public function append(array $append = [])
+    {
+        $this->options['append'] = $append;
+
+        return $this;
+    }
+
+    /**
      * 添加查询范围
      * @access public
      * @param array|string|Closure $scope 查询范围定义
@@ -492,6 +531,12 @@ trait ModelRelationQuery
         // 模型数据处理
         foreach ($this->options['filter'] as $filter) {
             call_user_func_array($filter, [$result, $options]);
+        }
+
+        foreach (['hidden', 'visible', 'append'] as $name) {
+            if (!empty($this->options[$name])) {
+                $result->$name($this->options[$name]);
+            }
         }
 
         // 刷新原始数据

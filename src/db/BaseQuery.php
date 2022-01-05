@@ -106,12 +106,6 @@ abstract class BaseQuery
             $name = Str::snake(substr($method, 5));
             array_unshift($args, $name);
             return call_user_func_array([$this, 'where'], $args);
-        } elseif ($this->model && in_array($method, ['hidden', 'visible', 'append'])) {
-            // 调用模型类方法
-            $this->model->filter(function ($model, $options) use ($method, $args) {
-                call_user_func_array([$model, $method], $args);
-            });
-            return $this;
         } elseif ($this->model && method_exists($this->model, 'scope' . $method)) {
             // 动态调用命名范围
             $method = 'scope' . $method;

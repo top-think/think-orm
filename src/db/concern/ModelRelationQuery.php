@@ -466,7 +466,7 @@ trait ModelRelationQuery
      */
     protected function jsonModelResult(Model $result, array $json = [], bool $assoc = false): void
     {
-        $withRelationAttr = $this->options['with_attr'];
+        $withAttr = $this->options['with_attr'];
         foreach ($json as $name) {
             if (!isset($result->$name)) {
                 continue;
@@ -474,8 +474,8 @@ trait ModelRelationQuery
 
             $jsonData = json_decode($result->getData($name), true);
 
-            if (isset($withRelationAttr[$name])) {
-                foreach ($withRelationAttr[$name] as $key => $closure) {
+            if (isset($withAttr[$name])) {
+                foreach ($withAttr[$name] as $key => $closure) {
                     $jsonData[$key] = $closure($jsonData[$key] ?? null, $jsonData);
                 }
             }
@@ -502,14 +502,11 @@ trait ModelRelationQuery
             $this->resultToModel($result);
         }
 
-        if (!empty($this->options['with'])) {
-            // 预载入
-            $result->eagerlyResultSet($resultSet, $this->options['with'], $this->options['with_relation_attr'], false, $this->options['with_cache'] ?? false);
-        }
-
-        if (!empty($this->options['with_join'])) {
-            // 预载入
-            $result->eagerlyResultSet($resultSet, $this->options['with_join'], $this->options['with_relation_attr'], true, $this->options['with_cache'] ?? false);
+        foreach (['with', 'with_join'] as $with) {
+            // 关联预载入
+            if (!empty($this->options[$with])) {
+                $result->eagerlyResultSet($resultSet, $this->options[$with], $this->options['with_relation_attr'], false, $this->options['with_cache'] ?? false);
+            }
         }
 
         // 模型数据集转换
@@ -524,13 +521,11 @@ trait ModelRelationQuery
      */
     protected function resultToModel(array &$result): void
     {
-        $options = $this->options;
-
-        $result = $this->model->newInstance($result, !empty($options['is_resultSet']) ? null : $this->getModelUpdateCondition($options), $options);
+        $result = $this->model->newInstance($result, !empty($this->options['is_resultSet']) ? null : $this->getModelUpdateCondition($this->options), $this->options);
 
         // 模型数据处理
         foreach ($this->options['filter'] as $filter) {
-            call_user_func_array($filter, [$result, $options]);
+            call_user_func_array($filter, [$result, $this->options]);
         }
 
         foreach (['hidden', 'visible', 'append'] as $name) {

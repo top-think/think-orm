@@ -263,14 +263,7 @@ abstract class BaseQuery
         $result = $this->connection->value($this, $field, $default);
 
         $array[$field] = $result;
-
-        if (!empty($this->options['json'])) {
-            $this->jsonResult($array, $this->options['json']);
-        }
-
-        if (!empty($this->options['with_attr'])) {
-            $array = $this->getResultAttr($array, $this->options['with_attr']);
-        }
+        $this->result($array);
 
         return $array[$field];
     }
@@ -287,15 +280,7 @@ abstract class BaseQuery
         $result = $this->connection->column($this, $field, $key);
 
         if (count($result) != count($result, 1)) {
-            foreach ($result as &$val) {
-                if (!empty($this->options['json'])) {
-                    $this->jsonResult($val, $this->options['json']);
-                }
-
-                if (!empty($this->options['with_attr'])) {
-                    $val = $this->getResultAttr($val, $this->options['with_attr']);
-                }
-            }
+            $this->resultSet($result, false);
         }
 
         return $result;
@@ -887,19 +872,7 @@ abstract class BaseQuery
         $this->options['json']       = $json;
         $this->options['json_assoc'] = $assoc;
 
-        if ($this->model) {
-            return $this->filter(function ($result) use ($json, $assoc) {
-                if (!empty($json)) {
-                    $this->jsonModelResult($result, $json, $assoc);
-                }
-            });
-        }
-
-        return $this->filter(function ($result) use ($json) {
-            if (!empty($json)) {
-                $this->jsonResult($result, $json);
-            }
-        });
+        return $this;
     }
 
     /**

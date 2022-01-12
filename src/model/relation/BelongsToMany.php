@@ -132,15 +132,9 @@ class BelongsToMany extends Relation
             $closure($this->getClosureType($closure));
         }
 
-        $resultSet = $this->relation($subRelation)
+        return $this->relation($subRelation)
             ->select()
             ->setParent(clone $this->parent);
-
-        foreach ($resultSet as $result) {
-            $this->matchPivot($result);
-        }
-
-        return $resultSet;
     }
 
     /**
@@ -613,7 +607,7 @@ class BelongsToMany extends Relation
             $foreignKey = $this->foreignKey;
             $localKey   = $this->localKey;
 
-            $this->query->getModel()->filter(function ($result, $options) {
+            $this->query->filter(function ($result, $options) {
                 $this->matchPivot($result);
             });
 

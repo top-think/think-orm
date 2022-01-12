@@ -132,9 +132,39 @@ class BelongsToMany extends Relation
             $closure($this->getClosureType($closure));
         }
 
-        return $this->relation($subRelation)
+        $resultSet = $this->relation($subRelation)
             ->select()
             ->setParent(clone $this->parent);
+
+        foreach ($resultSet as $result) {
+            $this->matchPivot($result);
+        }
+
+        return $resultSet;
+    }
+
+    /**
+     * 组装Pivot模型
+     * @access public
+     * @param  Model    $result 模型对象
+     * @return array
+     */
+    protected function matchPivot(Model $result): array
+    {
+        $pivot = [];
+        foreach ($result->getData() as $key => $val) {
+            if (strpos($key, '__')) {
+                [$name, $attr] = explode('__', $key, 2);
+
+                if ('pivot' == $name) {
+                    $pivot[$attr] = $val;
+                    unset($result->$key);
+                }
+            }
+        }
+
+        $result->setRelation($this->pivotDataName, $this->newPivot($pivot));
+        return $pivot;
     }
 
     /**
@@ -326,23 +356,12 @@ class BelongsToMany extends Relation
         // 组装模型数据
         $data = [];
         foreach ($list as $set) {
-            $pivot = [];
-            foreach ($set->getData() as $key => $val) {
-                if (strpos($key, '__')) {
-                    [$name, $attr] = explode('__', $key, 2);
-                    if ('pivot' == $name) {
-                        $pivot[$attr] = $val;
-                        unset($set->$key);
-                    }
-                }
-            }
-            $key = $pivot[$this->localKey];
+            $pivot = $this->matchPivot($set);
+            $key   = $pivot[$this->localKey];
 
             if ($this->withLimit && isset($data[$key]) && count($data[$key]) >= $this->withLimit) {
                 continue;
             }
-
-            $set->setRelation($this->pivotDataName, $this->newPivot($pivot));
 
             $data[$key][] = $set;
         }
@@ -595,20 +614,7 @@ class BelongsToMany extends Relation
             $localKey   = $this->localKey;
 
             $this->query->getModel()->filter(function ($result, $options) {
-                $pivot = [];
-
-                foreach ($result->getData() as $key => $val) {
-                    if (strpos($key, '__')) {
-                        [$name, $attr] = explode('__', $key, 2);
-
-                        if ('pivot' == $name) {
-                            $pivot[$attr] = $val;
-                            unset($result->$key);
-                        }
-                    }
-                }
-
-                $result->setRelation($this->pivotDataName, $this->newPivot($pivot));
+                $this->matchPivot($result);
             });
 
             // 关联查询

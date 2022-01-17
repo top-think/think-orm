@@ -276,11 +276,12 @@ class HasOne extends OneToOne
             $relationModel->exists(true);
         }
 
+        // 设置关联属性
+        $result->setRelation($relation, $relationModel);
+
         if (!empty($this->bindAttr)) {
             // 绑定关联属性
             $this->bindAttr($result, $relationModel);
-        } else {
-            $result->setRelation($relation, $relationModel);
         }
     }
 

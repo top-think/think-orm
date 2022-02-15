@@ -765,7 +765,7 @@ abstract class BaseQuery
     }
 
     /**
-     * 查询缓存
+     * 查询缓存 数据为空不缓存
      * @access public
      * @param mixed             $key    缓存key
      * @param integer|\DateTime $expire 缓存有效期
@@ -786,6 +786,20 @@ abstract class BaseQuery
         $this->options['cache'] = [$key, $expire, $tag];
 
         return $this;
+    }
+
+    /**
+     * 查询缓存 允许缓存空数据
+     * @access public
+     * @param mixed             $key    缓存key
+     * @param integer|\DateTime $expire 缓存有效期
+     * @param string|array      $tag    缓存标签
+     * @return $this
+     */
+    public function cacheAlways($key = true, $expire = null, $tag = null)
+    {
+        $this->options['cache_always'] = true;
+        return $this->cache($key, $expire, $tag);
     }
 
     /**

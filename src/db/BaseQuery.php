@@ -770,9 +770,10 @@ abstract class BaseQuery
      * @param mixed             $key    缓存key
      * @param integer|\DateTime $expire 缓存有效期
      * @param string|array      $tag    缓存标签
+     * @param bool              $always 始终缓存
      * @return $this
      */
-    public function cache($key = true, $expire = null, $tag = null)
+    public function cache($key = true, $expire = null, $tag = null, bool $always = false)
     {
         if (false === $key || !$this->getConnection()->getCache()) {
             return $this;
@@ -783,7 +784,8 @@ abstract class BaseQuery
             $key    = true;
         }
 
-        $this->options['cache'] = [$key, $expire, $tag];
+        $this->options['cache']        = [$key, $expire, $tag];
+        $this->options['cache_always'] = $always;
 
         return $this;
     }
@@ -798,8 +800,7 @@ abstract class BaseQuery
      */
     public function cacheAlways($key = true, $expire = null, $tag = null)
     {
-        $this->options['cache_always'] = true;
-        return $this->cache($key, $expire, $tag);
+        return $this->cache($key, $expire, $tag, true);
     }
 
     /**

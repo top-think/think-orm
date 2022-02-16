@@ -1055,7 +1055,7 @@ abstract class BaseQuery
             $this->parseUpdateData($this->options['data']);
         }
 
-        if (empty($this->options['where']) && $this->model) {
+        if ($this->model) {
             $this->where($this->model->getWhere());
         }
 
@@ -1081,7 +1081,7 @@ abstract class BaseQuery
             $this->parsePkWhere($data);
         }
 
-        if (empty($this->options['where']) && $this->model) {
+        if ($this->model) {
             $this->where($this->model->getWhere());
         }
 

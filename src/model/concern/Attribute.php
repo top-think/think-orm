@@ -383,11 +383,7 @@ trait Attribute
         } elseif (isset($this->type[$name])) {
             // 类型转换
             $value = $this->writeTransform($value, $this->type[$name]);
-        } elseif ($value instanceof Model) {
-            $this->relation[$name] = $value;
-            unset($this->get[$name]);
-            return;
-        } elseif (is_object($value) && method_exists($value, '__toString')) {
+        } elseif (array_key_exists($name, $this->origin) && is_object($value) && method_exists($value, '__toString')) {
             // 对象类型
             $value = $value->__toString();
         }

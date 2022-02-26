@@ -379,7 +379,7 @@ abstract class BaseQuery
             $field = array_merge((array) $this->options['field'], $field);
         }
 
-        $this->options['field'] = array_unique($field);
+        $this->options['field'] = array_unique($field, SORT_REGULAR);
 
         return $this;
     }
@@ -424,7 +424,7 @@ abstract class BaseQuery
             $field = array_merge((array) $this->options['field'], $field);
         }
 
-        $this->options['field'] = array_unique($field);
+        $this->options['field'] = array_unique($field, SORT_REGULAR);
 
         return $this;
     }

@@ -217,15 +217,15 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
      */
     public function __construct(array $data = [])
     {
-        $this->data = $data;
-
-        if (!empty($this->data)) {
+        if (!empty($data)) {
             // 废弃字段
             foreach ((array) $this->disuse as $key) {
-                if (array_key_exists($key, $this->data)) {
-                    unset($this->data[$key]);
+                if (array_key_exists($key, $data)) {
+                    unset($data[$key]);
                 }
             }
+            
+            $this->setAttrs($data);
         }
 
         // 记录原始数据

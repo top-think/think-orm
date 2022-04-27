@@ -57,7 +57,7 @@ class Mysql extends Builder
      * INSERT ALL SQL表达式
      * @var string
      */
-    protected $insertAllSql = '%INSERT%%EXTRA% INTO %TABLE%%PARTITION% (%FIELD%) VALUES %DATA% %DUPLICATE%%COMMENT%';
+    protected $insertAllSql = '%INSERT% IGNORE %EXTRA% INTO %TABLE%%PARTITION% (%FIELD%) VALUES %DATA% %DUPLICATE%%COMMENT%';
 
     /**
      * UPDATE SQL表达式

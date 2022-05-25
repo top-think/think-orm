@@ -705,7 +705,7 @@ abstract class BaseQuery
             ->limit(1)
             ->find();
 
-        $result = $data[$key];
+        $result = $data[$key] ?? 0;
 
         if (is_numeric($result)) {
             $lastId = 'asc' == $sort ? ($result - 1) + ($page - 1) * $listRows : ($result + 1) - ($page - 1) * $listRows;

@@ -1095,7 +1095,8 @@ abstract class BaseQuery
             list($field, $condition) = $this->options['soft_delete'];
             if ($condition) {
                 unset($this->options['soft_delete']);
-                $this->options['data'] = [$field => $condition];
+                $deleteTime = $this->model->autoWriteTimestamp(str_replace('__TABLE__.', '', $field));
+                $this->options['data'] = [$field => $deleteTime];
 
                 return $this->connection->update($this);
             }

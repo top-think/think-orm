@@ -72,6 +72,8 @@ trait TimeStamp
             } else {
                 $type = $this->getFieldType($this->createTime);
             }
+        } elseif ( is_string($type) ) {
+            $type = $this->getFieldType($type);
         }
 
         return $type;
@@ -130,10 +132,10 @@ trait TimeStamp
      * @access protected
      * @return mixed
      */
-    protected function autoWriteTimestamp()
+    public function autoWriteTimestamp($column = true)
     {
         // 检测时间字段类型
-        $type = $this->checkTimeFieldType($this->autoWriteTimestamp);
+        $type = $this->checkTimeFieldType($column ?: $this->autoWriteTimestamp);
 
         return is_string($type) ? $this->getTimeTypeValue($type) : time();
     }

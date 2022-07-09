@@ -219,8 +219,8 @@ trait ModelRelationQuery
         if (empty($this->model) || empty($with)) {
             return $this;
         }
+        $this->options['with'] = is_string($with) ? func_get_args() : $with;
 
-        $this->options['with'] = (array) $with;
         return $this;
     }
 

@@ -283,13 +283,18 @@ class MorphTo extends Relation
     {
         // 预载入关联查询 支持嵌套预载入
         $pk   = $this->parent->{$this->morphKey};
-        $data = (new $model)->with($subRelation)
-            ->cache($cache[0] ?? false, $cache[1] ?? null, $cache[2] ?? null)
-            ->find($pk);
 
-        if ($data) {
-            $data->setParent(clone $result);
-            $data->exists(true);
+        $data = null;
+
+        if(\class_exists($model)){
+            $data = (new $model)->with($subRelation)
+                ->cache($cache[0] ?? false, $cache[1] ?? null, $cache[2] ?? null)
+                ->find($pk);
+
+            if ($data) {
+                $data->setParent(clone $result);
+                $data->exists(true);
+            }
         }
 
         $result->setRelation($relation, $data ?: null);

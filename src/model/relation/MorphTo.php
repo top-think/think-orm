@@ -13,6 +13,7 @@ namespace think\model\relation;
 
 use Closure;
 use think\db\exception\DbException as Exception;
+use think\db\Query;
 use think\helper\Str;
 use think\Model;
 use think\model\Relation;
@@ -46,6 +47,8 @@ class MorphTo extends Relation
      */
     protected $relation;
 
+    protected $queryCaller = [];
+
     /**
      * 架构函数
      * @access public
@@ -53,7 +56,7 @@ class MorphTo extends Relation
      * @param  string $morphType 多态字段名
      * @param  string $morphKey  外键名
      * @param  array  $alias     多态别名定义
-     * @param  string $relation  关联名
+     * @param  ?string $relation  关联名
      */
     public function __construct(Model $parent, string $morphType, string $morphKey, array $alias = [], string $relation = null)
     {
@@ -80,8 +83,8 @@ class MorphTo extends Relation
     /**
      * 延迟获取关联数据
      * @access public
-     * @param  array   $subRelation 子关联名
-     * @param  Closure $closure     闭包查询条件
+     * @param array $subRelation 子关联名
+     * @param ?Closure $closure 闭包查询条件
      * @return Model
      */
     public function getRelation(array $subRelation = [], Closure $closure = null)
@@ -95,7 +98,7 @@ class MorphTo extends Relation
         // 主键数据
         $pk = $this->parent->$morphKey;
 
-        $relationModel = (new $model)->relation($subRelation)->find($pk);
+        $relationModel = $this->buildQuery((new $model)->relation($subRelation))->find($pk);
 
         if ($relationModel) {
             $relationModel->setParent(clone $this->parent);
@@ -125,7 +128,7 @@ class MorphTo extends Relation
      * @param  mixed  $where 查询条件（数组或者闭包）
      * @param  mixed  $fields 字段
      * @param  string $joinType JOIN类型
-     * @param  Query  $query    Query对象
+     * @param  ?Query  $query    Query对象
      * @return Query
      */
     public function hasWhere($where = [], $fields = null, string $joinType = '', Query $query = null)
@@ -137,7 +140,7 @@ class MorphTo extends Relation
      * 解析模型的完整命名空间
      * @access protected
      * @param  string $model 模型名（或者完整类名）
-     * @return string
+     * @return Model
      */
     protected function parseModel(string $model): string
     {
@@ -173,7 +176,7 @@ class MorphTo extends Relation
      * @access public
      * @return $this
      */
-    public function removeOption()
+    public function removeOption(string $option = '')
     {
         return $this;
     }
@@ -184,7 +187,7 @@ class MorphTo extends Relation
      * @param  array   $resultSet   数据集
      * @param  string  $relation    当前关联名
      * @param  array   $subRelation 子关联名
-     * @param  Closure $closure     闭包
+     * @param  ?Closure $closure     闭包
      * @param  array   $cache       关联缓存
      * @return void
      * @throws Exception
@@ -245,7 +248,7 @@ class MorphTo extends Relation
      * @param  Model   $result      数据对象
      * @param  string  $relation    当前关联名
      * @param  array   $subRelation 子关联名
-     * @param  Closure $closure     闭包
+     * @param  ?Closure $closure     闭包
      * @param  array   $cache       关联缓存
      * @return void
      */
@@ -261,7 +264,7 @@ class MorphTo extends Relation
      * 关联统计
      * @access public
      * @param  Model   $result  数据对象
-     * @param  Closure $closure 闭包
+     * @param  ?Closure $closure 闭包
      * @param  string  $aggregate 聚合查询方法
      * @param  string  $field 字段
      * @return integer
@@ -332,4 +335,20 @@ class MorphTo extends Relation
         return $this->parent->setRelation($this->relation, null);
     }
 
+    protected function buildQuery(Model $model)
+    {
+        $query = $model->db();
+
+        foreach ($this->queryCaller as $caller) {
+            call_user_func_array([$this->query, $caller[0]], $caller[1]);
+        }
+
+        return $query;
+    }
+
+    public function __call($method, $args)
+    {
+        $this->queryCaller[] = [$method, $args];
+        return $this;
+    }
 }

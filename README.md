@@ -1,5 +1,6 @@
 # ThinkORM(nandiao fork修改版)
 修改内容
+* 添加对swoole多协程的支持 修改版本:2c1382a
 * [修复在使用model时不能使用group方法的问题](https://github.com/top-think/think-orm/pull/300)
 
 

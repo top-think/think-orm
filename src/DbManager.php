@@ -19,6 +19,7 @@ use think\db\BaseQuery;
 use think\db\ConnectionInterface;
 use think\db\Query;
 use think\db\Raw;
+use Swoole\Coroutine;
 
 /**
  * Class DbManager
@@ -228,12 +229,17 @@ class DbManager
         if (empty($name)) {
             $name = $this->getConfig('default', 'mysql');
         }
-
-        if ($force || !isset($this->instance[$name])) {
-            $this->instance[$name] = $this->createConnection($name);
+        $uid = 0;
+        $CoroutineClassName = "Swoole\Coroutine";
+        if (class_exists($CoroutineClassName)) {
+            $uid = $CoroutineClassName::getcid();
         }
 
-        return $this->instance[$name];
+        if ($force || !isset($this->instance[$uid][$name])) {
+            $this->instance[$uid][$name] = $this->createConnection($name);
+        }
+
+        return $this->instance[$uid][$name];
     }
 
     /**

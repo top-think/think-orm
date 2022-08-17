@@ -1,3 +1,5 @@
 .idea
 composer.lock
 vendor
+.DS_Store
+tests/test.php

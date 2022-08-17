@@ -1,4 +1,8 @@
-# ThinkORM
+# ThinkORM(nandiao fork修改版)
+修改内容
+* [修复在使用model时不能使用group方法的问题](https://github.com/top-think/think-orm/pull/300)
+
+
 
 基于PHP7.1+ 和PDO实现的ORM，支持多数据库，2.0版本主要特性包括：
 

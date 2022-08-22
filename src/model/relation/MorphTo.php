@@ -133,7 +133,30 @@ class MorphTo extends Relation
      */
     public function hasWhere($where = [], $fields = null, string $joinType = '', Query $query = null)
     {
-        throw new Exception('relation not support: hasWhere');
+        $alias = class_basename($this->parent);
+
+        $types = $this->parent->distinct()->column($this->morphType);
+
+        $query = $query ?: $this->parent->db();
+
+        return $query->alias($alias)
+            ->where(function (Query $query) use ($types, $where, $alias) {
+                foreach ($types as $type) {
+                    if ($type) {
+                        $query->whereExists(function (Query $query) use ($type, $where, $alias) {
+                            /** @var Model $model */
+                            $model = new ($this->parseModel($type));
+
+                            $table = $model->getTable();
+                            $query
+                                ->table($table)
+                                ->where($alias . '.' . $this->morphType, $type)
+                                ->whereRaw("`{$alias}`.`{$this->morphKey}`=`{$table}`.`{$model->getPk()}`")
+                                ->where($where);
+                        }, 'OR');
+                    }
+                }
+            });
     }
 
     /**

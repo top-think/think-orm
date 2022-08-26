@@ -514,11 +514,14 @@ trait RelationShip
      * @access public
      * @param  string $model      模型名
      * @param  string $middle     中间表/模型名
-     * @param  string $foreignKey 关联外键
-     * @param  string $localKey   当前模型关联键
+     * @param  string $foreignKey 中间表中关联外键
+     * @param  string $localKey   中间表中当前模型关联键
+     * @param  string $modelKey   关联模型关联键
+     * @param  string $parentKey  上级模型关联键
      * @return BelongsToMany
      */
-    public function belongsToMany(string $model, string $middle = '', string $foreignKey = '', string $localKey = ''): BelongsToMany
+    public function belongsToMany(string $model, string $middle = '', string $foreignKey = '', string $localKey = '',
+                                  string $modelKey = '', string $parentKey = ''): BelongsToMany
     {
         // 记录当前关联信息
         $model      = $this->parseModel($model);
@@ -527,7 +530,7 @@ trait RelationShip
         $foreignKey = $foreignKey ?: $name . '_id';
         $localKey   = $localKey ?: $this->getForeignKey($this->name);
 
-        return new BelongsToMany($this, $model, $middle, $foreignKey, $localKey);
+        return new BelongsToMany($this, $model, $middle, $foreignKey, $localKey, $modelKey, $parentKey);
     }
 
     /**

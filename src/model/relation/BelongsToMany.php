@@ -50,20 +50,39 @@ class BelongsToMany extends Relation
     protected $pivotDataName = 'pivot';
 
     /**
+     * 上级模型关联键
+     * @var string
+     */
+    protected $parentKey;
+
+    /**
+     * 关联模型关联键
+     * @var string
+     */
+    protected $modelKey;
+
+    /**
      * 架构函数
      * @access public
      * @param  Model  $parent     上级模型对象
      * @param  string $model      模型名
      * @param  string $middle     中间表/模型名
-     * @param  string $foreignKey 关联模型外键
-     * @param  string $localKey   当前模型关联键
+     * @param  string $foreignKey 中间表中关联模型外键
+     * @param  string $localKey   中间表中当前模型关联键
+     * @param  string $modelKey   关联模型关联键
+     * @param  string $parentKey  上级模型关联键
      */
-    public function __construct(Model $parent, string $model, string $middle, string $foreignKey, string $localKey)
+    public function __construct(Model  $parent, string $model, string $middle, string $foreignKey, string $localKey,
+                                string $modelKey = '', string $parentKey = '')
     {
         $this->parent     = $parent;
         $this->model      = $model;
         $this->foreignKey = $foreignKey;
         $this->localKey   = $localKey;
+
+        $instance = new $model;
+        $this->modelKey   = $modelKey ?: $instance->getPk();
+        $this->parentKey  = $parentKey ?: $parent->getPk();
 
         if (false !== strpos($middle, '\\')) {
             $this->pivotName = $middle;
@@ -72,7 +91,7 @@ class BelongsToMany extends Relation
             $this->middle = $middle;
         }
 
-        $this->query = (new $model)->db();
+        $this->query = $instance->db();
         $this->pivot = $this->newPivot();
     }
 
@@ -158,8 +177,8 @@ class BelongsToMany extends Relation
         }
 
         $pivotData = $this->pivot->newInstance($pivot, [
-            [$this->localKey, '=', $this->parent->getKey(), null],
-            [$this->foreignKey, '=', $result->getKey(), null],
+            [$this->localKey, '=', $this->parent->{$this->parentKey}, null],
+            [$this->foreignKey, '=', $result->{$this->modelKey}, null],
         ]);
 
         $result->setRelation($this->pivotDataName, $pivotData);
@@ -223,7 +242,7 @@ class BelongsToMany extends Relation
     public function eagerlyResultSet(array &$resultSet, string $relation, array $subRelation, Closure $closure = null, array $cache = []): void
     {
         $localKey = $this->localKey;
-        $pk       = $resultSet[0]->getPk();
+        $pk       = $this->parentKey;
         $range    = [];
 
         foreach ($resultSet as $result) {
@@ -262,7 +281,7 @@ class BelongsToMany extends Relation
      */
     public function eagerlyResult(Model $result, string $relation, array $subRelation, Closure $closure = null, array $cache = []): void
     {
-        $pk = $result->getPk();
+        $pk = $this->parentKey;
 
         if (isset($result->$pk)) {
             $pk = $result->$pk;
@@ -292,7 +311,7 @@ class BelongsToMany extends Relation
      */
     public function relationCount(Model $result, Closure $closure = null, string $aggregate = 'count', string $field = '*', string &$name = null): float
     {
-        $pk = $result->getPk();
+        $pk = $this->parentKey;
 
         if (!isset($result->$pk)) {
             return 0;
@@ -326,7 +345,7 @@ class BelongsToMany extends Relation
 
         return $this->belongsToManyQuery($this->foreignKey, $this->localKey, [
             [
-                'pivot.' . $this->localKey, 'exp', new Raw('=' . $this->parent->db(false)->getTable() . '.' . $this->parent->getPk()),
+                'pivot.' . $this->localKey, 'exp', new Raw('=' . $this->parent->db(false)->getTable() . '.' . $this->parentKey),
             ],
         ])->fetchSql()->$aggregate($field);
     }
@@ -396,7 +415,7 @@ class BelongsToMany extends Relation
             $this->query
                 ->field($fields)
                 ->tableField(true, $table, 'pivot', 'pivot__')
-                ->join([$table => 'pivot'], 'pivot.' . $foreignKey . '=' . $tableName . '.' . $this->query->getPk())
+                ->join([$table => 'pivot'], 'pivot.' . $foreignKey . '=' . $tableName . '.' . $this->modelKey)
                 ->where($condition);
 
         }
@@ -458,19 +477,20 @@ class BelongsToMany extends Relation
             } else {
                 // 保存关联表数据
                 $model = new $this->model;
-                $id    = $model->insertGetId($data);
+                $model->save($data);
+                $id = $model->{$this->modelKey};
             }
         } elseif (is_numeric($data) || is_string($data)) {
             // 根据关联表主键直接写入中间表
             $id = $data;
         } elseif ($data instanceof Model) {
             // 根据关联表主键直接写入中间表
-            $id = $data->getKey();
+            $id = $data->{$this->modelKey};
         }
 
         if (!empty($id)) {
             // 保存中间表数据
-            $pivot[$this->localKey] = $this->parent->getKey();
+            $pivot[$this->localKey] = $this->parent->{$this->parentKey};
 
             $ids = (array) $id;
             foreach ($ids as $id) {
@@ -502,13 +522,13 @@ class BelongsToMany extends Relation
     public function attached($data)
     {
         if ($data instanceof Model) {
-            $id = $data->getKey();
+            $id = $data->{$this->modelKey};
         } else {
             $id = $data;
         }
 
         $pivot = $this->pivot
-            ->where($this->localKey, $this->parent->getKey())
+            ->where($this->localKey, $this->parent->{$this->parentKey})
             ->where($this->foreignKey, $id)
             ->find();
 
@@ -531,12 +551,12 @@ class BelongsToMany extends Relation
             $id = $data;
         } elseif ($data instanceof Model) {
             // 根据关联表主键直接写入中间表
-            $id = $data->getKey();
+            $id = $data->{$this->modelKey};
         }
 
         // 删除中间表数据
         $pivot   = [];
-        $pivot[] = [$this->localKey, '=', $this->parent->getKey()];
+        $pivot[] = [$this->localKey, '=', $this->parent->{$this->parentKey}];
 
         if (isset($id)) {
             $pivot[] = [$this->foreignKey, is_array($id) ? 'in' : '=', $id];
@@ -569,7 +589,7 @@ class BelongsToMany extends Relation
         ];
 
         $current = $this->pivot
-            ->where($this->localKey, $this->parent->getKey())
+            ->where($this->localKey, $this->parent->{$this->parentKey})
             ->column($this->foreignKey);
 
         $records = [];
@@ -617,10 +637,10 @@ class BelongsToMany extends Relation
             });
 
             // 关联查询
-            if (null === $this->parent->getKey()) {
-                $condition = ['pivot.' . $localKey, 'exp', new Raw('=' . $this->parent->getTable() . '.' . $this->parent->getPk())];
+            if (null === $this->parent->{$this->parentKey}) {
+                $condition = ['pivot.' . $localKey, 'exp', new Raw('=' . $this->parent->getTable() . '.' . $this->parentKey)];
             } else {
-                $condition = ['pivot.' . $localKey, '=', $this->parent->getKey()];
+                $condition = ['pivot.' . $localKey, '=', $this->parent->{$this->parentKey}];
             }
 
             $this->belongsToManyQuery($foreignKey, $localKey, [$condition]);

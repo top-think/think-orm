@@ -627,9 +627,12 @@ trait RelationShip
      * @param  string       $middle 中间表名/模型名
      * @param  string|array $morph 多态字段信息
      * @param  string       $localKey   当前模型关联键
+     * @param  string       $modelKey 关联模型关联键
+     * @param  string       $parentKey 上级模型关联键
      * @return MorphToMany
      */
-    public function morphToMany(string $model, string $middle, $morph = null, string $localKey = null): MorphToMany
+    public function morphToMany(string $model, string $middle, $morph = null, string $localKey = null,
+                                string $modelKey = '', string $parentKey = ''): MorphToMany
     {
         if (is_null($morph)) {
             $morph = $middle;
@@ -647,7 +650,7 @@ trait RelationShip
         $name     = Str::snake(class_basename($model));
         $localKey = $localKey ?: $this->getForeignKey($name);
 
-        return new MorphToMany($this, $model, $middle, $morphType, $morphKey, $localKey);
+        return new MorphToMany($this, $model, $middle, $morphType, $morphKey, $localKey, false, $modelKey, $parentKey);
     }
 
     /**
@@ -657,9 +660,12 @@ trait RelationShip
      * @param  string       $middle 中间表名/模型名
      * @param  string|array $morph 多态字段信息
      * @param  string       $foreignKey 关联外键
+     * @param  string       $modelKey 关联模型关联键
+     * @param  string       $parentKey 上级模型关联键
      * @return MorphToMany
      */
-    public function morphByMany(string $model, string $middle, $morph = null, string $foreignKey = null): MorphToMany
+    public function morphByMany(string $model, string $middle, $morph = null, string $foreignKey = null,
+                                string $modelKey = '', string $parentKey = ''): MorphToMany
     {
         if (is_null($morph)) {
             $morph = $middle;
@@ -676,7 +682,7 @@ trait RelationShip
         $model      = $this->parseModel($model);
         $foreignKey = $foreignKey ?: $this->getForeignKey($this->name);
 
-        return new MorphToMany($this, $model, $middle, $morphType, $morphKey, $foreignKey, true);
+        return new MorphToMany($this, $model, $middle, $morphType, $morphKey, $foreignKey, true, $modelKey, $parentKey);
     }
 
     /**

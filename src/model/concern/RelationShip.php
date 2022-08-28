@@ -536,12 +536,13 @@ trait RelationShip
     /**
      * MORPH  One 关联定义
      * @access public
-     * @param  string       $model 模型名
-     * @param  string|array $morph 多态字段信息
-     * @param  string       $type  多态类型
+     * @param  string       $model     模型名
+     * @param  string|array $morph     多态字段信息
+     * @param  string       $type      多态类型
+     * @param  string       $parentKey 上级模型关联键
      * @return MorphOne
      */
-    public function morphOne(string $model, $morph = null, string $type = ''): MorphOne
+    public function morphOne(string $model, $morph = null, string $type = '', string $parentKey = ''): MorphOne
     {
         // 记录当前关联信息
         $model = $this->parseModel($model);
@@ -560,18 +561,19 @@ trait RelationShip
 
         $type = $type ?: get_class($this);
 
-        return new MorphOne($this, $model, $foreignKey, $morphType, $type);
+        return new MorphOne($this, $model, $foreignKey, $morphType, $type, $parentKey);
     }
 
     /**
      * MORPH  MANY 关联定义
      * @access public
-     * @param  string       $model 模型名
-     * @param  string|array $morph 多态字段信息
-     * @param  string       $type  多态类型
+     * @param  string       $model     模型名
+     * @param  string|array $morph     多态字段信息
+     * @param  string       $type      多态类型
+     * @param  string       $parentKey 上级模型关联键
      * @return MorphMany
      */
-    public function morphMany(string $model, $morph = null, string $type = ''): MorphMany
+    public function morphMany(string $model, $morph = null, string $type = '', string $parentKey = ''): MorphMany
     {
         // 记录当前关联信息
         $model = $this->parseModel($model);
@@ -590,17 +592,18 @@ trait RelationShip
             $foreignKey = $morph . '_id';
         }
 
-        return new MorphMany($this, $model, $foreignKey, $morphType, $type);
+        return new MorphMany($this, $model, $foreignKey, $morphType, $type, $parentKey);
     }
 
     /**
      * MORPH TO 关联定义
      * @access public
-     * @param  string|array $morph 多态字段信息
-     * @param  array        $alias 多态别名定义
+     * @param  string|array $morph     多态字段信息
+     * @param  array        $alias     多态别名定义
+     * @param  ?string      $parentKey 上级模型关联键
      * @return MorphTo
      */
-    public function morphTo($morph = null, array $alias = []): MorphTo
+    public function morphTo($morph = null, array $alias = [], string $parentKey = ''): MorphTo
     {
         $trace    = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2);
         $relation = Str::snake($trace[1]['function']);
@@ -617,7 +620,7 @@ trait RelationShip
             $foreignKey = $morph . '_id';
         }
 
-        return new MorphTo($this, $morphType, $foreignKey, $alias, $relation);
+        return new MorphTo($this, $morphType, $foreignKey, $alias, $relation, $parentKey);
     }
 
     /**

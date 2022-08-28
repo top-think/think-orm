@@ -42,6 +42,12 @@ class MorphOne extends Relation
     protected $type;
 
     /**
+     * 上级模型关联键
+     * @var string
+     */
+    protected $parentKey;
+
+    /**
      * 绑定的关联属性
      * @var array
      */
@@ -55,14 +61,17 @@ class MorphOne extends Relation
      * @param  string $morphKey  关联外键
      * @param  string $morphType 多态字段名
      * @param  string $type      多态类型
+     * @param  string $parentKey 上级模型关联键
      */
-    public function __construct(Model $parent, string $model, string $morphKey, string $morphType, string $type)
+    public function __construct(Model $parent, string $model, string $morphKey, string $morphType, string $type,
+                                string $parentKey = '')
     {
         $this->parent    = $parent;
         $this->model     = $model;
         $this->type      = $type;
         $this->morphKey  = $morphKey;
         $this->morphType = $morphType;
+        $this->parentKey  = $parentKey ?: $parent->getPk();
         $this->query     = (new $model)->db();
     }
 
@@ -276,7 +285,7 @@ class MorphOne extends Relation
         }
 
         // 保存关联表数据
-        $pk = $this->parent->getPk();
+        $pk = $this->parentKey;
 
         $data[$this->morphKey]  = $this->parent->$pk;
         $data[$this->morphType] = $this->type;
@@ -292,7 +301,7 @@ class MorphOne extends Relation
     protected function baseQuery(): void
     {
         if (empty($this->baseQuery) && $this->parent->getData()) {
-            $pk = $this->parent->getPk();
+            $pk = $this->parentKey;
 
             $this->query->where([
                 [$this->morphKey, '=', $this->parent->$pk],

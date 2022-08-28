@@ -36,6 +36,13 @@ class MorphTo extends Relation
     protected $morphType;
 
     /**
+     * 上级模型关联键
+     *
+     * @var string
+     */
+    protected $parentKey;
+
+    /**
      * 多态别名
      * @var array
      */
@@ -57,14 +64,17 @@ class MorphTo extends Relation
      * @param string $morphKey 外键名
      * @param array $alias 多态别名定义
      * @param  ?string $relation 关联名
+     * @param string $parentKey 上级模型关联键
      */
-    public function __construct(Model $parent, string $morphType, string $morphKey, array $alias = [], string $relation = null)
+    public function __construct(Model $parent, string $morphType, string $morphKey, array $alias = [], string $relation = null,
+                                string $parentKey = '')
     {
         $this->parent    = $parent;
         $this->morphType = $morphType;
         $this->morphKey  = $morphKey;
         $this->alias     = $alias;
         $this->relation  = $relation;
+        $this->parentKey = $parentKey;
     }
 
     /**
@@ -149,10 +159,11 @@ class MorphTo extends Relation
                             $model = new $class();
 
                             $table = $model->getTable();
+                            $pk = $this->parentKey && $model->{$this->parentKey} ? $this->parentKey : $model->getPk();
                             $query
                                 ->table($table)
                                 ->where($alias . '.' . $this->morphType, $type)
-                                ->whereRaw("`{$alias}`.`{$this->morphKey}`=`{$table}`.`{$model->getPk()}`")
+                                ->whereRaw("`{$alias}`.`{$this->morphKey}`=`{$table}`.`{$model->$pk}`")
                                 ->where($where);
                         }, 'OR');
                     }
@@ -238,7 +249,7 @@ class MorphTo extends Relation
                 if (!\is_null($closure)) {
                     $obj = $closure($obj);
                 }
-                $pk   = $obj->getPk();
+                $pk   = $this->parentKey && $obj->{$this->parentKey} ? $this->parentKey : $obj->getPk();
                 $list = $obj->with($subRelation)
                     ->cache($cache[0] ?? false, $cache[1] ?? null, $cache[2] ?? null)
                     ->select($val);
@@ -339,7 +350,7 @@ class MorphTo extends Relation
     {
         $morphKey  = $this->morphKey;
         $morphType = $this->morphType;
-        $pk        = $model->getPk();
+        $pk        = $this->parentKey && $model->{$this->parentKey} ? $this->parentKey : $model->getPk();
 
         $this->parent->setAttr($morphKey, $model->$pk);
         $this->parent->setAttr($morphType, $type ?: get_class($model));

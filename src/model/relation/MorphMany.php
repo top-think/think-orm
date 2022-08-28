@@ -38,6 +38,12 @@ class MorphMany extends Relation
     protected $morphType;
 
     /**
+     * 上级模型关联键
+     * @var string
+     */
+    protected $parentKey;
+
+    /**
      * 多态类型
      * @var string
      */
@@ -51,8 +57,10 @@ class MorphMany extends Relation
      * @param  string $morphKey  关联外键
      * @param  string $morphType 多态字段名
      * @param  string $type      多态类型
+     * @param  string $parentKey 上级模型关联键
      */
-    public function __construct(Model $parent, string $model, string $morphKey, string $morphType, string $type)
+    public function __construct(Model $parent, string $model, string $morphKey, string $morphType, string $type,
+                                string $parentKey = '')
     {
         $this->parent    = $parent;
         $this->model     = $model;
@@ -60,6 +68,7 @@ class MorphMany extends Relation
         $this->morphKey  = $morphKey;
         $this->morphType = $morphType;
         $this->query     = (new $model)->db();
+        $this->parentKey = $parentKey ?: $parent->getPk();
     }
 
     /**
@@ -132,8 +141,8 @@ class MorphMany extends Relation
         $type      = $this->type;
         $range     = [];
 
+        $pk = $this->parentKey;
         foreach ($resultSet as $result) {
-            $pk = $result->getPk();
             // 获取关联外键列表
             if (isset($result->$pk)) {
                 $range[] = $result->$pk;
@@ -170,7 +179,7 @@ class MorphMany extends Relation
      */
     public function eagerlyResult(Model $result, string $relation, array $subRelation = [], Closure $closure = null, array $cache = []): void
     {
-        $pk = $result->getPk();
+        $pk = $this->parentKey;
 
         if (isset($result->$pk)) {
             $key  = $result->$pk;
@@ -199,7 +208,7 @@ class MorphMany extends Relation
      */
     public function relationCount(Model $result, Closure $closure = null, string $aggregate = 'count', string $field = '*', string &$name = null)
     {
-        $pk = $result->getPk();
+        $pk = $this->parentKey;
 
         if (!isset($result->$pk)) {
             return 0;
@@ -233,7 +242,7 @@ class MorphMany extends Relation
         }
 
         return $this->query
-            ->whereExp($this->morphKey, '=' . $this->parent->getTable() . '.' . $this->parent->getPk())
+            ->whereExp($this->morphKey, '=' . $this->parent->getTable() . '.' . $this->parentKey)
             ->where($this->morphType, '=', $this->type)
             ->fetchSql()
             ->$aggregate($field);
@@ -306,7 +315,7 @@ class MorphMany extends Relation
         }
 
         // 保存关联表数据
-        $pk = $this->parent->getPk();
+        $pk = $this->parentKey;
 
         $data[$this->morphKey]  = $this->parent->$pk;
         $data[$this->morphType] = $this->type;
@@ -367,7 +376,7 @@ class MorphMany extends Relation
     protected function baseQuery(): void
     {
         if (empty($this->baseQuery) && $this->parent->getData()) {
-            $pk = $this->parent->getPk();
+            $pk = $this->parentKey;
 
             $this->query->where([
                 [$this->morphKey, '=', $this->parent->$pk],

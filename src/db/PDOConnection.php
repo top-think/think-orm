@@ -1783,7 +1783,7 @@ abstract class PDOConnection extends Connection
                 $dbs[$key] = $db;
             }
 
-            $db->startTransXa($xid);
+            $db->startTransXa($db->getConfig('hostname').'_'.$db->getConfig('database').'_'.$xid);
         }
 
         try {
@@ -1793,17 +1793,17 @@ abstract class PDOConnection extends Connection
             }
 
             foreach ($dbs as $db) {
-                $db->prepareXa($xid);
+                $db->prepareXa($db->getConfig('hostname').'_'.$db->getConfig('database').'_'.$xid);
             }
 
             foreach ($dbs as $db) {
-                $db->commitXa($xid);
+                $db->commitXa($db->getConfig('hostname').'_'.$db->getConfig('database').'_'.$xid);
             }
 
             return $result;
         } catch (\Exception | \Throwable $e) {
             foreach ($dbs as $db) {
-                $db->rollbackXa($xid);
+                $db->rollbackXa($db->getConfig('hostname').'_'.$db->getConfig('database').'_'.$xid);
             }
             throw $e;
         }

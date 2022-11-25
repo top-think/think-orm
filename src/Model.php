@@ -625,7 +625,7 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
                 continue;
             }
 
-            foreach ($val as $key) {
+            foreach (array_keys($val) as $key) {
                 if (isset($data[$key])) {
                     unset($data[$key]);
                 }

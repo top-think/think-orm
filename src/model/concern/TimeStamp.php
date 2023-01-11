@@ -185,7 +185,10 @@ trait TimeStamp
         if (false === $format) {
             return $time;
         } elseif (false !== strpos($format, '\\')) {
-            return new $format($time);
+            $obj = new $format($time);
+            if (method_exists($obj, '__toString')) {
+                return $obj->__toString();
+            }
         }
 
         if ($time instanceof DateTime) {

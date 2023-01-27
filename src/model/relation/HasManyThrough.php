@@ -79,8 +79,9 @@ class HasManyThrough extends Relation
 
         $this->baseQuery();
 
-        if ($this->withLimit) {
-            $this->query->limit($this->withLimit);
+        $withLimit = $this->withLimit ?: $this->query->getOptions('with_limit');
+        if ($withLimit) {
+            $this->query->limit($withLimit);
         }
 
         return $this->query->relation($subRelation)

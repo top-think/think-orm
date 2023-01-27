@@ -77,8 +77,9 @@ class MorphMany extends Relation
 
         $this->baseQuery();
 
-        if ($this->withLimit) {
-            $this->query->limit($this->withLimit);
+        $withLimit = $this->withLimit ?: $this->query->getOptions('with_limit');
+        if ($withLimit) {
+            $this->query->limit($withLimit);
         }
 
         return $this->query->relation($subRelation)
@@ -266,11 +267,13 @@ class MorphMany extends Relation
         $morphKey = $this->morphKey;
 
         // 组装模型数据
-        $data = [];
+        $data      = [];
+        $withLimit = $this->withLimit ?: $this->query->getOptions('with_limit');
+
         foreach ($list as $set) {
             $key = $set->$morphKey;
 
-            if ($this->withLimit && isset($data[$key]) && count($data[$key]) >= $this->withLimit) {
+            if ($withLimit && isset($data[$key]) && count($data[$key]) >= $withLimit) {
                 continue;
             }
 

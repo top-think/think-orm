@@ -177,6 +177,18 @@ trait ModelRelationQuery
     }
 
     /**
+     * 限制关联数据的数量
+     * @access public
+     * @param  int $limit 关联数量限制
+     * @return $this
+     */
+    public function withLimit(int $limit)
+    {
+        $this->options['with_limit'] = $limit;
+        return $this;
+    }
+
+    /**
      * 设置数据字段获取器
      * @access public
      * @param string|array  $name     字段名

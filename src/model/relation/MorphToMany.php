@@ -217,8 +217,9 @@ class MorphToMany extends BelongsToMany
 
         $fields = $this->getQueryFields($tableName);
 
-        if ($this->withLimit) {
-            $this->query->limit($this->withLimit);
+        $withLimit = $this->withLimit ?: $this->query->getOptions('with_limit');
+        if ($withLimit) {
+            $this->query->limit($withLimit);
         }
 
         $query = $this->query
@@ -256,7 +257,9 @@ class MorphToMany extends BelongsToMany
             ->select();
 
         // 组装模型数据
-        $data = [];
+        $data      = [];
+        $withLimit = $this->withLimit ?: $this->query->getOptions('with_limit');
+
         foreach ($list as $set) {
             $pivot = [];
             foreach ($set->getData() as $key => $val) {
@@ -271,7 +274,7 @@ class MorphToMany extends BelongsToMany
 
             $key = $pivot[$this->localKey];
 
-            if ($this->withLimit && isset($data[$key]) && count($data[$key]) >= $this->withLimit) {
+            if ($withLimit && isset($data[$key]) && count($data[$key]) >= $withLimit) {
                 continue;
             }
 
@@ -481,7 +484,7 @@ class MorphToMany extends BelongsToMany
     {
         if (is_array($map)) {
             static::$morphMap = $merge && static::$morphMap
-                ? $map + static::$morphMap : $map;
+            ? $map+static::$morphMap : $map;
         }
 
         return static::$morphMap;

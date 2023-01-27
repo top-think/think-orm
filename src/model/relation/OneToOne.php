@@ -100,7 +100,7 @@ abstract class OneToOne extends Relation
 
             $joinOn = $foreignKeyExp . '=' . $joinAlias . '.' . $this->localKey;
         } else {
-            
+
             $foreignKeyExp = $this->foreignKey;
 
             if (strpos($foreignKeyExp, '.') === false) {
@@ -201,9 +201,9 @@ abstract class OneToOne extends Relation
      */
     public function save($data, bool $replace = true)
     {
-        $model = $this->make();
+        $model = $this->make($data);
 
-        return $model->replace($replace)->save($data) ? $model : false;
+        return $model->replace($replace)->save() ? $model : false;
     }
 
     /**
@@ -222,7 +222,6 @@ abstract class OneToOne extends Relation
 
         return new $this->model($data);
     }
-
 
     /**
      * 绑定关联表的属性到父模型属性

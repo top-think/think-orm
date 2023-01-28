@@ -68,12 +68,6 @@ abstract class Relation
     protected $selfRelation = false;
 
     /**
-     * 关联数据数量限制
-     * @var int
-     */
-    protected $withLimit;
-
-    /**
      * 关联数据字段限制
      * @var array
      */
@@ -198,18 +192,6 @@ abstract class Relation
                 $val[0] = $relation . '.' . $val[0];
             }
         }
-    }
-
-    /**
-     * 限制关联数据的数量
-     * @access public
-     * @param  int $limit 关联数量限制
-     * @return $this
-     */
-    public function withLimit(int $limit)
-    {
-        $this->withLimit = $limit;
-        return $this;
     }
 
     /**

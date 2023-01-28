@@ -8,7 +8,7 @@
 // +----------------------------------------------------------------------
 // | Author: liu21st <liu21st@gmail.com>
 // +----------------------------------------------------------------------
-declare (strict_types = 1);
+declare(strict_types=1);
 
 namespace think\db;
 
@@ -106,6 +106,13 @@ abstract class Connection implements ConnectionInterface
     protected $config = [];
 
     /**
+     * 连接对象唯一标识
+     * @var string
+     */
+    protected $unique = '';
+
+
+    /**
      * 缓存对象
      * @var CacheInterface
      */
@@ -121,6 +128,8 @@ abstract class Connection implements ConnectionInterface
         if (!empty($config)) {
             $this->config = array_merge($this->config, $config);
         }
+
+        $this->unique = $this->config['hostname'] . '_' . $this->config['database'];
 
         // 创建Builder对象
         $class = $this->getBuilderClass();
@@ -221,6 +230,28 @@ abstract class Connection implements ConnectionInterface
         }
 
         return $this->config[$config] ?? null;
+    }
+
+    /**
+     * 设置数据库的连接标识
+     * @access public
+     * @param string $unique 连接标识
+     * @return void
+     */
+    public function setUnique(string $unique): void
+    {
+        $this->unique = $unique;
+    }
+
+    /**
+     * 获取数据库的唯一标识
+     * @access public
+     * @param string $suffix 标识后缀
+     * @return string
+     */
+    public function getUnique(string $suffix = ''): string
+    {
+        return $this->unique . $suffix;
     }
 
     /**

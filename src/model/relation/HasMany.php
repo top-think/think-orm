@@ -58,7 +58,7 @@ class HasMany extends Relation
             $closure($this->getClosureType($closure));
         }
 
-        $withLimit = $this->withLimit ?: $this->query->getOptions('with_limit');
+        $withLimit = $this->query->getOptions('with_limit');
         if ($withLimit) {
             $this->query->limit($withLimit);
         }
@@ -219,7 +219,7 @@ class HasMany extends Relation
 
         // 组装模型数据
         $data      = [];
-        $withLimit = $this->withLimit ?: $this->query->getOptions('with_limit');
+        $withLimit = $this->query->getOptions('with_limit');
 
         foreach ($list as $set) {
             $key = $set->$foreignKey;

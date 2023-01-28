@@ -216,13 +216,7 @@ class MorphToMany extends BelongsToMany
         }
 
         $fields = $this->getQueryFields($tableName);
-
-        $withLimit = $this->withLimit ?: $this->query->getOptions('with_limit');
-        if ($withLimit) {
-            $this->query->limit($withLimit);
-        }
-
-        $query = $this->query
+        $query  = $this->query
             ->field($fields)
             ->tableField(true, $table, 'pivot', 'pivot__');
 
@@ -258,7 +252,7 @@ class MorphToMany extends BelongsToMany
 
         // 组装模型数据
         $data      = [];
-        $withLimit = $this->withLimit ?: $this->query->getOptions('with_limit');
+        $withLimit =   $this->query->getOptions('with_limit');
 
         foreach ($list as $set) {
             $pivot = [];

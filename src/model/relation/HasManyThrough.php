@@ -79,7 +79,7 @@ class HasManyThrough extends Relation
 
         $this->baseQuery();
 
-        $withLimit = $this->withLimit ?: $this->query->getOptions('with_limit');
+        $withLimit = $this->query->getOptions('with_limit');
         if ($withLimit) {
             $this->query->limit($withLimit);
         }
@@ -271,13 +271,14 @@ class HasManyThrough extends Relation
             ->select();
 
         // 组装模型数据
-        $data = [];
-        $keys = $throughList->column($this->foreignKey, $this->throughPk);
+        $data       = [];
+        $withLimit  = $this->query->getOptions('with_limit');
+        $keys       = $throughList->column($this->foreignKey, $this->throughPk);
 
         foreach ($list as $set) {
             $key = $keys[$set->{$this->throughKey}];
 
-            if ($this->withLimit && isset($data[$key]) && count($data[$key]) >= $this->withLimit) {
+            if ($withLimit && isset($data[$key]) && count($data[$key]) >= $withLimit) {
                 continue;
             }
 

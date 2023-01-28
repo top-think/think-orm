@@ -1759,6 +1759,17 @@ abstract class PDOConnection extends Connection
     }
 
     /**
+     * 获取数据库的唯一标识
+     * @access public
+     * @param string $suffix 标识后缀
+     * @return string
+     */
+    public function getUniqueXid(string $suffix = ''): string
+    {
+        return $this->config['hostname'] . '_' . $this->config['database'] . $suffix;
+    }
+
+    /**
      * 执行数据库Xa事务
      * @access public
      * @param  callable $callback 数据操作方法回调
@@ -1783,7 +1794,7 @@ abstract class PDOConnection extends Connection
                 $dbs[$key] = $db;
             }
 
-            $db->startTransXa($db->getUnique('_' . $xid) );
+            $db->startTransXa($db->getUniqueXid('_' . $xid) );
         }
 
         try {
@@ -1793,17 +1804,17 @@ abstract class PDOConnection extends Connection
             }
 
             foreach ($dbs as $db) {
-                $db->prepareXa($db->getUnique('_' . $xid));
+                $db->prepareXa($db->getUniqueXid('_' . $xid));
             }
 
             foreach ($dbs as $db) {
-                $db->commitXa($db->getUnique('_' . $xid) );
+                $db->commitXa($db->getUniqueXid('_' . $xid) );
             }
 
             return $result;
         } catch (\Exception | \Throwable $e) {
             foreach ($dbs as $db) {
-                $db->rollbackXa($db->getUnique('_' . $xid) );
+                $db->rollbackXa($db->getUniqueXid('_' . $xid) );
             }
             throw $e;
         }

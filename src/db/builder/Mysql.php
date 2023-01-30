@@ -208,9 +208,10 @@ class Mysql extends Builder
         if (empty($data)) {
             return '';
         }
+
         $set = [];
         foreach ($data as $key => $val) {
-            $set[] = $key . ' = ' . $val;
+            $set[] = (strpos($key,'->') ? strstr($key,'->',true) : $key) . ' = ' . $val;
         }
 
         return str_replace(

@@ -81,6 +81,8 @@ abstract class PDOConnection extends Connection
         'break_reconnect' => false,
         // 断线标识字符串
         'break_match_str' => [],
+        // 自动参数绑定
+        'auto_param_bind' => true,
     ];
 
     /**

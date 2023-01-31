@@ -191,12 +191,16 @@ abstract class Builder
      * @param  string $key       字段名
      * @param  mixed  $data      数据
      * @param  array  $bind      绑定数据
-     * @return string
+     * @return string|int|float
      */
-    protected function parseDataBind(Query $query, string $key, $data, array $bind = []): string
+    protected function parseDataBind(Query $query, string $key, $data, array $bind = [])
     {
         if ($data instanceof Raw) {
             return $this->parseRaw($query, $data);
+        }
+
+        if (!$query->isAutoBind()) {
+            return $data;
         }
 
         $name = $query->bindValue($data, $bind[$key] ?? PDO::PARAM_STR);
@@ -762,18 +766,24 @@ abstract class Builder
             if (count($value) === 0) {
                 return 'IN' == $exp ? '0 = 1' : '1 = 1';
             }
-            $array = [];
 
-            foreach ($value as $v) {
-                $name    = $query->bindValue($v, $bindType);
-                $array[] = ':' . $name;
+            if ($query->isAutoBind()) {
+                $array = [];
+                foreach ($value as $v) {
+                    $name    = $query->bindValue($v, $bindType);
+                    $array[] = ':' . $name;
+                }                              
+            } else {
+                $array = $value;  
             }
+
 
             if (count($array) == 1) {
                 return $key . ('IN' == $exp ? ' = ' : ' <> ') . $array[0];
-            } else {
-                $value = implode(',', $array);
-            }
+            } 
+
+            $value = implode(',', $array);
+            
         }
 
         return $key . ' ' . $exp . ' (' . $value . ')';

@@ -177,7 +177,7 @@ abstract class Builder
                 }
             } elseif (is_scalar($val)) {
                 // 过滤非标量数据
-                $result[$item] = $this->parseDataBind($query, $key, $val, $bind);
+                $result[$item] = !$query->isAutoBind() ? $val : $this->parseDataBind($query, $key, $val, $bind);
             }
         }
 
@@ -191,16 +191,12 @@ abstract class Builder
      * @param  string $key       字段名
      * @param  mixed  $data      数据
      * @param  array  $bind      绑定数据
-     * @return string|int|float
+     * @return string
      */
-    protected function parseDataBind(Query $query, string $key, $data, array $bind = [])
+    protected function parseDataBind(Query $query, string $key, $data, array $bind = []): string
     {
         if ($data instanceof Raw) {
             return $this->parseRaw($query, $data);
-        }
-
-        if (!$query->isAutoBind()) {
-            return $data;
         }
 
         $name = $query->bindValue($data, $bind[$key] ?? PDO::PARAM_STR);

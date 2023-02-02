@@ -675,7 +675,7 @@ trait RelationShip
      */
     protected function parseModel(string $model): string
     {
-        if (str_contains($model, '\\')) {
+        if (!str_contains($model, '\\')) {
             $path = explode('\\', static::class);
             array_pop($path);
             array_push($path, Str::studly($model));

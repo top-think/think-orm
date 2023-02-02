@@ -469,11 +469,7 @@ abstract class BaseQuery
      */
     public function limit(int $offset, int $length = null)
     {
-        if ($this->getOptions('from_relation')) {
-            $this->options['with_limit'] = $offset;
-        } else {
-            $this->options['limit'] = $offset . ($length ? ',' . $length : '');
-        }
+        $this->options['limit'] = $offset . ($length ? ',' . $length : '');
 
         return $this;
     }

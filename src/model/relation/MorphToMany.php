@@ -244,6 +244,11 @@ class MorphToMany extends BelongsToMany
             $closure($this->getClosureType($closure));
         }
 
+        $withLimit = $this->query->getOptions('limit');
+        if ($withLimit) {
+            $this->query->removeOption('limit');            
+        }
+
         // 预载入关联查询 支持嵌套预载入
         $list = $this->belongsToManyQuery($this->foreignKey, $this->localKey, $where)
             ->with($subRelation)
@@ -252,8 +257,6 @@ class MorphToMany extends BelongsToMany
 
         // 组装模型数据
         $data      = [];
-        $withLimit =   $this->query->getOptions('with_limit');
-
         foreach ($list as $set) {
             $pivot = [];
             foreach ($set->getData() as $key => $val) {

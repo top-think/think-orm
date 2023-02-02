@@ -177,17 +177,6 @@ trait ModelRelationQuery
     }
 
     /**
-     * 来自关联对象调用
-     * @access public
-     * @return $this
-     */
-    public function fromRelation()
-    {
-        $this->options['from_relation'] = true;
-        return $this;
-    }
-
-    /**
      * 设置数据字段获取器
      * @access public
      * @param string|array  $name     字段名

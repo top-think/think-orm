@@ -283,7 +283,7 @@ abstract class Relation
         if (!empty($params)) {
             $type  = $params[0]->getType();
             $query = $query?:$this->query;
-            return is_null($type) || Relation::class == $type->getName() ? $this : $query->fromRelation();
+            return is_null($type) || Relation::class == $type->getName() ? $this : $query;
         }
 
         return $this;
@@ -303,7 +303,7 @@ abstract class Relation
             // 执行基础查询
             $this->baseQuery();
 
-            $result = call_user_func_array([$this->query->fromRelation(), $method], $args);
+            $result = call_user_func_array([$this->query, $method], $args);
 
             return $result === $this->query ? $this : $result;
         }

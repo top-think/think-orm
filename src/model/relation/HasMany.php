@@ -58,11 +58,6 @@ class HasMany extends Relation
             $closure($this->getClosureType($closure));
         }
 
-        $withLimit = $this->query->getOptions('with_limit');
-        if ($withLimit) {
-            $this->query->limit($withLimit);
-        }
-
         return $this->query
             ->where($this->foreignKey, $this->parent->{$this->localKey})
             ->relation($subRelation)
@@ -211,6 +206,11 @@ class HasMany extends Relation
             $this->query->withoutField($this->withoutField);
         }
 
+        $withLimit = $this->query->getOptions('limit');
+        if ($withLimit) {
+            $this->query->removeOption('limit');            
+        }
+
         $list = $this->query
             ->where($where)
             ->cache($cache[0] ?? false, $cache[1] ?? null, $cache[2] ?? null)
@@ -219,7 +219,7 @@ class HasMany extends Relation
 
         // 组装模型数据
         $data      = [];
-        $withLimit = $this->query->getOptions('with_limit');
+        
 
         foreach ($list as $set) {
             $key = $set->$foreignKey;

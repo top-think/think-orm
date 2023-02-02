@@ -112,7 +112,7 @@ abstract class OneToOne extends Relation
 
         if ($closure) {
             // 执行闭包查询
-            $closure($this->getClosureType($closure));
+            $closure($this->getClosureType($closure, $query));
 
             // 使用withField指定获取关联的字段
             if ($this->withField) {

@@ -263,14 +263,15 @@ abstract class Relation
      * @access protected
      * @return mixed
      */
-    protected function getClosureType(Closure $closure)
+    protected function getClosureType(Closure $closure, $query = null)
     {
         $reflect = new ReflectionFunction($closure);
         $params  = $reflect->getParameters();
 
         if (!empty($params)) {
-            $type = $params[0]->getType();
-            return is_null($type) || Relation::class == $type->getName() ? $this : $this->query;
+            $type  = $params[0]->getType();
+            $query = $query?:$this->query;
+            return is_null($type) || Relation::class == $type->getName() ? $this : $query;
         }
 
         return $this;

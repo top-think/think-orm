@@ -2,13 +2,13 @@
 // +----------------------------------------------------------------------
 // | ThinkPHP [ WE CAN DO IT JUST THINK ]
 // +----------------------------------------------------------------------
-// | Copyright (c) 2006~2019 http://thinkphp.cn All rights reserved.
+// | Copyright (c) 2006~2023 http://thinkphp.cn All rights reserved.
 // +----------------------------------------------------------------------
 // | Licensed ( http://www.apache.org/licenses/LICENSE-2.0 )
 // +----------------------------------------------------------------------
 // | Author: liu21st <liu21st@gmail.com>
 // +----------------------------------------------------------------------
-declare (strict_types = 1);
+declare(strict_types=1);
 
 namespace think\model;
 
@@ -110,7 +110,7 @@ abstract class Relation
      * @access public
      * @return string
      */
-    public function getForeignKey()
+    public function getForeignKey():string
     {
         return $this->foreignKey;
     }
@@ -120,7 +120,7 @@ abstract class Relation
      * @access public
      * @return string
      */
-    public function getLocalKey()
+    public function getLocalKey():string
     {
         return $this->localKey;
     }
@@ -174,7 +174,7 @@ abstract class Relation
         }
 
         foreach ($fields as &$field) {
-            if (false === strpos($field, '.')) {
+            if (!str_contains($field, '.')) {
                 $field = $model . '.' . $field;
             }
         }
@@ -186,44 +186,12 @@ abstract class Relation
     {
         foreach ($where as $key => &$val) {
             if (is_string($key)) {
-                $where[] = [false === strpos($key, '.') ? $relation . '.' . $key : $key, '=', $val];
+                $where[] = [!str_contains($key, '.') ? $relation . '.' . $key : $key, '=', $val];
                 unset($where[$key]);
-            } elseif (isset($val[0]) && false === strpos($val[0], '.')) {
+            } elseif (isset($val[0]) && !str_contains($val[0], '.')) {
                 $val[0] = $relation . '.' . $val[0];
             }
         }
-    }
-
-    /**
-     * 限制关联数据的字段
-     * @access public
-     * @param  array|string $field 关联字段限制
-     * @return $this
-     */
-    public function withField($field)
-    {
-        if (is_string($field)) {
-            $field = array_map('trim', explode(',', $field));
-        }
-
-        $this->withField = $field;
-        return $this;
-    }
-
-    /**
-     * 排除关联数据的字段
-     * @access public
-     * @param  array|string $field 关联字段限制
-     * @return $this
-     */
-    public function withoutField($field)
-    {
-        if (is_string($field)) {
-            $field = array_map('trim', explode(',', $field));
-        }
-
-        $this->withoutField = $field;
-        return $this;
     }
 
     /**
@@ -249,7 +217,7 @@ abstract class Relation
             $model = (new $this->model)->data($this->default);
         } elseif ($this->default instanceof Closure) {
             $closure = $this->default;
-            $model   = new $this->model;
+            $model = new $this->model;
             $closure($model);
         } else {
             $model = $this->default;
@@ -259,30 +227,13 @@ abstract class Relation
     }
 
     /**
-     * 判断闭包的参数类型
-     * @access protected
-     * @return mixed
-     */
-    protected function getClosureType(Closure $closure)
-    {
-        $reflect = new ReflectionFunction($closure);
-        $params  = $reflect->getParameters();
-
-        if (!empty($params)) {
-            $type = $params[0]->getType();
-            return is_null($type) || Relation::class == $type->getName() ? $this : $this->query;
-        }
-
-        return $this;
-    }
-
-    /**
      * 执行基础查询（仅执行一次）
      * @access protected
      * @return void
      */
     protected function baseQuery(): void
-    {}
+    {
+    }
 
     public function __call($method, $args)
     {

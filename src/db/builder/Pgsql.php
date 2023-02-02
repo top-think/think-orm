@@ -2,7 +2,7 @@
 // +----------------------------------------------------------------------
 // | ThinkPHP [ WE CAN DO IT JUST THINK ]
 // +----------------------------------------------------------------------
-// | Copyright (c) 2006~2019 http://thinkphp.cn All rights reserved.
+// | Copyright (c) 2006~2023 http://thinkphp.cn All rights reserved.
 // +----------------------------------------------------------------------
 // | Licensed ( http://www.apache.org/licenses/LICENSE-2.0 )
 // +----------------------------------------------------------------------
@@ -74,11 +74,11 @@ class Pgsql extends Builder
 
         $key = trim($key);
 
-        if (strpos($key, '->') && false === strpos($key, '(')) {
+        if (str_contains($key, '->') && !str_contains($key, '(')) {
             // JSON字段支持
             [$field, $name] = explode('->', $key);
             $key            = '"' . $field . '"' . '->>\'' . $name . '\'';
-        } elseif (strpos($key, '.')) {
+        } elseif (str_contains($key, '.')) {
             [$table, $key] = explode('.', $key, 2);
 
             $alias = $query->getOptions('alias');

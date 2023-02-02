@@ -2,7 +2,7 @@
 // +----------------------------------------------------------------------
 // | ThinkPHP [ WE CAN DO IT JUST THINK ]
 // +----------------------------------------------------------------------
-// | Copyright (c) 2006~2019 http://thinkphp.cn All rights reserved.
+// | Copyright (c) 2006~2023 http://thinkphp.cn All rights reserved.
 // +----------------------------------------------------------------------
 // | Licensed ( http://www.apache.org/licenses/LICENSE-2.0 )
 // +----------------------------------------------------------------------
@@ -209,7 +209,7 @@ trait Conversion
 
         foreach ($this->visible as $key => $val) {
             if (is_string($val)) {
-                if (strpos($val, '.')) {
+                if (str_contains($val, '.')) {
                     [$relation, $name]          = explode('.', $val);
                     $this->visible[$relation][] = $name;
                 } else {
@@ -222,7 +222,7 @@ trait Conversion
 
         foreach ($this->hidden as $key => $val) {
             if (is_string($val)) {
-                if (strpos($val, '.')) {
+                if (str_contains($val, '.')) {
                     [$relation, $name]         = explode('.', $val);
                     $this->hidden[$relation][] = $name;
                 } else {
@@ -286,7 +286,7 @@ trait Conversion
             $relation   = $this->getRelation($key, true);
             $item[$key] = $relation ? $relation->append($name)
                 ->toArray() : [];
-        } elseif (strpos($name, '.')) {
+        } elseif (str_contains($name, '.')) {
             [$key, $attr] = explode('.', $name);
             // 追加关联对象属性
             $relation   = $this->getRelation($key, true);
@@ -362,7 +362,7 @@ trait Conversion
     {
         $resultSetType = $resultSetType ?: $this->resultSetType;
 
-        if ($resultSetType && false !== strpos($resultSetType, '\\')) {
+        if ($resultSetType && str_contains($resultSetType, '\\')) {
             $collection = new $resultSetType($collection);
         } else {
             $collection = new ModelCollection($collection);

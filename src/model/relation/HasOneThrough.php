@@ -2,7 +2,7 @@
 // +----------------------------------------------------------------------
 // | ThinkPHP [ WE CAN DO IT JUST THINK ]
 // +----------------------------------------------------------------------
-// | Copyright (c) 2006~2019 http://thinkphp.cn All rights reserved.
+// | Copyright (c) 2006~2023 http://thinkphp.cn All rights reserved.
 // +----------------------------------------------------------------------
 // | Licensed ( http://www.apache.org/licenses/LICENSE-2.0 )
 // +----------------------------------------------------------------------
@@ -31,7 +31,7 @@ class HasOneThrough extends HasManyThrough
     public function getRelation(array $subRelation = [], Closure $closure = null)
     {
         if ($closure) {
-            $closure($this->getClosureType($closure));
+            $closure($this->query);
         }
 
         $this->baseQuery();
@@ -143,7 +143,7 @@ class HasOneThrough extends HasManyThrough
         $keys = $this->through->where($where)->column($this->throughPk, $this->foreignKey);
 
         if ($closure) {
-            $closure($this->getClosureType($closure));
+            $closure($this->query);
         }
 
         $list = $this->query

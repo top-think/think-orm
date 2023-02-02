@@ -2,7 +2,7 @@
 // +----------------------------------------------------------------------
 // | ThinkPHP [ WE CAN DO IT JUST THINK ]
 // +----------------------------------------------------------------------
-// | Copyright (c) 2006~2019 http://thinkphp.cn All rights reserved.
+// | Copyright (c) 2006~2023 http://thinkphp.cn All rights reserved.
 // +----------------------------------------------------------------------
 // | Licensed ( http://www.apache.org/licenses/LICENSE-2.0 )
 // +----------------------------------------------------------------------
@@ -155,12 +155,12 @@ abstract class Builder
                 $val = json_encode($val);
             }
 
-            if (false !== strpos($key, '->')) {
+            if (str_contains($key, '->')) {
                 [$key, $name]  = explode('->', $key, 2);
                 $item          = $this->parseKey($query, $key);
 
                 $result[$item . '->' . $name] = 'json_set(' . $item . ', \'$.' . $name . '\', ' . $this->parseDataBind($query, $key . '->' . $name, $val, $bind) . ')';
-            } elseif (false === strpos($key, '.') && !in_array($key, $fields, true)) {
+            } elseif (!str_contains($key, '.') && !in_array($key, $fields, true)) {
                 if ($options['strict']) {
                     throw new Exception('fields not exists:[' . $key . ']');
                 }
@@ -377,9 +377,9 @@ abstract class Builder
                 $where[] = $this->parseMultiWhereField($query, $value, $field, $logic, $binds);
             } elseif ($field instanceof Raw) {
                 $where[] = ' ' . $logic . ' ' . $this->parseWhereItem($query, $field, $value, $binds);
-            } elseif (strpos($field, '|')) {
+            } elseif (str_contains($field, '|')) {
                 $where[] = $this->parseFieldsOr($query, $value, $field, $logic, $binds);
-            } elseif (strpos($field, '&')) {
+            } elseif (str_contains($field, '&')) {
                 $where[] = $this->parseFieldsAnd($query, $value, $field, $logic, $binds);
             } else {
                 // 对字段使用表达式查询
@@ -516,8 +516,8 @@ abstract class Builder
             $value = $value->__toString();
         }
 
-        if (is_scalar($value) && !in_array($exp, ['EXP', 'NOT NULL', 'NULL', 'IN', 'NOT IN', 'BETWEEN', 'NOT BETWEEN']) && strpos($exp, 'TIME') === false) {
-            if (is_string($value) && 0 === strpos($value, ':') && $query->isBind(substr($value, 1))) {
+        if (is_scalar($value) && !in_array($exp, ['EXP', 'NOT NULL', 'NULL', 'IN', 'NOT IN', 'BETWEEN', 'NOT BETWEEN']) && !str_contains($exp, 'TIME')) {
+            if (is_string($value) && str_starts_with($value, ':') && $query->isBind(substr($value, 1))) {
             } else {
                 $name  = $query->bindValue($value, $bindType);
                 $value = ':' . $name;
@@ -815,7 +815,7 @@ abstract class Builder
         $options = $query->getOptions();
 
         // 获取时间字段类型
-        if (strpos($key, '.')) {
+        if (str_contains($key, '.')) {
             [$table, $key] = explode('.', $key);
 
             if (isset($options['alias']) && $pos = array_search($table, $options['alias'])) {
@@ -857,7 +857,7 @@ abstract class Builder
      */
     protected function parseLimit(Query $query, string $limit): string
     {
-        return (!empty($limit) && false === strpos($limit, '(')) ? ' LIMIT ' . $limit . ' ' : '';
+        return (!empty($limit) && !str_contains($limit, '(')) ? ' LIMIT ' . $limit . ' ' : '';
     }
 
     /**
@@ -874,7 +874,7 @@ abstract class Builder
         foreach ($join as $item) {
             [$table, $type, $on] = $item;
 
-            if (strpos($on, '=')) {
+            if (str_contains($on, '=')) {
                 [$val1, $val2] = explode('=', $on, 2);
 
                 $condition = $this->parseKey($query, $val1) . '=' . $this->parseKey($query, $val2);
@@ -909,7 +909,7 @@ abstract class Builder
                 $array[] = $this->parseRand($query);
             } elseif (is_string($val)) {
                 if (is_numeric($key)) {
-                    [$key, $sort] = explode(' ', strpos($val, ' ') ? $val : $val . ' ');
+                    [$key, $sort] = explode(' ', str_contains($val, ' ') ? $val : $val . ' ');
                 } else {
                     $sort = $val;
                 }
@@ -1031,7 +1031,7 @@ abstract class Builder
      */
     protected function parseComment(Query $query, string $comment): string
     {
-        if (false !== strpos($comment, '*/')) {
+        if (str_contains($comment, '*/')) {
             $comment = strstr($comment, '*/', true);
         }
 

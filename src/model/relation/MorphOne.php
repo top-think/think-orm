@@ -2,7 +2,7 @@
 // +----------------------------------------------------------------------
 // | ThinkPHP [ WE CAN DO IT JUST THINK ]
 // +----------------------------------------------------------------------
-// | Copyright (c) 2006~2019 http://thinkphp.cn All rights reserved.
+// | Copyright (c) 2006~2023 http://thinkphp.cn All rights reserved.
 // +----------------------------------------------------------------------
 // | Licensed ( http://www.apache.org/licenses/LICENSE-2.0 )
 // +----------------------------------------------------------------------
@@ -76,7 +76,7 @@ class MorphOne extends Relation
     public function getRelation(array $subRelation = [], Closure $closure = null)
     {
         if ($closure) {
-            $closure($this->getClosureType($closure));
+            $closure($this->query);
         }
 
         $this->baseQuery();
@@ -231,7 +231,7 @@ class MorphOne extends Relation
         // 预载入关联查询 支持嵌套预载入
         if ($closure) {
             $this->baseQuery = true;
-            $closure($this->getClosureType($closure));
+            $closure($this->query);
         }
 
         $list = $this->query

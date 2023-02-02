@@ -57,7 +57,7 @@ class Mongo
      */
     protected function parseKey(Query $query, string $key): string
     {
-        if (0 === strpos($key, '__TABLE__.')) {
+        if (str_starts_with($key, '__TABLE__.')) {
             [$collection, $key] = explode('.', $key, 2);
         }
 
@@ -139,7 +139,7 @@ class Mongo
         foreach ($data as $key => $val) {
             $item = $this->parseKey($query, $key);
 
-            if (is_array($val) && isset($val[0]) && is_string($val[0]) && 0 === strpos($val[0], '$')) {
+            if (is_array($val) && isset($val[0]) && is_string($val[0]) && str_starts_with($val[0], '$')) {
                 $result[$val[0]][$item] = $this->parseValue($query, $val[1], $key);
             } else {
                 $result['$set'][$item] = $this->parseValue($query, $val, $key);
@@ -181,13 +181,13 @@ class Mongo
                     call_user_func_array($value, [ & $query]);
                     $filter[$logic][] = $this->parseWhere($query, $query->getOptions('where'));
                 } else {
-                    if (strpos($field, '|')) {
+                    if (str_contains($field, '|')) {
                         // 不同字段使用相同查询条件（OR）
                         $array = explode('|', $field);
                         foreach ($array as $k) {
                             $filter['$or'][] = $this->parseWhereItem($query, $k, $value);
                         }
-                    } elseif (strpos($field, '&')) {
+                    } elseif (str_contains($field, '&')) {
                         // 不同字段使用相同查询条件（AND）
                         $array = explode('&', $field);
                         foreach ($array as $k) {

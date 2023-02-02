@@ -2,7 +2,7 @@
 // +----------------------------------------------------------------------
 // | ThinkPHP [ WE CAN DO IT JUST THINK ]
 // +----------------------------------------------------------------------
-// | Copyright (c) 2006~2019 http://thinkphp.cn All rights reserved.
+// | Copyright (c) 2006~2023 http://thinkphp.cn All rights reserved.
 // +----------------------------------------------------------------------
 // | Licensed ( http://www.apache.org/licenses/LICENSE-2.0 )
 // +----------------------------------------------------------------------
@@ -211,7 +211,7 @@ class Mysql extends Builder
 
         $set = [];
         foreach ($data as $key => $val) {
-            $set[] = (strpos($key,'->') ? strstr($key,'->',true) : $key) . ' = ' . $val;
+            $set[] = (str_contains($key,'->') ? strstr($key,'->',true) : $key) . ' = ' . $val;
         }
 
         return str_replace(
@@ -314,16 +314,16 @@ class Mysql extends Builder
 
         $key = trim($key);
 
-        if (strpos($key, '->>') && false === strpos($key, '(')) {
+        if (str_contains($key, '->>') && !str_contains($key, '(')) {
             // JSON字段支持
             [$field, $name] = explode('->>', $key, 2);
 
-            return $this->parseKey($query, $field, true) . '->>\'$' . (strpos($name, '[') === 0 ? '' : '.') . str_replace('->>', '.', $name) . '\'';
-        } elseif (strpos($key, '->') && false === strpos($key, '(')) {
+            return $this->parseKey($query, $field, true) . '->>\'$' . (str_starts_with($name, '[') ? '' : '.') . str_replace('->>', '.', $name) . '\'';
+        } elseif (str_contains($key, '->') && !str_contains($key, '(')) {
             // JSON字段支持
             [$field, $name] = explode('->', $key, 2);
-            return 'json_extract(' . $this->parseKey($query, $field, true) . ', \'$' . (strpos($name, '[') === 0 ? '' : '.') . str_replace('->', '.', $name) . '\')';
-        } elseif (strpos($key, '.') && !preg_match('/[,\'\"\(\)`\s]/', $key)) {
+            return 'json_extract(' . $this->parseKey($query, $field, true) . ', \'$' . (str_starts_with($name, '[') ? '' : '.') . str_replace('->', '.', $name) . '\')';
+        } elseif (str_contains($key, '.') && !preg_match('/[,\'\"\(\)`\s]/', $key)) {
             [$table, $key] = explode('.', $key, 2);
 
             $alias = $query->getOptions('alias');
@@ -347,7 +347,7 @@ class Mysql extends Builder
         }
 
         if (isset($table)) {
-            if (strpos($table, '.')) {
+            if (str_contains($table, '.')) {
                 $table = str_replace('.', '`.`', $table);
             }
 

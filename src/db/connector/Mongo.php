@@ -241,7 +241,7 @@ class Mongo extends Connection
         $options   = $query->getOptions();
         $namespace = $options['table'];
 
-        if (false === strpos($namespace, '.')) {
+        if (!str_contains($namespace, '.')) {
             $namespace = $this->dbName . '.' . $namespace;
         }
 
@@ -369,7 +369,7 @@ class Mongo extends Connection
         $options = $query->getOptions();
 
         $namespace = $options['table'];
-        if (false === strpos($namespace, '.')) {
+        if (!str_contains($namespace, '.')) {
             $namespace = $this->dbName . '.' . $namespace;
         }
 
@@ -1018,7 +1018,7 @@ class Mongo extends Connection
         // 执行查询操作
         $resultSet = $this->mongoQuery($query, $mongoQuery);
 
-        if (('*' == $field || strpos($field, ',')) && $key) {
+        if (('*' == $field || str_contains($field, ',')) && $key) {
             $result = array_column($resultSet, null, $key);
         } elseif (!empty($resultSet)) {
             $result = array_column($resultSet, $field, $key);

@@ -2,7 +2,7 @@
 // +----------------------------------------------------------------------
 // | ThinkPHP [ WE CAN DO IT JUST THINK ]
 // +----------------------------------------------------------------------
-// | Copyright (c) 2006~2019 http://thinkphp.cn All rights reserved.
+// | Copyright (c) 2006~2023 http://thinkphp.cn All rights reserved.
 // +----------------------------------------------------------------------
 // | Licensed ( http://www.apache.org/licenses/LICENSE-2.0 )
 // +----------------------------------------------------------------------
@@ -122,7 +122,7 @@ trait ResultOperation
         foreach ($withAttr as $name => $closure) {
             $name = Str::snake($name);
 
-            if (strpos($name, '.')) {
+            if (str_contains($name, '.')) {
                 // 支持JSON字段 获取器定义
                 [$key, $field] = explode('.', $name);
 

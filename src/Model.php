@@ -2,13 +2,13 @@
 // +----------------------------------------------------------------------
 // | ThinkPHP [ WE CAN DO IT JUST THINK ]
 // +----------------------------------------------------------------------
-// | Copyright (c) 2006~2019 http://thinkphp.cn All rights reserved.
+// | Copyright (c) 2006~2023 http://thinkphp.cn All rights reserved.
 // +----------------------------------------------------------------------
 // | Licensed ( http://www.apache.org/licenses/LICENSE-2.0 )
 // +----------------------------------------------------------------------
 // | Author: liu21st <liu21st@gmail.com>
 // +----------------------------------------------------------------------
-declare (strict_types = 1);
+declare(strict_types=1);
 
 namespace think;
 
@@ -221,7 +221,7 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
 
         if (!empty($this->data)) {
             // 废弃字段
-            foreach ((array) $this->disuse as $key) {
+            foreach ($this->disuse as $key) {
                 if (array_key_exists($key, $this->data)) {
                     unset($this->data[$key]);
                 }
@@ -233,7 +233,7 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
 
         if (empty($this->name)) {
             // 当前模型名
-            $name       = str_replace('\\', '/', static::class);
+            $name = str_replace('\\', '/', static::class);
             $this->name = basename($name);
         }
 
@@ -454,9 +454,9 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
     public function refresh(bool $relation = false)
     {
         if ($this->exists) {
-            $this->data   = $this->db()->find($this->getKey())->getData();
+            $this->data = $this->db()->find($this->getKey())->getData();
             $this->origin = $this->data;
-            $this->get    = [];
+            $this->get = [];
 
             if ($relation) {
                 $this->relation = [];
@@ -504,17 +504,13 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
      * @param array|bool $data 数据
      * @return void
      */
-    public function lazySave($data = []): void
+    public function lazySave(array|bool $data = []): void
     {
-        if (false === $data) {
-            $this->lazySave = false;
-        } else {
-            if (is_array($data)) {
-                $this->setAttrs($data);
-            }
-
-            $this->lazySave = true;
+        if (is_array($data)) {
+            $this->setAttrs($data);
         }
+
+        $this->lazySave = false === $data ? false : true;
     }
 
     /**
@@ -543,8 +539,8 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
         $this->trigger('AfterWrite');
 
         // 重新记录原始数据
-        $this->origin   = $this->data;
-        $this->get      = [];
+        $this->origin = $this->data;
+        $this->get = [];
         $this->lazySave = false;
 
         return true;
@@ -613,7 +609,7 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
 
         if ($this->autoWriteTimestamp && $this->updateTime) {
             // 自动写入更新时间
-            $data[$this->updateTime]       = $this->autoWriteTimestamp();
+            $data[$this->updateTime] = $this->autoWriteTimestamp();
             $this->data[$this->updateTime] = $data[$this->updateTime];
         }
 
@@ -637,7 +633,7 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
 
         $db->transaction(function () use ($data, $allowFields, $db) {
             $this->key = null;
-            $where     = $this->getWhere();
+            $where = $this->getWhere();
 
             $result = $db->where($where)
                 ->strict(false)
@@ -678,12 +674,12 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
         // 时间戳自动写入
         if ($this->autoWriteTimestamp) {
             if ($this->createTime && !isset($data[$this->createTime])) {
-                $data[$this->createTime]       = $this->autoWriteTimestamp();
+                $data[$this->createTime] = $this->autoWriteTimestamp();
                 $this->data[$this->createTime] = $data[$this->createTime];
             }
 
             if ($this->updateTime && !isset($data[$this->updateTime])) {
-                $data[$this->updateTime]       = $this->autoWriteTimestamp();
+                $data[$this->updateTime] = $this->autoWriteTimestamp();
                 $this->data[$this->updateTime] = $data[$this->updateTime];
             }
         }
@@ -736,7 +732,7 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
         $pk = $this->getPk();
 
         if (is_string($pk) && isset($this->origin[$pk])) {
-            $where     = [[$pk, '=', $this->origin[$pk]]];
+            $where = [[$pk, '=', $this->origin[$pk]]];
             $this->key = $this->origin[$pk];
         } elseif (is_array($pk)) {
             foreach ($pk as $field) {
@@ -774,7 +770,6 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
             }
 
             $result = [];
-
             $suffix = $this->getSuffix();
 
             foreach ($dataSet as $key => $data) {
@@ -819,7 +814,7 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
 
         $this->trigger('AfterDelete');
 
-        $this->exists   = false;
+        $this->exists = false;
         $this->lazySave = false;
 
         return true;
@@ -965,32 +960,30 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
      */
     public function __unset(string $name): void
     {
-        unset($this->data[$name],
+        unset(
+            $this->data[$name],
             $this->get[$name],
-            $this->relation[$name]);
+            $this->relation[$name]
+        );
     }
 
     // ArrayAccess
-    #[\ReturnTypeWillChange]
-    public function offsetSet($name, $value)
+    public function offsetSet(mixed $name, mixed $value): void
     {
         $this->setAttr($name, $value);
     }
 
-    #[\ReturnTypeWillChange]
-    public function offsetExists($name): bool
+    public function offsetExists(mixed $name): bool
     {
         return $this->__isset($name);
     }
 
-    #[\ReturnTypeWillChange]
-    public function offsetUnset($name)
+    public function offsetUnset(mixed $name): void
     {
         $this->__unset($name);
     }
 
-    #[\ReturnTypeWillChange]
-    public function offsetGet($name)
+    public function offsetGet(mixed $name): mixed
     {
         return $this->getAttr($name);
     }

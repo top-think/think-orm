@@ -2,7 +2,7 @@
 // +----------------------------------------------------------------------
 // | ThinkPHP [ WE CAN DO IT JUST THINK ]
 // +----------------------------------------------------------------------
-// | Copyright (c) 2006~2019 http://thinkphp.cn All rights reserved.
+// | Copyright (c) 2006~2023 http://thinkphp.cn All rights reserved.
 // +----------------------------------------------------------------------
 // | Licensed ( http://www.apache.org/licenses/LICENSE-2.0 )
 // +----------------------------------------------------------------------
@@ -29,15 +29,15 @@ class Collection extends BaseCollection
     /**
      * 延迟预载入关联查询
      * @access public
-     * @param  array|string $relation 关联
-     * @param  mixed        $cache    关联缓存
+     * @param  array $relation 关联
+     * @param  mixed $cache    关联缓存
      * @return $this
      */
-    public function load($relation, $cache = false)
+    public function load(array $relation, $cache = false)
     {
         if (!$this->isEmpty()) {
             $item = current($this->items);
-            $item->eagerlyResultSet($this->items, (array) $relation, [], false, $cache);
+            $item->eagerlyResultSet($this->items, $relation, [], false, $cache);
         }
 
         return $this;

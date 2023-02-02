@@ -2,7 +2,7 @@
 // +----------------------------------------------------------------------
 // | ThinkPHP [ WE CAN DO IT JUST THINK ]
 // +----------------------------------------------------------------------
-// | Copyright (c) 2006~2019 http://thinkphp.cn All rights reserved.
+// | Copyright (c) 2006~2023 http://thinkphp.cn All rights reserved.
 // +----------------------------------------------------------------------
 // | Licensed ( http://www.apache.org/licenses/LICENSE-2.0 )
 // +----------------------------------------------------------------------
@@ -65,7 +65,7 @@ class BelongsToMany extends Relation
         $this->foreignKey = $foreignKey;
         $this->localKey   = $localKey;
 
-        if (false !== strpos($middle, '\\')) {
+        if (str_contains($middle, '\\')) {
             $this->pivotName = $middle;
             $this->middle    = class_basename($middle);
         } else {
@@ -129,12 +129,7 @@ class BelongsToMany extends Relation
     public function getRelation(array $subRelation = [], Closure $closure = null): Collection
     {
         if ($closure) {
-            $closure($this->getClosureType($closure));
-        }
-
-        $withLimit = $this->query->getOptions('with_limit');
-        if ($withLimit) {
-            $this->query->limit($withLimit);
+            $closure($this->query);
         }
 
         return $this->relation($subRelation)
@@ -152,7 +147,7 @@ class BelongsToMany extends Relation
     {
         $pivot = [];
         foreach ($result->getData() as $key => $val) {
-            if (strpos($key, '__')) {
+            if (str_contains($key, '__')) {
                 [$name, $attr] = explode('__', $key, 2);
 
                 if ('pivot' == $name) {
@@ -306,7 +301,7 @@ class BelongsToMany extends Relation
         $pk = $result->$pk;
 
         if ($closure) {
-            $closure($this->getClosureType($closure), $name);
+            $closure($this->query, $name);
         }
 
         return $this->belongsToManyQuery($this->foreignKey, $this->localKey, [
@@ -326,7 +321,7 @@ class BelongsToMany extends Relation
     public function getRelationCountQuery(Closure $closure = null, string $aggregate = 'count', string $field = '*', string &$name = null): string
     {
         if ($closure) {
-            $closure($this->getClosureType($closure), $name);
+            $closure($this->query, $name);
         }
 
         return $this->belongsToManyQuery($this->foreignKey, $this->localKey, [
@@ -348,7 +343,12 @@ class BelongsToMany extends Relation
     protected function eagerlyManyToMany(array $where, array $subRelation = [], Closure $closure = null, array $cache = []): array
     {
         if ($closure) {
-            $closure($this->getClosureType($closure));
+            $closure($this->query);
+        }
+
+        $withLimit = $this->query->getOptions('limit');
+        if ($withLimit) {
+            $this->query->removeOption('limit');            
         }
 
         // 预载入关联查询 支持嵌套预载入
@@ -359,8 +359,6 @@ class BelongsToMany extends Relation
 
         // 组装模型数据
         $data      = [];
-        $withLimit = $this->query->getOptions('with_limit');
-
         foreach ($list as $set) {
             $pivot = $this->matchPivot($set);
             $key   = $pivot[$this->localKey];
@@ -389,11 +387,6 @@ class BelongsToMany extends Relation
         if (empty($this->baseQuery)) {
             $tableName = $this->query->getTable();
             $table     = $this->pivot->db()->getTable();
-
-            if ($this->withoutField) {
-                $this->query->withoutField($this->withoutField);
-            }
-
             $fields = $this->getQueryFields($tableName);
 
             $this->query

@@ -2,7 +2,7 @@
 // +----------------------------------------------------------------------
 // | ThinkPHP [ WE CAN DO IT JUST THINK ]
 // +----------------------------------------------------------------------
-// | Copyright (c) 2006~2019 http://thinkphp.cn All rights reserved.
+// | Copyright (c) 2006~2023 http://thinkphp.cn All rights reserved.
 // +----------------------------------------------------------------------
 // | Licensed ( http://www.apache.org/licenses/LICENSE-2.0 )
 // +----------------------------------------------------------------------
@@ -55,7 +55,7 @@ class HasOne extends OneToOne
         $localKey = $this->localKey;
 
         if ($closure) {
-            $closure($this->getClosureType($closure));
+            $closure($this->query);
         }
 
         // 判断关联类型执行查询
@@ -91,7 +91,7 @@ class HasOne extends OneToOne
     public function getRelationCountQuery(Closure $closure = null, string $aggregate = 'count', string $field = '*', string &$name = null): string
     {
         if ($closure) {
-            $closure($this->getClosureType($closure), $name);
+            $closure($this->query, $name);
         }
 
         return $this->query
@@ -119,7 +119,7 @@ class HasOne extends OneToOne
         }
 
         if ($closure) {
-            $closure($this->getClosureType($closure), $name);
+            $closure($this->query, $name);
         }
 
         return $this->query

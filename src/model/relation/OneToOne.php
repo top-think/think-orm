@@ -2,7 +2,7 @@
 // +----------------------------------------------------------------------
 // | ThinkPHP [ WE CAN DO IT JUST THINK ]
 // +----------------------------------------------------------------------
-// | Copyright (c) 2006~2019 http://thinkphp.cn All rights reserved.
+// | Copyright (c) 2006~2023 http://thinkphp.cn All rights reserved.
 // +----------------------------------------------------------------------
 // | Licensed ( http://www.apache.org/licenses/LICENSE-2.0 )
 // +----------------------------------------------------------------------
@@ -86,7 +86,7 @@ abstract class OneToOne extends Relation
         // 预载入封装
         $joinTable = $this->query->getTable();
         $joinAlias = $relation;
-        $joinType  = $joinType ?: $this->joinType;
+        $joinType = $joinType ?: $this->joinType;
 
         $query->via($joinAlias);
 
@@ -94,7 +94,7 @@ abstract class OneToOne extends Relation
 
             $foreignKeyExp = $this->foreignKey;
 
-            if (strpos($foreignKeyExp, '.') === false) {
+            if (!str_contains($foreignKeyExp, '.')) {
                 $foreignKeyExp = $name . '.' . $this->foreignKey;
             }
 
@@ -103,7 +103,7 @@ abstract class OneToOne extends Relation
 
             $foreignKeyExp = $this->foreignKey;
 
-            if (strpos($foreignKeyExp, '.') === false) {
+            if (!str_contains($foreignKeyExp, '.')) {
                 $foreignKeyExp = $joinAlias . '.' . $this->foreignKey;
             }
 
@@ -112,11 +112,12 @@ abstract class OneToOne extends Relation
 
         if ($closure) {
             // 执行闭包查询
-            $closure($this->getClosureType($closure));
+            $closure($query);
 
             // 使用withField指定获取关联的字段
-            if ($this->withField) {
-                $field = $this->withField;
+            $withField = $this->query->getOptions('field');
+            if ($withField) {
+                $field = $withField;
             }
         }
 
@@ -254,11 +255,11 @@ abstract class OneToOne extends Relation
      * @param  Model  $result   模型对象实例
      * @return void
      */
-    protected function match(string $model, string $relation, Model $result): void
+    protected function match (string $model, string $relation, Model $result): void
     {
         // 重新组装模型数据
         foreach ($result->getData() as $key => $val) {
-            if (strpos($key, '__')) {
+            if (str_contains($key, '__')) {
                 [$name, $attr] = explode('__', $key, 2);
                 if ($name == $relation) {
                     $list[$name][$attr] = $val;
@@ -299,7 +300,7 @@ abstract class OneToOne extends Relation
     protected function bindAttr(Model $result, Model $model = null): void
     {
         foreach ($this->bindAttr as $key => $attr) {
-            $key   = is_numeric($key) ? $attr : $key;
+            $key = is_numeric($key) ? $attr : $key;
             $value = $result->getOrigin($key);
 
             if (!is_null($value)) {
@@ -325,13 +326,7 @@ abstract class OneToOne extends Relation
         // 预载入关联查询 支持嵌套预载入
         if ($closure) {
             $this->baseQuery = true;
-            $closure($this->getClosureType($closure));
-        }
-
-        if ($this->withField) {
-            $this->query->field($this->withField);
-        } elseif ($this->withoutField) {
-            $this->query->withoutField($this->withoutField);
+            $closure($this->query);
         }
 
         $list = $this->query

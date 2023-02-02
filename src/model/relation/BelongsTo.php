@@ -2,7 +2,7 @@
 // +----------------------------------------------------------------------
 // | ThinkPHP [ WE CAN DO IT JUST THINK ]
 // +----------------------------------------------------------------------
-// | Copyright (c) 2006~2019 http://thinkphp.cn All rights reserved.
+// | Copyright (c) 2006~2023 http://thinkphp.cn All rights reserved.
 // +----------------------------------------------------------------------
 // | Licensed ( http://www.apache.org/licenses/LICENSE-2.0 )
 // +----------------------------------------------------------------------
@@ -55,7 +55,7 @@ class BelongsTo extends OneToOne
     public function getRelation(array $subRelation = [], Closure $closure = null)
     {
         if ($closure) {
-            $closure($this->getClosureType($closure));
+            $closure($this->query);
         }
 
         $foreignKey = $this->foreignKey;
@@ -92,7 +92,7 @@ class BelongsTo extends OneToOne
     public function getRelationCountQuery(Closure $closure = null, string $aggregate = 'count', string $field = '*', &$name = ''): string
     {
         if ($closure) {
-            $closure($this->getClosureType($closure), $name);
+            $closure($this->query, $name);
         }
 
         return $this->query
@@ -120,7 +120,7 @@ class BelongsTo extends OneToOne
         }
 
         if ($closure) {
-            $closure($this->getClosureType($closure), $name);
+            $closure($this->query, $name);
         }
 
         return $this->query

@@ -2,7 +2,7 @@
 // +----------------------------------------------------------------------
 // | ThinkPHP [ WE CAN DO IT JUST THINK ]
 // +----------------------------------------------------------------------
-// | Copyright (c) 2006~2019 http://thinkphp.cn All rights reserved.
+// | Copyright (c) 2006~2023 http://thinkphp.cn All rights reserved.
 // +----------------------------------------------------------------------
 // | Licensed ( http://www.apache.org/licenses/LICENSE-2.0 )
 // +----------------------------------------------------------------------
@@ -55,8 +55,8 @@ class Mysql extends PDOConnection
     {
         [$tableName] = explode(' ', $tableName);
 
-        if (false === strpos($tableName, '`')) {
-            if (strpos($tableName, '.')) {
+        if (!str_contains($tableName, '`')) {
+            if (str_contains($tableName, '.')) {
                 $tableName = str_replace('.', '`.`', $tableName);
             }
             $tableName = '`' . $tableName . '`';

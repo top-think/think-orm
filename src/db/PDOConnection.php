@@ -2,7 +2,7 @@
 // +----------------------------------------------------------------------
 // | ThinkPHP [ WE CAN DO IT JUST THINK ]
 // +----------------------------------------------------------------------
-// | Copyright (c) 2006~2019 http://thinkphp.cn All rights reserved.
+// | Copyright (c) 2006~2023 http://thinkphp.cn All rights reserved.
 // +----------------------------------------------------------------------
 // | Licensed ( http://www.apache.org/licenses/LICENSE-2.0 )
 // +----------------------------------------------------------------------
@@ -312,7 +312,7 @@ abstract class PDOConnection extends Connection
     {
         if (in_array($type, ['integer', 'string', 'float', 'boolean', 'bool', 'int', 'str'])) {
             $bind = $this->bindType[$type];
-        } elseif (0 === strpos($type, 'set') || 0 === strpos($type, 'enum')) {
+        } elseif (str_starts_with($type, 'set') || str_starts_with($type, 'enum')) {
             $bind = PDO::PARAM_STR;
         } elseif (preg_match('/(double|float|decimal|real|numeric)/is', $type)) {
             $bind = self::PARAM_FLOAT;
@@ -345,7 +345,7 @@ abstract class PDOConnection extends Connection
      */
     public function getSchemaInfo(string $tableName, $force = false)
     {
-        if (!strpos($tableName, '.')) {
+        if (!str_contains($tableName, '.')) {
             $schema = $this->getConfig('database') . '.' . $tableName;
         } else {
             $schema = $tableName;
@@ -401,7 +401,7 @@ abstract class PDOConnection extends Connection
             $tableName = key($tableName) ?: current($tableName);
         }
 
-        if (strpos($tableName, ',') || strpos($tableName, ')')) {
+        if (str_contains($tableName, ',') || str_contains($tableName, ')')) {
             // 多表不获取字段信息
             return [];
         }
@@ -1230,25 +1230,25 @@ abstract class PDOConnection extends Connection
         $pdo       = $this->getPDOStatement($sql, $query->getBind(), $options['master']);
         $resultSet = $pdo->fetchAll(PDO::FETCH_ASSOC);
 
-        if (is_string($key) && strpos($key, '.')) {
+        if (is_string($key) && str_contains($key, '.')) {
             [$alias, $key] = explode('.', $key);
         }
 
         if (empty($resultSet)) {
             $result = [];
-        } elseif ('*' !== $column && \count($column) === 1) {
-            $column = \array_shift($column);
-            if (\strpos($column, ' ')) {
-                $column = \substr(\strrchr(\trim($column), ' '), 1);
+        } elseif ('*' !== $column && count($column) === 1) {
+            $column = array_shift($column);
+            if (str_contains($column, ' ')) {
+                $column = substr(strrchr(trim($column), ' '), 1);
             }
 
-            if (\strpos($column, '.')) {
-                [$alias, $column] = \explode('.', $column);
+            if (str_contains($column, '.')) {
+                [$alias, $column] = explode('.', $column);
             }
 
-            $result = \array_column($resultSet, $column, $key);
+            $result = array_column($resultSet, $column, $key);
         } elseif ($key) {
-            $result = \array_column($resultSet, null, $key);
+            $result = array_column($resultSet, null, $key);
         } else {
             $result = $resultSet;
         }
@@ -1283,8 +1283,8 @@ abstract class PDOConnection extends Connection
 
             // 判断占位符
             $sql = is_numeric($key) ?
-                substr_replace($sql, $value, strpos($sql, '?'), 1) :
-                substr_replace($sql, $value, strpos($sql, ':' . $key), strlen(':' . $key));
+                substr_replace($sql, $value, str_contains($sql, '?'), 1) :
+                substr_replace($sql, $value, str_contains($sql, ':' . $key), strlen(':' . $key));
         }
 
         return rtrim($sql);

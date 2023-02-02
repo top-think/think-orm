@@ -2,7 +2,7 @@
 // +----------------------------------------------------------------------
 // | ThinkPHP [ WE CAN DO IT JUST THINK ]
 // +----------------------------------------------------------------------
-// | Copyright (c) 2006~2019 http://thinkphp.cn All rights reserved.
+// | Copyright (c) 2006~2023 http://thinkphp.cn All rights reserved.
 // +----------------------------------------------------------------------
 // | Licensed ( http://www.apache.org/licenses/LICENSE-2.0 )
 // +----------------------------------------------------------------------
@@ -155,7 +155,7 @@ trait TimeStamp
                 $value = $this->formatDateTime('Y-m-d H:i:s.u');
                 break;
             default:
-                if (false !== strpos($type, '\\')) {
+                if (str_contains($type, '\\')) {
                     // 对象数据写入
                     $obj = new $type();
                     if (method_exists($obj, '__toString')) {
@@ -184,7 +184,7 @@ trait TimeStamp
 
         if (false === $format) {
             return $time;
-        } elseif (false !== strpos($format, '\\')) {
+        } elseif (str_contains($format, '\\')) {
             return new $format($time);
         }
 

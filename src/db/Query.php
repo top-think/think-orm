@@ -2,7 +2,7 @@
 // +----------------------------------------------------------------------
 // | ThinkPHP [ WE CAN DO IT JUST THINK ]
 // +----------------------------------------------------------------------
-// | Copyright (c) 2006~2019 http://thinkphp.cn All rights reserved.
+// | Copyright (c) 2006~2023 http://thinkphp.cn All rights reserved.
 // +----------------------------------------------------------------------
 // | Licensed ( http://www.apache.org/licenses/LICENSE-2.0 )
 // +----------------------------------------------------------------------
@@ -417,7 +417,7 @@ class Query extends BaseQuery
         } else {
             $query = $this->options($options)->limit($count);
 
-            if (strpos($column, '.')) {
+            if (str_contains($column, '.')) {
                 [$alias, $key] = explode('.', $column);
             } else {
                 $key = $column;

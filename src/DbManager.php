@@ -2,7 +2,7 @@
 // +----------------------------------------------------------------------
 // | ThinkPHP [ WE CAN DO IT JUST THINK ]
 // +----------------------------------------------------------------------
-// | Copyright (c) 2006~2019 http://thinkphp.cn All rights reserved.
+// | Copyright (c) 2006~2023 http://thinkphp.cn All rights reserved.
 // +----------------------------------------------------------------------
 // | Licensed ( http://www.apache.org/licenses/LICENSE-2.0 )
 // +----------------------------------------------------------------------
@@ -262,7 +262,7 @@ class DbManager
 
         $type = !empty($config['type']) ? $config['type'] : 'mysql';
 
-        if (false !== strpos($type, '\\')) {
+        if (str_contains($type, '\\')) {
             $class = $type;
         } else {
             $class = '\\think\\db\\connector\\' . ucfirst($type);

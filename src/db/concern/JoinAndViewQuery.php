@@ -2,7 +2,7 @@
 // +----------------------------------------------------------------------
 // | ThinkPHP [ WE CAN DO IT JUST THINK ]
 // +----------------------------------------------------------------------
-// | Copyright (c) 2006~2019 http://thinkphp.cn All rights reserved.
+// | Copyright (c) 2006~2023 http://thinkphp.cn All rights reserved.
 // +----------------------------------------------------------------------
 // | Licensed ( http://www.apache.org/licenses/LICENSE-2.0 )
 // +----------------------------------------------------------------------
@@ -102,22 +102,22 @@ trait JoinAndViewQuery
 
         $join = trim($join);
 
-        if (false !== strpos($join, '(')) {
+        if (str_contains($join, '(')) {
             // 使用子查询
             $table = $join;
         } else {
             // 使用别名
-            if (strpos($join, ' ')) {
+            if (str_contains($join, ' ')) {
                 // 使用别名
                 [$table, $alias] = explode(' ', $join);
             } else {
                 $table = $join;
-                if (false === strpos($join, '.')) {
+                if (!str_contains($join, '.')) {
                     $alias = $join;
                 }
             }
 
-            if ($this->prefix && false === strpos($table, '.') && 0 !== strpos($table, $this->prefix)) {
+            if ($this->prefix && !str_contains($table, '.') && !str_starts_with($table, $this->prefix)) {
                 $table = $this->getTable($table);
             }
         }
@@ -208,7 +208,7 @@ trait JoinAndViewQuery
             // 视图查询排序处理
             foreach ($options['order'] as $key => $val) {
                 if (is_numeric($key) && is_string($val)) {
-                    if (strpos($val, ' ')) {
+                    if (str_contains($val, ' ')) {
                         [$field, $sort] = explode(' ', $val);
                         if (array_key_exists($field, $options['map'])) {
                             $options['order'][$options['map'][$field]] = $sort;

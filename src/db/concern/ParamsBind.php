@@ -2,7 +2,7 @@
 // +----------------------------------------------------------------------
 // | ThinkPHP [ WE CAN DO IT JUST THINK ]
 // +----------------------------------------------------------------------
-// | Copyright (c) 2006~2019 http://thinkphp.cn All rights reserved.
+// | Copyright (c) 2006~2023 http://thinkphp.cn All rights reserved.
 // +----------------------------------------------------------------------
 // | Licensed ( http://www.apache.org/licenses/LICENSE-2.0 )
 // +----------------------------------------------------------------------
@@ -108,7 +108,7 @@ trait ParamsBind
             }
 
             if (is_numeric($key)) {
-                $sql = substr_replace($sql, ':' . $name, strpos($sql, '?'), 1);
+                $sql = substr_replace($sql, ':' . $name, str_contains($sql, '?'), 1);
             } else {
                 $sql = str_replace(':' . $key, ':' . $name, $sql);
             }

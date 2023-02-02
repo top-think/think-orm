@@ -2,7 +2,7 @@
 // +----------------------------------------------------------------------
 // | ThinkPHP [ WE CAN DO IT JUST THINK ]
 // +----------------------------------------------------------------------
-// | Copyright (c) 2006~2019 http://thinkphp.cn All rights reserved.
+// | Copyright (c) 2006~2023 http://thinkphp.cn All rights reserved.
 // +----------------------------------------------------------------------
 // | Licensed ( http://www.apache.org/licenses/LICENSE-2.0 )
 // +----------------------------------------------------------------------
@@ -72,15 +72,10 @@ class MorphMany extends Relation
     public function getRelation(array $subRelation = [], Closure $closure = null): Collection
     {
         if ($closure) {
-            $closure($this->getClosureType($closure));
+            $closure($this->query);
         }
 
         $this->baseQuery();
-
-        $withLimit = $this->query->getOptions('with_limit');
-        if ($withLimit) {
-            $this->query->limit($withLimit);
-        }
 
         return $this->query->relation($subRelation)
             ->select()
@@ -207,7 +202,7 @@ class MorphMany extends Relation
         }
 
         if ($closure) {
-            $closure($this->getClosureType($closure), $name);
+            $closure($this->query, $name);
         }
 
         return $this->query
@@ -230,7 +225,7 @@ class MorphMany extends Relation
     public function getRelationCountQuery(Closure $closure = null, string $aggregate = 'count', string $field = '*', string &$name = null): string
     {
         if ($closure) {
-            $closure($this->getClosureType($closure), $name);
+            $closure($this->query, $name);
         }
 
         return $this->query
@@ -256,7 +251,12 @@ class MorphMany extends Relation
 
         if ($closure) {
             $this->baseQuery = true;
-            $closure($this->getClosureType($closure));
+            $closure($this->query);
+        }
+
+        $withLimit = $this->query->getOptions('limit');
+        if ($withLimit) {
+            $this->query->removeOption('limit');            
         }
 
         $list = $this->query
@@ -268,8 +268,6 @@ class MorphMany extends Relation
 
         // 组装模型数据
         $data      = [];
-        $withLimit = $this->query->getOptions('with_limit');
-
         foreach ($list as $set) {
             $key = $set->$morphKey;
 

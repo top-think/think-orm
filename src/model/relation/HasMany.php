@@ -2,7 +2,7 @@
 // +----------------------------------------------------------------------
 // | ThinkPHP [ WE CAN DO IT JUST THINK ]
 // +----------------------------------------------------------------------
-// | Copyright (c) 2006~2019 http://thinkphp.cn All rights reserved.
+// | Copyright (c) 2006~2023 http://thinkphp.cn All rights reserved.
 // +----------------------------------------------------------------------
 // | Licensed ( http://www.apache.org/licenses/LICENSE-2.0 )
 // +----------------------------------------------------------------------
@@ -55,12 +55,7 @@ class HasMany extends Relation
     public function getRelation(array $subRelation = [], Closure $closure = null): Collection
     {
         if ($closure) {
-            $closure($this->getClosureType($closure));
-        }
-
-        $withLimit = $this->query->getOptions('with_limit');
-        if ($withLimit) {
-            $this->query->limit($withLimit);
+            $closure($this->query);
         }
 
         return $this->query
@@ -157,7 +152,7 @@ class HasMany extends Relation
         }
 
         if ($closure) {
-            $closure($this->getClosureType($closure), $name);
+            $closure($this->query, $name);
         }
 
         return $this->query
@@ -177,7 +172,7 @@ class HasMany extends Relation
     public function getRelationCountQuery(Closure $closure = null, string $aggregate = 'count', string $field = '*', string &$name = null): string
     {
         if ($closure) {
-            $closure($this->getClosureType($closure), $name);
+            $closure($this->query, $name);
         }
 
         return $this->query->alias($aggregate . '_table')
@@ -204,11 +199,12 @@ class HasMany extends Relation
         // 预载入关联查询 支持嵌套预载入
         if ($closure) {
             $this->baseQuery = true;
-            $closure($this->getClosureType($closure));
+            $closure($this->query);
         }
 
-        if ($this->withoutField) {
-            $this->query->withoutField($this->withoutField);
+        $withLimit = $this->query->getOptions('limit');
+        if ($withLimit) {
+            $this->query->removeOption('limit');            
         }
 
         $list = $this->query
@@ -219,8 +215,6 @@ class HasMany extends Relation
 
         // 组装模型数据
         $data      = [];
-        $withLimit = $this->query->getOptions('with_limit');
-
         foreach ($list as $set) {
             $key = $set->$foreignKey;
 

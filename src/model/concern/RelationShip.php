@@ -2,13 +2,13 @@
 // +----------------------------------------------------------------------
 // | ThinkPHP [ WE CAN DO IT JUST THINK ]
 // +----------------------------------------------------------------------
-// | Copyright (c) 2006~2019 http://thinkphp.cn All rights reserved.
+// | Copyright (c) 2006~2023 http://thinkphp.cn All rights reserved.
 // +----------------------------------------------------------------------
 // | Licensed ( http://www.apache.org/licenses/LICENSE-2.0 )
 // +----------------------------------------------------------------------
 // | Author: liu21st <liu21st@gmail.com>
 // +----------------------------------------------------------------------
-declare (strict_types = 1);
+declare(strict_types=1);
 
 namespace think\model\concern;
 
@@ -148,7 +148,7 @@ trait RelationShip
             if (is_array($relation)) {
                 $subRelation = $relation;
                 $relation    = $key;
-            } elseif (strpos($relation, '.')) {
+            } elseif (str_contains($relation, '.')) {
                 [$relation, $subRelation] = explode('.', $relation, 2);
             }
 
@@ -234,9 +234,8 @@ trait RelationShip
         if ($class instanceof OneToOne) {
             $class->eagerly($query, $relation, $field, $joinType, $closure, $first);
             return true;
-        } else {
-            return false;
         }
+        return false;
     }
 
     /**
@@ -263,7 +262,7 @@ trait RelationShip
             if (is_array($relation)) {
                 $subRelation = $relation;
                 $relation    = $key;
-            } elseif (strpos($relation, '.')) {
+            } elseif (str_contains($relation, '.')) {
                 [$relation, $subRelation] = explode('.', $relation, 2);
 
                 $subRelation = [$subRelation];
@@ -311,7 +310,7 @@ trait RelationShip
             if (is_array($relation)) {
                 $subRelation = $relation;
                 $relation    = $key;
-            } elseif (strpos($relation, '.')) {
+            } elseif (str_contains($relation, '.')) {
                 [$relation, $subRelation] = explode('.', $relation, 2);
 
                 $subRelation = [$subRelation];
@@ -530,6 +529,8 @@ trait RelationShip
         return new BelongsToMany($this, $model, $middle, $foreignKey, $localKey);
     }
 
+
+
     /**
      * MORPH  One 关联定义
      * @access public
@@ -538,7 +539,7 @@ trait RelationShip
      * @param  string       $type  多态类型
      * @return MorphOne
      */
-    public function morphOne(string $model, $morph = null, string $type = ''): MorphOne
+    public function morphOne(string $model, string|array $morph = null, string $type = ''): MorphOne
     {
         // 记录当前关联信息
         $model = $this->parseModel($model);
@@ -548,12 +549,7 @@ trait RelationShip
             $morph = Str::snake($trace[1]['function']);
         }
 
-        if (is_array($morph)) {
-            [$morphType, $foreignKey] = $morph;
-        } else {
-            $morphType  = $morph . '_type';
-            $foreignKey = $morph . '_id';
-        }
+        [$morphType, $foreignKey] = $this->parseMorph($morph);
 
         $type = $type ?: get_class($this);
 
@@ -568,7 +564,7 @@ trait RelationShip
      * @param  string       $type  多态类型
      * @return MorphMany
      */
-    public function morphMany(string $model, $morph = null, string $type = ''): MorphMany
+    public function morphMany(string $model, string|array $morph = null, string $type = ''): MorphMany
     {
         // 记录当前关联信息
         $model = $this->parseModel($model);
@@ -580,12 +576,7 @@ trait RelationShip
 
         $type = $type ?: get_class($this);
 
-        if (is_array($morph)) {
-            [$morphType, $foreignKey] = $morph;
-        } else {
-            $morphType  = $morph . '_type';
-            $foreignKey = $morph . '_id';
-        }
+        [$morphType, $foreignKey] = $this->parseMorph($morph);
 
         return new MorphMany($this, $model, $foreignKey, $morphType, $type);
     }
@@ -597,7 +588,7 @@ trait RelationShip
      * @param  array        $alias 多态别名定义
      * @return MorphTo
      */
-    public function morphTo($morph = null, array $alias = []): MorphTo
+    public function morphTo(string|array $morph = null, array $alias = []): MorphTo
     {
         $trace    = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2);
         $relation = Str::snake($trace[1]['function']);
@@ -606,13 +597,7 @@ trait RelationShip
             $morph = $relation;
         }
 
-        // 记录当前关联信息
-        if (is_array($morph)) {
-            [$morphType, $foreignKey] = $morph;
-        } else {
-            $morphType  = $morph . '_type';
-            $foreignKey = $morph . '_id';
-        }
+        [$morphType, $foreignKey] = $this->parseMorph($morph);
 
         return new MorphTo($this, $morphType, $foreignKey, $alias, $relation);
     }
@@ -626,19 +611,13 @@ trait RelationShip
      * @param  string       $localKey   当前模型关联键
      * @return MorphToMany
      */
-    public function morphToMany(string $model, string $middle, $morph = null, string $localKey = null): MorphToMany
+    public function morphToMany(string $model, string $middle, string|array $morph = null, string $localKey = null): MorphToMany
     {
         if (is_null($morph)) {
             $morph = $middle;
         }
 
-        // 记录当前关联信息
-        if (is_array($morph)) {
-            [$morphType, $morphKey] = $morph;
-        } else {
-            $morphType = $morph . '_type';
-            $morphKey  = $morph . '_id';
-        }
+        [$morphType, $morphKey] = $this->parseMorph($morph);
 
         $model    = $this->parseModel($model);
         $name     = Str::snake(class_basename($model));
@@ -656,24 +635,36 @@ trait RelationShip
      * @param  string       $foreignKey 关联外键
      * @return MorphToMany
      */
-    public function morphByMany(string $model, string $middle, $morph = null, string $foreignKey = null): MorphToMany
+    public function morphByMany(string $model, string $middle, string|array $morph = null, string $foreignKey = null): MorphToMany
     {
         if (is_null($morph)) {
             $morph = $middle;
         }
 
-        // 记录当前关联信息
-        if (is_array($morph)) {
-            [$morphType, $morphKey] = $morph;
-        } else {
-            $morphType = $morph . '_type';
-            $morphKey  = $morph . '_id';
-        }
+        [$morphType, $morphKey] = $this->parseMorph($morph);
 
         $model      = $this->parseModel($model);
         $foreignKey = $foreignKey ?: $this->getForeignKey($this->name);
 
         return new MorphToMany($this, $model, $middle, $morphType, $morphKey, $foreignKey, true);
+    }
+
+    /**
+     * 解析多态
+     * @access protected
+     * @param  string|array $morph
+     * @return array
+     */
+    protected function parseMorph(string|array $morph): array
+    {
+        if (is_array($morph)) {
+            [$morphType, $foreignKey] = $morph;
+        } else {
+            $morphType  = $morph . '_type';
+            $foreignKey = $morph . '_id';
+        }
+
+        return [$morphType, $foreignKey];
     }
 
     /**
@@ -684,7 +675,7 @@ trait RelationShip
      */
     protected function parseModel(string $model): string
     {
-        if (false === strpos($model, '\\')) {
+        if (str_contains($model, '\\')) {
             $path = explode('\\', static::class);
             array_pop($path);
             array_push($path, Str::studly($model));
@@ -702,7 +693,7 @@ trait RelationShip
      */
     protected function getForeignKey(string $name): string
     {
-        if (strpos($name, '\\')) {
+        if (str_contains($name, '\\')) {
             $name = class_basename($name);
         }
 
@@ -734,8 +725,10 @@ trait RelationShip
      */
     protected function getRelationData(Relation $modelRelation)
     {
-        if ($this->parent && !$modelRelation->isSelfRelation()
-            && get_class($this->parent) == get_class($modelRelation->getModel())) {
+        if (
+            $this->parent && !$modelRelation->isSelfRelation()
+            && get_class($this->parent) == get_class($modelRelation->getModel())
+        ) {
             return $this->parent;
         }
 

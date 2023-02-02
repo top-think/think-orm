@@ -2,7 +2,7 @@
 // +----------------------------------------------------------------------
 // | ThinkPHP [ WE CAN DO IT JUST THINK ]
 // +----------------------------------------------------------------------
-// | Copyright (c) 2006~2019 http://thinkphp.cn All rights reserved.
+// | Copyright (c) 2006~2023 http://thinkphp.cn All rights reserved.
 // +----------------------------------------------------------------------
 // | Licensed ( http://www.apache.org/licenses/LICENSE-2.0 )
 // +----------------------------------------------------------------------
@@ -73,7 +73,7 @@ class Pgsql extends PDOConnection
                     'notnull' => (bool) ('' !== $val['null']),
                     'default' => $val['default'],
                     'primary' => !empty($val['key']),
-                    'autoinc' => (0 === strpos($val['extra'], 'nextval(')),
+                    'autoinc' => str_starts_with($val['extra'], 'nextval('),
                 ];
             }
         }

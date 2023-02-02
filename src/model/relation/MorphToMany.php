@@ -2,7 +2,7 @@
 // +----------------------------------------------------------------------
 // | ThinkPHP [ WE CAN DO IT JUST THINK ]
 // +----------------------------------------------------------------------
-// | Copyright (c) 2006~2019 http://thinkphp.cn All rights reserved.
+// | Copyright (c) 2006~2023 http://thinkphp.cn All rights reserved.
 // +----------------------------------------------------------------------
 // | Licensed ( http://www.apache.org/licenses/LICENSE-2.0 )
 // +----------------------------------------------------------------------
@@ -164,14 +164,12 @@ class MorphToMany extends BelongsToMany
             return 0;
         }
 
-        $pk = $result->$pk;
-
         if ($closure) {
-            $closure($this->getClosureType($closure), $name);
+            $closure($this->query, $name);
         }
 
         return $this->belongsToManyQuery($this->foreignKey, $this->localKey, [
-            ['pivot.' . $this->localKey, '=', $pk],
+            ['pivot.' . $this->localKey, '=', $result->$pk],
             ['pivot.' . $this->morphType, '=', $this->morphClass],
         ])->$aggregate($field);
     }
@@ -188,7 +186,7 @@ class MorphToMany extends BelongsToMany
     public function getRelationCountQuery(Closure $closure = null, string $aggregate = 'count', string $field = '*', string &$name = null): string
     {
         if ($closure) {
-            $closure($this->getClosureType($closure), $name);
+            $closure($this->query, $name);
         }
 
         return $this->belongsToManyQuery($this->foreignKey, $this->localKey, [
@@ -210,12 +208,8 @@ class MorphToMany extends BelongsToMany
         // 关联查询封装
         $tableName = $this->query->getTable();
         $table     = $this->pivot->db()->getTable();
+        $fields    = $this->getQueryFields($tableName);
 
-        if ($this->withoutField) {
-            $this->query->withoutField($this->withoutField);
-        }
-
-        $fields = $this->getQueryFields($tableName);
         $query  = $this->query
             ->field($fields)
             ->tableField(true, $table, 'pivot', 'pivot__');
@@ -241,7 +235,12 @@ class MorphToMany extends BelongsToMany
     protected function eagerlyManyToMany(array $where, array $subRelation = [], Closure $closure = null, array $cache = []): array
     {
         if ($closure) {
-            $closure($this->getClosureType($closure));
+            $closure($this->query);
+        }
+
+        $withLimit = $this->query->getOptions('limit');
+        if ($withLimit) {
+            $this->query->removeOption('limit');            
         }
 
         // 预载入关联查询 支持嵌套预载入
@@ -252,12 +251,10 @@ class MorphToMany extends BelongsToMany
 
         // 组装模型数据
         $data      = [];
-        $withLimit =   $this->query->getOptions('with_limit');
-
         foreach ($list as $set) {
             $pivot = [];
             foreach ($set->getData() as $key => $val) {
-                if (strpos($key, '__')) {
+                if (str_contains($key, '__')) {
                     [$name, $attr] = explode('__', $key, 2);
                     if ('pivot' == $name) {
                         $pivot[$attr] = $val;

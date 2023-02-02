@@ -2,7 +2,7 @@
 // +----------------------------------------------------------------------
 // | ThinkPHP [ WE CAN DO IT JUST THINK ]
 // +----------------------------------------------------------------------
-// | Copyright (c) 2006~2019 http://thinkphp.cn All rights reserved.
+// | Copyright (c) 2006~2023 http://thinkphp.cn All rights reserved.
 // +----------------------------------------------------------------------
 // | Licensed ( http://www.apache.org/licenses/LICENSE-2.0 )
 // +----------------------------------------------------------------------
@@ -414,7 +414,7 @@ trait Attribute
 
         if (is_array($type)) {
             [$type, $param] = $type;
-        } elseif (strpos($type, ':')) {
+        } elseif (str_contains($type, ':')) {
             [$type, $param] = explode(':', $type, 2);
         }
 
@@ -456,7 +456,7 @@ trait Attribute
                 $value = serialize($value);
                 break;
             default:
-                if (is_object($value) && false !== strpos($type, '\\') && method_exists($value, '__toString')) {
+                if (is_object($value) && str_contains($type, '\\') && method_exists($value, '__toString')) {
                     // 对象类型
                     $value = $value->__toString();
                 }
@@ -494,7 +494,7 @@ trait Attribute
      * @return mixed
      * @throws InvalidArgumentException
      */
-    protected function getValue(string $name, $value, $relation = false)
+    protected function getValue(string $name, $value, bool|string $relation = false)
     {
         // 检测属性获取器
         $fieldName = $this->getRealFieldName($name);
@@ -546,7 +546,7 @@ trait Attribute
      * @param  mixed  $value JSON数据
      * @return mixed
      */
-    protected function getJsonValue($name, $value)
+    protected function getJsonValue(string $name, $value)
     {
         if (is_null($value)) {
             return $value;
@@ -591,7 +591,7 @@ trait Attribute
 
         if (is_array($type)) {
             [$type, $param] = $type;
-        } elseif (strpos($type, ':')) {
+        } elseif (str_contains($type, ':')) {
             [$type, $param] = explode(':', $type, 2);
         }
 
@@ -638,7 +638,7 @@ trait Attribute
                 }
                 break;
             default:
-                if (false !== strpos($type, '\\')) {
+                if (str_contains($type, '\\')) {
                     // 对象类型
                     $value = new $type($value);
                 }
@@ -663,7 +663,7 @@ trait Attribute
         } else {
             $name = $this->getRealFieldName($name);
 
-            if (strpos($name, '.')) {
+            if (str_contains($name, '.')) {
                 [$name, $key] = explode('.', $name);
 
                 $this->withAttr[$name][$key] = $callback;

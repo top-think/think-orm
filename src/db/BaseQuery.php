@@ -2,7 +2,7 @@
 // +----------------------------------------------------------------------
 // | ThinkPHP [ WE CAN DO IT JUST THINK ]
 // +----------------------------------------------------------------------
-// | Copyright (c) 2006~2019 http://thinkphp.cn All rights reserved.
+// | Copyright (c) 2006~2023 http://thinkphp.cn All rights reserved.
 // +----------------------------------------------------------------------
 // | Licensed ( http://www.apache.org/licenses/LICENSE-2.0 )
 // +----------------------------------------------------------------------
@@ -497,10 +497,10 @@ abstract class BaseQuery
     public function table($table)
     {
         if (is_string($table)) {
-            if (strpos($table, ')')) {
+            if (str_contains($table, ')')) {
                 // 子查询
-            } elseif (false === strpos($table, ',')) {
-                if (strpos($table, ' ')) {
+            } elseif (!str_contains($table, ',')) {
+                if (str_contains($table, ' ')) {
                     [$item, $alias] = explode(' ', $table);
                     $table          = [];
                     $this->alias([$item => $alias]);
@@ -512,7 +512,7 @@ abstract class BaseQuery
 
                 foreach ($tables as $item) {
                     $item = trim($item);
-                    if (strpos($item, ' ')) {
+                    if (str_contains($item, ' ')) {
                         [$item, $alias] = explode(' ', $item);
                         $this->alias([$item => $alias]);
                         $table[$item] = $alias;
@@ -560,7 +560,7 @@ abstract class BaseQuery
             if (!empty($this->options['via'])) {
                 $field = $this->options['via'] . '.' . $field;
             }
-            if (strpos($field, ',')) {
+            if (str_contains($field, ',')) {
                 $field = array_map('trim', explode(',', $field));
             } else {
                 $field = empty($order) ? $field : [$field => $order];

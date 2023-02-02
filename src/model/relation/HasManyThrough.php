@@ -2,7 +2,7 @@
 // +----------------------------------------------------------------------
 // | ThinkPHP [ WE CAN DO IT JUST THINK ]
 // +----------------------------------------------------------------------
-// | Copyright (c) 2006~2019 http://thinkphp.cn All rights reserved.
+// | Copyright (c) 2006~2023 http://thinkphp.cn All rights reserved.
 // +----------------------------------------------------------------------
 // | Licensed ( http://www.apache.org/licenses/LICENSE-2.0 )
 // +----------------------------------------------------------------------
@@ -74,15 +74,10 @@ class HasManyThrough extends Relation
     public function getRelation(array $subRelation = [], Closure $closure = null)
     {
         if ($closure) {
-            $closure($this->getClosureType($closure));
+            $closure($this->query);
         }
 
         $this->baseQuery();
-
-        $withLimit = $this->query->getOptions('with_limit');
-        if ($withLimit) {
-            $this->query->limit($withLimit);
-        }
 
         return $this->query->relation($subRelation)
             ->select()
@@ -256,13 +251,18 @@ class HasManyThrough extends Relation
 
         if ($closure) {
             $this->baseQuery = true;
-            $closure($this->getClosureType($closure));
+            $closure($this->query);
         }
 
         $throughKey = $this->throughKey;
 
         if ($this->baseQuery) {
             $throughKey = Str::snake(class_basename($this->model)) . "." . $this->throughKey;
+        }
+
+        $withLimit = $this->query->getOptions('limit');
+        if ($withLimit) {
+            $this->query->removeOption('limit');            
         }
 
         $list = $this->query
@@ -272,7 +272,6 @@ class HasManyThrough extends Relation
 
         // 组装模型数据
         $data       = [];
-        $withLimit  = $this->query->getOptions('with_limit');
         $keys       = $throughList->column($this->foreignKey, $this->throughPk);
 
         foreach ($list as $set) {
@@ -307,7 +306,7 @@ class HasManyThrough extends Relation
         }
 
         if ($closure) {
-            $closure($this->getClosureType($closure), $name);
+            $closure($this->query, $name);
         }
 
         $alias        = Str::snake(class_basename($this->model));
@@ -316,7 +315,7 @@ class HasManyThrough extends Relation
         $throughKey   = $this->throughKey;
         $modelTable   = $this->parent->getTable();
 
-        if (false === strpos($field, '.')) {
+        if (!str_contains($field, '.')) {
             $field = $alias . '.' . $field;
         }
 
@@ -340,7 +339,7 @@ class HasManyThrough extends Relation
     public function getRelationCountQuery(Closure $closure = null, string $aggregate = 'count', string $field = '*', string &$name = null): string
     {
         if ($closure) {
-            $closure($this->getClosureType($closure), $name);
+            $closure($this->query, $name);
         }
 
         $alias        = Str::snake(class_basename($this->model));
@@ -349,7 +348,7 @@ class HasManyThrough extends Relation
         $throughKey   = $this->throughKey;
         $modelTable   = $this->parent->getTable();
 
-        if (false === strpos($field, '.')) {
+        if (!str_contains($field, '.')) {
             $field = $alias . '.' . $field;
         }
 
@@ -375,10 +374,6 @@ class HasManyThrough extends Relation
             $pk           = $this->throughPk;
             $throughKey   = $this->throughKey;
             $modelTable   = $this->parent->getTable();
-
-            if ($this->withoutField) {
-                $this->query->withoutField($this->withoutField);
-            }
 
             $fields = $this->getQueryFields($alias);
 

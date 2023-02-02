@@ -2,7 +2,7 @@
 // +----------------------------------------------------------------------
 // | ThinkPHP [ WE CAN DO IT JUST THINK ]
 // +----------------------------------------------------------------------
-// | Copyright (c) 2006~2019 http://thinkphp.cn All rights reserved.
+// | Copyright (c) 2006~2023 http://thinkphp.cn All rights reserved.
 // +----------------------------------------------------------------------
 // | Licensed ( http://www.apache.org/licenses/LICENSE-2.0 )
 // +----------------------------------------------------------------------
@@ -172,7 +172,7 @@ class MorphTo extends Relation
             $model = $this->alias[$model];
         }
 
-        if (false === strpos($model, '\\')) {
+        if (!str_contains($model, '\\')) {
             $path = explode('\\', get_class($this->parent));
             array_pop($path);
             array_push($path, Str::studly($model));

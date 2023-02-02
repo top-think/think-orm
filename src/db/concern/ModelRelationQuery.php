@@ -2,13 +2,13 @@
 // +----------------------------------------------------------------------
 // | ThinkPHP [ WE CAN DO IT JUST THINK ]
 // +----------------------------------------------------------------------
-// | Copyright (c) 2006~2019 http://thinkphp.cn All rights reserved.
+// | Copyright (c) 2006~2023 http://thinkphp.cn All rights reserved.
 // +----------------------------------------------------------------------
 // | Licensed ( http://www.apache.org/licenses/LICENSE-2.0 )
 // +----------------------------------------------------------------------
 // | Author: liu21st <liu21st@gmail.com>
 // +----------------------------------------------------------------------
-declare (strict_types = 1);
+declare(strict_types=1);
 
 namespace think\db\concern;
 
@@ -177,6 +177,17 @@ trait ModelRelationQuery
     }
 
     /**
+     * 限制关联数据的字段
+     * @access public
+     * @param  array|string $field 关联字段限制
+     * @return $this
+     */
+    public function withField($field)
+    {
+        return $this->field($field);
+    }
+
+    /**
      * 限制关联数据的数量
      * @access public
      * @param  int $limit 关联数量限制
@@ -184,7 +195,18 @@ trait ModelRelationQuery
      */
     public function withLimit(int $limit)
     {
-        $this->options['with_limit'] = $limit;
+        return $this->limit($limit);
+    }
+
+    /**
+     * 设置关联数据不存在的时候默认值
+     * @access public
+     * @param  mixed $data 默认值
+     * @return $this
+     */
+    public function withDefault($data = null)
+    {
+        $this->model->withDefault($data);
         return $this;
     }
 
@@ -206,11 +228,10 @@ trait ModelRelationQuery
 
         $this->options['with_attr'][$name] = $callback;
 
-        if (strpos($name, '.')) {
+        if (str_contains($name, '.')) {
             [$relation, $field] = explode('.', $name);
 
             if (!empty($this->options['json']) && in_array($relation, $this->options['json'])) {
-
             } else {
                 $this->options['with_relation_attr'][$relation][$field] = $callback;
                 unset($this->options['with_attr'][$name]);
@@ -263,7 +284,7 @@ trait ModelRelationQuery
             } elseif (is_array($relation)) {
                 $field    = $relation;
                 $relation = $key;
-            } elseif (is_string($relation) && strpos($relation, '.')) {
+            } elseif (is_string($relation) && str_contains($relation, '.')) {
                 $relation = strstr($relation, '.', true);
             }
 
@@ -570,5 +591,4 @@ trait ModelRelationQuery
         // 刷新原始数据
         $result->refreshOrigin();
     }
-
 }

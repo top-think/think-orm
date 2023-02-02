@@ -2,7 +2,7 @@
 // +----------------------------------------------------------------------
 // | ThinkPHP [ WE CAN DO IT JUST THINK ]
 // +----------------------------------------------------------------------
-// | Copyright (c) 2006~2019 http://thinkphp.cn All rights reserved.
+// | Copyright (c) 2006~2023 http://thinkphp.cn All rights reserved.
 // +----------------------------------------------------------------------
 // | Licensed ( http://www.apache.org/licenses/LICENSE-2.0 )
 // +----------------------------------------------------------------------
@@ -55,7 +55,7 @@ trait WhereQuery
             $via = $query->getOptions('via');
             foreach ($this->options['where'] as $logic => &$where) {
                 foreach ($where as $key => &$val) {
-                    if (is_array($val) && !strpos($val[0], '.')) {
+                    if (is_array($val) && !str_contains($val[0], '.')) {
                         $val[0] = $via . '.' . $val[0];
                     }
                 }
@@ -357,7 +357,7 @@ trait WhereQuery
     {
         $logic = strtoupper($logic);
 
-        if (is_string($field) && !empty($this->options['via']) && false === strpos($field, '.')) {
+        if (is_string($field) && !empty($this->options['via']) && !str_contains($field, '.')) {
             $field = $this->options['via'] . '.' . $field;
         }
 

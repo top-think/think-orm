@@ -2,7 +2,7 @@
 // +----------------------------------------------------------------------
 // | ThinkPHP [ WE CAN DO IT JUST THINK ]
 // +----------------------------------------------------------------------
-// | Copyright (c) 2006~2019 http://thinkphp.cn All rights reserved.
+// | Copyright (c) 2006~2023 http://thinkphp.cn All rights reserved.
 // +----------------------------------------------------------------------
 // | Licensed ( http://www.apache.org/licenses/LICENSE-2.0 )
 // +----------------------------------------------------------------------
@@ -205,11 +205,11 @@ trait SoftDelete
             return false;
         }
 
-        if (false === strpos($field, '.')) {
+        if (!str_contains($field, '.')) {
             $field = '__TABLE__.' . $field;
         }
 
-        if (!$read && strpos($field, '.')) {
+        if (!$read && str_contains($field, '.')) {
             $array = explode('.', $field);
             $field = array_pop($array);
         }

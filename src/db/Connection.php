@@ -2,7 +2,7 @@
 // +----------------------------------------------------------------------
 // | ThinkPHP [ WE CAN DO IT JUST THINK ]
 // +----------------------------------------------------------------------
-// | Copyright (c) 2006~2019 http://thinkphp.cn All rights reserved.
+// | Copyright (c) 2006~2023 http://thinkphp.cn All rights reserved.
 // +----------------------------------------------------------------------
 // | Licensed ( http://www.apache.org/licenses/LICENSE-2.0 )
 // +----------------------------------------------------------------------
@@ -235,7 +235,7 @@ abstract class Connection implements ConnectionInterface
         $listen = $this->db->getListen();
         if (empty($listen)) {
             $listen[] = function ($sql, $time, $master) {
-                if (0 === strpos($sql, 'CONNECT:')) {
+                if (str_starts_with($sql, 'CONNECT:')) {
                     $this->db->log($sql);
                     return;
                 }

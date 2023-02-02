@@ -177,14 +177,13 @@ trait ModelRelationQuery
     }
 
     /**
-     * 限制关联数据的数量
+     * 来自关联对象调用
      * @access public
-     * @param  int $limit 关联数量限制
      * @return $this
      */
-    public function withLimit(int $limit)
+    public function fromRelation()
     {
-        $this->options['with_limit'] = $limit;
+        $this->options['from_relation'] = true;
         return $this;
     }
 

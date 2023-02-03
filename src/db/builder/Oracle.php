@@ -39,13 +39,13 @@ class Oracle extends Builder
             $limit = explode(',', $limit);
 
             if (count($limit) > 1) {
-                $limitStr = '(numrow>'.$limit[0].') AND (numrow<='.($limit[0] + $limit[1]).')';
+                $limitStr = '(numrow>' . $limit[0] . ') AND (numrow<=' . ($limit[0] + $limit[1]) . ')';
             } else {
-                $limitStr = '(numrow>0 AND numrow<='.$limit[0].')';
+                $limitStr = '(numrow>0 AND numrow<=' . $limit[0] . ')';
             }
         }
 
-        return $limitStr ? ' WHERE '.$limitStr : '';
+        return $limitStr ? ' WHERE ' . $limitStr : '';
     }
 
     /**
@@ -89,7 +89,7 @@ class Oracle extends Builder
         if (str_contains($key, '->') && !str_contains($key, '(')) {
             // JSON字段支持
             [$field, $name] = explode($key, '->');
-            $key = $field.'."'.$name.'"';
+            $key = $field . '."' . $name . '"';
         } elseif (str_contains($key, '.') && !preg_match('/[,\'\"\(\)\[\s]/', $key)) {
             [$table, $key] = explode('.', $key, 2);
 
@@ -106,15 +106,15 @@ class Oracle extends Builder
         }
 
         if ($strict && !preg_match('/^[\w\.\*]+$/', $key)) {
-            throw new Exception('not support data:'.$key);
+            throw new Exception('not support data:' . $key);
         }
 
         if ('*' != $key && !preg_match('/[,\'\"\*\(\)\[.\s]/', $key)) {
-            $key = '"'.$key.'"';
+            $key = '"' . $key . '"';
         }
 
         if (isset($table)) {
-            $key = '"'.$table.'".'.$key;
+            $key = '"' . $table . '".' . $key;
         }
 
         return $key;

@@ -387,11 +387,11 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
     {
         /** @var Query $query */
         $query = self::$db->connect($this->connection)
-            ->name($this->name.$this->suffix)
+            ->name($this->name . $this->suffix)
             ->pk($this->pk);
 
         if (!empty($this->table)) {
-            $query->table($this->table.$this->suffix);
+            $query->table($this->table . $this->suffix);
         }
 
         $query->model($this)
@@ -600,7 +600,7 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
                 $this->field = array_keys(array_merge($this->schema, $this->jsonType));
             } else {
                 $query = $this->db();
-                $table = $this->table ? $this->table.$this->suffix : $query->getTable();
+                $table = $this->table ? $this->table . $this->suffix : $query->getTable();
 
                 $this->field = $query->getConnection()->getTableFields($table);
             }

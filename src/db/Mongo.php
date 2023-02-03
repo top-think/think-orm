@@ -553,7 +553,7 @@ class Mongo extends BaseQuery
      */
     public function getQueryGuid($data = null): string
     {
-        return md5($this->getConfig('database').serialize(var_export($data ?: $this->options, true)));
+        return md5($this->getConfig('database') . serialize(var_export($data ?: $this->options, true)));
     }
 
     /**

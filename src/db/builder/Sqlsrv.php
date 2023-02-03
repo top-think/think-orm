@@ -86,17 +86,17 @@ class Sqlsrv extends Builder
                 $array[] = $this->parseRand($query);
             } else {
                 if (is_numeric($key)) {
-                    [$key, $sort] = explode(' ', str_contains($val, ' ') ? $val : $val.' ');
+                    [$key, $sort] = explode(' ', str_contains($val, ' ') ? $val : $val . ' ');
                 } else {
                     $sort = $val;
                 }
 
-                $sort = in_array(strtolower($sort), ['asc', 'desc'], true) ? ' '.$sort : '';
-                $array[] = $this->parseKey($query, $key, true).$sort;
+                $sort = in_array(strtolower($sort), ['asc', 'desc'], true) ? ' ' . $sort : '';
+                $array[] = $this->parseKey($query, $key, true) . $sort;
             }
         }
 
-        return ' ORDER BY '.implode(',', $array);
+        return ' ORDER BY ' . implode(',', $array);
     }
 
     /**
@@ -146,15 +146,15 @@ class Sqlsrv extends Builder
         }
 
         if ($strict && !preg_match('/^[\w\.\*]+$/', $key)) {
-            throw new Exception('not support data:'.$key);
+            throw new Exception('not support data:' . $key);
         }
 
         if ('*' != $key && !preg_match('/[,\'\"\*\(\)\[.\s]/', $key)) {
-            $key = '['.$key.']';
+            $key = '[' . $key . ']';
         }
 
         if (isset($table)) {
-            $key = '['.$table.'].'.$key;
+            $key = '[' . $table . '].' . $key;
         }
 
         return $key;
@@ -177,12 +177,12 @@ class Sqlsrv extends Builder
         $limit = explode(',', $limit);
 
         if (count($limit) > 1) {
-            $limitStr = '(T1.ROW_NUMBER BETWEEN '.$limit[0].' + 1 AND '.$limit[0].' + '.$limit[1].')';
+            $limitStr = '(T1.ROW_NUMBER BETWEEN ' . $limit[0] . ' + 1 AND ' . $limit[0] . ' + ' . $limit[1] . ')';
         } else {
-            $limitStr = '(T1.ROW_NUMBER BETWEEN 1 AND '.$limit[0].')';
+            $limitStr = '(T1.ROW_NUMBER BETWEEN 1 AND ' . $limit[0] . ')';
         }
 
-        return 'WHERE '.$limitStr;
+        return 'WHERE ' . $limitStr;
     }
 
     public function selectInsert(Query $query, array $fields, string $table): string

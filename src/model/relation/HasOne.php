@@ -98,7 +98,7 @@ class HasOne extends OneToOne
         }
 
         return $this->query
-            ->whereExp($this->foreignKey, '='.$this->parent->getTable().'.'.$this->localKey)
+            ->whereExp($this->foreignKey, '=' . $this->parent->getTable() . '.' . $this->localKey)
             ->fetchSql()
             ->$aggregate($field);
     }
@@ -154,10 +154,10 @@ class HasOne extends OneToOne
 
         return $query->whereExists(function ($query) use ($table, $model, $relation, $localKey, $foreignKey, $softDelete) {
             $query->table([$table => $relation])
-                ->field($relation.'.'.$foreignKey)
-                ->whereExp($model.'.'.$localKey, '='.$relation.'.'.$foreignKey)
+                ->field($relation . '.' . $foreignKey)
+                ->whereExp($model . '.' . $localKey, '=' . $relation . '.' . $foreignKey)
                 ->when($softDelete, function ($query) use ($softDelete, $relation) {
-                    $query->where($relation.strstr($softDelete[0], '.'), '=' == $softDelete[1][0] ? $softDelete[1][1] : null);
+                    $query->where($relation . strstr($softDelete[0], '.'), '=' == $softDelete[1][0] ? $softDelete[1][1] : null);
                 });
         });
     }
@@ -193,9 +193,9 @@ class HasOne extends OneToOne
 
         return $query->alias($model)
             ->field($fields)
-            ->join([$table => $relation], $model.'.'.$this->localKey.'='.$relation.'.'.$this->foreignKey, $joinType ?: $this->joinType)
+            ->join([$table => $relation], $model . '.' . $this->localKey . '=' . $relation . '.' . $this->foreignKey, $joinType ?: $this->joinType)
             ->when($softDelete, function ($query) use ($softDelete, $relation) {
-                $query->where($relation.strstr($softDelete[0], '.'), '=' == $softDelete[1][0] ? $softDelete[1][1] : null);
+                $query->where($relation . strstr($softDelete[0], '.'), '=' == $softDelete[1][0] ? $softDelete[1][1] : null);
             })
             ->where($where);
     }

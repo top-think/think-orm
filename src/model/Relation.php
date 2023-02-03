@@ -178,7 +178,7 @@ abstract class Relation
     protected function getRelationQueryFields($fields, string $model)
     {
         if (empty($fields) || '*' == $fields) {
-            return $model.'.*';
+            return $model . '.*';
         }
 
         if (is_string($fields)) {
@@ -187,7 +187,7 @@ abstract class Relation
 
         foreach ($fields as &$field) {
             if (!str_contains($field, '.')) {
-                $field = $model.'.'.$field;
+                $field = $model . '.' . $field;
             }
         }
 
@@ -198,10 +198,10 @@ abstract class Relation
     {
         foreach ($where as $key => &$val) {
             if (is_string($key)) {
-                $where[] = [!str_contains($key, '.') ? $relation.'.'.$key : $key, '=', $val];
+                $where[] = [!str_contains($key, '.') ? $relation . '.' . $key : $key, '=', $val];
                 unset($where[$key]);
             } elseif (isset($val[0]) && !str_contains($val[0], '.')) {
-                $val[0] = $relation.'.'.$val[0];
+                $val[0] = $relation . '.' . $val[0];
             }
         }
     }
@@ -247,6 +247,6 @@ abstract class Relation
             return $result === $this->query ? $this : $result;
         }
 
-        throw new Exception('method not exists:'.__CLASS__.'->'.$method);
+        throw new Exception('method not exists:' . __CLASS__ . '->' . $method);
     }
 }

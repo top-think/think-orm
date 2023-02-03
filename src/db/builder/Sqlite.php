@@ -37,9 +37,9 @@ class Sqlite extends Builder
         if (!empty($limit)) {
             $limit = explode(',', $limit);
             if (count($limit) > 1) {
-                $limitStr .= ' LIMIT '.$limit[1].' OFFSET '.$limit[0].' ';
+                $limitStr .= ' LIMIT ' . $limit[1] . ' OFFSET ' . $limit[0] . ' ';
             } else {
-                $limitStr .= ' LIMIT '.$limit[0].' ';
+                $limitStr .= ' LIMIT ' . $limit[0] . ' ';
             }
         }
 
@@ -93,11 +93,11 @@ class Sqlite extends Builder
         }
 
         if ('*' != $key && !preg_match('/[,\'\"\*\(\)`.\s]/', $key)) {
-            $key = '`'.$key.'`';
+            $key = '`' . $key . '`';
         }
 
         if (isset($table)) {
-            $key = '`'.$table.'`.'.$key;
+            $key = '`' . $table . '`.' . $key;
         }
 
         return $key;

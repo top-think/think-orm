@@ -51,9 +51,9 @@ class Pgsql extends Builder
         if (!empty($limit)) {
             $limit = explode(',', $limit);
             if (count($limit) > 1) {
-                $limitStr .= ' LIMIT '.$limit[1].' OFFSET '.$limit[0].' ';
+                $limitStr .= ' LIMIT ' . $limit[1] . ' OFFSET ' . $limit[0] . ' ';
             } else {
-                $limitStr .= ' LIMIT '.$limit[0].' ';
+                $limitStr .= ' LIMIT ' . $limit[0] . ' ';
             }
         }
 
@@ -82,7 +82,7 @@ class Pgsql extends Builder
         if (str_contains($key, '->') && !str_contains($key, '(')) {
             // JSON字段支持
             [$field, $name] = explode('->', $key);
-            $key = '"'.$field.'"'.'->>\''.$name.'\'';
+            $key = '"' . $field . '"' . '->>\'' . $name . '\'';
         } elseif (str_contains($key, '.')) {
             [$table, $key] = explode('.', $key, 2);
 
@@ -98,12 +98,12 @@ class Pgsql extends Builder
             }
 
             if ('*' != $key && !preg_match('/[,\"\*\(\).\s]/', $key)) {
-                $key = '"'.$key.'"';
+                $key = '"' . $key . '"';
             }
         }
 
         if (isset($table)) {
-            $key = $table.'.'.$key;
+            $key = $table . '.' . $key;
         }
 
         return $key;

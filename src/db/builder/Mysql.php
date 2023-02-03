@@ -132,7 +132,7 @@ class Mysql extends Builder
 
         $set = [];
         foreach ($data as $key => $val) {
-            $set[] = $key.' = '.$val;
+            $set[] = $key . ' = ' . $val;
         }
 
         return str_replace(
@@ -179,7 +179,7 @@ class Mysql extends Builder
         foreach ($dataSet as $data) {
             $data = $this->parseData($query, $data, $allowFields, $bind);
 
-            $values[] = '( '.implode(',', array_values($data)).' )';
+            $values[] = '( ' . implode(',', array_values($data)) . ' )';
 
             if (!isset($insertFields)) {
                 $insertFields = array_keys($data);
@@ -225,7 +225,7 @@ class Mysql extends Builder
 
         $set = [];
         foreach ($data as $key => $val) {
-            $set[] = (str_contains($key, '->') ? strstr($key, '->', true) : $key).' = '.$val;
+            $set[] = (str_contains($key, '->') ? strstr($key, '->', true) : $key) . ' = ' . $val;
         }
 
         return str_replace(
@@ -263,7 +263,7 @@ class Mysql extends Builder
                 $this->parseTable($query, $options['table']),
                 $this->parsePartition($query, $options['partition']),
                 $this->parseExtra($query, $options['extra']),
-                !empty($options['using']) ? ' USING '.$this->parseTable($query, $options['using']).' ' : '',
+                !empty($options['using']) ? ' USING ' . $this->parseTable($query, $options['using']) . ' ' : '',
                 $this->parseJoin($query, $options['join']),
                 $this->parseWhere($query, $options['where']),
                 $this->parseOrder($query, $options['order']),
@@ -292,7 +292,7 @@ class Mysql extends Builder
             $value = $this->parseRaw($query, $value);
         }
 
-        return $key.' '.$exp.' '.$value;
+        return $key . ' ' . $exp . ' ' . $value;
     }
 
     /**
@@ -312,7 +312,7 @@ class Mysql extends Builder
             $value = $this->parseRaw($query, $value);
         }
 
-        return 'FIND_IN_SET('.$value.', '.$key.')';
+        return 'FIND_IN_SET(' . $value . ', ' . $key . ')';
     }
 
     /**
@@ -324,7 +324,7 @@ class Mysql extends Builder
      *
      * @return string
      */
-    public function parseKey(Query $query, $key, bool $strict = false): string
+    public function parseKey(Query $query, string|int|Raw $key, bool $strict = false): string
     {
         if (is_int($key)) {
             return (string) $key;
@@ -338,12 +338,12 @@ class Mysql extends Builder
             // JSON字段支持
             [$field, $name] = explode('->>', $key, 2);
 
-            return $this->parseKey($query, $field, true).'->>\'$'.(str_starts_with($name, '[') ? '' : '.').str_replace('->>', '.', $name).'\'';
+            return $this->parseKey($query, $field, true) . '->>\'$' . (str_starts_with($name, '[') ? '' : '.') . str_replace('->>', '.', $name) . '\'';
         } elseif (str_contains($key, '->') && !str_contains($key, '(')) {
             // JSON字段支持
             [$field, $name] = explode('->', $key, 2);
 
-            return 'json_extract('.$this->parseKey($query, $field, true).', \'$'.(str_starts_with($name, '[') ? '' : '.').str_replace('->', '.', $name).'\')';
+            return 'json_extract(' . $this->parseKey($query, $field, true) . ', \'$' . (str_starts_with($name, '[') ? '' : '.') . str_replace('->', '.', $name) . '\')';
         } elseif (str_contains($key, '.') && !preg_match('/[,\'\"\(\)`\s]/', $key)) {
             [$table, $key] = explode('.', $key, 2);
 
@@ -360,11 +360,11 @@ class Mysql extends Builder
         }
 
         if ($strict && !preg_match('/^[\w\.\*]+$/', $key)) {
-            throw new Exception('not support data:'.$key);
+            throw new Exception('not support data:' . $key);
         }
 
         if ('*' != $key && !preg_match('/[,\'\"\*\(\)`.\s]/', $key)) {
-            $key = '`'.$key.'`';
+            $key = '`' . $key . '`';
         }
 
         if (isset($table)) {
@@ -372,7 +372,7 @@ class Mysql extends Builder
                 $table = str_replace('.', '`.`', $table);
             }
 
-            $key = '`'.$table.'`.'.$key;
+            $key = '`' . $table . '`.' . $key;
         }
 
         return $key;
@@ -408,7 +408,7 @@ class Mysql extends Builder
             $partition = explode(',', $partition);
         }
 
-        return ' PARTITION ('.implode(' , ', $partition).') ';
+        return ' PARTITION (' . implode(' , ', $partition) . ') ';
     }
 
     /**
@@ -426,7 +426,7 @@ class Mysql extends Builder
         }
 
         if ($duplicate instanceof Raw) {
-            return ' ON DUPLICATE KEY UPDATE '.$this->parseRaw($query, $duplicate).' ';
+            return ' ON DUPLICATE KEY UPDATE ' . $this->parseRaw($query, $duplicate) . ' ';
         }
 
         if (is_string($duplicate)) {
@@ -437,15 +437,15 @@ class Mysql extends Builder
         foreach ($duplicate as $key => $val) {
             if (is_numeric($key)) {
                 $val = $this->parseKey($query, $val);
-                $updates[] = $val.' = VALUES('.$val.')';
+                $updates[] = $val . ' = VALUES(' . $val . ')';
             } elseif ($val instanceof Raw) {
-                $updates[] = $this->parseKey($query, $key).' = '.$this->parseRaw($query, $val);
+                $updates[] = $this->parseKey($query, $key) . ' = ' . $this->parseRaw($query, $val);
             } else {
                 $name = $query->bindValue($val, $query->getConnection()->getFieldBindType($key));
-                $updates[] = $this->parseKey($query, $key).' = :'.$name;
+                $updates[] = $this->parseKey($query, $key) . ' = :' . $name;
             }
         }
 
-        return ' ON DUPLICATE KEY UPDATE '.implode(' , ', $updates).' ';
+        return ' ON DUPLICATE KEY UPDATE ' . implode(' , ', $updates) . ' ';
     }
 }

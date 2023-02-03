@@ -310,7 +310,7 @@ class Query extends BaseQuery
      */
     public function buildSql(bool $sub = true): string
     {
-        return $sub ? '( '.$this->fetchSql()->select().' )' : $this->fetchSql()->select();
+        return $sub ? '( ' . $this->fetchSql()->select() . ' )' : $this->fetchSql()->select();
     }
 
     /**
@@ -396,7 +396,7 @@ class Query extends BaseQuery
      */
     public function getQueryGuid($data = null): string
     {
-        return md5($this->getConfig('database').serialize(var_export($data ?: $this->options, true)).serialize($this->getBind(false)));
+        return md5($this->getConfig('database') . serialize(var_export($data ?: $this->options, true)) . serialize($this->getBind(false)));
     }
 
     /**

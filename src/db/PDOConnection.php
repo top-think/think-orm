@@ -237,7 +237,7 @@ abstract class PDOConnection extends Connection
      */
     public function getBuilderClass(): string
     {
-        return $this->getConfig('builder') ?: '\\think\\db\\builder\\'.ucfirst($this->getConfig('type'));
+        return $this->getConfig('builder') ?: '\\think\\db\\builder\\' . ucfirst($this->getConfig('type'));
     }
 
     /**
@@ -357,7 +357,7 @@ abstract class PDOConnection extends Connection
      */
     protected function getSchemaCacheKey(string $schema): string
     {
-        return $this->getConfig('hostname').':'.$this->getConfig('hostport').'@'.$schema;
+        return $this->getConfig('hostname') . ':' . $this->getConfig('hostport') . '@' . $schema;
     }
 
     /**
@@ -369,7 +369,7 @@ abstract class PDOConnection extends Connection
     public function getSchemaInfo(string $tableName, $force = false)
     {
         if (!str_contains($tableName, '.')) {
-            $schema = $this->getConfig('database').'.'.$tableName;
+            $schema = $this->getConfig('database') . '.' . $tableName;
         } else {
             $schema = $tableName;
         }
@@ -590,7 +590,7 @@ abstract class PDOConnection extends Connection
 
             // SQL监控
             if (!empty($config['trigger_sql'])) {
-                $this->trigger('CONNECT:[ UseTime:'.number_format(microtime(true) - $startTime, 6).'s ] '.$config['dsn']);
+                $this->trigger('CONNECT:[ UseTime:' . number_format(microtime(true) - $startTime, 6) . 's ] ' . $config['dsn']);
             }
 
             return $this->links[$linkNum];
@@ -828,7 +828,7 @@ abstract class PDOConnection extends Connection
             $this->reConnectTimes = 0;
 
             return $this->PDOStatement;
-        } catch (\Throwable|\Exception $e) {
+        } catch (\Throwable | \Exception $e) {
             if ($this->transTimes > 0) {
                 // 事务活动中时不应该进行重试，应直接中断执行，防止造成污染。
                 if ($this->isBreak($e)) {
@@ -1065,7 +1065,7 @@ abstract class PDOConnection extends Connection
 
                 // 提交事务
                 $this->commit();
-            } catch (\Exception|\Throwable $e) {
+            } catch (\Exception | \Throwable $e) {
                 $this->rollback();
 
                 throw $e;
@@ -1229,7 +1229,7 @@ abstract class PDOConnection extends Connection
             [$distinct, $field] = explode(' ', $field);
         }
 
-        $field = $aggregate.'('.(!empty($distinct) ? 'DISTINCT ' : '').$this->builder->parseKey($query, $field, true).') AS think_'.strtolower($aggregate);
+        $field = $aggregate . '(' . (!empty($distinct) ? 'DISTINCT ' : '') . $this->builder->parseKey($query, $field, true) . ') AS think_' . strtolower($aggregate);
 
         $result = $this->value($query, $field, 0);
 
@@ -1347,7 +1347,7 @@ abstract class PDOConnection extends Connection
             $type = is_array($val) ? $val[1] : PDO::PARAM_STR;
 
             if (self::PARAM_FLOAT == $type || PDO::PARAM_STR == $type) {
-                $value = '\''.addslashes($value).'\'';
+                $value = '\'' . addslashes($value) . '\'';
             } elseif (PDO::PARAM_INT == $type && '' === $value) {
                 $value = '0';
             }
@@ -1355,7 +1355,7 @@ abstract class PDOConnection extends Connection
             // 判断占位符
             $sql = is_numeric($key) ?
                 substr_replace($sql, $value, strpos($sql, '?'), 1) :
-                substr_replace($sql, $value, strpos($sql, ':'.$key), strlen(':'.$key));
+                substr_replace($sql, $value, strpos($sql, ':' . $key), strlen(':' . $key));
         }
 
         return rtrim($sql);
@@ -1376,7 +1376,7 @@ abstract class PDOConnection extends Connection
     {
         foreach ($bind as $key => $val) {
             // 占位符
-            $param = is_numeric($key) ? $key + 1 : ':'.$key;
+            $param = is_numeric($key) ? $key + 1 : ':' . $key;
 
             if (is_array($val)) {
                 if (PDO::PARAM_INT == $val[1] && '' === $val[0]) {
@@ -1414,7 +1414,7 @@ abstract class PDOConnection extends Connection
     protected function bindParam(array $bind): void
     {
         foreach ($bind as $key => $val) {
-            $param = is_numeric($key) ? $key + 1 : ':'.$key;
+            $param = is_numeric($key) ? $key + 1 : ':' . $key;
 
             if (is_array($val)) {
                 array_unshift($val, $param);
@@ -1502,7 +1502,7 @@ abstract class PDOConnection extends Connection
             $this->commit();
 
             return $result;
-        } catch (\Exception|\Throwable $e) {
+        } catch (\Exception | \Throwable $e) {
             $this->rollback();
 
             throw $e;
@@ -1528,11 +1528,11 @@ abstract class PDOConnection extends Connection
                 $this->linkID->beginTransaction();
             } elseif ($this->transTimes > 1 && $this->supportSavepoint() && $this->linkID->inTransaction()) {
                 $this->linkID->exec(
-                    $this->parseSavepoint('trans'.$this->transTimes)
+                    $this->parseSavepoint('trans' . $this->transTimes)
                 );
             }
             $this->reConnectTimes = 0;
-        } catch (\Throwable|\Exception $e) {
+        } catch (\Throwable | \Exception $e) {
             if (1 === $this->transTimes && $this->reConnectTimes < 4 && $this->isBreak($e)) {
                 $this->transTimes--;
                 $this->reConnectTimes++;
@@ -1582,7 +1582,7 @@ abstract class PDOConnection extends Connection
                 $this->linkID->rollBack();
             } elseif ($this->transTimes > 1 && $this->supportSavepoint()) {
                 $this->linkID->exec(
-                    $this->parseSavepointRollBack('trans'.$this->transTimes)
+                    $this->parseSavepointRollBack('trans' . $this->transTimes)
                 );
             }
         }
@@ -1609,7 +1609,7 @@ abstract class PDOConnection extends Connection
      */
     protected function parseSavepoint(string $name): string
     {
-        return 'SAVEPOINT '.$name;
+        return 'SAVEPOINT ' . $name;
     }
 
     /**
@@ -1621,7 +1621,7 @@ abstract class PDOConnection extends Connection
      */
     protected function parseSavepointRollBack(string $name): string
     {
-        return 'ROLLBACK TO SAVEPOINT '.$name;
+        return 'ROLLBACK TO SAVEPOINT ' . $name;
     }
 
     /**
@@ -1759,13 +1759,13 @@ abstract class PDOConnection extends Connection
     {
         if ($this->PDOStatement) {
             $error = $this->PDOStatement->errorInfo();
-            $error = $error[1].':'.$error[2];
+            $error = $error[1] . ':' . $error[2];
         } else {
             $error = '';
         }
 
         if ('' != $this->queryStr) {
-            $error .= "\n [ SQL语句 ] : ".$this->getLastsql();
+            $error .= "\n [ SQL语句 ] : " . $this->getLastsql();
         }
 
         return $error;
@@ -1862,7 +1862,7 @@ abstract class PDOConnection extends Connection
      */
     public function getUniqueXid(string $suffix = ''): string
     {
-        return $this->config['hostname'].'_'.$this->config['database'].$suffix;
+        return $this->config['hostname'] . '_' . $this->config['database'] . $suffix;
     }
 
     /**
@@ -1892,7 +1892,7 @@ abstract class PDOConnection extends Connection
                 $dbs[$key] = $db;
             }
 
-            $db->startTransXa($db->getUniqueXid('_'.$xid));
+            $db->startTransXa($db->getUniqueXid('_' . $xid));
         }
 
         try {
@@ -1902,17 +1902,17 @@ abstract class PDOConnection extends Connection
             }
 
             foreach ($dbs as $db) {
-                $db->prepareXa($db->getUniqueXid('_'.$xid));
+                $db->prepareXa($db->getUniqueXid('_' . $xid));
             }
 
             foreach ($dbs as $db) {
-                $db->commitXa($db->getUniqueXid('_'.$xid));
+                $db->commitXa($db->getUniqueXid('_' . $xid));
             }
 
             return $result;
-        } catch (\Exception|\Throwable $e) {
+        } catch (\Exception | \Throwable $e) {
             foreach ($dbs as $db) {
-                $db->rollbackXa($db->getUniqueXid('_'.$xid));
+                $db->rollbackXa($db->getUniqueXid('_' . $xid));
             }
 
             throw $e;

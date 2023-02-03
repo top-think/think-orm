@@ -163,7 +163,6 @@ trait Attribute
         if (is_string($pk) && array_key_exists($pk, $this->data)) {
             return $this->data[$pk];
         }
-
     }
 
     /**
@@ -323,7 +322,7 @@ trait Attribute
             return $this->relation[$fieldName];
         }
 
-        throw new InvalidArgumentException('property not exists:'.static::class.'->'.$name);
+        throw new InvalidArgumentException('property not exists:' . static::class . '->' . $name);
     }
 
     /**
@@ -396,7 +395,7 @@ trait Attribute
         $name = $this->getRealFieldName($name);
 
         // 检测修改器
-        $method = 'set'.Str::studly($name).'Attr';
+        $method = 'set' . Str::studly($name) . 'Attr';
 
         if (method_exists($this, $method)) {
             $array = $this->data;
@@ -535,7 +534,7 @@ trait Attribute
             return $this->get[$fieldName];
         }
 
-        $method = 'get'.Str::studly($name).'Attr';
+        $method = 'get' . Str::studly($name) . 'Attr';
         if (isset($this->withAttr[$fieldName])) {
             if ($relation) {
                 $value = $this->getRelationValue($relation);

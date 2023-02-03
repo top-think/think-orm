@@ -21,29 +21,13 @@ use ArrayAccess;
 class Where implements ArrayAccess
 {
     /**
-     * 查询表达式.
-     *
-     * @var array
-     */
-    protected $where = [];
-
-    /**
-     * 是否需要把查询条件两边增加括号.
-     *
-     * @var bool
-     */
-    protected $enclose = false;
-
-    /**
      * 创建一个查询表达式.
      *
      * @param array $where   查询条件数组
      * @param bool  $enclose 是否增加括号
      */
-    public function __construct(array $where = [], bool $enclose = false)
+    public function __construct(protected array $where = [], protected bool $enclose = false)
     {
-        $this->where = $where;
-        $this->enclose = $enclose;
     }
 
     /**
@@ -169,22 +153,22 @@ class Where implements ArrayAccess
     }
 
     // ArrayAccess
-    public function offsetSet($name, $value)
+    public function offsetSet(mixed $name, mixed $value): void
     {
         $this->__set($name, $value);
     }
 
-    public function offsetExists($name)
+    public function offsetExists(mixed $name): bool
     {
         return $this->__isset($name);
     }
 
-    public function offsetUnset($name)
+    public function offsetUnset(mixed $name): void
     {
         $this->__unset($name);
     }
 
-    public function offsetGet($name)
+    public function offsetGet(mixed $name)
     {
         return $this->__get($name);
     }

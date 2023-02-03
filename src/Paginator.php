@@ -196,10 +196,10 @@ abstract class Paginator implements ArrayAccess, Countable, IteratorAggregate, J
 
         $url = $path;
         if (!empty($parameters)) {
-            $url .= '?'.http_build_query($parameters, '', '&');
+            $url .= '?' . http_build_query($parameters, '', '&');
         }
 
-        return $url.$this->buildFragment();
+        return $url . $this->buildFragment();
     }
 
     /**
@@ -371,7 +371,7 @@ abstract class Paginator implements ArrayAccess, Countable, IteratorAggregate, J
      */
     protected function buildFragment(): string
     {
-        return $this->options['fragment'] ? '#'.$this->options['fragment'] : '';
+        return $this->options['fragment'] ? '#' . $this->options['fragment'] : '';
     }
 
     /**

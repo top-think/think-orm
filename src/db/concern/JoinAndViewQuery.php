@@ -23,14 +23,14 @@ trait JoinAndViewQuery
     /**
      * 查询SQL组装 join.
      *
-     * @param mixed  $join      关联的表名
+     * @param array|string|Raw   $join      关联的表名
      * @param mixed  $condition 条件
      * @param string $type      JOIN类型
      * @param array  $bind      参数绑定
      *
      * @return $this
      */
-    public function join($join, string $condition = null, string $type = 'INNER', array $bind = [])
+    public function join(array|string|Raw $join, string $condition = null, string $type = 'INNER', array $bind = [])
     {
         $table = $this->getJoinTable($join);
 
@@ -46,13 +46,13 @@ trait JoinAndViewQuery
     /**
      * LEFT JOIN.
      *
-     * @param mixed $join      关联的表名
+     * @param array|string|Raw  $join      关联的表名
      * @param mixed $condition 条件
      * @param array $bind      参数绑定
      *
      * @return $this
      */
-    public function leftJoin($join, string $condition = null, array $bind = [])
+    public function leftJoin(array|string|Raw $join, string $condition = null, array $bind = [])
     {
         return $this->join($join, $condition, 'LEFT', $bind);
     }
@@ -60,13 +60,13 @@ trait JoinAndViewQuery
     /**
      * RIGHT JOIN.
      *
-     * @param mixed $join      关联的表名
+     * @param array|string|Raw  $join      关联的表名
      * @param mixed $condition 条件
      * @param array $bind      参数绑定
      *
      * @return $this
      */
-    public function rightJoin($join, string $condition = null, array $bind = [])
+    public function rightJoin(array|string|Raw $join, string $condition = null, array $bind = [])
     {
         return $this->join($join, $condition, 'RIGHT', $bind);
     }
@@ -74,13 +74,13 @@ trait JoinAndViewQuery
     /**
      * FULL JOIN.
      *
-     * @param mixed $join      关联的表名
+     * @param array|string|Raw  $join      关联的表名
      * @param mixed $condition 条件
      * @param array $bind      参数绑定
      *
      * @return $this
      */
-    public function fullJoin($join, string $condition = null, array $bind = [])
+    public function fullJoin(array|string|Raw $join, string $condition = null, array $bind = [])
     {
         return $this->join($join, $condition, 'FULL');
     }
@@ -94,7 +94,7 @@ trait JoinAndViewQuery
      *
      * @return string|array
      */
-    protected function getJoinTable($join, &$alias = null)
+    protected function getJoinTable(array|string|Raw $join, string &$alias = null)
     {
         if (is_array($join)) {
             $table = $join;
@@ -137,15 +137,15 @@ trait JoinAndViewQuery
     /**
      * 指定JOIN查询字段.
      *
-     * @param string|array $join  数据表
-     * @param string|array $field 查询字段
+     * @param array|string|Raw  $join  数据表
+     * @param string|array|bool $field 查询字段
      * @param string       $on    JOIN条件
      * @param string       $type  JOIN类型
      * @param array        $bind  参数绑定
      *
      * @return $this
      */
-    public function view($join, $field = true, $on = null, string $type = 'INNER', array $bind = [])
+    public function view(array|string|Raw $join, string|array|bool $field = true, string $on = null, string $type = 'INNER', array $bind = [])
     {
         $this->options['view'] = true;
 
@@ -153,7 +153,7 @@ trait JoinAndViewQuery
         $table = $this->getJoinTable($join, $alias);
 
         if (true === $field) {
-            $fields = $alias.'.*';
+            $fields = $alias . '.*';
         } else {
             if (is_string($field)) {
                 $field = explode(',', $field);
@@ -161,17 +161,17 @@ trait JoinAndViewQuery
 
             foreach ($field as $key => $val) {
                 if (is_numeric($key)) {
-                    $fields[] = $alias.'.'.$val;
+                    $fields[] = $alias . '.' . $val;
 
-                    $this->options['map'][$val] = $alias.'.'.$val;
+                    $this->options['map'][$val] = $alias . '.' . $val;
                 } else {
                     if (preg_match('/[,=\.\'\"\(\s]/', $key)) {
                         $name = $key;
                     } else {
-                        $name = $alias.'.'.$key;
+                        $name = $alias . '.' . $key;
                     }
 
-                    $fields[] = $name.' AS '.$val;
+                    $fields[] = $name . ' AS ' . $val;
 
                     $this->options['map'][$val] = $name;
                 }

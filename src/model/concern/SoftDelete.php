@@ -212,7 +212,7 @@ trait SoftDelete
         }
 
         if (!str_contains($field, '.')) {
-            $field = '__TABLE__.'.$field;
+            $field = '__TABLE__.' . $field;
         }
 
         if (!$read && str_contains($field, '.')) {

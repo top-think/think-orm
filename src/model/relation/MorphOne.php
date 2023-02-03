@@ -362,7 +362,7 @@ class MorphOne extends Relation
             $value = $result->getOrigin($key);
 
             if (!is_null($value)) {
-                throw new Exception('bind attr has exists:'.$key);
+                throw new Exception('bind attr has exists:' . $key);
             }
 
             $result->setAttr($key, $model ? $model->$attr : null);

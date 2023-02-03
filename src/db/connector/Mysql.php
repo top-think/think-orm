@@ -31,16 +31,16 @@ class Mysql extends PDOConnection
     protected function parseDsn(array $config): string
     {
         if (!empty($config['socket'])) {
-            $dsn = 'mysql:unix_socket='.$config['socket'];
+            $dsn = 'mysql:unix_socket=' . $config['socket'];
         } elseif (!empty($config['hostport'])) {
-            $dsn = 'mysql:host='.$config['hostname'].';port='.$config['hostport'];
+            $dsn = 'mysql:host=' . $config['hostname'] . ';port=' . $config['hostport'];
         } else {
-            $dsn = 'mysql:host='.$config['hostname'];
+            $dsn = 'mysql:host=' . $config['hostname'];
         }
-        $dsn .= ';dbname='.$config['database'];
+        $dsn .= ';dbname=' . $config['database'];
 
         if (!empty($config['charset'])) {
-            $dsn .= ';charset='.$config['charset'];
+            $dsn .= ';charset=' . $config['charset'];
         }
 
         return $dsn;
@@ -61,10 +61,10 @@ class Mysql extends PDOConnection
             if (str_contains($tableName, '.')) {
                 $tableName = str_replace('.', '`.`', $tableName);
             }
-            $tableName = '`'.$tableName.'`';
+            $tableName = '`' . $tableName . '`';
         }
 
-        $sql = 'SHOW FULL COLUMNS FROM '.$tableName;
+        $sql = 'SHOW FULL COLUMNS FROM ' . $tableName;
         $pdo = $this->getPDOStatement($sql);
         $result = $pdo->fetchAll(PDO::FETCH_ASSOC);
         $info = [];
@@ -97,7 +97,7 @@ class Mysql extends PDOConnection
      */
     public function getTables(string $dbName = ''): array
     {
-        $sql = !empty($dbName) ? 'SHOW TABLES FROM '.$dbName : 'SHOW TABLES ';
+        $sql = !empty($dbName) ? 'SHOW TABLES FROM ' . $dbName : 'SHOW TABLES ';
         $pdo = $this->getPDOStatement($sql);
         $result = $pdo->fetchAll(PDO::FETCH_ASSOC);
         $info = [];

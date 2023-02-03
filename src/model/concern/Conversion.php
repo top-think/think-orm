@@ -152,7 +152,7 @@ trait Conversion
             foreach ($append as $key => $attr) {
                 $key = is_numeric($key) ? $attr : $key;
                 if (isset($this->data[$key])) {
-                    throw new Exception('bind attr has exists:'.$key);
+                    throw new Exception('bind attr has exists:' . $key);
                 }
 
                 $this->data[$key] = $model->$attr;
@@ -337,7 +337,7 @@ trait Conversion
                 $key = is_numeric($key) ? $attr : $key;
 
                 if (isset($item[$key])) {
-                    throw new Exception('bind attr has exists:'.$key);
+                    throw new Exception('bind attr has exists:' . $key);
                 }
 
                 $item[$key] = $value ? $value->getAttr($attr) : null;

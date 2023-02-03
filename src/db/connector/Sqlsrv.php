@@ -41,14 +41,14 @@ class Sqlsrv extends PDOConnection
      */
     protected function parseDsn(array $config): string
     {
-        $dsn = 'sqlsrv:Database='.$config['database'].';Server='.$config['hostname'];
+        $dsn = 'sqlsrv:Database=' . $config['database'] . ';Server=' . $config['hostname'];
 
         if (!empty($config['hostport'])) {
-            $dsn .= ','.$config['hostport'];
+            $dsn .= ',' . $config['hostport'];
         }
 
         if (!empty($config['trust_server_certificate'])) {
-            $dsn .= ';TrustServerCertificate='.$config['trust_server_certificate'];
+            $dsn .= ';TrustServerCertificate=' . $config['trust_server_certificate'];
         }
 
         return $dsn;

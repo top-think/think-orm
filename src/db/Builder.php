@@ -226,7 +226,7 @@ abstract class Builder
      *
      * @return string
      */
-    public function parseKey(Query $query, $key, bool $strict = false): string
+    public function parseKey(Query $query, string|int|Raw $key, bool $strict = false): string
     {
         return $key;
     }

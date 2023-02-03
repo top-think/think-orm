@@ -56,13 +56,13 @@ trait WhereQuery
     protected function parseQueryWhere(BaseQuery $query): void
     {
         $this->options['where'] = $query->getOptions('where') ?? [];
+        $via = $query->getOptions('via');
 
-        if ($query->getOptions('via')) {
-            $via = $query->getOptions('via');
+        if ($via) {            
             foreach ($this->options['where'] as $logic => &$where) {
                 foreach ($where as $key => &$val) {
                     if (is_array($val) && !str_contains($val[0], '.')) {
-                        $val[0] = $via.'.'.$val[0];
+                        $val[0] = $via . '.' . $val[0];
                     }
                 }
             }
@@ -389,7 +389,7 @@ trait WhereQuery
         $logic = strtoupper($logic);
 
         if (is_string($field) && !empty($this->options['via']) && !str_contains($field, '.')) {
-            $field = $this->options['via'].'.'.$field;
+            $field = $this->options['via'] . '.' . $field;
         }
 
         if ($strict) {
@@ -505,7 +505,7 @@ trait WhereQuery
 
         if (!empty($where)) {
             $this->options['where'][$logic] = isset($this->options['where'][$logic]) ?
-            array_merge($this->options['where'][$logic], $where) : $where;
+                array_merge($this->options['where'][$logic], $where) : $where;
         }
 
         return $this;

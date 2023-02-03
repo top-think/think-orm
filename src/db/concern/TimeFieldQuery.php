@@ -53,7 +53,7 @@ trait TimeFieldQuery
      *
      * @param string       $field 日期字段名
      * @param string       $op    比较运算符或者表达式
-     * @param string|array $range 比较范围
+     * @param mixed        $range 比较范围
      * @param string       $logic AND OR
      *
      * @return $this
@@ -69,7 +69,7 @@ trait TimeFieldQuery
             $op = is_array($range) ? 'between' : '>=';
         }
 
-        return $this->parseWhereExp($logic, $field, strtolower($op).' time', $range, [], true);
+        return $this->parseWhereExp($logic, $field, strtolower($op) . ' time', $range, [], true);
     }
 
     /**
@@ -86,7 +86,7 @@ trait TimeFieldQuery
     public function whereTimeInterval(string $field, string $start, string $interval = 'day', int $step = 1, string $logic = 'AND')
     {
         $startTime = strtotime($start);
-        $endTime = strtotime(($step > 0 ? '+' : '-').abs($step).' '.$interval.(abs($step) > 1 ? 's' : ''), $startTime);
+        $endTime = strtotime(($step > 0 ? '+' : '-') . abs($step) . ' ' . $interval . (abs($step) > 1 ? 's' : ''), $startTime);
 
         return $this->whereTime($field, 'between', $step > 0 ? [$startTime, $endTime - 1] : [$endTime, $startTime - 1], $logic);
     }
@@ -145,7 +145,7 @@ trait TimeFieldQuery
             $year = date('Y', strtotime($year));
         }
 
-        return $this->whereTimeInterval($field, $year.'-1-1', 'year', $step, $logic);
+        return $this->whereTimeInterval($field, $year . '-1-1', 'year', $step, $logic);
     }
 
     /**

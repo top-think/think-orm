@@ -119,16 +119,16 @@ abstract class BaseQuery
             array_unshift($args, $name);
 
             return call_user_func_array([$this, 'where'], $args);
-        } elseif ($this->model && method_exists($this->model, 'scope'.$method)) {
+        } elseif ($this->model && method_exists($this->model, 'scope' . $method)) {
             // 动态调用命名范围
-            $method = 'scope'.$method;
+            $method = 'scope' . $method;
             array_unshift($args, $this);
 
             call_user_func_array([$this->model, $method], $args);
 
             return $this;
         } else {
-            throw new Exception('method not exist:'.static::class.'->'.$method);
+            throw new Exception('method not exist:' . static::class . '->' . $method);
         }
     }
 
@@ -223,7 +223,7 @@ abstract class BaseQuery
 
         $name = $name ?: $this->name;
 
-        return $this->prefix.Str::snake($name);
+        return $this->prefix . Str::snake($name);
     }
 
     /**
@@ -442,10 +442,10 @@ abstract class BaseQuery
         $prefix = $prefix ?: $tableName;
         foreach ($field as $key => &$val) {
             if (is_numeric($key) && $alias) {
-                $field[$prefix.'.'.$val] = $alias.$val;
+                $field[$prefix . '.' . $val] = $alias . $val;
                 unset($field[$key]);
             } elseif (is_numeric($key)) {
-                $val = $prefix.'.'.$val;
+                $val = $prefix . '.' . $val;
             }
         }
 
@@ -501,7 +501,7 @@ abstract class BaseQuery
      */
     public function limit(int $offset, int $length = null)
     {
-        $this->options['limit'] = $offset.($length ? ','.$length : '');
+        $this->options['limit'] = $offset . ($length ? ',' . $length : '');
 
         return $this;
     }
@@ -594,7 +594,7 @@ abstract class BaseQuery
 
         if (is_string($field)) {
             if (!empty($this->options['via'])) {
-                $field = $this->options['via'].'.'.$field;
+                $field = $this->options['via'] . '.' . $field;
             }
             if (str_contains($field, ',')) {
                 $field = array_map('trim', explode(',', $field));
@@ -604,9 +604,9 @@ abstract class BaseQuery
         } elseif (!empty($this->options['via'])) {
             foreach ($field as $key => $val) {
                 if (is_numeric($key)) {
-                    $field[$key] = $this->options['via'].'.'.$val;
+                    $field[$key] = $this->options['via'] . '.' . $val;
                 } else {
-                    $field[$this->options['via'].'.'.$key] = $val;
+                    $field[$this->options['via'] . '.' . $key] = $val;
                     unset($field[$key]);
                 }
             }
@@ -1300,7 +1300,7 @@ abstract class BaseQuery
             $page = $page > 0 ? $page : 1;
             $listRows = $listRows ?: (is_numeric($options['limit']) ? $options['limit'] : 20);
             $offset = $listRows * ($page - 1);
-            $options['limit'] = $offset.','.$listRows;
+            $options['limit'] = $offset . ',' . $listRows;
         }
 
         $this->options = $options;
@@ -1368,7 +1368,7 @@ abstract class BaseQuery
                 $alias = $this->options['alias'][$table];
             }
 
-            $key = isset($alias) ? $alias.'.'.$pk : $pk;
+            $key = isset($alias) ? $alias . '.' . $pk : $pk;
             // 根据主键查询
             if (is_array($data)) {
                 $this->where($key, 'in', $data);

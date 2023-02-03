@@ -1,5 +1,4 @@
 <?php
-
 // +----------------------------------------------------------------------
 // | ThinkPHP [ WE CAN DO IT JUST THINK ]
 // +----------------------------------------------------------------------
@@ -41,10 +40,10 @@ class Pgsql extends PDOConnection
      */
     protected function parseDsn(array $config): string
     {
-        $dsn = 'pgsql:dbname='.$config['database'].';host='.$config['hostname'];
+        $dsn = 'pgsql:dbname=' . $config['database'] . ';host=' . $config['hostname'];
 
         if (!empty($config['hostport'])) {
-            $dsn .= ';port='.$config['hostport'];
+            $dsn .= ';port=' . $config['hostport'];
         }
 
         return $dsn;
@@ -60,7 +59,7 @@ class Pgsql extends PDOConnection
     public function getFields(string $tableName): array
     {
         [$tableName] = explode(' ', $tableName);
-        $sql = 'select fields_name as "field",fields_type as "type",fields_not_null as "null",fields_key_name as "key",fields_default as "default",fields_default as "extra" from table_msg(\''.$tableName.'\');';
+        $sql = 'select fields_name as "field",fields_type as "type",fields_not_null as "null",fields_key_name as "key",fields_default as "default",fields_default as "extra" from table_msg(\'' . $tableName . '\');';
 
         $pdo = $this->getPDOStatement($sql);
         $result = $pdo->fetchAll(PDO::FETCH_ASSOC);

@@ -74,13 +74,13 @@ trait ModelEvent
             return true;
         }
 
-        $call = 'on'.Str::studly($event);
+        $call = 'on' . Str::studly($event);
 
         try {
             if (method_exists(static::class, $call)) {
                 $result = call_user_func([static::class, $call], $this);
             } elseif (is_object(self::$event) && method_exists(self::$event, 'trigger')) {
-                $result = self::$event->trigger('model.'.static::class.'.'.$event, $this);
+                $result = self::$event->trigger('model.' . static::class . '.' . $event, $this);
                 $result = empty($result) ? true : end($result);
             } else {
                 $result = true;

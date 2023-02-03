@@ -29,7 +29,7 @@ class Sqlite extends PDOConnection
      */
     protected function parseDsn(array $config): string
     {
-        $dsn = 'sqlite:'.$config['database'];
+        $dsn = 'sqlite:' . $config['database'];
 
         return $dsn;
     }
@@ -44,7 +44,7 @@ class Sqlite extends PDOConnection
     public function getFields(string $tableName): array
     {
         [$tableName] = explode(' ', $tableName);
-        $sql = 'PRAGMA table_info( \''.$tableName.'\' )';
+        $sql = 'PRAGMA table_info( \'' . $tableName . '\' )';
 
         $pdo = $this->getPDOStatement($sql);
         $result = $pdo->fetchAll(PDO::FETCH_ASSOC);
@@ -78,8 +78,8 @@ class Sqlite extends PDOConnection
     public function getTables(string $dbName = ''): array
     {
         $sql = "SELECT name FROM sqlite_master WHERE type='table' "
-            .'UNION ALL SELECT name FROM sqlite_temp_master '
-            ."WHERE type='table' ORDER BY name";
+            . 'UNION ALL SELECT name FROM sqlite_temp_master '
+            . "WHERE type='table' ORDER BY name";
 
         $pdo = $this->getPDOStatement($sql);
         $result = $pdo->fetchAll(PDO::FETCH_ASSOC);

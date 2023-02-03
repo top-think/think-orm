@@ -30,7 +30,7 @@ trait AggregateQuery
      *
      * @return mixed
      */
-    protected function aggregate(string $aggregate, $field, bool $force = false)
+    protected function aggregate(string $aggregate, string|Raw $field, bool $force = false)
     {
         return $this->connection->aggregate($this, $aggregate, $field, $force);
     }
@@ -38,7 +38,7 @@ trait AggregateQuery
     /**
      * COUNT查询.
      *
-     * @param string|Raw $field 字段名
+     * @param string $field 字段名
      *
      * @return int
      */
@@ -48,12 +48,12 @@ trait AggregateQuery
             // 支持GROUP
 
             if (!preg_match('/^[\w\.\*]+$/', $field)) {
-                throw new DbException('not support data:'.$field);
+                throw new DbException('not support data:' . $field);
             }
 
             $options = $this->getOptions();
             $subSql = $this->options($options)
-                ->field('count('.$field.') AS think_count')
+                ->field('count(' . $field . ') AS think_count')
                 ->bind($this->bind)
                 ->buildSql();
 
@@ -74,7 +74,7 @@ trait AggregateQuery
      *
      * @return float
      */
-    public function sum($field): float
+    public function sum(string|Raw $field): float
     {
         return $this->aggregate('SUM', $field, true);
     }
@@ -87,7 +87,7 @@ trait AggregateQuery
      *
      * @return mixed
      */
-    public function min($field, bool $force = true)
+    public function min(string|Raw $field, bool $force = true)
     {
         return $this->aggregate('MIN', $field, $force);
     }
@@ -100,7 +100,7 @@ trait AggregateQuery
      *
      * @return mixed
      */
-    public function max($field, bool $force = true)
+    public function max(string|Raw $field, bool $force = true)
     {
         return $this->aggregate('MAX', $field, $force);
     }
@@ -112,7 +112,7 @@ trait AggregateQuery
      *
      * @return float
      */
-    public function avg($field): float
+    public function avg(string|Raw $field): float
     {
         return $this->aggregate('AVG', $field, true);
     }

@@ -180,8 +180,8 @@ class HasMany extends Relation
             $closure($this->query, $name);
         }
 
-        return $this->query->alias($aggregate.'_table')
-            ->whereExp($aggregate.'_table.'.$this->foreignKey, '='.$this->parent->getTable().'.'.$this->localKey)
+        return $this->query->alias($aggregate . '_table')
+            ->whereExp($aggregate . '_table.' . $this->foreignKey, '=' . $this->parent->getTable() . '.' . $this->localKey)
             ->fetchSql()
             ->$aggregate($field);
     }
@@ -306,19 +306,19 @@ class HasMany extends Relation
         $relation = class_basename($this->model);
 
         if ('*' != $id) {
-            $id = $relation.'.'.(new $this->model())->getPk();
+            $id = $relation . '.' . (new $this->model())->getPk();
         }
 
         $softDelete = $this->query->getOptions('soft_delete');
         $query = $query ?: $this->parent->db()->alias($model);
 
-        return $query->field($model.'.*')
-            ->join([$table => $relation], $model.'.'.$this->localKey.'='.$relation.'.'.$this->foreignKey, $joinType)
+        return $query->field($model . '.*')
+            ->join([$table => $relation], $model . '.' . $this->localKey . '=' . $relation . '.' . $this->foreignKey, $joinType)
             ->when($softDelete, function ($query) use ($softDelete, $relation) {
-                $query->where($relation.strstr($softDelete[0], '.'), '=' == $softDelete[1][0] ? $softDelete[1][1] : null);
+                $query->where($relation . strstr($softDelete[0], '.'), '=' == $softDelete[1][0] ? $softDelete[1][1] : null);
             })
-            ->group($relation.'.'.$this->foreignKey)
-            ->having('count('.$id.')'.$operator.$count);
+            ->group($relation . '.' . $this->foreignKey)
+            ->having('count(' . $id . ')' . $operator . $count);
     }
 
     /**
@@ -351,11 +351,11 @@ class HasMany extends Relation
         $query = $query ?: $this->parent->db();
 
         return $query->alias($model)
-            ->group($model.'.'.$this->localKey)
+            ->group($model . '.' . $this->localKey)
             ->field($fields)
-            ->join([$table => $relation], $model.'.'.$this->localKey.'='.$relation.'.'.$this->foreignKey, $joinType)
+            ->join([$table => $relation], $model . '.' . $this->localKey . '=' . $relation . '.' . $this->foreignKey, $joinType)
             ->when($softDelete, function ($query) use ($softDelete, $relation) {
-                $query->where($relation.strstr($softDelete[0], '.'), '=' == $softDelete[1][0] ? $softDelete[1][1] : null);
+                $query->where($relation . strstr($softDelete[0], '.'), '=' == $softDelete[1][0] ? $softDelete[1][1] : null);
             })
             ->where($where);
     }

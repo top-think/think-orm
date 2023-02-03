@@ -264,7 +264,7 @@ class DbManager
     {
         $connections = $this->getConfig('connections');
         if (!isset($connections[$name])) {
-            throw new InvalidArgumentException('Undefined db config:'.$name);
+            throw new InvalidArgumentException('Undefined db config:' . $name);
         }
 
         return $connections[$name];
@@ -286,7 +286,7 @@ class DbManager
         if (str_contains($type, '\\')) {
             $class = $type;
         } else {
-            $class = '\\think\\db\\connector\\'.ucfirst($type);
+            $class = '\\think\\db\\connector\\' . ucfirst($type);
         }
 
         /** @var ConnectionInterface $connection */

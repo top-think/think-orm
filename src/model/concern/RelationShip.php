@@ -124,7 +124,7 @@ trait RelationShip
     public function setRelation(string $name, $value, array $data = [])
     {
         // 检测修改器
-        $method = 'set'.Str::studly($name).'Attr';
+        $method = 'set' . Str::studly($name) . 'Attr';
 
         if (method_exists($this, $method)) {
             $value = $this->$method($value, array_merge($this->data, $data));
@@ -371,7 +371,7 @@ trait RelationShip
             $value = $this->getOrigin($key);
 
             if (!is_null($value)) {
-                throw new Exception('bind attr has exists:'.$key);
+                throw new Exception('bind attr has exists:' . $key);
             }
 
             $this->set($key, $relation ? $relation->$attr : null);
@@ -413,11 +413,11 @@ trait RelationShip
             }
 
             if (empty($name)) {
-                $name = Str::snake($relation).'_'.$aggregate;
+                $name = Str::snake($relation) . '_' . $aggregate;
             }
 
             if ($useSubQuery) {
-                $query->field(['('.$count.')' => $name]);
+                $query->field(['(' . $count . ')' => $name]);
             } else {
                 $this->setAttr($name, $count);
             }
@@ -548,8 +548,8 @@ trait RelationShip
         // 记录当前关联信息
         $model = $this->parseModel($model);
         $name = Str::snake(class_basename($model));
-        $middle = $middle ?: Str::snake($this->name).'_'.$name;
-        $foreignKey = $foreignKey ?: $name.'_id';
+        $middle = $middle ?: Str::snake($this->name) . '_' . $name;
+        $foreignKey = $foreignKey ?: $name . '_id';
         $localKey = $localKey ?: $this->getForeignKey($this->name);
 
         return new BelongsToMany($this, $model, $middle, $foreignKey, $localKey);
@@ -690,8 +690,8 @@ trait RelationShip
         if (is_array($morph)) {
             [$morphType, $foreignKey] = $morph;
         } else {
-            $morphType = $morph.'_type';
-            $foreignKey = $morph.'_id';
+            $morphType = $morph . '_type';
+            $foreignKey = $morph . '_id';
         }
 
         return [$morphType, $foreignKey];
@@ -729,7 +729,7 @@ trait RelationShip
             $name = class_basename($name);
         }
 
-        return Str::snake($name).'_id';
+        return Str::snake($name) . '_id';
     }
 
     /**

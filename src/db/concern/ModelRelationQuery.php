@@ -122,7 +122,7 @@ trait ModelRelationQuery
         if ($this->model) {
             // 检查模型类的查询范围方法
             foreach ($scope as $name) {
-                $method = 'scope'.trim($name);
+                $method = 'scope' . trim($name);
 
                 if (method_exists($this->model, $method)) {
                     call_user_func_array([$this->model, $method], $args);
@@ -174,12 +174,12 @@ trait ModelRelationQuery
             } elseif ($this->model) {
                 // 检测搜索器
                 $fieldName = is_numeric($key) ? $field : $key;
-                $method = 'search'.Str::studly($fieldName).'Attr';
+                $method = 'search' . Str::studly($fieldName) . 'Attr';
 
                 if (method_exists($this->model, $method)) {
                     $this->model->$method($this, $data[$field] ?? null, $data, $prefix);
                 } elseif (isset($data[$field])) {
-                    $this->where($fieldName, in_array($fieldName, $likeFields) ? 'like' : '=', in_array($fieldName, $likeFields) ? '%'.$data[$field].'%' : $data[$field]);
+                    $this->where($fieldName, in_array($fieldName, $likeFields) ? 'like' : '=', in_array($fieldName, $likeFields) ? '%' . $data[$field] . '%' : $data[$field]);
                 }
             }
         }
@@ -237,7 +237,7 @@ trait ModelRelationQuery
      *
      * @return $this
      */
-    public function withAttr($name, callable $callback = null)
+    public function withAttr(string|array $name, callable $callback = null)
     {
         if (is_array($name)) {
             foreach ($name as $key => $val) {
@@ -269,7 +269,7 @@ trait ModelRelationQuery
      *
      * @return $this
      */
-    public function with($with)
+    public function with(array|string $with)
     {
         if (empty($this->model) || empty($with)) {
             return $this;
@@ -288,7 +288,7 @@ trait ModelRelationQuery
      *
      * @return $this
      */
-    public function withJoin($with, string $joinType = '')
+    public function withJoin(array|string $with, string $joinType = '')
     {
         if (empty($this->model) || empty($with)) {
             return $this;
@@ -337,7 +337,7 @@ trait ModelRelationQuery
      *
      * @return $this
      */
-    protected function withAggregate($relations, string $aggregate = 'count', $field = '*', bool $subQuery = true)
+    protected function withAggregate(string|array $relations, string $aggregate = 'count', $field = '*', bool $subQuery = true)
     {
         if (empty($this->model)) {
             return $this;
@@ -368,7 +368,7 @@ trait ModelRelationQuery
      *
      * @return $this
      */
-    public function withCache($relation = true, $key = true, $expire = null, string $tag = null)
+    public function withCache(string|array|bool $relation = true, $key = true, $expire = null, string $tag = null)
     {
         if (empty($this->model)) {
             return $this;
@@ -409,7 +409,7 @@ trait ModelRelationQuery
      *
      * @return $this
      */
-    public function withCount($relation, bool $subQuery = true)
+    public function withCount(string|array $relation, bool $subQuery = true)
     {
         return $this->withAggregate($relation, 'count', '*', $subQuery);
     }
@@ -423,7 +423,7 @@ trait ModelRelationQuery
      *
      * @return $this
      */
-    public function withSum($relation, string $field, bool $subQuery = true)
+    public function withSum(string|array $relation, string $field, bool $subQuery = true)
     {
         return $this->withAggregate($relation, 'sum', $field, $subQuery);
     }
@@ -437,7 +437,7 @@ trait ModelRelationQuery
      *
      * @return $this
      */
-    public function withMax($relation, string $field, bool $subQuery = true)
+    public function withMax(string|array $relation, string $field, bool $subQuery = true)
     {
         return $this->withAggregate($relation, 'max', $field, $subQuery);
     }
@@ -451,7 +451,7 @@ trait ModelRelationQuery
      *
      * @return $this
      */
-    public function withMin($relation, string $field, bool $subQuery = true)
+    public function withMin(string|array $relation, string $field, bool $subQuery = true)
     {
         return $this->withAggregate($relation, 'min', $field, $subQuery);
     }
@@ -465,7 +465,7 @@ trait ModelRelationQuery
      *
      * @return $this
      */
-    public function withAvg($relation, string $field, bool $subQuery = true)
+    public function withAvg(string|array $relation, string $field, bool $subQuery = true)
     {
         return $this->withAggregate($relation, 'avg', $field, $subQuery);
     }

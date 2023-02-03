@@ -104,8 +104,8 @@ class MorphToMany extends BelongsToMany
         if (!empty($range)) {
             // 查询关联数据
             $data = $this->eagerlyManyToMany([
-                ['pivot.'.$this->localKey, 'in', $range],
-                ['pivot.'.$this->morphType, '=', $this->morphClass],
+                ['pivot.' . $this->localKey, 'in', $range],
+                ['pivot.' . $this->morphType, '=', $this->morphClass],
             ], $subRelation, $closure, $cache);
 
             // 关联数据封装
@@ -138,8 +138,8 @@ class MorphToMany extends BelongsToMany
             $pk = $result->$pk;
             // 查询管理数据
             $data = $this->eagerlyManyToMany([
-                ['pivot.'.$this->localKey, '=', $pk],
-                ['pivot.'.$this->morphType, '=', $this->morphClass],
+                ['pivot.' . $this->localKey, '=', $pk],
+                ['pivot.' . $this->morphType, '=', $this->morphClass],
             ], $subRelation, $closure, $cache);
 
             // 关联数据封装
@@ -175,8 +175,8 @@ class MorphToMany extends BelongsToMany
         }
 
         return $this->belongsToManyQuery($this->foreignKey, $this->localKey, [
-            ['pivot.'.$this->localKey, '=', $result->$pk],
-            ['pivot.'.$this->morphType, '=', $this->morphClass],
+            ['pivot.' . $this->localKey, '=', $result->$pk],
+            ['pivot.' . $this->morphType, '=', $this->morphClass],
         ])->$aggregate($field);
     }
 
@@ -197,8 +197,8 @@ class MorphToMany extends BelongsToMany
         }
 
         return $this->belongsToManyQuery($this->foreignKey, $this->localKey, [
-            ['pivot.'.$this->localKey, 'exp', new Raw('='.$this->parent->db(false)->getTable().'.'.$this->parent->getPk())],
-            ['pivot.'.$this->morphType, '=', $this->morphClass],
+            ['pivot.' . $this->localKey, 'exp', new Raw('=' . $this->parent->db(false)->getTable() . '.' . $this->parent->getPk())],
+            ['pivot.' . $this->morphType, '=', $this->morphClass],
         ])->fetchSql()->$aggregate($field);
     }
 
@@ -224,7 +224,7 @@ class MorphToMany extends BelongsToMany
 
         if (empty($this->baseQuery)) {
             $relationFk = $this->query->getPk();
-            $query->join([$table => 'pivot'], 'pivot.'.$foreignKey.'='.$tableName.'.'.$relationFk)
+            $query->join([$table => 'pivot'], 'pivot.' . $foreignKey . '=' . $tableName . '.' . $relationFk)
                 ->where($condition);
         }
 
@@ -469,8 +469,8 @@ class MorphToMany extends BelongsToMany
 
             // 关联查询
             $this->belongsToManyQuery($foreignKey, $localKey, [
-                ['pivot.'.$localKey, '=', $this->parent->getKey()],
-                ['pivot.'.$this->morphType, '=', $this->morphClass],
+                ['pivot.' . $localKey, '=', $this->parent->getKey()],
+                ['pivot.' . $this->morphType, '=', $this->morphClass],
             ]);
 
             $this->baseQuery = true;
@@ -489,7 +489,7 @@ class MorphToMany extends BelongsToMany
     {
         if (is_array($map)) {
             static::$morphMap = $merge && static::$morphMap
-            ? $map + static::$morphMap : $map;
+                ? $map + static::$morphMap : $map;
         }
 
         return static::$morphMap;

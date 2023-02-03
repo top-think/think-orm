@@ -52,7 +52,7 @@ trait ParamsBind
      */
     public function bindValue($value, int $type = null, string $name = null)
     {
-        $name = $name ?: 'ThinkBind_'.(count($this->bind) + 1).'_'.mt_rand().'_';
+        $name = $name ?: 'ThinkBind_' . (count($this->bind) + 1) . '_' . mt_rand() . '_';
 
         $this->bind[$name] = [$value, $type ?: PDO::PARAM_STR];
 
@@ -66,7 +66,7 @@ trait ParamsBind
      *
      * @return bool
      */
-    public function isBind($key)
+    public function isBind(string $key)
     {
         return isset($this->bind[$key]);
     }
@@ -118,9 +118,9 @@ trait ParamsBind
             }
 
             if (is_numeric($key)) {
-                $sql = substr_replace($sql, ':'.$name, str_contains($sql, '?'), 1);
+                $sql = substr_replace($sql, ':' . $name, strpos($sql, '?'), 1);
             } else {
-                $sql = str_replace(':'.$key, ':'.$name, $sql);
+                $sql = str_replace(':' . $key, ':' . $name, $sql);
             }
         }
     }

@@ -162,7 +162,7 @@ class Mongo extends Connection
             }
 
             if (empty($config['dsn'])) {
-                $config['dsn'] = 'mongodb://'.($config['username'] ? "{$config['username']}" : '').($config['password'] ? ":{$config['password']}@" : '').$config['hostname'].($config['hostport'] ? ":{$config['hostport']}" : '');
+                $config['dsn'] = 'mongodb://' . ($config['username'] ? "{$config['username']}" : '') . ($config['password'] ? ":{$config['password']}@" : '') . $config['hostname'] . ($config['hostport'] ? ":{$config['hostport']}" : '');
             }
 
             $startTime = microtime(true);
@@ -171,7 +171,7 @@ class Mongo extends Connection
 
             if (!empty($config['trigger_sql'])) {
                 // 记录数据库连接信息
-                $this->trigger('CONNECT:[ UseTime:'.number_format(microtime(true) - $startTime, 6).'s ] '.$config['dsn']);
+                $this->trigger('CONNECT:[ UseTime:' . number_format(microtime(true) - $startTime, 6) . 's ] ' . $config['dsn']);
             }
         }
 
@@ -248,12 +248,12 @@ class Mongo extends Connection
         $namespace = $options['table'];
 
         if (!str_contains($namespace, '.')) {
-            $namespace = $this->dbName.'.'.$namespace;
+            $namespace = $this->dbName . '.' . $namespace;
         }
 
         if (!empty($this->queryStr)) {
             // 记录执行指令
-            $this->queryStr = 'db'.strstr($namespace, '.').'.'.$this->queryStr;
+            $this->queryStr = 'db' . strstr($namespace, '.') . '.' . $this->queryStr;
         }
 
         if ($mongoQuery instanceof Closure) {
@@ -383,12 +383,12 @@ class Mongo extends Connection
 
         $namespace = $options['table'];
         if (!str_contains($namespace, '.')) {
-            $namespace = $this->dbName.'.'.$namespace;
+            $namespace = $this->dbName . '.' . $namespace;
         }
 
         if (!empty($this->queryStr)) {
             // 记录执行指令
-            $this->queryStr = 'db'.strstr($namespace, '.').'.'.$this->queryStr;
+            $this->queryStr = 'db' . strstr($namespace, '.') . '.' . $this->queryStr;
         }
 
         $writeConcern = $options['writeConcern'] ?? null;
@@ -452,7 +452,7 @@ class Mongo extends Connection
         $dbName = $dbName ?: $this->dbName;
 
         if (!empty($this->queryStr)) {
-            $this->queryStr = 'db.'.$this->queryStr;
+            $this->queryStr = 'db.' . $this->queryStr;
         }
 
         if ($session = $this->getSession()) {
@@ -545,34 +545,34 @@ class Mongo extends Connection
 
         switch (strtolower($type)) {
             case 'aggregate':
-                $this->queryStr = 'runCommand('.($data ? json_encode($data) : '').');';
+                $this->queryStr = 'runCommand(' . ($data ? json_encode($data) : '') . ');';
                 break;
             case 'find':
-                $this->queryStr = $type.'('.($data ? json_encode($data) : '').')';
+                $this->queryStr = $type . '(' . ($data ? json_encode($data) : '') . ')';
 
                 if (isset($options['sort'])) {
-                    $this->queryStr .= '.sort('.json_encode($options['sort']).')';
+                    $this->queryStr .= '.sort(' . json_encode($options['sort']) . ')';
                 }
 
                 if (isset($options['skip'])) {
-                    $this->queryStr .= '.skip('.$options['skip'].')';
+                    $this->queryStr .= '.skip(' . $options['skip'] . ')';
                 }
 
                 if (isset($options['limit'])) {
-                    $this->queryStr .= '.limit('.$options['limit'].')';
+                    $this->queryStr .= '.limit(' . $options['limit'] . ')';
                 }
 
                 $this->queryStr .= ';';
                 break;
             case 'insert':
             case 'remove':
-                $this->queryStr = $type.'('.($data ? json_encode($data) : '').');';
+                $this->queryStr = $type . '(' . ($data ? json_encode($data) : '') . ');';
                 break;
             case 'update':
-                $this->queryStr = $type.'('.json_encode($options).','.json_encode($data).');';
+                $this->queryStr = $type . '(' . json_encode($options) . ',' . json_encode($data) . ');';
                 break;
             case 'cmd':
-                $this->queryStr = $data.'('.json_encode($options).');';
+                $this->queryStr = $data . '(' . json_encode($options) . ');';
                 break;
         }
 
@@ -696,7 +696,7 @@ class Mongo extends Connection
 
         // 记录数据库连接信息
         if (!empty($config['trigger_sql'])) {
-            $this->trigger('CONNECT:ReplicaSet[ UseTime:'.number_format(microtime(true) - $startTime, 6).'s ] '.$this->config['dsn']);
+            $this->trigger('CONNECT:ReplicaSet[ UseTime:' . number_format(microtime(true) - $startTime, 6) . 's ] ' . $this->config['dsn']);
         }
 
         return $manager;
@@ -709,16 +709,16 @@ class Mongo extends Connection
      */
     private function buildUrl(): string
     {
-        $url = 'mongodb://'.($this->config['username'] ? "{$this->config['username']}" : '').($this->config['password'] ? ":{$this->config['password']}@" : '');
+        $url = 'mongodb://' . ($this->config['username'] ? "{$this->config['username']}" : '') . ($this->config['password'] ? ":{$this->config['password']}@" : '');
 
         $hostList = is_string($this->config['hostname']) ? explode(',', $this->config['hostname']) : $this->config['hostname'];
         $portList = is_string($this->config['hostport']) ? explode(',', $this->config['hostport']) : $this->config['hostport'];
 
         for ($i = 0; $i < count($hostList); $i++) {
-            $url = $url.$hostList[$i].':'.$portList[0].',';
+            $url = $url . $hostList[$i] . ':' . $portList[0] . ',';
         }
 
-        return rtrim($url, ',').'/';
+        return rtrim($url, ',') . '/';
     }
 
     /**
@@ -1025,7 +1025,7 @@ class Mongo extends Connection
             $field = implode(',', $field);
         }
         if ($key && '*' != $field) {
-            $projection = $key.','.$field;
+            $projection = $key . ',' . $field;
         } else {
             $projection = $field;
         }
@@ -1217,7 +1217,7 @@ class Mongo extends Connection
     public function getSession()
     {
         return ($this->session_uuid && isset($this->sessions[$this->session_uuid]))
-        ? $this->sessions[$this->session_uuid]
-        : null;
+            ? $this->sessions[$this->session_uuid]
+            : null;
     }
 }

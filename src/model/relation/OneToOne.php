@@ -100,18 +100,18 @@ abstract class OneToOne extends Relation
             $foreignKeyExp = $this->foreignKey;
 
             if (!str_contains($foreignKeyExp, '.')) {
-                $foreignKeyExp = $name.'.'.$this->foreignKey;
+                $foreignKeyExp = $name . '.' . $this->foreignKey;
             }
 
-            $joinOn = $foreignKeyExp.'='.$joinAlias.'.'.$this->localKey;
+            $joinOn = $foreignKeyExp . '=' . $joinAlias . '.' . $this->localKey;
         } else {
             $foreignKeyExp = $this->foreignKey;
 
             if (!str_contains($foreignKeyExp, '.')) {
-                $foreignKeyExp = $joinAlias.'.'.$this->foreignKey;
+                $foreignKeyExp = $joinAlias . '.' . $this->foreignKey;
             }
 
-            $joinOn = $name.'.'.$this->localKey.'='.$foreignKeyExp;
+            $joinOn = $name . '.' . $this->localKey . '=' . $foreignKeyExp;
         }
 
         if ($closure) {
@@ -126,7 +126,7 @@ abstract class OneToOne extends Relation
         }
 
         $query->join([$joinTable => $joinAlias], $joinOn, $joinType)
-            ->tableField($field, $joinTable, $joinAlias, $relation.'__');
+            ->tableField($field, $joinTable, $joinAlias, $relation . '__');
     }
 
     /**
@@ -319,7 +319,7 @@ abstract class OneToOne extends Relation
             $value = $result->getOrigin($key);
 
             if (!is_null($value)) {
-                throw new Exception('bind attr has exists:'.$key);
+                throw new Exception('bind attr has exists:' . $key);
             }
 
             $result->setAttr($key, $model ? $model->$attr : null);

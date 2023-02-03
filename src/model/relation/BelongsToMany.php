@@ -224,7 +224,7 @@ class BelongsToMany extends Relation
      */
     public function wherePivot($field, $op = null, $condition = null)
     {
-        $this->query->where('pivot.'.$field, $op, $condition);
+        $this->query->where('pivot.' . $field, $op, $condition);
 
         return $this;
     }
@@ -256,7 +256,7 @@ class BelongsToMany extends Relation
         if (!empty($range)) {
             // 查询关联数据
             $data = $this->eagerlyManyToMany([
-                ['pivot.'.$localKey, 'in', $range],
+                ['pivot.' . $localKey, 'in', $range],
             ], $subRelation, $closure, $cache);
 
             // 关联数据封装
@@ -289,7 +289,7 @@ class BelongsToMany extends Relation
             $pk = $result->$pk;
             // 查询管理数据
             $data = $this->eagerlyManyToMany([
-                ['pivot.'.$this->localKey, '=', $pk],
+                ['pivot.' . $this->localKey, '=', $pk],
             ], $subRelation, $closure, $cache);
 
             // 关联数据封装
@@ -327,7 +327,7 @@ class BelongsToMany extends Relation
         }
 
         return $this->belongsToManyQuery($this->foreignKey, $this->localKey, [
-            ['pivot.'.$this->localKey, '=', $pk],
+            ['pivot.' . $this->localKey, '=', $pk],
         ])->$aggregate($field);
     }
 
@@ -349,7 +349,7 @@ class BelongsToMany extends Relation
 
         return $this->belongsToManyQuery($this->foreignKey, $this->localKey, [
             [
-                'pivot.'.$this->localKey, 'exp', new Raw('='.$this->parent->db(false)->getTable().'.'.$this->parent->getPk()),
+                'pivot.' . $this->localKey, 'exp', new Raw('=' . $this->parent->db(false)->getTable() . '.' . $this->parent->getPk()),
             ],
         ])->fetchSql()->$aggregate($field);
     }
@@ -417,7 +417,7 @@ class BelongsToMany extends Relation
             $this->query
                 ->field($fields)
                 ->tableField(true, $table, 'pivot', 'pivot__')
-                ->join([$table => 'pivot'], 'pivot.'.$foreignKey.'='.$tableName.'.'.$this->query->getPk())
+                ->join([$table => 'pivot'], 'pivot.' . $foreignKey . '=' . $tableName . '.' . $this->query->getPk())
                 ->where($condition);
         }
 
@@ -645,9 +645,9 @@ class BelongsToMany extends Relation
 
             // 关联查询
             if (null === $this->parent->getKey()) {
-                $condition = ['pivot.'.$localKey, 'exp', new Raw('='.$this->parent->getTable().'.'.$this->parent->getPk())];
+                $condition = ['pivot.' . $localKey, 'exp', new Raw('=' . $this->parent->getTable() . '.' . $this->parent->getPk())];
             } else {
-                $condition = ['pivot.'.$localKey, '=', $this->parent->getKey()];
+                $condition = ['pivot.' . $localKey, '=', $this->parent->getKey()];
             }
 
             $this->belongsToManyQuery($foreignKey, $localKey, [$condition]);

@@ -25,7 +25,7 @@ trait TableFieldInfo
      *
      * @return array
      */
-    public function getTableFields($tableName = ''): array
+    public function getTableFields(string $tableName = ''): array
     {
         if ('' == $tableName) {
             $tableName = $this->getTable();

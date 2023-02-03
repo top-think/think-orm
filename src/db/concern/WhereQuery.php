@@ -58,7 +58,7 @@ trait WhereQuery
         $this->options['where'] = $query->getOptions('where') ?? [];
         $via = $query->getOptions('via');
 
-        if ($via) {            
+        if ($via) {
             foreach ($this->options['where'] as $logic => &$where) {
                 foreach ($where as $key => &$val) {
                     if (is_array($val) && !str_contains($val[0], '.')) {

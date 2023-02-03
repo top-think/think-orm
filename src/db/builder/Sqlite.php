@@ -1,4 +1,5 @@
 <?php
+
 // +----------------------------------------------------------------------
 // | ThinkPHP [ WE CAN DO IT JUST THINK ]
 // +----------------------------------------------------------------------
@@ -8,7 +9,7 @@
 // +----------------------------------------------------------------------
 // | Author: liu21st <liu21st@gmail.com>
 // +----------------------------------------------------------------------
-declare (strict_types = 1);
+declare(strict_types=1);
 
 namespace think\db\builder;
 
@@ -17,15 +18,16 @@ use think\db\Query;
 use think\db\Raw;
 
 /**
- * Sqlite数据库驱动
+ * Sqlite数据库驱动.
  */
 class Sqlite extends Builder
 {
     /**
-     * limit
-     * @access public
+     * limit.
+     *
      * @param Query $query 查询对象
      * @param mixed $limit
+     *
      * @return string
      */
     public function parseLimit(Query $query, string $limit): string
@@ -35,9 +37,9 @@ class Sqlite extends Builder
         if (!empty($limit)) {
             $limit = explode(',', $limit);
             if (count($limit) > 1) {
-                $limitStr .= ' LIMIT ' . $limit[1] . ' OFFSET ' . $limit[0] . ' ';
+                $limitStr .= ' LIMIT '.$limit[1].' OFFSET '.$limit[0].' ';
             } else {
-                $limitStr .= ' LIMIT ' . $limit[0] . ' ';
+                $limitStr .= ' LIMIT '.$limit[0].' ';
             }
         }
 
@@ -45,9 +47,10 @@ class Sqlite extends Builder
     }
 
     /**
-     * 随机排序
-     * @access protected
+     * 随机排序.
+     *
      * @param Query $query 查询对象
+     *
      * @return string
      */
     protected function parseRand(Query $query): string
@@ -56,11 +59,12 @@ class Sqlite extends Builder
     }
 
     /**
-     * 字段和表名处理
-     * @access public
+     * 字段和表名处理.
+     *
      * @param Query $query  查询对象
      * @param mixed $key    字段名
      * @param bool  $strict 严格检测
+     *
      * @return string
      */
     public function parseKey(Query $query, $key, bool $strict = false): string
@@ -89,21 +93,22 @@ class Sqlite extends Builder
         }
 
         if ('*' != $key && !preg_match('/[,\'\"\*\(\)`.\s]/', $key)) {
-            $key = '`' . $key . '`';
+            $key = '`'.$key.'`';
         }
 
         if (isset($table)) {
-            $key = '`' . $table . '`.' . $key;
+            $key = '`'.$table.'`.'.$key;
         }
 
         return $key;
     }
 
     /**
-     * 设置锁机制
-     * @access protected
+     * 设置锁机制.
+     *
      * @param Query       $query 查询对象
      * @param bool|string $lock
+     *
      * @return string
      */
     protected function parseLock(Query $query, $lock = false): string

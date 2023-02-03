@@ -1,8 +1,10 @@
 <?php
-require __DIR__ . '/../vendor/autoload.php';
-require __DIR__ . '/functions.php';
+
+require __DIR__.'/../vendor/autoload.php';
+require __DIR__.'/functions.php';
 
 use think\facade\Db;
+
 // 数据库配置信息设置（全局有效）
 Db::setConfig([
     // 默认数据连接标识

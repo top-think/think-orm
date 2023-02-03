@@ -1,4 +1,5 @@
 <?php
+
 // +----------------------------------------------------------------------
 // | ThinkPHP [ WE CAN DO IT JUST THINK ]
 // +----------------------------------------------------------------------
@@ -8,7 +9,7 @@
 // +----------------------------------------------------------------------
 // | Author: liu21st <liu21st@gmail.com>
 // +----------------------------------------------------------------------
-declare (strict_types = 1);
+declare(strict_types=1);
 
 namespace think\model\concern;
 
@@ -25,8 +26,8 @@ trait OptimLock
     }
 
     /**
-     * 数据检查
-     * @access protected
+     * 数据检查.
+     *
      * @return void
      */
     protected function checkData(): void
@@ -36,7 +37,7 @@ trait OptimLock
 
     /**
      * 记录乐观锁
-     * @access protected
+     *
      * @return void
      */
     protected function recordLockVersion(): void
@@ -50,7 +51,7 @@ trait OptimLock
 
     /**
      * 更新乐观锁
-     * @access protected
+     *
      * @return void
      */
     protected function updateLockVersion(): void
@@ -65,7 +66,7 @@ trait OptimLock
 
     public function getWhere()
     {
-        $where     = parent::getWhere();
+        $where = parent::getWhere();
         $optimLock = $this->getOptimLockField();
 
         if ($optimLock && $lockVer = $this->getOrigin($optimLock)) {
@@ -81,5 +82,4 @@ trait OptimLock
             throw new Exception('record has update');
         }
     }
-
 }

@@ -1,4 +1,5 @@
 <?php
+
 // +----------------------------------------------------------------------
 // | ThinkPHP [ WE CAN DO IT JUST THINK ]
 // +----------------------------------------------------------------------
@@ -8,27 +9,27 @@
 // +----------------------------------------------------------------------
 // | Author: 麦当苗儿 <zuojiazi@vip.qq.com> <http://zjzit.cn>
 // +----------------------------------------------------------------------
-declare (strict_types = 1);
+declare(strict_types=1);
 
 namespace think\db\exception;
 
 /**
  * PDO异常处理类
- * 重新封装了系统的\PDOException类
+ * 重新封装了系统的\PDOException类.
  */
 class PDOException extends DbException
 {
     /**
      * PDOException constructor.
-     * @access public
-     * @param  \PDOException $exception
-     * @param  array         $config
-     * @param  string        $sql
-     * @param  int           $code
+     *
+     * @param \PDOException $exception
+     * @param array         $config
+     * @param string        $sql
+     * @param int           $code
      */
     public function __construct(\PDOException $exception, array $config = [], string $sql = '', int $code = 10501)
     {
-        $error   = $exception->errorInfo;
+        $error = $exception->errorInfo;
         $message = $exception->getMessage();
 
         if (!empty($error)) {

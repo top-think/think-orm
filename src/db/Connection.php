@@ -1,4 +1,5 @@
 <?php
+
 // +----------------------------------------------------------------------
 // | ThinkPHP [ WE CAN DO IT JUST THINK ]
 // +----------------------------------------------------------------------
@@ -16,104 +17,118 @@ use Psr\SimpleCache\CacheInterface;
 use think\DbManager;
 
 /**
- * 数据库连接基础类
+ * 数据库连接基础类.
  */
 abstract class Connection implements ConnectionInterface
 {
-
     /**
-     * 当前SQL指令
+     * 当前SQL指令.
+     *
      * @var string
      */
     protected $queryStr = '';
 
     /**
-     * 返回或者影响记录数
+     * 返回或者影响记录数.
+     *
      * @var int
      */
     protected $numRows = 0;
 
     /**
-     * 事务指令数
+     * 事务指令数.
+     *
      * @var int
      */
     protected $transTimes = 0;
 
     /**
-     * 错误信息
+     * 错误信息.
+     *
      * @var string
      */
     protected $error = '';
 
     /**
-     * 数据库连接ID 支持多个连接
+     * 数据库连接ID 支持多个连接.
+     *
      * @var array
      */
     protected $links = [];
 
     /**
-     * 当前连接ID
+     * 当前连接ID.
+     *
      * @var object
      */
     protected $linkID;
 
     /**
-     * 当前读连接ID
+     * 当前读连接ID.
+     *
      * @var object
      */
     protected $linkRead;
 
     /**
-     * 当前写连接ID
+     * 当前写连接ID.
+     *
      * @var object
      */
     protected $linkWrite;
 
     /**
-     * 数据表信息
+     * 数据表信息.
+     *
      * @var array
      */
     protected $info = [];
 
     /**
-     * 查询开始时间
+     * 查询开始时间.
+     *
      * @var float
      */
     protected $queryStartTime;
 
     /**
      * Builder对象
+     *
      * @var Builder
      */
     protected $builder;
 
     /**
      * Db对象
+     *
      * @var DbManager
      */
     protected $db;
 
     /**
-     * 是否读取主库
+     * 是否读取主库.
+     *
      * @var bool
      */
     protected $readMaster = false;
 
     /**
-     * 数据库连接参数配置
+     * 数据库连接参数配置.
+     *
      * @var array
      */
     protected $config = [];
 
     /**
      * 缓存对象
+     *
      * @var CacheInterface
      */
     protected $cache;
 
     /**
-     * 架构函数 读取数据库配置信息
-     * @access public
+     * 架构函数 读取数据库配置信息.
+     *
      * @param array $config 数据库配置数组
      */
     public function __construct(array $config = [])
@@ -130,7 +145,7 @@ abstract class Connection implements ConnectionInterface
 
     /**
      * 获取当前的builder实例对象
-     * @access public
+     *
      * @return Builder
      */
     public function getBuilder()
@@ -157,8 +172,10 @@ abstract class Connection implements ConnectionInterface
     }
 
     /**
-     * 指定表名开始查询
+     * 指定表名开始查询.
+     *
      * @param $table
+     *
      * @return BaseQuery
      */
     public function table($table)
@@ -167,8 +184,10 @@ abstract class Connection implements ConnectionInterface
     }
 
     /**
-     * 指定表名开始查询(不带前缀)
+     * 指定表名开始查询(不带前缀).
+     *
      * @param $name
+     *
      * @return BaseQuery
      */
     public function name($name)
@@ -178,8 +197,9 @@ abstract class Connection implements ConnectionInterface
 
     /**
      * 设置当前的数据库Db对象
-     * @access public
+     *
      * @param DbManager $db
+     *
      * @return void
      */
     public function setDb(DbManager $db)
@@ -189,8 +209,9 @@ abstract class Connection implements ConnectionInterface
 
     /**
      * 设置当前的缓存对象
-     * @access public
+     *
      * @param CacheInterface $cache
+     *
      * @return void
      */
     public function setCache(CacheInterface $cache)
@@ -200,7 +221,7 @@ abstract class Connection implements ConnectionInterface
 
     /**
      * 获取当前的缓存对象
-     * @access public
+     *
      * @return CacheInterface|null
      */
     public function getCache()
@@ -209,9 +230,10 @@ abstract class Connection implements ConnectionInterface
     }
 
     /**
-     * 获取数据库的配置参数
-     * @access public
+     * 获取数据库的配置参数.
+     *
      * @param string $config 配置名称
+     *
      * @return mixed
      */
     public function getConfig(string $config = '')
@@ -224,10 +246,11 @@ abstract class Connection implements ConnectionInterface
     }
 
     /**
-     * 数据库SQL监控
-     * @access protected
+     * 数据库SQL监控.
+     *
      * @param string $sql    执行的SQL语句 留空自动获取
-     * @param bool   $master  主从标记
+     * @param bool   $master 主从标记
+     *
      * @return void
      */
     protected function trigger(string $sql = '', bool $master = false): void
@@ -237,6 +260,7 @@ abstract class Connection implements ConnectionInterface
             $listen[] = function ($sql, $time, $master) {
                 if (str_starts_with($sql, 'CONNECT:')) {
                     $this->db->log($sql);
+
                     return;
                 }
 
@@ -248,12 +272,12 @@ abstract class Connection implements ConnectionInterface
                     $master = '';
                 }
 
-                $this->db->log($sql . ' [ ' . $master . 'RunTime:' . $time . 's ]');
+                $this->db->log($sql.' [ '.$master.'RunTime:'.$time.'s ]');
             };
         }
 
         $runtime = number_format((microtime(true) - $this->queryStartTime), 6);
-        $sql     = $sql ?: $this->getLastsql();
+        $sql = $sql ?: $this->getLastsql();
 
         if (empty($this->config['deploy'])) {
             $master = null;
@@ -267,8 +291,8 @@ abstract class Connection implements ConnectionInterface
     }
 
     /**
-     * 缓存数据
-     * @access protected
+     * 缓存数据.
+     *
      * @param CacheItem $cacheItem 缓存Item
      */
     protected function cacheData(CacheItem $cacheItem)
@@ -281,16 +305,17 @@ abstract class Connection implements ConnectionInterface
     }
 
     /**
-     * 分析缓存Key
-     * @access protected
-     * @param BaseQuery $query 查询对象
+     * 分析缓存Key.
+     *
+     * @param BaseQuery $query  查询对象
      * @param string    $method 查询方法
+     *
      * @return string
      */
     protected function getCacheKey(BaseQuery $query, string $method = ''): string
     {
         if (!empty($query->getOptions('key')) && empty($method)) {
-            $key = 'think_' . $this->getConfig('database') . '.' . $query->getTable() . '|' . $query->getOptions('key');
+            $key = 'think_'.$this->getConfig('database').'.'.$query->getTable().'|'.$query->getOptions('key');
         } else {
             $key = $query->getQueryGuid();
         }
@@ -299,11 +324,12 @@ abstract class Connection implements ConnectionInterface
     }
 
     /**
-     * 分析缓存
-     * @access protected
-     * @param BaseQuery $query 查询对象
-     * @param array     $cache 缓存信息
+     * 分析缓存.
+     *
+     * @param BaseQuery $query  查询对象
+     * @param array     $cache  缓存信息
      * @param string    $method 查询方法
+     *
      * @return CacheItem
      */
     protected function parseCache(BaseQuery $query, array $cache, string $method = ''): CacheItem
@@ -326,9 +352,9 @@ abstract class Connection implements ConnectionInterface
     }
 
     /**
-     * 获取返回或者影响的记录数
-     * @access public
-     * @return integer
+     * 获取返回或者影响的记录数.
+     *
+     * @return int
      */
     public function getNumRows(): int
     {
@@ -336,8 +362,7 @@ abstract class Connection implements ConnectionInterface
     }
 
     /**
-     * 析构方法
-     * @access public
+     * 析构方法.
      */
     public function __destruct()
     {

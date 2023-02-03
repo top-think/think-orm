@@ -1,4 +1,5 @@
 <?php
+
 // +----------------------------------------------------------------------
 // | ThinkPHP [ WE CAN DO IT JUST THINK ]
 // +----------------------------------------------------------------------
@@ -8,44 +9,45 @@
 // +----------------------------------------------------------------------
 // | Author: liu21st <liu21st@gmail.com>
 // +----------------------------------------------------------------------
-declare (strict_types = 1);
+declare(strict_types=1);
 
 namespace think\db;
 
 /**
- * SQL Raw
+ * SQL Raw.
  */
 class Raw
 {
     /**
-     * 查询表达式
+     * 查询表达式.
      *
      * @var string
      */
     protected $value;
 
     /**
-     * 参数绑定
+     * 参数绑定.
      *
      * @var array
      */
     protected $bind = [];
 
     /**
-     * 创建一个查询表达式
+     * 创建一个查询表达式.
      *
-     * @param  string  $value
-     * @param  array   $bind
+     * @param string $value
+     * @param array  $bind
+     *
      * @return void
      */
     public function __construct(string $value, array $bind = [])
     {
         $this->value = $value;
-        $this->bind  = $bind;
+        $this->bind = $bind;
     }
 
     /**
-     * 获取表达式
+     * 获取表达式.
      *
      * @return string
      */
@@ -55,7 +57,7 @@ class Raw
     }
 
     /**
-     * 获取参数绑定
+     * 获取参数绑定.
      *
      * @return string
      */
@@ -63,5 +65,4 @@ class Raw
     {
         return $this->bind;
     }
-
 }

@@ -1,4 +1,5 @@
 <?php
+
 // +----------------------------------------------------------------------
 // | ThinkPHP [ WE CAN DO IT JUST THINK ]
 // +----------------------------------------------------------------------
@@ -8,26 +9,25 @@
 // +----------------------------------------------------------------------
 // | Author: liu21st <liu21st@gmail.com>
 // +----------------------------------------------------------------------
-declare (strict_types = 1);
+declare(strict_types=1);
 
 namespace think\db\concern;
 
 use think\db\Raw;
-use think\helper\Str;
 
 /**
- * JOIN和VIEW查询
+ * JOIN和VIEW查询.
  */
 trait JoinAndViewQuery
 {
-
     /**
-     * 查询SQL组装 join
-     * @access public
+     * 查询SQL组装 join.
+     *
      * @param mixed  $join      关联的表名
      * @param mixed  $condition 条件
      * @param string $type      JOIN类型
      * @param array  $bind      参数绑定
+     *
      * @return $this
      */
     public function join($join, string $condition = null, string $type = 'INNER', array $bind = [])
@@ -44,11 +44,12 @@ trait JoinAndViewQuery
     }
 
     /**
-     * LEFT JOIN
-     * @access public
+     * LEFT JOIN.
+     *
      * @param mixed $join      关联的表名
      * @param mixed $condition 条件
      * @param array $bind      参数绑定
+     *
      * @return $this
      */
     public function leftJoin($join, string $condition = null, array $bind = [])
@@ -57,11 +58,12 @@ trait JoinAndViewQuery
     }
 
     /**
-     * RIGHT JOIN
-     * @access public
+     * RIGHT JOIN.
+     *
      * @param mixed $join      关联的表名
      * @param mixed $condition 条件
      * @param array $bind      参数绑定
+     *
      * @return $this
      */
     public function rightJoin($join, string $condition = null, array $bind = [])
@@ -70,11 +72,12 @@ trait JoinAndViewQuery
     }
 
     /**
-     * FULL JOIN
-     * @access public
+     * FULL JOIN.
+     *
      * @param mixed $join      关联的表名
      * @param mixed $condition 条件
      * @param array $bind      参数绑定
+     *
      * @return $this
      */
     public function fullJoin($join, string $condition = null, array $bind = [])
@@ -84,10 +87,11 @@ trait JoinAndViewQuery
 
     /**
      * 获取Join表名及别名 支持
-     * ['prefix_table或者子查询'=>'alias'] 'table alias'
-     * @access protected
+     * ['prefix_table或者子查询'=>'alias'] 'table alias'.
+     *
      * @param array|string|Raw $join  JION表名
      * @param string           $alias 别名
+     *
      * @return string|array
      */
     protected function getJoinTable($join, &$alias = null)
@@ -95,6 +99,7 @@ trait JoinAndViewQuery
         if (is_array($join)) {
             $table = $join;
             $alias = array_shift($join);
+
             return $table;
         } elseif ($join instanceof Raw) {
             return $join;
@@ -130,13 +135,14 @@ trait JoinAndViewQuery
     }
 
     /**
-     * 指定JOIN查询字段
-     * @access public
+     * 指定JOIN查询字段.
+     *
      * @param string|array $join  数据表
      * @param string|array $field 查询字段
      * @param string       $on    JOIN条件
      * @param string       $type  JOIN类型
      * @param array        $bind  参数绑定
+     *
      * @return $this
      */
     public function view($join, $field = true, $on = null, string $type = 'INNER', array $bind = [])
@@ -144,10 +150,10 @@ trait JoinAndViewQuery
         $this->options['view'] = true;
 
         $fields = [];
-        $table  = $this->getJoinTable($join, $alias);
+        $table = $this->getJoinTable($join, $alias);
 
         if (true === $field) {
-            $fields = $alias . '.*';
+            $fields = $alias.'.*';
         } else {
             if (is_string($field)) {
                 $field = explode(',', $field);
@@ -155,17 +161,17 @@ trait JoinAndViewQuery
 
             foreach ($field as $key => $val) {
                 if (is_numeric($key)) {
-                    $fields[] = $alias . '.' . $val;
+                    $fields[] = $alias.'.'.$val;
 
-                    $this->options['map'][$val] = $alias . '.' . $val;
+                    $this->options['map'][$val] = $alias.'.'.$val;
                 } else {
                     if (preg_match('/[,=\.\'\"\(\s]/', $key)) {
                         $name = $key;
                     } else {
-                        $name = $alias . '.' . $key;
+                        $name = $alias.'.'.$key;
                     }
 
-                    $fields[] = $name . ' AS ' . $val;
+                    $fields[] = $name.' AS '.$val;
 
                     $this->options['map'][$val] = $name;
                 }
@@ -184,9 +190,10 @@ trait JoinAndViewQuery
     }
 
     /**
-     * 视图查询处理
-     * @access protected
+     * 视图查询处理.
+     *
      * @param array $options 查询参数
+     *
      * @return void
      */
     protected function parseView(array &$options): void
@@ -225,5 +232,4 @@ trait JoinAndViewQuery
             }
         }
     }
-
 }

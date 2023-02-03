@@ -1,4 +1,5 @@
 <?php
+
 // +----------------------------------------------------------------------
 // | ThinkPHP [ WE CAN DO IT JUST THINK ]
 // +----------------------------------------------------------------------
@@ -8,7 +9,7 @@
 // +----------------------------------------------------------------------
 // | Author: liu21st <liu21st@gmail.com>
 // +----------------------------------------------------------------------
-declare (strict_types = 1);
+declare(strict_types=1);
 
 namespace think\db\concern;
 
@@ -16,16 +17,17 @@ use think\db\exception\DbException;
 use think\db\Raw;
 
 /**
- * 聚合查询
+ * 聚合查询.
  */
 trait AggregateQuery
 {
     /**
-     * 聚合查询
-     * @access protected
+     * 聚合查询.
+     *
      * @param string     $aggregate 聚合方法
      * @param string|Raw $field     字段名
      * @param bool       $force     强制转为数字类型
+     *
      * @return mixed
      */
     protected function aggregate(string $aggregate, $field, bool $force = false)
@@ -34,9 +36,10 @@ trait AggregateQuery
     }
 
     /**
-     * COUNT查询
-     * @access public
+     * COUNT查询.
+     *
      * @param string|Raw $field 字段名
+     *
      * @return int
      */
     public function count(string $field = '*'): int
@@ -45,12 +48,12 @@ trait AggregateQuery
             // 支持GROUP
 
             if (!preg_match('/^[\w\.\*]+$/', $field)) {
-                throw new DbException('not support data:' . $field);
+                throw new DbException('not support data:'.$field);
             }
 
             $options = $this->getOptions();
-            $subSql  = $this->options($options)
-                ->field('count(' . $field . ') AS think_count')
+            $subSql = $this->options($options)
+                ->field('count('.$field.') AS think_count')
                 ->bind($this->bind)
                 ->buildSql();
 
@@ -65,9 +68,10 @@ trait AggregateQuery
     }
 
     /**
-     * SUM查询
-     * @access public
+     * SUM查询.
+     *
      * @param string|Raw $field 字段名
+     *
      * @return float
      */
     public function sum($field): float
@@ -76,10 +80,11 @@ trait AggregateQuery
     }
 
     /**
-     * MIN查询
-     * @access public
+     * MIN查询.
+     *
      * @param string|Raw $field 字段名
      * @param bool       $force 强制转为数字类型
+     *
      * @return mixed
      */
     public function min($field, bool $force = true)
@@ -88,10 +93,11 @@ trait AggregateQuery
     }
 
     /**
-     * MAX查询
-     * @access public
+     * MAX查询.
+     *
      * @param string|Raw $field 字段名
      * @param bool       $force 强制转为数字类型
+     *
      * @return mixed
      */
     public function max($field, bool $force = true)
@@ -100,14 +106,14 @@ trait AggregateQuery
     }
 
     /**
-     * AVG查询
-     * @access public
+     * AVG查询.
+     *
      * @param string|Raw $field 字段名
+     *
      * @return float
      */
     public function avg($field): float
     {
         return $this->aggregate('AVG', $field, true);
     }
-
 }

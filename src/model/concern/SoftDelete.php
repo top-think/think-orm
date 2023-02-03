@@ -1,4 +1,5 @@
 <?php
+
 // +----------------------------------------------------------------------
 // | ThinkPHP [ WE CAN DO IT JUST THINK ]
 // +----------------------------------------------------------------------
@@ -8,7 +9,7 @@
 // +----------------------------------------------------------------------
 // | Author: liu21st <liu21st@gmail.com>
 // +----------------------------------------------------------------------
-declare (strict_types = 1);
+declare(strict_types=1);
 
 namespace think\model\concern;
 
@@ -16,24 +17,26 @@ use think\db\BaseQuery as Query;
 use think\Model;
 
 /**
- * 数据软删除
+ * 数据软删除.
+ *
  * @mixin Model
+ *
  * @method $this withTrashed()
  * @method $this onlyTrashed()
  */
 trait SoftDelete
 {
-
     public function db($scope = []): Query
     {
         $query = parent::db($scope);
         $this->withNoTrashed($query);
+
         return $query;
     }
 
     /**
-     * 判断当前实例是否被软删除
-     * @access public
+     * 判断当前实例是否被软删除.
+     *
      * @return bool
      */
     public function trashed(): bool
@@ -62,8 +65,8 @@ trait SoftDelete
     }
 
     /**
-     * 获取软删除数据的查询条件
-     * @access protected
+     * 获取软删除数据的查询条件.
+     *
      * @return array
      */
     protected function getWithTrashedExp(): array
@@ -72,8 +75,8 @@ trait SoftDelete
     }
 
     /**
-     * 删除当前的记录
-     * @access public
+     * 删除当前的记录.
+     *
      * @return bool
      */
     public function delete(): bool
@@ -82,7 +85,7 @@ trait SoftDelete
             return false;
         }
 
-        $name  = $this->getDeleteTimeField();
+        $name = $this->getDeleteTimeField();
         $force = $this->isForce();
 
         if ($name && !$force) {
@@ -118,10 +121,11 @@ trait SoftDelete
     }
 
     /**
-     * 删除记录
-     * @access public
-     * @param mixed $data 主键列表 支持闭包查询条件
-     * @param bool $force 是否强制删除
+     * 删除记录.
+     *
+     * @param mixed $data  主键列表 支持闭包查询条件
+     * @param bool  $force 是否强制删除
+     *
      * @return bool
      */
     public static function destroy($data, bool $force = false): bool
@@ -160,9 +164,10 @@ trait SoftDelete
     }
 
     /**
-     * 恢复被软删除的记录
-     * @access public
+     * 恢复被软删除的记录.
+     *
      * @param array $where 更新条件
+     *
      * @return bool
      */
     public function restore($where = []): bool
@@ -192,9 +197,10 @@ trait SoftDelete
     }
 
     /**
-     * 获取软删除字段
-     * @access protected
+     * 获取软删除字段.
+     *
      * @param bool $read 是否查询操作 写操作的时候会自动去掉表别名
+     *
      * @return string|false
      */
     protected function getDeleteTimeField(bool $read = false)
@@ -206,7 +212,7 @@ trait SoftDelete
         }
 
         if (!str_contains($field, '.')) {
-            $field = '__TABLE__.' . $field;
+            $field = '__TABLE__.'.$field;
         }
 
         if (!$read && str_contains($field, '.')) {
@@ -218,9 +224,10 @@ trait SoftDelete
     }
 
     /**
-     * 查询的时候默认排除软删除数据
-     * @access protected
+     * 查询的时候默认排除软删除数据.
+     *
      * @param Query $query
+     *
      * @return void
      */
     protected function withNoTrashed(Query $query): void

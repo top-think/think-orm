@@ -1,14 +1,15 @@
 <?php
+
 declare(strict_types=1);
 
 namespace tests\orm;
 
 use Exception;
 use tests\Base;
-use think\facade\Db;
-use Throwable;
 use function tests\mysql_kill_connection;
 use function tests\query_mysql_connection_id;
+use think\facade\Db;
+use Throwable;
 
 class DbTransactionTest extends Base
 {
@@ -17,7 +18,8 @@ class DbTransactionTest extends Base
     public static function setUpBeforeClass(): void
     {
         Db::execute('DROP TABLE IF EXISTS `test_tran_a`;');
-        Db::execute(<<<SQL
+        Db::execute(
+            <<<'SQL'
 CREATE TABLE `test_tran_a` (
      `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
      `type` tinyint(4) NOT NULL DEFAULT '0',
@@ -113,7 +115,7 @@ SQL
                 'username' => '3-7-b',
             ]);
             Db::table('test_tran_a')->commit();
-        } catch (Throwable | Exception $exception) {
+        } catch (Throwable|Exception $exception) {
             try {
                 Db::table('test_tran_a')->rollback();
             } catch (Exception $rollbackException) {
@@ -209,7 +211,7 @@ SQL
             Db::table('test_tran_a')->commit();
             // tran 0
             Db::table('test_tran_a')->commit();
-        } catch (Throwable | Exception $exception) {
+        } catch (Throwable|Exception $exception) {
             try {
                 Db::table('test_tran_a')->rollback();
             } catch (Exception $rollbackException) {

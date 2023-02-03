@@ -1,4 +1,5 @@
 <?php
+
 // +----------------------------------------------------------------------
 // | ThinkPHP [ WE CAN DO IT JUST THINK ]
 // +----------------------------------------------------------------------
@@ -8,7 +9,7 @@
 // +----------------------------------------------------------------------
 // | Author: liu21st <liu21st@gmail.com>
 // +----------------------------------------------------------------------
-declare (strict_types = 1);
+declare(strict_types=1);
 
 namespace think\db;
 
@@ -16,24 +17,27 @@ use think\db\exception\DbException as Exception;
 use think\helper\Str;
 
 /**
- * SQL获取类
+ * SQL获取类.
  */
 class Fetch
 {
     /**
      * 查询对象
+     *
      * @var Query
      */
     protected $query;
 
     /**
      * Connection对象
+     *
      * @var Connection
      */
     protected $connection;
 
     /**
      * Builder对象
+     *
      * @var Builder
      */
     protected $builder;
@@ -41,37 +45,39 @@ class Fetch
     /**
      * 创建一个查询SQL获取对象
      *
-     * @param  Query    $query      查询对象
+     * @param Query $query 查询对象
      */
     public function __construct(Query $query)
     {
-        $this->query      = $query;
+        $this->query = $query;
         $this->connection = $query->getConnection();
-        $this->builder    = $this->connection->getBuilder();
+        $this->builder = $this->connection->getBuilder();
     }
 
     /**
-     * 聚合查询
-     * @access protected
-     * @param  string $aggregate    聚合方法
-     * @param  string $field        字段名
+     * 聚合查询.
+     *
+     * @param string $aggregate 聚合方法
+     * @param string $field     字段名
+     *
      * @return string
      */
     protected function aggregate(string $aggregate, string $field): string
     {
         $this->query->parseOptions();
 
-        $field = $aggregate . '(' . $this->builder->parseKey($this->query, $field) . ') AS think_' . strtolower($aggregate);
+        $field = $aggregate.'('.$this->builder->parseKey($this->query, $field).') AS think_'.strtolower($aggregate);
 
         return $this->value($field, 0, false);
     }
 
     /**
      * 得到某个字段的值
-     * @access public
-     * @param string $field 字段名
-     * @param mixed $default 默认值
-     * @param bool $one
+     *
+     * @param string $field   字段名
+     * @param mixed  $default 默认值
+     * @param bool   $one
+     *
      * @return string
      */
     public function value(string $field, $default = null, bool $one = true): string
@@ -97,10 +103,11 @@ class Fetch
     }
 
     /**
-     * 得到某个列的数组
-     * @access public
-     * @param  string $field 字段名 多个字段用逗号分隔
-     * @param  string $key   索引
+     * 得到某个列的数组.
+     *
+     * @param string $field 字段名 多个字段用逗号分隔
+     * @param string $key   索引
+     *
      * @return string
      */
     public function column(string $field, string $key = ''): string
@@ -112,7 +119,7 @@ class Fetch
         }
 
         if ($key && '*' != $field) {
-            $field = $key . ',' . $field;
+            $field = $key.','.$field;
         }
 
         $field = array_map('trim', explode(',', $field));
@@ -132,9 +139,10 @@ class Fetch
     }
 
     /**
-     * 插入记录
-     * @access public
-     * @param  array $data 数据
+     * 插入记录.
+     *
+     * @param array $data 数据
+     *
      * @return string
      */
     public function insert(array $data = []): string
@@ -151,9 +159,10 @@ class Fetch
     }
 
     /**
-     * 插入记录并获取自增ID
-     * @access public
-     * @param  array $data 数据
+     * 插入记录并获取自增ID.
+     *
+     * @param array $data 数据
+     *
      * @return string
      */
     public function insertGetId(array $data = []): string
@@ -162,10 +171,11 @@ class Fetch
     }
 
     /**
-     * 保存数据 自动判断insert或者update
-     * @access public
-     * @param  array $data        数据
-     * @param  bool  $forceInsert 是否强制insert
+     * 保存数据 自动判断insert或者update.
+     *
+     * @param array $data        数据
+     * @param bool  $forceInsert 是否强制insert
+     *
      * @return string
      */
     public function save(array $data = [], bool $forceInsert = false): string
@@ -188,10 +198,11 @@ class Fetch
     }
 
     /**
-     * 批量插入记录
-     * @access public
-     * @param  array     $dataSet 数据集
-     * @param  integer   $limit   每次写入数据限制
+     * 批量插入记录.
+     *
+     * @param array $dataSet 数据集
+     * @param int   $limit   每次写入数据限制
+     *
      * @return string
      */
     public function insertAll(array $dataSet = [], int $limit = null): string
@@ -207,10 +218,10 @@ class Fetch
         }
 
         if ($limit) {
-            $array    = array_chunk($dataSet, $limit, true);
+            $array = array_chunk($dataSet, $limit, true);
             $fetchSql = [];
             foreach ($array as $item) {
-                $sql  = $this->builder->insertAll($this->query, $item);
+                $sql = $this->builder->insertAll($this->query, $item);
                 $bind = $this->query->getBind();
 
                 $fetchSql[] = $this->connection->getRealSql($sql, $bind);
@@ -225,10 +236,11 @@ class Fetch
     }
 
     /**
-     * 通过Select方式插入记录
-     * @access public
-     * @param  array    $fields 要插入的数据表字段名
-     * @param  string   $table  要插入的数据表名
+     * 通过Select方式插入记录.
+     *
+     * @param array  $fields 要插入的数据表字段名
+     * @param string $table  要插入的数据表名
+     *
      * @return string
      */
     public function selectInsert(array $fields, string $table): string
@@ -241,9 +253,10 @@ class Fetch
     }
 
     /**
-     * 更新记录
-     * @access public
-     * @param  mixed $data 数据
+     * 更新记录.
+     *
+     * @param mixed $data 数据
+     *
      * @return string
      */
     public function update(array $data = []): string
@@ -288,9 +301,10 @@ class Fetch
     }
 
     /**
-     * 删除记录
-     * @access public
-     * @param  mixed $data 表达式 true 表示强制删除
+     * 删除记录.
+     *
+     * @param mixed $data 表达式 true 表示强制删除
+     *
      * @return string
      */
     public function delete($data = null): string
@@ -310,6 +324,7 @@ class Fetch
                 $this->query->setOption('data', [$field => $condition]);
                 // 生成删除SQL语句
                 $sql = $this->builder->delete($this->query);
+
                 return $this->fetch($sql);
             }
         }
@@ -321,9 +336,10 @@ class Fetch
     }
 
     /**
-     * 查找记录 返回SQL
-     * @access public
-     * @param  mixed $data
+     * 查找记录 返回SQL.
+     *
+     * @param mixed $data
+     *
      * @return string
      */
     public function select($data = null): string
@@ -342,9 +358,10 @@ class Fetch
     }
 
     /**
-     * 查找单条记录 返回SQL语句
-     * @access public
-     * @param  mixed $data
+     * 查找单条记录 返回SQL语句.
+     *
+     * @param mixed $data
+     *
      * @return string
      */
     public function find($data = null): string
@@ -364,9 +381,10 @@ class Fetch
     }
 
     /**
-     * 查找多条记录 如果不存在则抛出异常
-     * @access public
-     * @param  mixed $data
+     * 查找多条记录 如果不存在则抛出异常.
+     *
+     * @param mixed $data
+     *
      * @return string
      */
     public function selectOrFail($data = null): string
@@ -375,9 +393,10 @@ class Fetch
     }
 
     /**
-     * 查找单条记录 如果不存在则抛出异常
-     * @access public
-     * @param  mixed $data
+     * 查找单条记录 如果不存在则抛出异常.
+     *
+     * @param mixed $data
+     *
      * @return string
      */
     public function findOrFail($data = null): string
@@ -386,9 +405,10 @@ class Fetch
     }
 
     /**
-     * 查找单条记录 不存在返回空数据（或者空模型）
-     * @access public
-     * @param  mixed $data 数据
+     * 查找单条记录 不存在返回空数据（或者空模型）.
+     *
+     * @param mixed $data 数据
+     *
      * @return string
      */
     public function findOrEmpty($data = null)
@@ -397,9 +417,10 @@ class Fetch
     }
 
     /**
-     * 获取实际的SQL语句
-     * @access public
-     * @param  string $sql
+     * 获取实际的SQL语句.
+     *
+     * @param string $sql
+     *
      * @return string
      */
     public function fetch(string $sql): string
@@ -410,9 +431,10 @@ class Fetch
     }
 
     /**
-     * COUNT查询
-     * @access public
-     * @param  string $field 字段名
+     * COUNT查询.
+     *
+     * @param string $field 字段名
+     *
      * @return string
      */
     public function count(string $field = '*'): string
@@ -421,8 +443,8 @@ class Fetch
 
         if (!empty($options['group'])) {
             // 支持GROUP
-            $subSql = $this->query->field('count(' . $field . ') AS think_count')->buildSql();
-            $query  = $this->query->newQuery()->table([$subSql => '_group_count_']);
+            $subSql = $this->query->field('count('.$field.') AS think_count')->buildSql();
+            $query = $this->query->newQuery()->table([$subSql => '_group_count_']);
 
             return $query->fetchsql()->aggregate('COUNT', '*');
         } else {
@@ -431,9 +453,10 @@ class Fetch
     }
 
     /**
-     * SUM查询
-     * @access public
-     * @param  string $field 字段名
+     * SUM查询.
+     *
+     * @param string $field 字段名
+     *
      * @return string
      */
     public function sum(string $field): string
@@ -442,9 +465,10 @@ class Fetch
     }
 
     /**
-     * MIN查询
-     * @access public
-     * @param  string $field    字段名
+     * MIN查询.
+     *
+     * @param string $field 字段名
+     *
      * @return string
      */
     public function min(string $field): string
@@ -453,9 +477,10 @@ class Fetch
     }
 
     /**
-     * MAX查询
-     * @access public
-     * @param  string $field    字段名
+     * MAX查询.
+     *
+     * @param string $field 字段名
+     *
      * @return string
      */
     public function max(string $field): string
@@ -464,9 +489,10 @@ class Fetch
     }
 
     /**
-     * AVG查询
-     * @access public
-     * @param  string $field 字段名
+     * AVG查询.
+     *
+     * @param string $field 字段名
+     *
      * @return string
      */
     public function avg(string $field): string
@@ -479,14 +505,17 @@ class Fetch
         if (strtolower(substr($method, 0, 5)) == 'getby') {
             // 根据某个字段获取记录
             $field = Str::snake(substr($method, 5));
+
             return $this->where($field, '=', $args[0])->find();
         } elseif (strtolower(substr($method, 0, 10)) == 'getfieldby') {
             // 根据某个字段获取记录的某个值
             $name = Str::snake(substr($method, 10));
+
             return $this->where($name, '=', $args[0])->value($args[1]);
         }
 
         $result = call_user_func_array([$this->query, $method], $args);
+
         return $result === $this->query ? $this : $result;
     }
 }

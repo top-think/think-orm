@@ -1,20 +1,21 @@
 <?php
+
 declare(strict_types=1);
 
 namespace tests\orm;
 
-use tests\Base;
-use think\Collection;
-use think\db\exception\DbException;
-use think\db\Raw;
-use think\Exception as ThinkException;
-use think\facade\Db;
 use function array_column;
 use function array_keys;
 use function array_unique;
 use function array_values;
 use function tests\array_column_ex;
 use function tests\array_value_sort;
+use tests\Base;
+use think\Collection;
+use think\db\exception\DbException;
+use think\db\Raw;
+use think\Exception as ThinkException;
+use think\facade\Db;
 
 class DbTest extends Base
 {
@@ -23,7 +24,8 @@ class DbTest extends Base
     public static function setUpBeforeClass(): void
     {
         Db::execute('DROP TABLE IF EXISTS `test_user`;');
-        Db::execute(<<<SQL
+        Db::execute(
+            <<<'SQL'
 CREATE TABLE `test_user` (
      `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
      `type` tinyint(4) NOT NULL DEFAULT '0',
@@ -115,7 +117,7 @@ SQL
                 'type2' => function ($value) {
                     return $value['type'] + 1000;
                 },
-                'id'
+                'id',
             ],
             'id'
         );
@@ -155,22 +157,24 @@ SQL
         $this->assertEquals($expected, $result);
 
         $this->assertEquals([
-            "SELECT * FROM `test_user` WHERE  `type` IN (1,3)",
-            "SELECT * FROM `test_user` WHERE  `type` = 1",
-            "SELECT * FROM `test_user` WHERE  `type` IN (1,0)",
-            "SELECT * FROM `test_user` WHERE  0 = 1",
-            "SELECT * FROM `test_user` WHERE  `type` NOT IN (1,3)",
-            "SELECT * FROM `test_user` WHERE  1 = 1",
+            'SELECT * FROM `test_user` WHERE  `type` IN (1,3)',
+            'SELECT * FROM `test_user` WHERE  `type` = 1',
+            'SELECT * FROM `test_user` WHERE  `type` IN (1,0)',
+            'SELECT * FROM `test_user` WHERE  0 = 1',
+            'SELECT * FROM `test_user` WHERE  `type` NOT IN (1,3)',
+            'SELECT * FROM `test_user` WHERE  1 = 1',
         ], $sqlLogs);
     }
 
     public function testException()
     {
         $this->expectException(DbException::class);
+
         try {
-            Db::query("wrong syntax");
+            Db::query('wrong syntax');
         } catch (DbException $exception) {
             $this->assertInstanceOf(ThinkException::class, $exception);
+
             throw $exception;
         }
     }

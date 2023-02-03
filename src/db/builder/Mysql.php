@@ -1,4 +1,5 @@
 <?php
+
 // +----------------------------------------------------------------------
 // | ThinkPHP [ WE CAN DO IT JUST THINK ]
 // +----------------------------------------------------------------------
@@ -8,7 +9,7 @@
 // +----------------------------------------------------------------------
 // | Author: liu21st <liu21st@gmail.com>
 // +----------------------------------------------------------------------
-declare (strict_types = 1);
+declare(strict_types=1);
 
 namespace think\db\builder;
 
@@ -18,12 +19,13 @@ use think\db\Query;
 use think\db\Raw;
 
 /**
- * mysql数据库驱动
+ * mysql数据库驱动.
  */
 class Mysql extends Builder
 {
     /**
-     * 查询表达式解析
+     * 查询表达式解析.
+     *
      * @var array
      */
     protected $parser = [
@@ -42,40 +44,46 @@ class Mysql extends Builder
     ];
 
     /**
-     * SELECT SQL表达式
+     * SELECT SQL表达式.
+     *
      * @var string
      */
     protected $selectSql = 'SELECT%DISTINCT%%EXTRA% %FIELD% FROM %TABLE%%PARTITION%%FORCE%%JOIN%%WHERE%%GROUP%%HAVING%%UNION%%ORDER%%LIMIT% %LOCK%%COMMENT%';
 
     /**
-     * INSERT SQL表达式
+     * INSERT SQL表达式.
+     *
      * @var string
      */
     protected $insertSql = '%INSERT%%EXTRA% INTO %TABLE%%PARTITION% SET %SET% %DUPLICATE%%COMMENT%';
 
     /**
-     * INSERT ALL SQL表达式
+     * INSERT ALL SQL表达式.
+     *
      * @var string
      */
     protected $insertAllSql = '%INSERT%%EXTRA% INTO %TABLE%%PARTITION% (%FIELD%) VALUES %DATA% %DUPLICATE%%COMMENT%';
 
     /**
-     * UPDATE SQL表达式
+     * UPDATE SQL表达式.
+     *
      * @var string
      */
     protected $updateSql = 'UPDATE%EXTRA% %TABLE%%PARTITION% %JOIN% SET %SET% %WHERE% %ORDER%%LIMIT% %LOCK%%COMMENT%';
 
     /**
-     * DELETE SQL表达式
+     * DELETE SQL表达式.
+     *
      * @var string
      */
     protected $deleteSql = 'DELETE%EXTRA% FROM %TABLE%%PARTITION%%USING%%JOIN%%WHERE%%ORDER%%LIMIT% %LOCK%%COMMENT%';
 
     /**
-     * 生成查询SQL
-     * @access public
-     * @param  Query  $query  查询对象
-     * @param  bool   $one    是否仅获取一个记录
+     * 生成查询SQL.
+     *
+     * @param Query $query 查询对象
+     * @param bool  $one   是否仅获取一个记录
+     *
      * @return string
      */
     public function select(Query $query, bool $one = false): string
@@ -101,13 +109,15 @@ class Mysql extends Builder
                 $this->parseComment($query, $options['comment']),
                 $this->parseForce($query, $options['force']),
             ],
-            $this->selectSql);
+            $this->selectSql
+        );
     }
 
     /**
-     * 生成Insert SQL
-     * @access public
-     * @param  Query $query 查询对象
+     * 生成Insert SQL.
+     *
+     * @param Query $query 查询对象
+     *
      * @return string
      */
     public function insert(Query $query): string
@@ -122,7 +132,7 @@ class Mysql extends Builder
 
         $set = [];
         foreach ($data as $key => $val) {
-            $set[] = $key . ' = ' . $val;
+            $set[] = $key.' = '.$val;
         }
 
         return str_replace(
@@ -136,15 +146,17 @@ class Mysql extends Builder
                 $this->parseDuplicate($query, $options['duplicate']),
                 $this->parseComment($query, $options['comment']),
             ],
-            $this->insertSql);
+            $this->insertSql
+        );
     }
 
     /**
-     * 生成insertall SQL
-     * @access public
-     * @param  Query     $query   查询对象
-     * @param  array     $dataSet 数据集
-     * @param  bool      $replace 是否replace
+     * 生成insertall SQL.
+     *
+     * @param Query $query   查询对象
+     * @param array $dataSet 数据集
+     * @param bool  $replace 是否replace
+     *
      * @return string
      */
     public function insertAll(Query $query, array $dataSet, bool $replace = false): string
@@ -167,7 +179,7 @@ class Mysql extends Builder
         foreach ($dataSet as $data) {
             $data = $this->parseData($query, $data, $allowFields, $bind);
 
-            $values[] = '( ' . implode(',', array_values($data)) . ' )';
+            $values[] = '( '.implode(',', array_values($data)).' )';
 
             if (!isset($insertFields)) {
                 $insertFields = array_keys($data);
@@ -190,13 +202,15 @@ class Mysql extends Builder
                 $this->parseDuplicate($query, $options['duplicate']),
                 $this->parseComment($query, $options['comment']),
             ],
-            $this->insertAllSql);
+            $this->insertAllSql
+        );
     }
 
     /**
-     * 生成update SQL
-     * @access public
-     * @param  Query     $query  查询对象
+     * 生成update SQL.
+     *
+     * @param Query $query 查询对象
+     *
      * @return string
      */
     public function update(Query $query): string
@@ -211,7 +225,7 @@ class Mysql extends Builder
 
         $set = [];
         foreach ($data as $key => $val) {
-            $set[] = (str_contains($key,'->') ? strstr($key,'->',true) : $key) . ' = ' . $val;
+            $set[] = (str_contains($key, '->') ? strstr($key, '->', true) : $key).' = '.$val;
         }
 
         return str_replace(
@@ -228,13 +242,15 @@ class Mysql extends Builder
                 $this->parseLock($query, $options['lock']),
                 $this->parseComment($query, $options['comment']),
             ],
-            $this->updateSql);
+            $this->updateSql
+        );
     }
 
     /**
-     * 生成delete SQL
-     * @access public
-     * @param  Query  $query  查询对象
+     * 生成delete SQL.
+     *
+     * @param Query $query 查询对象
+     *
      * @return string
      */
     public function delete(Query $query): string
@@ -247,7 +263,7 @@ class Mysql extends Builder
                 $this->parseTable($query, $options['table']),
                 $this->parsePartition($query, $options['partition']),
                 $this->parseExtra($query, $options['extra']),
-                !empty($options['using']) ? ' USING ' . $this->parseTable($query, $options['using']) . ' ' : '',
+                !empty($options['using']) ? ' USING '.$this->parseTable($query, $options['using']).' ' : '',
                 $this->parseJoin($query, $options['join']),
                 $this->parseWhere($query, $options['where']),
                 $this->parseOrder($query, $options['order']),
@@ -255,17 +271,19 @@ class Mysql extends Builder
                 $this->parseLock($query, $options['lock']),
                 $this->parseComment($query, $options['comment']),
             ],
-            $this->deleteSql);
+            $this->deleteSql
+        );
     }
 
     /**
-     * 正则查询
-     * @access protected
-     * @param  Query        $query        查询对象
-     * @param  string       $key
-     * @param  string       $exp
-     * @param  mixed        $value
-     * @param  string       $field
+     * 正则查询.
+     *
+     * @param Query  $query 查询对象
+     * @param string $key
+     * @param string $exp
+     * @param mixed  $value
+     * @param string $field
+     *
      * @return string
      */
     protected function parseRegexp(Query $query, string $key, string $exp, $value, string $field): string
@@ -274,17 +292,18 @@ class Mysql extends Builder
             $value = $this->parseRaw($query, $value);
         }
 
-        return $key . ' ' . $exp . ' ' . $value;
+        return $key.' '.$exp.' '.$value;
     }
 
     /**
-     * FIND_IN_SET 查询
-     * @access protected
-     * @param  Query        $query        查询对象
-     * @param  string       $key
-     * @param  string       $exp
-     * @param  mixed        $value
-     * @param  string       $field
+     * FIND_IN_SET 查询.
+     *
+     * @param Query  $query 查询对象
+     * @param string $key
+     * @param string $exp
+     * @param mixed  $value
+     * @param string $field
+     *
      * @return string
      */
     protected function parseFindInSet(Query $query, string $key, string $exp, $value, string $field): string
@@ -293,15 +312,16 @@ class Mysql extends Builder
             $value = $this->parseRaw($query, $value);
         }
 
-        return 'FIND_IN_SET(' . $value . ', ' . $key . ')';
+        return 'FIND_IN_SET('.$value.', '.$key.')';
     }
 
     /**
-     * 字段和表名处理
-     * @access public
-     * @param  Query     $query 查询对象
-     * @param  mixed     $key   字段名
-     * @param  bool      $strict   严格检测
+     * 字段和表名处理.
+     *
+     * @param Query $query  查询对象
+     * @param mixed $key    字段名
+     * @param bool  $strict 严格检测
+     *
      * @return string
      */
     public function parseKey(Query $query, $key, bool $strict = false): string
@@ -318,11 +338,12 @@ class Mysql extends Builder
             // JSON字段支持
             [$field, $name] = explode('->>', $key, 2);
 
-            return $this->parseKey($query, $field, true) . '->>\'$' . (str_starts_with($name, '[') ? '' : '.') . str_replace('->>', '.', $name) . '\'';
+            return $this->parseKey($query, $field, true).'->>\'$'.(str_starts_with($name, '[') ? '' : '.').str_replace('->>', '.', $name).'\'';
         } elseif (str_contains($key, '->') && !str_contains($key, '(')) {
             // JSON字段支持
             [$field, $name] = explode('->', $key, 2);
-            return 'json_extract(' . $this->parseKey($query, $field, true) . ', \'$' . (str_starts_with($name, '[') ? '' : '.') . str_replace('->', '.', $name) . '\')';
+
+            return 'json_extract('.$this->parseKey($query, $field, true).', \'$'.(str_starts_with($name, '[') ? '' : '.').str_replace('->', '.', $name).'\')';
         } elseif (str_contains($key, '.') && !preg_match('/[,\'\"\(\)`\s]/', $key)) {
             [$table, $key] = explode('.', $key, 2);
 
@@ -339,11 +360,11 @@ class Mysql extends Builder
         }
 
         if ($strict && !preg_match('/^[\w\.\*]+$/', $key)) {
-            throw new Exception('not support data:' . $key);
+            throw new Exception('not support data:'.$key);
         }
 
         if ('*' != $key && !preg_match('/[,\'\"\*\(\)`.\s]/', $key)) {
-            $key = '`' . $key . '`';
+            $key = '`'.$key.'`';
         }
 
         if (isset($table)) {
@@ -351,16 +372,17 @@ class Mysql extends Builder
                 $table = str_replace('.', '`.`', $table);
             }
 
-            $key = '`' . $table . '`.' . $key;
+            $key = '`'.$table.'`.'.$key;
         }
 
         return $key;
     }
 
     /**
-     * 随机排序
-     * @access protected
-     * @param  Query     $query        查询对象
+     * 随机排序.
+     *
+     * @param Query $query 查询对象
+     *
      * @return string
      */
     protected function parseRand(Query $query): string
@@ -369,10 +391,11 @@ class Mysql extends Builder
     }
 
     /**
-     * Partition 分析
-     * @access protected
-     * @param  Query        $query    查询对象
-     * @param  string|array $partition  分区
+     * Partition 分析.
+     *
+     * @param Query        $query     查询对象
+     * @param string|array $partition 分区
+     *
      * @return string
      */
     protected function parsePartition(Query $query, $partition): string
@@ -385,14 +408,15 @@ class Mysql extends Builder
             $partition = explode(',', $partition);
         }
 
-        return ' PARTITION (' . implode(' , ', $partition) . ') ';
+        return ' PARTITION ('.implode(' , ', $partition).') ';
     }
 
     /**
-     * ON DUPLICATE KEY UPDATE 分析
-     * @access protected
-     * @param  Query  $query    查询对象
-     * @param  mixed  $duplicate
+     * ON DUPLICATE KEY UPDATE 分析.
+     *
+     * @param Query $query     查询对象
+     * @param mixed $duplicate
+     *
      * @return string
      */
     protected function parseDuplicate(Query $query, $duplicate): string
@@ -402,7 +426,7 @@ class Mysql extends Builder
         }
 
         if ($duplicate instanceof Raw) {
-            return ' ON DUPLICATE KEY UPDATE ' . $this->parseRaw($query, $duplicate) . ' ';
+            return ' ON DUPLICATE KEY UPDATE '.$this->parseRaw($query, $duplicate).' ';
         }
 
         if (is_string($duplicate)) {
@@ -412,16 +436,16 @@ class Mysql extends Builder
         $updates = [];
         foreach ($duplicate as $key => $val) {
             if (is_numeric($key)) {
-                $val       = $this->parseKey($query, $val);
-                $updates[] = $val . ' = VALUES(' . $val . ')';
+                $val = $this->parseKey($query, $val);
+                $updates[] = $val.' = VALUES('.$val.')';
             } elseif ($val instanceof Raw) {
-                $updates[] = $this->parseKey($query, $key) . " = " . $this->parseRaw($query, $val);
+                $updates[] = $this->parseKey($query, $key).' = '.$this->parseRaw($query, $val);
             } else {
-                $name      = $query->bindValue($val, $query->getConnection()->getFieldBindType($key));
-                $updates[] = $this->parseKey($query, $key) . " = :" . $name;
+                $name = $query->bindValue($val, $query->getConnection()->getFieldBindType($key));
+                $updates[] = $this->parseKey($query, $key).' = :'.$name;
             }
         }
 
-        return ' ON DUPLICATE KEY UPDATE ' . implode(' , ', $updates) . ' ';
+        return ' ON DUPLICATE KEY UPDATE '.implode(' , ', $updates).' ';
     }
 }

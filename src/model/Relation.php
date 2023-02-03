@@ -1,4 +1,5 @@
 <?php
+
 // +----------------------------------------------------------------------
 // | ThinkPHP [ WE CAN DO IT JUST THINK ]
 // +----------------------------------------------------------------------
@@ -13,81 +14,90 @@ declare(strict_types=1);
 namespace think\model;
 
 use Closure;
-use ReflectionFunction;
 use think\db\BaseQuery as Query;
 use think\db\exception\DbException as Exception;
 use think\Model;
 
 /**
- * 模型关联基础类
- * @package think\model
+ * 模型关联基础类.
+ *
  * @mixin Query
  */
 abstract class Relation
 {
     /**
      * 父模型对象
+     *
      * @var Model
      */
     protected $parent;
 
     /**
-     * 当前关联的模型类名
+     * 当前关联的模型类名.
+     *
      * @var string
      */
     protected $model;
 
     /**
      * 关联模型查询对象
+     *
      * @var Query
      */
     protected $query;
 
     /**
-     * 关联表外键
+     * 关联表外键.
+     *
      * @var string
      */
     protected $foreignKey;
 
     /**
-     * 关联表主键
+     * 关联表主键.
+     *
      * @var string
      */
     protected $localKey;
 
     /**
-     * 是否执行关联基础查询
+     * 是否执行关联基础查询.
+     *
      * @var bool
      */
     protected $baseQuery;
 
     /**
-     * 是否为自关联
+     * 是否为自关联.
+     *
      * @var bool
      */
     protected $selfRelation = false;
 
     /**
-     * 关联数据字段限制
+     * 关联数据字段限制.
+     *
      * @var array
      */
     protected $withField;
 
     /**
-     * 排除关联数据字段
+     * 排除关联数据字段.
+     *
      * @var array
      */
     protected $withoutField;
 
     /**
-     * 默认数据
+     * 默认数据.
+     *
      * @var mixed
      */
     protected $default;
 
     /**
-     * 获取关联的所属模型
-     * @access public
+     * 获取关联的所属模型.
+     *
      * @return Model
      */
     public function getParent(): Model
@@ -96,8 +106,8 @@ abstract class Relation
     }
 
     /**
-     * 获取当前的关联模型类的Query实例
-     * @access public
+     * 获取当前的关联模型类的Query实例.
+     *
      * @return Query
      */
     public function getQuery()
@@ -106,28 +116,28 @@ abstract class Relation
     }
 
     /**
-     * 获取关联表外键
-     * @access public
+     * 获取关联表外键.
+     *
      * @return string
      */
-    public function getForeignKey():string
+    public function getForeignKey(): string
     {
         return $this->foreignKey;
     }
 
     /**
-     * 获取关联表主键
-     * @access public
+     * 获取关联表主键.
+     *
      * @return string
      */
-    public function getLocalKey():string
+    public function getLocalKey(): string
     {
         return $this->localKey;
     }
 
     /**
-     * 获取当前的关联模型类的实例
-     * @access public
+     * 获取当前的关联模型类的实例.
+     *
      * @return Model
      */
     public function getModel(): Model
@@ -136,8 +146,8 @@ abstract class Relation
     }
 
     /**
-     * 当前关联是否为自关联
-     * @access public
+     * 当前关联是否为自关联.
+     *
      * @return bool
      */
     public function isSelfRelation(): bool
@@ -146,27 +156,29 @@ abstract class Relation
     }
 
     /**
-     * 封装关联数据集
-     * @access public
-     * @param  array $resultSet 数据集
-     * @param  Model $parent 父模型
+     * 封装关联数据集.
+     *
+     * @param array $resultSet 数据集
+     * @param Model $parent    父模型
+     *
      * @return mixed
      */
     protected function resultSetBuild(array $resultSet, Model $parent = null)
     {
-        return (new $this->model)->toCollection($resultSet)->setParent($parent);
+        return (new $this->model())->toCollection($resultSet)->setParent($parent);
     }
 
     protected function getQueryFields(string $model)
     {
         $fields = $this->query->getOptions('field');
+
         return $this->getRelationQueryFields($fields, $model);
     }
 
     protected function getRelationQueryFields($fields, string $model)
     {
         if (empty($fields) || '*' == $fields) {
-            return $model . '.*';
+            return $model.'.*';
         }
 
         if (is_string($fields)) {
@@ -175,7 +187,7 @@ abstract class Relation
 
         foreach ($fields as &$field) {
             if (!str_contains($field, '.')) {
-                $field = $model . '.' . $field;
+                $field = $model.'.'.$field;
             }
         }
 
@@ -186,26 +198,27 @@ abstract class Relation
     {
         foreach ($where as $key => &$val) {
             if (is_string($key)) {
-                $where[] = [!str_contains($key, '.') ? $relation . '.' . $key : $key, '=', $val];
+                $where[] = [!str_contains($key, '.') ? $relation.'.'.$key : $key, '=', $val];
                 unset($where[$key]);
             } elseif (isset($val[0]) && !str_contains($val[0], '.')) {
-                $val[0] = $relation . '.' . $val[0];
+                $val[0] = $relation.'.'.$val[0];
             }
         }
     }
 
     /**
      * 获取关联数据默认值
-     * @access protected
-     * @param  mixed $data 模型数据
+     *
+     * @param mixed $data 模型数据
+     *
      * @return mixed
      */
     protected function getDefaultModel($data)
     {
         if (is_array($data)) {
-            $model = (new $this->model)->data($data);
+            $model = (new $this->model())->data($data);
         } elseif ($data instanceof Closure) {
-            $model = new $this->model;
+            $model = new $this->model();
             $data($model);
         } else {
             $model = $data;
@@ -215,8 +228,8 @@ abstract class Relation
     }
 
     /**
-     * 执行基础查询（仅执行一次）
-     * @access protected
+     * 执行基础查询（仅执行一次）.
+     *
      * @return void
      */
     protected function baseQuery(): void
@@ -234,6 +247,6 @@ abstract class Relation
             return $result === $this->query ? $this : $result;
         }
 
-        throw new Exception('method not exists:' . __CLASS__ . '->' . $method);
+        throw new Exception('method not exists:'.__CLASS__.'->'.$method);
     }
 }

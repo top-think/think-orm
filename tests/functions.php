@@ -2,8 +2,6 @@
 
 namespace tests;
 
-use think\db\ConnectionInterface;
-use think\facade\Db;
 use function array_column;
 use function array_combine;
 use function array_map;
@@ -11,6 +9,8 @@ use function call_user_func;
 use function is_callable;
 use function is_int;
 use function sort;
+use think\db\ConnectionInterface;
+use think\facade\Db;
 
 function array_column_ex(array $arr, array $column, ?string $key = null): array
 {
@@ -25,6 +25,7 @@ function array_column_ex(array $arr, array $column, ?string $key = null): array
                 $item[$key] = $val[$index];
             }
         }
+
         return $item;
     }, $arr);
 
@@ -45,6 +46,7 @@ function array_value_sort(array $arr)
 function query_mysql_connection_id(ConnectionInterface $connect): int
 {
     $cid = $connect->query('SELECT CONNECTION_ID() as cid')[0]['cid'];
+
     return (int) $cid;
 }
 

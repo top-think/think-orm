@@ -1,4 +1,5 @@
 <?php
+
 // +----------------------------------------------------------------------
 // | ThinkPHP [ WE CAN DO IT JUST THINK ]
 // +----------------------------------------------------------------------
@@ -8,7 +9,7 @@
 // +----------------------------------------------------------------------
 // | Author: liu21st <liu21st@gmail.com>
 // +----------------------------------------------------------------------
-declare (strict_types = 1);
+declare(strict_types=1);
 
 namespace think\db;
 
@@ -20,44 +21,48 @@ use ArrayAccess;
 class Where implements ArrayAccess
 {
     /**
-     * 查询表达式
+     * 查询表达式.
+     *
      * @var array
      */
     protected $where = [];
 
     /**
-     * 是否需要把查询条件两边增加括号
+     * 是否需要把查询条件两边增加括号.
+     *
      * @var bool
      */
     protected $enclose = false;
 
     /**
-     * 创建一个查询表达式
+     * 创建一个查询表达式.
      *
-     * @param  array    $where      查询条件数组
-     * @param  bool     $enclose    是否增加括号
+     * @param array $where   查询条件数组
+     * @param bool  $enclose 是否增加括号
      */
     public function __construct(array $where = [], bool $enclose = false)
     {
-        $this->where   = $where;
+        $this->where = $where;
         $this->enclose = $enclose;
     }
 
     /**
-     * 设置是否添加括号
-     * @access public
-     * @param  bool $enclose
+     * 设置是否添加括号.
+     *
+     * @param bool $enclose
+     *
      * @return $this
      */
     public function enclose(bool $enclose = true)
     {
         $this->enclose = $enclose;
+
         return $this;
     }
 
     /**
-     * 解析为Query对象可识别的查询条件数组
-     * @access public
+     * 解析为Query对象可识别的查询条件数组.
+     *
      * @return array
      */
     public function parse(): array
@@ -80,15 +85,16 @@ class Where implements ArrayAccess
     }
 
     /**
-     * 分析查询表达式
-     * @access protected
-     * @param  string   $field     查询字段
-     * @param  array    $where     查询条件
+     * 分析查询表达式.
+     *
+     * @param string $field 查询字段
+     * @param array  $where 查询条件
+     *
      * @return array
      */
     protected function parseItem(string $field, array $where = []): array
     {
-        $op        = $where[0];
+        $op = $where[0];
         $condition = $where[1] ?? null;
 
         if (is_array($op)) {
@@ -115,9 +121,10 @@ class Where implements ArrayAccess
 
     /**
      * 修改器 设置数据对象的值
-     * @access public
-     * @param  string $name  名称
-     * @param  mixed  $value 值
+     *
+     * @param string $name  名称
+     * @param mixed  $value 值
+     *
      * @return void
      */
     public function __set($name, $value)
@@ -127,8 +134,9 @@ class Where implements ArrayAccess
 
     /**
      * 获取器 获取数据对象的值
-     * @access public
-     * @param  string $name 名称
+     *
+     * @param string $name 名称
+     *
      * @return mixed
      */
     public function __get($name)
@@ -138,8 +146,9 @@ class Where implements ArrayAccess
 
     /**
      * 检测数据对象的值
-     * @access public
-     * @param  string $name 名称
+     *
+     * @param string $name 名称
+     *
      * @return bool
      */
     public function __isset($name)
@@ -149,8 +158,9 @@ class Where implements ArrayAccess
 
     /**
      * 销毁数据对象的值
-     * @access public
-     * @param  string $name 名称
+     *
+     * @param string $name 名称
+     *
      * @return void
      */
     public function __unset($name)
@@ -178,5 +188,4 @@ class Where implements ArrayAccess
     {
         return $this->__get($name);
     }
-
 }

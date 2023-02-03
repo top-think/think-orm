@@ -1,4 +1,5 @@
 <?php
+
 // +----------------------------------------------------------------------
 // | ThinkPHP [ WE CAN DO IT JUST THINK ]
 // +----------------------------------------------------------------------
@@ -8,7 +9,7 @@
 // +----------------------------------------------------------------------
 // | Author: liu21st <liu21st@gmail.com>
 // +----------------------------------------------------------------------
-declare (strict_types = 1);
+declare(strict_types=1);
 
 namespace think\db\connector;
 
@@ -16,39 +17,40 @@ use PDO;
 use think\db\PDOConnection;
 
 /**
- * mysql数据库驱动
+ * mysql数据库驱动.
  */
 class Mysql extends PDOConnection
 {
-
     /**
-     * 解析pdo连接的dsn信息
-     * @access protected
-     * @param  array $config 连接信息
+     * 解析pdo连接的dsn信息.
+     *
+     * @param array $config 连接信息
+     *
      * @return string
      */
     protected function parseDsn(array $config): string
     {
         if (!empty($config['socket'])) {
-            $dsn = 'mysql:unix_socket=' . $config['socket'];
+            $dsn = 'mysql:unix_socket='.$config['socket'];
         } elseif (!empty($config['hostport'])) {
-            $dsn = 'mysql:host=' . $config['hostname'] . ';port=' . $config['hostport'];
+            $dsn = 'mysql:host='.$config['hostname'].';port='.$config['hostport'];
         } else {
-            $dsn = 'mysql:host=' . $config['hostname'];
+            $dsn = 'mysql:host='.$config['hostname'];
         }
-        $dsn .= ';dbname=' . $config['database'];
+        $dsn .= ';dbname='.$config['database'];
 
         if (!empty($config['charset'])) {
-            $dsn .= ';charset=' . $config['charset'];
+            $dsn .= ';charset='.$config['charset'];
         }
 
         return $dsn;
     }
 
     /**
-     * 取得数据表的字段信息
-     * @access public
-     * @param  string $tableName
+     * 取得数据表的字段信息.
+     *
+     * @param string $tableName
+     *
      * @return array
      */
     public function getFields(string $tableName): array
@@ -59,13 +61,13 @@ class Mysql extends PDOConnection
             if (str_contains($tableName, '.')) {
                 $tableName = str_replace('.', '`.`', $tableName);
             }
-            $tableName = '`' . $tableName . '`';
+            $tableName = '`'.$tableName.'`';
         }
 
-        $sql    = 'SHOW FULL COLUMNS FROM ' . $tableName;
-        $pdo    = $this->getPDOStatement($sql);
+        $sql = 'SHOW FULL COLUMNS FROM '.$tableName;
+        $pdo = $this->getPDOStatement($sql);
         $result = $pdo->fetchAll(PDO::FETCH_ASSOC);
-        $info   = [];
+        $info = [];
 
         if (!empty($result)) {
             foreach ($result as $key => $val) {
@@ -87,17 +89,18 @@ class Mysql extends PDOConnection
     }
 
     /**
-     * 取得数据库的表信息
-     * @access public
-     * @param  string $dbName
+     * 取得数据库的表信息.
+     *
+     * @param string $dbName
+     *
      * @return array
      */
     public function getTables(string $dbName = ''): array
     {
-        $sql    = !empty($dbName) ? 'SHOW TABLES FROM ' . $dbName : 'SHOW TABLES ';
-        $pdo    = $this->getPDOStatement($sql);
+        $sql = !empty($dbName) ? 'SHOW TABLES FROM '.$dbName : 'SHOW TABLES ';
+        $pdo = $this->getPDOStatement($sql);
         $result = $pdo->fetchAll(PDO::FETCH_ASSOC);
-        $info   = [];
+        $info = [];
 
         foreach ($result as $key => $val) {
             $info[$key] = current($val);
@@ -113,8 +116,9 @@ class Mysql extends PDOConnection
 
     /**
      * 启动XA事务
-     * @access public
-     * @param  string $xid XA事务id
+     *
+     * @param string $xid XA事务id
+     *
      * @return void
      */
     public function startTransXa(string $xid): void
@@ -125,8 +129,9 @@ class Mysql extends PDOConnection
 
     /**
      * 预编译XA事务
-     * @access public
-     * @param  string $xid XA事务id
+     *
+     * @param string $xid XA事务id
+     *
      * @return void
      */
     public function prepareXa(string $xid): void
@@ -138,8 +143,9 @@ class Mysql extends PDOConnection
 
     /**
      * 提交XA事务
-     * @access public
-     * @param  string $xid XA事务id
+     *
+     * @param string $xid XA事务id
+     *
      * @return void
      */
     public function commitXa(string $xid): void
@@ -150,8 +156,9 @@ class Mysql extends PDOConnection
 
     /**
      * 回滚XA事务
-     * @access public
-     * @param  string $xid XA事务id
+     *
+     * @param string $xid XA事务id
+     *
      * @return void
      */
     public function rollbackXa(string $xid): void

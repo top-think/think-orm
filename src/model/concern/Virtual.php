@@ -1,4 +1,5 @@
 <?php
+
 // +----------------------------------------------------------------------
 // | ThinkPHP [ WE CAN DO IT JUST THINK ]
 // +----------------------------------------------------------------------
@@ -8,7 +9,7 @@
 // +----------------------------------------------------------------------
 // | Author: liu21st <liu21st@gmail.com>
 // +----------------------------------------------------------------------
-declare (strict_types = 1);
+declare(strict_types=1);
 
 namespace think\model\concern;
 
@@ -16,14 +17,15 @@ use think\db\BaseQuery as Query;
 use think\db\exception\DbException as Exception;
 
 /**
- * 虚拟模型
+ * 虚拟模型.
  */
 trait Virtual
 {
     /**
      * 获取当前模型的数据库查询对象
-     * @access public
+     *
      * @param array $scope 设置不使用的全局查询范围
+     *
      * @return Query
      */
     public function db($scope = []): Query
@@ -32,19 +34,22 @@ trait Virtual
     }
 
     /**
-     * 获取字段类型信息
-     * @access public
+     * 获取字段类型信息.
+     *
      * @param string $field 字段名
+     *
      * @return string|null
      */
     public function getFieldType(string $field)
-    {}
+    {
+    }
 
     /**
      * 保存当前数据对象
-     * @access public
+     *
      * @param array  $data     数据
      * @param string $sequence 自增序列名
+     *
      * @return bool
      */
     public function save(array $data = [], string $sequence = null): bool
@@ -65,8 +70,8 @@ trait Virtual
     }
 
     /**
-     * 删除当前的记录
-     * @access public
+     * 删除当前的记录.
+     *
      * @return bool
      */
     public function delete(): bool
@@ -86,5 +91,4 @@ trait Virtual
 
         return true;
     }
-
 }

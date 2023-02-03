@@ -1,4 +1,5 @@
 <?php
+
 // +----------------------------------------------------------------------
 // | ThinkPHP [ WE CAN DO IT JUST THINK ]
 // +----------------------------------------------------------------------
@@ -20,20 +21,21 @@ use think\contract\Jsonable;
 use think\db\BaseQuery as Query;
 
 /**
- * Class Model
- * @package think
+ * Class Model.
+ *
  * @mixin Query
- * @method void onAfterRead(Model $model) static after_read事件定义
- * @method mixed onBeforeInsert(Model $model) static before_insert事件定义
- * @method void onAfterInsert(Model $model) static after_insert事件定义
- * @method mixed onBeforeUpdate(Model $model) static before_update事件定义
- * @method void onAfterUpdate(Model $model) static after_update事件定义
- * @method mixed onBeforeWrite(Model $model) static before_write事件定义
- * @method void onAfterWrite(Model $model) static after_write事件定义
- * @method mixed onBeforeDelete(Model $model) static before_write事件定义
- * @method void onAfterDelete(Model $model) static after_delete事件定义
- * @method void onBeforeRestore(Model $model) static before_restore事件定义
- * @method void onAfterRestore(Model $model) static after_restore事件定义
+ *
+ * @method void  onAfterRead(Model $model)     static after_read事件定义
+ * @method mixed onBeforeInsert(Model $model)  static before_insert事件定义
+ * @method void  onAfterInsert(Model $model)   static after_insert事件定义
+ * @method mixed onBeforeUpdate(Model $model)  static before_update事件定义
+ * @method void  onAfterUpdate(Model $model)   static after_update事件定义
+ * @method mixed onBeforeWrite(Model $model)   static before_write事件定义
+ * @method void  onAfterWrite(Model $model)    static after_write事件定义
+ * @method mixed onBeforeDelete(Model $model)  static before_write事件定义
+ * @method void  onAfterDelete(Model $model)   static after_delete事件定义
+ * @method void  onBeforeRestore(Model $model) static before_restore事件定义
+ * @method void  onAfterRestore(Model $model)  static after_restore事件定义
  */
 abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonable
 {
@@ -44,111 +46,129 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
     use model\concern\Conversion;
 
     /**
-     * 数据是否存在
+     * 数据是否存在.
+     *
      * @var bool
      */
     private $exists = false;
 
     /**
-     * 是否强制更新所有数据
+     * 是否强制更新所有数据.
+     *
      * @var bool
      */
     private $force = false;
 
     /**
-     * 是否Replace
+     * 是否Replace.
+     *
      * @var bool
      */
     private $replace = false;
 
     /**
      * 数据表后缀
+     *
      * @var string
      */
     protected $suffix;
 
     /**
-     * 更新条件
+     * 更新条件.
+     *
      * @var array
      */
     private $updateWhere;
 
     /**
-     * 数据库配置
+     * 数据库配置.
+     *
      * @var string
      */
     protected $connection;
 
     /**
-     * 模型名称
+     * 模型名称.
+     *
      * @var string
      */
     protected $name;
 
     /**
      * 主键值
+     *
      * @var string
      */
     protected $key;
 
     /**
-     * 数据表名称
+     * 数据表名称.
+     *
      * @var string
      */
     protected $table;
 
     /**
      * 初始化过的模型.
+     *
      * @var array
      */
     protected static $initialized = [];
 
     /**
      * 软删除字段默认值
+     *
      * @var mixed
      */
     protected $defaultSoftDelete;
 
     /**
-     * 全局查询范围
+     * 全局查询范围.
+     *
      * @var array
      */
     protected $globalScope = [];
 
     /**
-     * 延迟保存信息
+     * 延迟保存信息.
+     *
      * @var bool
      */
     private $lazySave = false;
 
     /**
      * Db对象
+     *
      * @var DbManager
      */
     protected static $db;
 
     /**
-     * 容器对象的依赖注入方法
+     * 容器对象的依赖注入方法.
+     *
      * @var callable
      */
     protected static $invoker;
 
     /**
-     * 服务注入
+     * 服务注入.
+     *
      * @var Closure[]
      */
     protected static $maker = [];
 
     /**
-     * 方法注入
+     * 方法注入.
+     *
      * @var Closure[][]
      */
     protected static $macro = [];
 
     /**
-     * 设置服务注入
-     * @access public
+     * 设置服务注入.
+     *
      * @param Closure $maker
+     *
      * @return void
      */
     public static function maker(Closure $maker)
@@ -157,10 +177,11 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
     }
 
     /**
-     * 设置方法注入
-     * @access public
-     * @param string $method
+     * 设置方法注入.
+     *
+     * @param string  $method
      * @param Closure $closure
+     *
      * @return void
      */
     public static function macro(string $method, Closure $closure)
@@ -173,8 +194,9 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
 
     /**
      * 设置Db对象
-     * @access public
+     *
      * @param DbManager $db Db对象
+     *
      * @return void
      */
     public static function setDb(DbManager $db)
@@ -183,9 +205,10 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
     }
 
     /**
-     * 设置容器对象的依赖注入方法
-     * @access public
+     * 设置容器对象的依赖注入方法.
+     *
      * @param callable $callable 依赖注入方法
+     *
      * @return void
      */
     public static function setInvoker(callable $callable): void
@@ -194,16 +217,18 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
     }
 
     /**
-     * 调用反射执行模型方法 支持参数绑定
-     * @access public
+     * 调用反射执行模型方法 支持参数绑定.
+     *
      * @param mixed $method
-     * @param array $vars 参数
+     * @param array $vars   参数
+     *
      * @return mixed
      */
     public function invoke($method, array $vars = [])
     {
         if (self::$invoker) {
             $call = self::$invoker;
+
             return $call($method instanceof Closure ? $method : Closure::fromCallable([$this, $method]), $vars);
         }
 
@@ -211,8 +236,8 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
     }
 
     /**
-     * 架构函数
-     * @access public
+     * 架构函数.
+     *
      * @param array $data 数据
      */
     public function __construct(array $data = [])
@@ -248,8 +273,8 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
     }
 
     /**
-     * 获取当前模型名称
-     * @access public
+     * 获取当前模型名称.
+     *
      * @return string
      */
     public function getName(): string
@@ -258,11 +283,12 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
     }
 
     /**
-     * 创建新的模型实例
-     * @access public
-     * @param array $data       数据
-     * @param mixed $where      更新条件
-     * @param array $options    参数
+     * 创建新的模型实例.
+     *
+     * @param array $data    数据
+     * @param mixed $where   更新条件
+     * @param array $options 参数
+     *
      * @return Model
      */
     public function newInstance(array $data = [], $where = null, array $options = []): Model
@@ -291,9 +317,10 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
     }
 
     /**
-     * 设置模型的更新条件
-     * @access protected
+     * 设置模型的更新条件.
+     *
      * @param mixed $where 更新条件
+     *
      * @return void
      */
     protected function setUpdateWhere($where): void
@@ -302,20 +329,22 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
     }
 
     /**
-     * 设置当前模型的数据库连接
-     * @access public
+     * 设置当前模型的数据库连接.
+     *
      * @param string $connection 数据表连接标识
+     *
      * @return $this
      */
     public function setConnection(string $connection)
     {
         $this->connection = $connection;
+
         return $this;
     }
 
     /**
-     * 获取当前模型的数据库连接标识
-     * @access public
+     * 获取当前模型的数据库连接标识.
+     *
      * @return string
      */
     public function getConnection(): string
@@ -325,19 +354,21 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
 
     /**
      * 设置当前模型数据表的后缀
-     * @access public
+     *
      * @param string $suffix 数据表后缀
+     *
      * @return $this
      */
     public function setSuffix(string $suffix)
     {
         $this->suffix = $suffix;
+
         return $this;
     }
 
     /**
      * 获取当前模型的数据表后缀
-     * @access public
+     *
      * @return string
      */
     public function getSuffix(): string
@@ -347,19 +378,20 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
 
     /**
      * 获取当前模型的数据库查询对象
-     * @access public
+     *
      * @param array $scope 设置不使用的全局查询范围
+     *
      * @return Query
      */
     public function db($scope = []): Query
     {
         /** @var Query $query */
         $query = self::$db->connect($this->connection)
-            ->name($this->name . $this->suffix)
+            ->name($this->name.$this->suffix)
             ->pk($this->pk);
 
         if (!empty($this->table)) {
-            $query->table($this->table . $this->suffix);
+            $query->table($this->table.$this->suffix);
         }
 
         $query->model($this)
@@ -382,8 +414,8 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
     }
 
     /**
-     *  初始化模型
-     * @access private
+     *  初始化模型.
+     *
      * @return void
      */
     private function initialize(): void
@@ -395,8 +427,8 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
     }
 
     /**
-     * 初始化处理
-     * @access protected
+     * 初始化处理.
+     *
      * @return void
      */
     protected static function init()
@@ -412,20 +444,22 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
     }
 
     /**
-     * 更新是否强制写入数据 而不做比较（亦可用于软删除的强制删除）
-     * @access public
+     * 更新是否强制写入数据 而不做比较（亦可用于软删除的强制删除）.
+     *
      * @param bool $force
+     *
      * @return $this
      */
     public function force(bool $force = true)
     {
         $this->force = $force;
+
         return $this;
     }
 
     /**
-     * 判断force
-     * @access public
+     * 判断force.
+     *
      * @return bool
      */
     public function isForce(): bool
@@ -434,21 +468,24 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
     }
 
     /**
-     * 新增数据是否使用Replace
-     * @access public
+     * 新增数据是否使用Replace.
+     *
      * @param bool $replace
+     *
      * @return $this
      */
     public function replace(bool $replace = true)
     {
         $this->replace = $replace;
+
         return $this;
     }
 
     /**
-     * 刷新模型数据
-     * @access public
+     * 刷新模型数据.
+     *
      * @param bool $relation 是否刷新关联数据
+     *
      * @return $this
      */
     public function refresh(bool $relation = false)
@@ -467,20 +504,22 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
     }
 
     /**
-     * 设置数据是否存在
-     * @access public
+     * 设置数据是否存在.
+     *
      * @param bool $exists
+     *
      * @return $this
      */
     public function exists(bool $exists = true)
     {
         $this->exists = $exists;
+
         return $this;
     }
 
     /**
-     * 判断数据是否存在数据库
-     * @access public
+     * 判断数据是否存在数据库.
+     *
      * @return bool
      */
     public function isExists(): bool
@@ -489,8 +528,8 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
     }
 
     /**
-     * 判断模型是否为空
-     * @access public
+     * 判断模型是否为空.
+     *
      * @return bool
      */
     public function isEmpty(): bool
@@ -500,8 +539,9 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
 
     /**
      * 延迟保存当前数据对象
-     * @access public
+     *
      * @param array|bool $data 数据
+     *
      * @return void
      */
     public function lazySave(array|bool $data = []): void
@@ -515,9 +555,10 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
 
     /**
      * 保存当前数据对象
-     * @access public
+     *
      * @param array  $data     数据
      * @param string $sequence 自增序列名
+     *
      * @return bool
      */
     public function save(array $data = [], string $sequence = null): bool
@@ -547,8 +588,8 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
     }
 
     /**
-     * 检查数据是否允许写入
-     * @access protected
+     * 检查数据是否允许写入.
+     *
      * @return array
      */
     protected function checkAllowFields(): array
@@ -559,7 +600,7 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
                 $this->field = array_keys(array_merge($this->schema, $this->jsonType));
             } else {
                 $query = $this->db();
-                $table = $this->table ? $this->table . $this->suffix : $query->getTable();
+                $table = $this->table ? $this->table.$this->suffix : $query->getTable();
 
                 $this->field = $query->getConnection()->getTableFields($table);
             }
@@ -582,8 +623,8 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
     }
 
     /**
-     * 保存写入数据
-     * @access protected
+     * 保存写入数据.
+     *
      * @return bool
      */
     protected function updateData(): bool
@@ -657,9 +698,10 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
     }
 
     /**
-     * 新增写入数据
-     * @access protected
+     * 新增写入数据.
+     *
      * @param string $sequence 自增名
+     *
      * @return bool
      */
     protected function insertData(string $sequence = null): bool
@@ -723,8 +765,8 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
     }
 
     /**
-     * 获取当前的更新条件
-     * @access public
+     * 获取当前的更新条件.
+     *
      * @return mixed
      */
     public function getWhere()
@@ -751,18 +793,19 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
 
     /**
      * 保存多个数据到当前数据对象
-     * @access public
+     *
      * @param iterable $dataSet 数据
-     * @param boolean  $replace 是否自动识别更新和写入
-     * @return Collection
+     * @param bool     $replace 是否自动识别更新和写入
+     *
      * @throws \Exception
+     *
+     * @return Collection
      */
     public function saveAll(iterable $dataSet, bool $replace = true): Collection
     {
         $db = $this->db();
 
         $result = $db->transaction(function () use ($replace, $dataSet) {
-
             $pk = $this->getPk();
 
             if (is_string($pk) && $replace) {
@@ -787,8 +830,8 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
     }
 
     /**
-     * 删除当前的记录
-     * @access public
+     * 删除当前的记录.
+     *
      * @return bool
      */
     public function delete(): bool
@@ -821,12 +864,13 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
     }
 
     /**
-     * 写入数据
-     * @access public
+     * 写入数据.
+     *
      * @param array  $data       数据数组
      * @param array  $allowField 允许字段
      * @param bool   $replace    使用Replace
      * @param string $suffix     数据表后缀
+     *
      * @return static
      */
     public static function create(array $data, array $allowField = [], bool $replace = false, string $suffix = ''): Model
@@ -847,12 +891,13 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
     }
 
     /**
-     * 更新数据
-     * @access public
+     * 更新数据.
+     *
      * @param array  $data       数据数组
      * @param mixed  $where      更新条件
      * @param array  $allowField 允许字段
      * @param string $suffix     数据表后缀
+     *
      * @return static
      */
     public static function update(array $data, $where = [], array $allowField = [], string $suffix = '')
@@ -877,10 +922,11 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
     }
 
     /**
-     * 删除记录
-     * @access public
+     * 删除记录.
+     *
      * @param mixed $data  主键列表 支持闭包查询条件
      * @param bool  $force 是否强制删除
+     *
      * @return bool
      */
     public static function destroy($data, bool $force = false): bool
@@ -911,7 +957,7 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
     }
 
     /**
-     * 解序列化后处理
+     * 解序列化后处理.
      */
     public function __wakeup()
     {
@@ -920,9 +966,10 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
 
     /**
      * 修改器 设置数据对象的值
-     * @access public
+     *
      * @param string $name  名称
      * @param mixed  $value 值
+     *
      * @return void
      */
     public function __set(string $name, $value): void
@@ -932,8 +979,9 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
 
     /**
      * 获取器 获取数据对象的值
-     * @access public
+     *
      * @param string $name 名称
+     *
      * @return mixed
      */
     public function __get(string $name)
@@ -943,8 +991,9 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
 
     /**
      * 检测数据对象的值
-     * @access public
+     *
      * @param string $name 名称
+     *
      * @return bool
      */
     public function __isset(string $name): bool
@@ -954,8 +1003,9 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
 
     /**
      * 销毁数据对象的值
-     * @access public
+     *
      * @param string $name 名称
+     *
      * @return void
      */
     public function __unset(string $name): void
@@ -989,9 +1039,10 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
     }
 
     /**
-     * 设置不使用的全局查询范围
-     * @access public
+     * 设置不使用的全局查询范围.
+     *
      * @param array $scope 不启用的全局查询范围
+     *
      * @return Query
      */
     public static function withoutGlobalScope(array $scope = null): Query
@@ -1002,9 +1053,10 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
     }
 
     /**
-     * 切换后缀进行查询
-     * @access public
+     * 切换后缀进行查询.
+     *
      * @param string $suffix 切换的表后缀
+     *
      * @return Model
      */
     public static function suffix(string $suffix)
@@ -1016,9 +1068,10 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
     }
 
     /**
-     * 切换数据库连接进行查询
-     * @access public
+     * 切换数据库连接进行查询.
+     *
      * @param string $connection 数据库连接标识
+     *
      * @return Model
      */
     public static function connect(string $connection)
@@ -1050,8 +1103,7 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
     }
 
     /**
-     * 析构方法
-     * @access public
+     * 析构方法.
      */
     public function __destruct()
     {

@@ -195,32 +195,20 @@ abstract class Relation
     }
 
     /**
-     * 设置关联数据不存在的时候默认值
-     * @access public
-     * @param  mixed $data 默认值
-     * @return $this
-     */
-    public function withDefault($data = null)
-    {
-        $this->default = $data;
-        return $this;
-    }
-
-    /**
      * 获取关联数据默认值
      * @access protected
+     * @param  mixed $data 模型数据
      * @return mixed
      */
-    protected function getDefaultModel()
+    protected function getDefaultModel($data)
     {
-        if (is_array($this->default)) {
-            $model = (new $this->model)->data($this->default);
-        } elseif ($this->default instanceof Closure) {
-            $closure = $this->default;
+        if (is_array($data)) {
+            $model = (new $this->model)->data($data);
+        } elseif ($data instanceof Closure) {
             $model = new $this->model;
-            $closure($model);
+            $data($model);
         } else {
-            $model = $this->default;
+            $model = $data;
         }
 
         return $model;

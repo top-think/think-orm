@@ -73,7 +73,8 @@ class HasOne extends OneToOne
 
             $relationModel->setParent(clone $this->parent);
         } else {
-            $relationModel = $this->getDefaultModel();
+            $default = $this->query->getOptions('default_model');
+            $relationModel = $this->getDefaultModel($default);
         }
 
         return $relationModel;
@@ -219,6 +220,8 @@ class HasOne extends OneToOne
 
         if (!empty($range)) {
             $this->query->removeWhereField($foreignKey);
+            $default        = $this->query->getOptions('default_model');
+            $defaultModel   = $this->getDefaultModel($default);
 
             $data = $this->eagerlyWhere([
                 [$foreignKey, 'in', $range],
@@ -228,7 +231,7 @@ class HasOne extends OneToOne
             foreach ($resultSet as $result) {
                 // 关联模型
                 if (!isset($data[$result->$localKey])) {
-                    $relationModel = $this->getDefaultModel();
+                    $relationModel = $defaultModel;
                 } else {
                     $relationModel = $data[$result->$localKey];
                     $relationModel->setParent(clone $result);
@@ -269,7 +272,8 @@ class HasOne extends OneToOne
 
         // 关联模型
         if (!isset($data[$result->$localKey])) {
-            $relationModel = $this->getDefaultModel();
+            $default       = $this->query->getOptions('default_model');
+            $relationModel = $this->getDefaultModel($default);
         } else {
             $relationModel = $data[$result->$localKey];
             $relationModel->setParent(clone $result);

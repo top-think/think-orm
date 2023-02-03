@@ -177,7 +177,8 @@ trait ModelRelationQuery
     }
 
     /**
-     * 限制关联数据的字段
+     * 限制关联数据的字段 已废弃直接使用field或withoutfield替代
+     * @deprecated 
      * @access public
      * @param  array|string $field 关联字段限制
      * @return $this
@@ -188,7 +189,8 @@ trait ModelRelationQuery
     }
 
     /**
-     * 限制关联数据的数量
+     * 限制关联数据的数量 已废弃直接使用limit替代
+     * @deprecated
      * @access public
      * @param  int $limit 关联数量限制
      * @return $this
@@ -206,7 +208,7 @@ trait ModelRelationQuery
      */
     public function withDefault($data = null)
     {
-        $this->model->withDefault($data);
+        $this->options['default_model'] = $data;
         return $this;
     }
 

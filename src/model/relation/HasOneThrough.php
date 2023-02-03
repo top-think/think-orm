@@ -41,7 +41,8 @@ class HasOneThrough extends HasManyThrough
         if ($relationModel) {
             $relationModel->setParent(clone $this->parent);
         } else {
-            $relationModel = $this->getDefaultModel();
+            $default       = $this->query->getOptions('default_model');
+            $relationModel = $this->getDefaultModel($default);
         }
 
         return $relationModel;
@@ -72,6 +73,8 @@ class HasOneThrough extends HasManyThrough
 
         if (!empty($range)) {
             $this->query->removeWhereField($foreignKey);
+            $default        = $this->query->getOptions('default_model');
+            $defaultModel   = $this->getDefaultModel($default);
 
             $data = $this->eagerlyWhere([
                 [$this->foreignKey, 'in', $range],
@@ -81,7 +84,7 @@ class HasOneThrough extends HasManyThrough
             foreach ($resultSet as $result) {
                 // 关联模型
                 if (!isset($data[$result->$localKey])) {
-                    $relationModel = $this->getDefaultModel();
+                    $relationModel = $defaultModel;
                 } else {
                     $relationModel = $data[$result->$localKey];
                     $relationModel->setParent(clone $result);
@@ -117,7 +120,8 @@ class HasOneThrough extends HasManyThrough
 
         // 关联模型
         if (!isset($data[$result->$localKey])) {
-            $relationModel = $this->getDefaultModel();
+            $default       = $this->query->getOptions('default_model');
+            $relationModel = $this->getDefaultModel($default);
         } else {
             $relationModel = $data[$result->$localKey];
             $relationModel->setParent(clone $result);

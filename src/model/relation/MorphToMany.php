@@ -246,7 +246,7 @@ class MorphToMany extends BelongsToMany
 
         $withLimit = $this->query->getOptions('limit');
         if ($withLimit) {
-            $this->query->removeOption('limit');            
+            $this->query->removeOption('limit');
         }
 
         // 预载入关联查询 支持嵌套预载入
@@ -300,10 +300,10 @@ class MorphToMany extends BelongsToMany
                 $model = new $this->model;
                 $id    = $model->insertGetId($data);
             }
-        } else if (is_numeric($data) || is_string($data)) {
+        } elseif (is_numeric($data) || is_string($data)) {
             // 根据关联表主键直接写入中间表
             $id = $data;
-        } else if ($data instanceof Model) {
+        } elseif ($data instanceof Model) {
             // 根据关联表主键直接写入中间表
             $id = $data->getKey();
         }
@@ -371,10 +371,10 @@ class MorphToMany extends BelongsToMany
     {
         if (is_array($data)) {
             $id = $data;
-        } else if (is_numeric($data) || is_string($data)) {
+        } elseif (is_numeric($data) || is_string($data)) {
             // 根据关联表主键直接写入中间表
             $id = $data;
-        } else if ($data instanceof Model) {
+        } elseif ($data instanceof Model) {
             // 根据关联表主键直接写入中间表
             $id = $data->getKey();
         }
@@ -441,7 +441,7 @@ class MorphToMany extends BelongsToMany
             if (!in_array($id, $current)) {
                 $this->attach($id, $attributes);
                 $changes['attached'][] = $id;
-            } else if (count($attributes) > 0 && $this->attach($id, $attributes)) {
+            } elseif (count($attributes) > 0 && $this->attach($id, $attributes)) {
                 $changes['updated'][] = $id;
             }
         }
@@ -481,7 +481,7 @@ class MorphToMany extends BelongsToMany
     {
         if (is_array($map)) {
             static::$morphMap = $merge && static::$morphMap
-            ? $map+static::$morphMap : $map;
+            ? $map + static::$morphMap : $map;
         }
 
         return static::$morphMap;

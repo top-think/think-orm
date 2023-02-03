@@ -17,7 +17,8 @@ class DbTransactionTest extends Base
     public static function setUpBeforeClass(): void
     {
         Db::execute('DROP TABLE IF EXISTS `test_tran_a`;');
-        Db::execute(<<<SQL
+        Db::execute(
+            <<<SQL
 CREATE TABLE `test_tran_a` (
      `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
      `type` tinyint(4) NOT NULL DEFAULT '0',

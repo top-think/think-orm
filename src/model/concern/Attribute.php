@@ -15,7 +15,6 @@ namespace think\model\concern;
 use InvalidArgumentException;
 use think\db\Raw;
 use think\helper\Str;
-use think\Model;
 use think\model\Relation;
 
 /**
@@ -448,6 +447,7 @@ trait Attribute
                 break;
             case 'array':
                 $value = (array) $value;
+                // no break
             case 'json':
                 $option = !empty($param) ? (int) $param : JSON_UNESCAPED_UNICODE;
                 $value  = json_encode($value, $option);

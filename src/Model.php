@@ -994,7 +994,7 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
      * @param array $scope 不启用的全局查询范围
      * @return Query
      */
-    public static function withoutGlobalScope(array $scope = null)
+    public static function withoutGlobalScope(array $scope = null): Query
     {
         $model = new static();
 

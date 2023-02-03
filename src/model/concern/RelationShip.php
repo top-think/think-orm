@@ -152,9 +152,8 @@ trait RelationShip
                 [$relation, $subRelation] = explode('.', $relation, 2);
             }
 
-            $method       = Str::camel($relation);
-            $relationName = Str::snake($relation);
-
+            $method         = Str::camel($relation);
+            $relationName   = Str::snake($relation);
             $relationResult = $this->$method();
 
             if (isset($withRelationAttr[$relationName])) {

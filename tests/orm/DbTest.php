@@ -23,7 +23,8 @@ class DbTest extends Base
     public static function setUpBeforeClass(): void
     {
         Db::execute('DROP TABLE IF EXISTS `test_user`;');
-        Db::execute(<<<SQL
+        Db::execute(
+            <<<SQL
 CREATE TABLE `test_user` (
      `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
      `type` tinyint(4) NOT NULL DEFAULT '0',

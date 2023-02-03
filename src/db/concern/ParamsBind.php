@@ -88,7 +88,7 @@ trait ParamsBind
             $autoBind = $this->getOptions('auto_bind');
         }
 
-        return (bool)$autoBind;            
+        return (bool) $autoBind;
     }
 
     /**

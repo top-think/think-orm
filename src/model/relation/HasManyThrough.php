@@ -262,7 +262,7 @@ class HasManyThrough extends Relation
 
         $withLimit = $this->query->getOptions('limit');
         if ($withLimit) {
-            $this->query->removeOption('limit');            
+            $this->query->removeOption('limit');
         }
 
         $list = $this->query

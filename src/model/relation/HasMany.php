@@ -15,7 +15,6 @@ namespace think\model\relation;
 use Closure;
 use think\Collection;
 use think\db\BaseQuery as Query;
-use think\helper\Str;
 use think\Model;
 use think\model\Relation;
 
@@ -208,7 +207,7 @@ class HasMany extends Relation
 
         $withLimit = $this->query->getOptions('limit');
         if ($withLimit) {
-            $this->query->removeOption('limit');            
+            $this->query->removeOption('limit');
         }
 
         $list = $this->query
@@ -220,7 +219,6 @@ class HasMany extends Relation
         // 组装模型数据
         $data      = [];
         
-
         foreach ($list as $set) {
             $key = $set->$foreignKey;
 

@@ -348,7 +348,7 @@ class BelongsToMany extends Relation
 
         $withLimit = $this->query->getOptions('limit');
         if ($withLimit) {
-            $this->query->removeOption('limit');            
+            $this->query->removeOption('limit');
         }
 
         // 预载入关联查询 支持嵌套预载入

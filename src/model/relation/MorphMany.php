@@ -15,7 +15,6 @@ use Closure;
 use think\Collection;
 use think\db\BaseQuery as Query;
 use think\db\exception\DbException as Exception;
-use think\helper\Str;
 use think\Model;
 use think\model\Relation;
 
@@ -256,7 +255,7 @@ class MorphMany extends Relation
 
         $withLimit = $this->query->getOptions('limit');
         if ($withLimit) {
-            $this->query->removeOption('limit');            
+            $this->query->removeOption('limit');
         }
 
         $list = $this->query

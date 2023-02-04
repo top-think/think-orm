@@ -198,6 +198,15 @@ interface ConnectionInterface
      */
     public function rollback();
 
+        /**
+     * 取得数据表的字段信息.
+     *
+     * @param string $tableName
+     *
+     * @return array
+     */
+    public function getTableFields(string $tableName): array;
+
     /**
      * 获取最近一次查询的sql语句.
      *

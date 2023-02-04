@@ -106,7 +106,7 @@ class CacheItem
      *
      * @return string|array
      */
-    public function getTag(): string|array
+    public function getTag()
     {
         return $this->tag;
     }

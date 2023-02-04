@@ -313,7 +313,7 @@ trait Attribute
 
         if (array_key_exists($fieldName, $this->data)) {
             return $this->data[$fieldName];
-        } 
+        }
 
         if (array_key_exists($fieldName, $this->relation)) {
             return $this->relation[$fieldName];

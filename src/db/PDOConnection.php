@@ -1271,7 +1271,7 @@ abstract class PDOConnection extends Connection
             $field[] = $key;
         }
 
-        $query->setOption('field', $field);
+        $query->setOption('field', (array)$field);
 
         if (!empty($options['cache'])) {
             // 判断查询缓存

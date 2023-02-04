@@ -59,11 +59,11 @@ class Pgsql extends PDOConnection
     public function getFields(string $tableName): array
     {
         [$tableName] = explode(' ', $tableName);
-        $sql = 'select fields_name as "field",fields_type as "type",fields_not_null as "null",fields_key_name as "key",fields_default as "default",fields_default as "extra" from table_msg(\'' . $tableName . '\');';
 
-        $pdo = $this->getPDOStatement($sql);
+        $sql    = 'select fields_name as "field",fields_type as "type",fields_not_null as "null",fields_key_name as "key",fields_default as "default",fields_default as "extra" from table_msg(\'' . $tableName . '\');';
+        $pdo    = $this->getPDOStatement($sql);
         $result = $pdo->fetchAll(PDO::FETCH_ASSOC);
-        $info = [];
+        $info   = [];
 
         if (!empty($result)) {
             foreach ($result as $key => $val) {
@@ -92,10 +92,10 @@ class Pgsql extends PDOConnection
      */
     public function getTables(string $dbName = ''): array
     {
-        $sql = "select tablename as Tables_in_test from pg_tables where  schemaname ='public'";
-        $pdo = $this->getPDOStatement($sql);
+        $sql    = "select tablename as Tables_in_test from pg_tables where  schemaname ='public'";
+        $pdo    = $this->getPDOStatement($sql);
         $result = $pdo->fetchAll(PDO::FETCH_ASSOC);
-        $info = [];
+        $info   = [];
 
         foreach ($result as $key => $val) {
             $info[$key] = current($val);

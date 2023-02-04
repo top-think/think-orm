@@ -52,11 +52,11 @@ class Oracle extends Builder
      * 设置锁机制.
      *
      * @param Query      $query 查询对象
-     * @param bool|false $lock
+     * @param bool|string $lock
      *
      * @return string
      */
-    protected function parseLock(Query $query, $lock = false): string
+    protected function parseLock(Query $query, bool|string $lock = false): string
     {
         if (!$lock) {
             return '';
@@ -69,14 +69,14 @@ class Oracle extends Builder
      * 字段和表名处理.
      *
      * @param Query  $query  查询对象
-     * @param string $key
+     * @param string|int|Raw $key
      * @param bool   $strict
      *
      * @throws Exception
      *
      * @return string
      */
-    public function parseKey(Query $query, $key, bool $strict = false): string
+    public function parseKey(Query $query, string|int|Raw $key, bool $strict = false): string
     {
         if (is_int($key)) {
             return (string) $key;

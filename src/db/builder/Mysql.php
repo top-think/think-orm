@@ -161,10 +161,8 @@ class Mysql extends Builder
      */
     public function insertAll(Query $query, array $dataSet, bool $replace = false): string
     {
-        $options = $query->getOptions();
-
-        // 获取绑定信息
-        $bind = $query->getFieldsBindType();
+        $options    = $query->getOptions();
+        $bind       = $query->getFieldsBindType();
 
         // 获取合法的字段
         if (empty($options['field']) || '*' == $options['field']) {
@@ -215,9 +213,8 @@ class Mysql extends Builder
      */
     public function update(Query $query): string
     {
-        $options = $query->getOptions();
-
-        $data = $this->parseData($query, $options['data']);
+        $options    = $query->getOptions();
+        $data       = $this->parseData($query, $options['data']);
 
         if (empty($data)) {
             return '';

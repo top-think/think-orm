@@ -115,12 +115,12 @@ class Sqlsrv extends Builder
      * 字段和表名处理.
      *
      * @param Query $query  查询对象
-     * @param mixed $key    字段名
+     * @param string|int|Raw $key    字段名
      * @param bool  $strict 严格检测
      *
      * @return string
      */
-    public function parseKey(Query $query, $key, bool $strict = false): string
+    public function parseKey(Query $query, string|int|Raw $key, bool $strict = false): string
     {
         if (is_int($key)) {
             return (string) $key;

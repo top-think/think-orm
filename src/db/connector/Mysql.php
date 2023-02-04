@@ -64,10 +64,10 @@ class Mysql extends PDOConnection
             $tableName = '`' . $tableName . '`';
         }
 
-        $sql = 'SHOW FULL COLUMNS FROM ' . $tableName;
-        $pdo = $this->getPDOStatement($sql);
+        $sql    = 'SHOW FULL COLUMNS FROM ' . $tableName;
+        $pdo    = $this->getPDOStatement($sql);
         $result = $pdo->fetchAll(PDO::FETCH_ASSOC);
-        $info = [];
+        $info   = [];
 
         if (!empty($result)) {
             foreach ($result as $key => $val) {
@@ -97,10 +97,10 @@ class Mysql extends PDOConnection
      */
     public function getTables(string $dbName = ''): array
     {
-        $sql = !empty($dbName) ? 'SHOW TABLES FROM ' . $dbName : 'SHOW TABLES ';
-        $pdo = $this->getPDOStatement($sql);
+        $sql    = !empty($dbName) ? 'SHOW TABLES FROM ' . $dbName : 'SHOW TABLES ';
+        $pdo    = $this->getPDOStatement($sql);
         $result = $pdo->fetchAll(PDO::FETCH_ASSOC);
-        $info = [];
+        $info   = [];
 
         foreach ($result as $key => $val) {
             $info[$key] = current($val);

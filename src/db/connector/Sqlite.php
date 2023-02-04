@@ -44,11 +44,11 @@ class Sqlite extends PDOConnection
     public function getFields(string $tableName): array
     {
         [$tableName] = explode(' ', $tableName);
-        $sql = 'PRAGMA table_info( \'' . $tableName . '\' )';
 
-        $pdo = $this->getPDOStatement($sql);
+        $sql    = 'PRAGMA table_info( \'' . $tableName . '\' )';
+        $pdo    = $this->getPDOStatement($sql);
         $result = $pdo->fetchAll(PDO::FETCH_ASSOC);
-        $info = [];
+        $info   = [];
 
         if (!empty($result)) {
             foreach ($result as $key => $val) {
@@ -81,9 +81,9 @@ class Sqlite extends PDOConnection
             . 'UNION ALL SELECT name FROM sqlite_temp_master '
             . "WHERE type='table' ORDER BY name";
 
-        $pdo = $this->getPDOStatement($sql);
+        $pdo    = $this->getPDOStatement($sql);
         $result = $pdo->fetchAll(PDO::FETCH_ASSOC);
-        $info = [];
+        $info   = [];
 
         foreach ($result as $key => $val) {
             $info[$key] = current($val);

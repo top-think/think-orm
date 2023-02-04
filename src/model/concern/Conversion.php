@@ -272,7 +272,7 @@ trait Conversion
 
             if (isset($this->mapping[$key])) {
                 // 检查字段映射
-                $mapName = $this->mapping[$key];
+                $mapName        = $this->mapping[$key];
                 $item[$mapName] = $item[$key];
                 unset($item[$key]);
             }
@@ -300,18 +300,18 @@ trait Conversion
     {
         if (is_array($name)) {
             // 追加关联对象属性
-            $relation = $this->getRelation($key, true);
+            $relation   = $this->getRelation($key, true);
             $item[$key] = $relation ? $relation->append($name)
                 ->toArray() : [];
         } elseif (str_contains($name, '.')) {
             [$key, $attr] = explode('.', $name);
             // 追加关联对象属性
-            $relation = $this->getRelation($key, true);
+            $relation   = $this->getRelation($key, true);
             $item[$key] = $relation ? $relation->append([$attr])
                 ->toArray() : [];
         } else {
-            $value = $this->getAttr($name);
-            $item[$name] = $value;
+            $value          = $this->getAttr($name);
+            $item[$name]    = $value;
 
             $this->getBindAttrValue($name, $value, $item);
         }

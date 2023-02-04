@@ -106,7 +106,7 @@ class CacheItem
      *
      * @return string|array
      */
-    public function getTag()
+    public function getTag(): string|array
     {
         return $this->tag;
     }
@@ -189,13 +189,9 @@ class CacheItem
      *
      * @return $this
      */
-    public function expiresAt($expiration)
+    public function expiresAt(DateTimeInterface $expiration)
     {
-        if ($expiration instanceof DateTimeInterface) {
-            $this->expire = $expiration;
-        } else {
-            throw new InvalidArgumentException('not support datetime');
-        }
+        $this->expire = $expiration;
 
         return $this;
     }

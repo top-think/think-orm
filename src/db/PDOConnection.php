@@ -1245,7 +1245,7 @@ abstract class PDOConnection extends Connection
      *
      * @return array
      */
-    public function column(BaseQuery $query, $column, string $key = ''): array
+    public function column(BaseQuery $query, string|array $column, string $key = ''): array
     {
         $options = $query->parseOptions();
 
@@ -1257,21 +1257,17 @@ abstract class PDOConnection extends Connection
             $key = null;
         }
 
-        if (\is_string($column)) {
-            $column = \trim($column);
+        if (is_string($column)) {
+            $column = trim($column);
             if ('*' !== $column) {
-                $column = \array_map('\trim', \explode(',', $column));
+                $column = array_map('trim', explode(',', $column));
             }
-        } elseif (\is_array($column)) {
-            if (\in_array('*', $column)) {
-                $column = '*';
-            }
-        } else {
-            throw new DbException('not support type');
+        } elseif (in_array('*', $column)) {
+            $column = '*';
         }
 
         $field = $column;
-        if ('*' !== $column && $key && !\in_array($key, $column)) {
+        if ('*' !== $column && $key && !in_array($key, $column)) {
             $field[] = $key;
         }
 

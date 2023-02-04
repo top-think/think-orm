@@ -166,7 +166,7 @@ interface ConnectionInterface
      *
      * @return array
      */
-    public function column(BaseQuery $query, $column, string $key = ''): array;
+    public function column(BaseQuery $query, string|array $column, string $key = ''): array;
 
     /**
      * 执行数据库事务
@@ -213,4 +213,14 @@ interface ConnectionInterface
      * @return string
      */
     public function getLastSql(): string;
+
+    /**
+     * 获取最近插入的ID.
+     *
+     * @param BaseQuery $query    查询对象
+     * @param string    $sequence 自增序列名
+     *
+     * @return mixed
+     */
+    public function getLastInsID(BaseQuery $query, string $sequence = null);    
 }

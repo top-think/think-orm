@@ -22,13 +22,6 @@ use think\helper\Str;
 class Fetch
 {
     /**
-     * 查询对象
-     *
-     * @var Query
-     */
-    protected $query;
-
-    /**
      * Connection对象
      *
      * @var Connection
@@ -47,9 +40,8 @@ class Fetch
      *
      * @param Query $query 查询对象
      */
-    public function __construct(Query $query)
+    public function __construct(protected Query $query)
     {
-        $this->query = $query;
         $this->connection = $query->getConnection();
         $this->builder = $this->connection->getBuilder();
     }
@@ -342,11 +334,11 @@ class Fetch
      *
      * @return string
      */
-    public function select($data = null): string
+    public function select(array $data = []): string
     {
         $this->query->parseOptions();
 
-        if (!is_null($data)) {
+        if (!empty($data)) {
             // 主键条件分析
             $this->query->parsePkWhere($data);
         }

@@ -198,7 +198,7 @@ interface ConnectionInterface
      */
     public function rollback();
 
-        /**
+    /**
      * 取得数据表的字段信息.
      *
      * @param string $tableName
@@ -222,5 +222,5 @@ interface ConnectionInterface
      *
      * @return mixed
      */
-    public function getLastInsID(BaseQuery $query, string $sequence = null);    
+    public function getLastInsID(BaseQuery $query, string $sequence = null);
 }

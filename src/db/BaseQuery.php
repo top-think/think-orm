@@ -19,7 +19,6 @@ use think\db\exception\DataNotFoundException;
 use think\db\exception\DbException as Exception;
 use think\db\exception\ModelNotFoundException;
 use think\helper\Str;
-use think\Model;
 use think\Paginator;
 
 /**
@@ -544,7 +543,7 @@ abstract class BaseQuery
         } elseif (is_array($table)) {
             $table = $this->tableArr($table);
         } else {
-            $table = (array)$table;
+            $table = (array) $table;
         }
 
         $this->options['table'] = $table;
@@ -582,7 +581,7 @@ abstract class BaseQuery
                 }
             }
         }
-        return (array)$table;
+        return (array) $table;
     }
 
     /**

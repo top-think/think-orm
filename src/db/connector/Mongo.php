@@ -775,10 +775,11 @@ class Mongo extends Connection
      * 获取最近插入的ID.
      *
      * @param BaseQuery $query 查询对象
+     * @param string    $sequence 自增序列名
      *
      * @return mixed
      */
-    public function getLastInsID(BaseQuery $query)
+    public function getLastInsID(BaseQuery $query, string $sequence = null)
     {
         $id = $this->builder->getLastInsID();
 

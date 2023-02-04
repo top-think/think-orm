@@ -280,11 +280,11 @@ abstract class Builder
      * table分析.
      *
      * @param Query $query  查询对象
-     * @param array $tables 表名
+     * @param array|string $tables 表名
      *
      * @return string
      */
-    protected function parseTable(Query $query, $tables): string
+    protected function parseTable(Query $query, array|string $tables): string
     {
         $item = [];
         $options = $query->getOptions();

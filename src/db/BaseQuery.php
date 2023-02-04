@@ -542,8 +542,6 @@ abstract class BaseQuery
             $table = $this->tableStr($table);
         } elseif (is_array($table)) {
             $table = $this->tableArr($table);
-        } else {
-            $table = (array) $table;
         }
 
         $this->options['table'] = $table;
@@ -555,11 +553,12 @@ abstract class BaseQuery
      *
      * @param string $table 表名
      *
-     * @return array
+     * @return array|string
      */
-    protected function tableStr(string $table): array
+    protected function tableStr(string $table): array|string
     {
         if (!str_contains($table, ',')) {
+            // 单表
             if (str_contains($table, ' ')) {
                 [$item, $alias] = explode(' ', $table);
                 $table = [];
@@ -567,6 +566,7 @@ abstract class BaseQuery
                 $table[$item] = $alias;
             }
         } else {
+            // 多表
             $tables = explode(',', $table);
             $table = [];
 
@@ -581,7 +581,7 @@ abstract class BaseQuery
                 }
             }
         }
-        return (array) $table;
+        return $table;
     }
 
     /**

@@ -240,12 +240,7 @@ trait Attribute
             $data = $result;
         }
 
-        if ($set) {
-            // 数据对象赋值
-            $this->setAttrs($data);
-        } else {
-            $this->data = $data;
-        }
+        $this->appendData($data, $set);
 
         return $this;
     }
@@ -318,7 +313,9 @@ trait Attribute
 
         if (array_key_exists($fieldName, $this->data)) {
             return $this->data[$fieldName];
-        } elseif (array_key_exists($fieldName, $this->relation)) {
+        } 
+
+        if (array_key_exists($fieldName, $this->relation)) {
             return $this->relation[$fieldName];
         }
 
@@ -399,7 +396,6 @@ trait Attribute
 
         if (method_exists($this, $method)) {
             $array = $this->data;
-
             $value = $this->$method($value, array_merge($this->data, $data));
 
             if (is_null($value) && $array !== $this->data) {
@@ -409,6 +405,7 @@ trait Attribute
             // 类型转换
             $value = $this->writeTransform($value, $this->type[$name]);
         } elseif ($this->isRelationAttr($name)) {
+            // 关联属性
             $this->relation[$name] = $value;
         } elseif ((array_key_exists($name, $this->origin) || empty($this->origin)) && is_object($value) && method_exists($value, '__toString')) {
             // 对象类型
@@ -428,7 +425,7 @@ trait Attribute
      *
      * @return mixed
      */
-    protected function writeTransform($value, $type)
+    protected function writeTransform($value, string|array $type)
     {
         if (is_null($value)) {
             return;
@@ -617,7 +614,7 @@ trait Attribute
      *
      * @return mixed
      */
-    protected function readTransform($value, $type)
+    protected function readTransform($value, string|array $type)
     {
         if (is_null($value)) {
             return;
@@ -689,7 +686,7 @@ trait Attribute
      *
      * @return $this
      */
-    public function withAttr($name, callable $callback = null)
+    public function withAttr(string|array $name, callable $callback = null)
     {
         if (is_array($name)) {
             foreach ($name as $key => $val) {

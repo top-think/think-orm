@@ -65,11 +65,11 @@ class MorphTo extends Relation
      */
     public function __construct(Model $parent, string $morphType, string $morphKey, array $alias = [], string $relation = null)
     {
-        $this->parent = $parent;
-        $this->morphType = $morphType;
-        $this->morphKey = $morphKey;
-        $this->alias = $alias;
-        $this->relation = $relation;
+        $this->parent       = $parent;
+        $this->morphType    = $morphType;
+        $this->morphKey     = $morphKey;
+        $this->alias        = $alias;
+        $this->relation     = $relation;
     }
 
     /**
@@ -95,8 +95,8 @@ class MorphTo extends Relation
      */
     public function getRelation(array $subRelation = [], Closure $closure = null)
     {
-        $morphKey = $this->morphKey;
-        $morphType = $this->morphType;
+        $morphKey   = $this->morphKey;
+        $morphType  = $this->morphType;
 
         // 多态模型
         $model = $this->parseModel($this->parent->$morphType);
@@ -142,9 +142,7 @@ class MorphTo extends Relation
     public function hasWhere($where = [], $fields = null, string $joinType = '', Query $query = null)
     {
         $alias = class_basename($this->parent);
-
         $types = $this->parent->distinct()->column($this->morphType);
-
         $query = $query ?: $this->parent->db();
 
         return $query->alias($alias)
@@ -230,9 +228,9 @@ class MorphTo extends Relation
      */
     public function eagerlyResultSet(array &$resultSet, string $relation, array $subRelation, Closure $closure = null, array $cache = []): void
     {
-        $morphKey = $this->morphKey;
-        $morphType = $this->morphType;
-        $range = [];
+        $morphKey   = $this->morphKey;
+        $morphType  = $this->morphType;
+        $range      = [];
 
         foreach ($resultSet as $result) {
             // 获取关联外键列表
@@ -324,11 +322,10 @@ class MorphTo extends Relation
     protected function eagerlyMorphToOne(string $model, string $relation, Model $result, array $subRelation = [], array $cache = []): void
     {
         // 预载入关联查询 支持嵌套预载入
-        $pk = $this->parent->{$this->morphKey};
+        $pk     = $this->parent->{$this->morphKey};
+        $data   = null;
 
-        $data = null;
-
-        if (\class_exists($model)) {
+        if (class_exists($model)) {
             $data = (new $model())->with($subRelation)
                 ->cache($cache[0] ?? false, $cache[1] ?? null, $cache[2] ?? null)
                 ->find($pk);
@@ -352,9 +349,9 @@ class MorphTo extends Relation
      */
     public function associate(Model $model, string $type = ''): Model
     {
-        $morphKey = $this->morphKey;
-        $morphType = $this->morphType;
-        $pk = $model->getPk();
+        $morphKey   = $this->morphKey;
+        $morphType  = $this->morphType;
+        $pk         = $model->getPk();
 
         $this->parent->setAttr($morphKey, $model->$pk);
         $this->parent->setAttr($morphType, $type ?: get_class($model));
@@ -370,8 +367,8 @@ class MorphTo extends Relation
      */
     public function dissociate(): Model
     {
-        $morphKey = $this->morphKey;
-        $morphType = $this->morphType;
+        $morphKey   = $this->morphKey;
+        $morphType  = $this->morphType;
 
         $this->parent->setAttr($morphKey, null);
         $this->parent->setAttr($morphType, null);

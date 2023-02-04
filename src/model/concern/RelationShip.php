@@ -455,11 +455,11 @@ trait RelationShip
     public function belongsTo(string $model, string $foreignKey = '', string $localKey = ''): BelongsTo
     {
         // 记录当前关联信息
-        $model = $this->parseModel($model);
+        $model      = $this->parseModel($model);
         $foreignKey = $foreignKey ?: $this->getForeignKey((new $model())->getName());
-        $localKey = $localKey ?: (new $model())->getPk();
-        $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2);
-        $relation = Str::snake($trace[1]['function']);
+        $localKey   = $localKey ?: (new $model())->getPk();
+        $trace      = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2);
+        $relation   = Str::snake($trace[1]['function']);
 
         return new BelongsTo($this, $model, $foreignKey, $localKey, $relation);
     }
@@ -476,8 +476,8 @@ trait RelationShip
     public function hasMany(string $model, string $foreignKey = '', string $localKey = ''): HasMany
     {
         // 记录当前关联信息
-        $model = $this->parseModel($model);
-        $localKey = $localKey ?: $this->getPk();
+        $model      = $this->parseModel($model);
+        $localKey   = $localKey ?: $this->getPk();
         $foreignKey = $foreignKey ?: $this->getForeignKey($this->name);
 
         return new HasMany($this, $model, $foreignKey, $localKey);
@@ -498,12 +498,12 @@ trait RelationShip
     public function hasManyThrough(string $model, string $through, string $foreignKey = '', string $throughKey = '', string $localKey = '', string $throughPk = ''): HasManyThrough
     {
         // 记录当前关联信息
-        $model = $this->parseModel($model);
-        $through = $this->parseModel($through);
-        $localKey = $localKey ?: $this->getPk();
+        $model      = $this->parseModel($model);
+        $through    = $this->parseModel($through);
+        $localKey   = $localKey ?: $this->getPk();
         $foreignKey = $foreignKey ?: $this->getForeignKey($this->name);
         $throughKey = $throughKey ?: $this->getForeignKey((new $through())->getName());
-        $throughPk = $throughPk ?: (new $through())->getPk();
+        $throughPk  = $throughPk ?: (new $through())->getPk();
 
         return new HasManyThrough($this, $model, $through, $foreignKey, $throughKey, $localKey, $throughPk);
     }
@@ -523,12 +523,12 @@ trait RelationShip
     public function hasOneThrough(string $model, string $through, string $foreignKey = '', string $throughKey = '', string $localKey = '', string $throughPk = ''): HasOneThrough
     {
         // 记录当前关联信息
-        $model = $this->parseModel($model);
-        $through = $this->parseModel($through);
-        $localKey = $localKey ?: $this->getPk();
+        $model      = $this->parseModel($model);
+        $through    = $this->parseModel($through);
+        $localKey   = $localKey ?: $this->getPk();
         $foreignKey = $foreignKey ?: $this->getForeignKey($this->name);
         $throughKey = $throughKey ?: $this->getForeignKey((new $through())->getName());
-        $throughPk = $throughPk ?: (new $through())->getPk();
+        $throughPk  = $throughPk ?: (new $through())->getPk();
 
         return new HasOneThrough($this, $model, $through, $foreignKey, $throughKey, $localKey, $throughPk);
     }
@@ -546,11 +546,11 @@ trait RelationShip
     public function belongsToMany(string $model, string $middle = '', string $foreignKey = '', string $localKey = ''): BelongsToMany
     {
         // 记录当前关联信息
-        $model = $this->parseModel($model);
-        $name = Str::snake(class_basename($model));
-        $middle = $middle ?: Str::snake($this->name) . '_' . $name;
+        $model      = $this->parseModel($model);
+        $name       = Str::snake(class_basename($model));
+        $middle     = $middle ?: Str::snake($this->name) . '_' . $name;
         $foreignKey = $foreignKey ?: $name . '_id';
-        $localKey = $localKey ?: $this->getForeignKey($this->name);
+        $localKey   = $localKey ?: $this->getForeignKey($this->name);
 
         return new BelongsToMany($this, $model, $middle, $foreignKey, $localKey);
     }
@@ -647,9 +647,9 @@ trait RelationShip
 
         [$morphType, $morphKey] = $this->parseMorph($morph);
 
-        $model = $this->parseModel($model);
-        $name = Str::snake(class_basename($model));
-        $localKey = $localKey ?: $this->getForeignKey($name);
+        $model      = $this->parseModel($model);
+        $name       = Str::snake(class_basename($model));
+        $localKey   = $localKey ?: $this->getForeignKey($name);
 
         return new MorphToMany($this, $model, $middle, $morphType, $morphKey, $localKey);
     }
@@ -672,7 +672,7 @@ trait RelationShip
 
         [$morphType, $morphKey] = $this->parseMorph($morph);
 
-        $model = $this->parseModel($model);
+        $model      = $this->parseModel($model);
         $foreignKey = $foreignKey ?: $this->getForeignKey($this->name);
 
         return new MorphToMany($this, $model, $middle, $morphType, $morphKey, $foreignKey, true);
@@ -690,7 +690,7 @@ trait RelationShip
         if (is_array($morph)) {
             [$morphType, $foreignKey] = $morph;
         } else {
-            $morphType = $morph . '_type';
+            $morphType  = $morph . '_type';
             $foreignKey = $morph . '_id';
         }
 

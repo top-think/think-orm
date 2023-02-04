@@ -89,25 +89,6 @@ trait Conversion
     }
 
     /**
-     * 设置需要附加的输出属性.
-     *
-     * @param array $append 属性列表
-     * @param bool  $merge  是否合并
-     *
-     * @return $this
-     */
-    public function append(array $append = [], bool $merge = false)
-    {
-        if ($merge) {
-            $this->append = array_merge($this->append, $append);
-        } else {
-            $this->append = $append;
-        }
-
-        return $this;
-    }
-
-    /**
      * 设置输出层场景.
      *
      * @param string $scene 场景名称
@@ -157,6 +138,25 @@ trait Conversion
 
                 $this->data[$key] = $model->$attr;
             }
+        }
+
+        return $this;
+    }
+
+    /**
+     * 设置需要附加的输出属性.
+     *
+     * @param array $append 属性列表
+     * @param bool  $merge  是否合并
+     *
+     * @return $this
+     */
+    public function append(array $append = [], bool $merge = false)
+    {
+        if ($merge) {
+            $this->append = array_merge($this->append, $append);
+        } else {
+            $this->append = $append;
         }
 
         return $this;
@@ -296,7 +296,7 @@ trait Conversion
         return $item;
     }
 
-    protected function appendAttrToArray(array &$item, $key, $name)
+    protected function appendAttrToArray(array &$item, $key, array|string $name)
     {
         if (is_array($name)) {
             // 追加关联对象属性
@@ -363,8 +363,7 @@ trait Conversion
     }
 
     // JsonSerializable
-    #[\ReturnTypeWillChange]
-    public function jsonSerialize()
+    public function jsonSerialize(): mixed
     {
         return $this->toArray();
     }

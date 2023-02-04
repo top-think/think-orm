@@ -116,7 +116,7 @@ abstract class Paginator implements ArrayAccess, Countable, IteratorAggregate, J
 
         $this->options['path'] = '/' != $this->options['path'] ? rtrim($this->options['path'], '/') : $this->options['path'];
 
-        $this->simple = $simple;
+        $this->simple   = $simple;
         $this->listRows = $listRows;
 
         if (!$items instanceof Collection) {
@@ -124,14 +124,14 @@ abstract class Paginator implements ArrayAccess, Countable, IteratorAggregate, J
         }
 
         if ($simple) {
-            $this->currentPage = $this->setCurrentPage($currentPage);
-            $this->hasMore = count($items) > ($this->listRows);
-            $items = $items->slice(0, $this->listRows);
+            $this->currentPage  = $this->setCurrentPage($currentPage);
+            $this->hasMore      = count($items) > ($this->listRows);
+            $items              = $items->slice(0, $this->listRows);
         } else {
-            $this->total = $total;
-            $this->lastPage = (int) ceil($total / $listRows);
-            $this->currentPage = $this->setCurrentPage($currentPage);
-            $this->hasMore = $this->currentPage < $this->lastPage;
+            $this->total        = $total;
+            $this->lastPage     = (int) ceil($total / $listRows);
+            $this->currentPage  = $this->setCurrentPage($currentPage);
+            $this->hasMore      = $this->currentPage < $this->lastPage;
         }
         $this->items = $items;
     }
@@ -184,10 +184,10 @@ abstract class Paginator implements ArrayAccess, Countable, IteratorAggregate, J
 
         if (!str_contains($this->options['path'], '[PAGE]')) {
             $parameters = [$this->options['var_page'] => $page];
-            $path = $this->options['path'];
+            $path       = $this->options['path'];
         } else {
             $parameters = [];
-            $path = str_replace('[PAGE]', (string) $page, $this->options['path']);
+            $path       = str_replace('[PAGE]', (string) $page, $this->options['path']);
         }
 
         if (count($this->options['query']) > 0) {
@@ -443,7 +443,6 @@ abstract class Paginator implements ArrayAccess, Countable, IteratorAggregate, J
      * @return Traversable An instance of an object implementing <b>Iterator</b> or
      *                     <b>Traversable</b>
      */
-    #[\ReturnTypeWillChange]
     public function getIterator(): Traversable
     {
         return new ArrayIterator($this->items->all());
@@ -456,8 +455,7 @@ abstract class Paginator implements ArrayAccess, Countable, IteratorAggregate, J
      *
      * @return bool
      */
-    #[\ReturnTypeWillChange]
-    public function offsetExists($offset): bool
+    public function offsetExists(mixed $offset): bool
     {
         return $this->items->offsetExists($offset);
     }
@@ -469,8 +467,7 @@ abstract class Paginator implements ArrayAccess, Countable, IteratorAggregate, J
      *
      * @return mixed
      */
-    #[\ReturnTypeWillChange]
-    public function offsetGet($offset)
+    public function offsetGet(mixed $offset): mixed
     {
         return $this->items->offsetGet($offset);
     }
@@ -481,8 +478,7 @@ abstract class Paginator implements ArrayAccess, Countable, IteratorAggregate, J
      * @param mixed $offset
      * @param mixed $value
      */
-    #[\ReturnTypeWillChange]
-    public function offsetSet($offset, $value)
+    public function offsetSet(mixed $offset, mixed $value): void
     {
         $this->items->offsetSet($offset, $value);
     }
@@ -496,8 +492,7 @@ abstract class Paginator implements ArrayAccess, Countable, IteratorAggregate, J
      *
      * @since  5.0.0
      */
-    #[\ReturnTypeWillChange]
-    public function offsetUnset($offset)
+    public function offsetUnset(mixed $offset): void
     {
         $this->items->offsetUnset($offset);
     }
@@ -542,8 +537,7 @@ abstract class Paginator implements ArrayAccess, Countable, IteratorAggregate, J
     /**
      * Specify data which should be serialized to JSON.
      */
-    #[\ReturnTypeWillChange]
-    public function jsonSerialize()
+    public function jsonSerialize(): mixed
     {
         return $this->toArray();
     }

@@ -330,7 +330,7 @@ class Fetch
     /**
      * 查找记录 返回SQL.
      *
-     * @param mixed $data
+     * @param array $data
      *
      * @return string
      */

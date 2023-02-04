@@ -1295,7 +1295,7 @@ abstract class BaseQuery
 
         // 获取数据表
         if (empty($options['table'])) {
-            $options['table'] = (array) $this->getTable();
+            $options['table'] = $this->getTable();
         }
 
         if (!isset($options['where'])) {

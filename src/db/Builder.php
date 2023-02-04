@@ -289,7 +289,7 @@ abstract class Builder
         $item = [];
         $options = $query->getOptions();
 
-        foreach ((array)$tables as $key => $table) {
+        foreach ((array) $tables as $key => $table) {
             if ($table instanceof Raw) {
                 $item[] = $this->parseRaw($query, $table);
             } elseif (!is_numeric($key)) {

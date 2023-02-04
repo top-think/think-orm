@@ -1030,14 +1030,13 @@ abstract class PDOConnection extends Connection
      *
      * @param BaseQuery $query   查询对象
      * @param mixed     $dataSet 数据集
-     * @param int       $limit   每次写入数据限制
      *
      * @throws \Exception
      * @throws \Throwable
      *
      * @return int
      */
-    public function insertAll(BaseQuery $query, array $dataSet = [], int $limit = 0): int
+    public function insertAll(BaseQuery $query, array $dataSet = []): int
     {
         if (!is_array(reset($dataSet))) {
             return 0;
@@ -1045,6 +1044,12 @@ abstract class PDOConnection extends Connection
 
         $options = $query->parseOptions();
         $replace = !empty($options['replace']);
+
+        if (!empty($options['limit']) && is_numeric($options['limit'])) {
+            $limit = (int) $options['limit'];
+        }else{
+            $limit = 0;
+        }
 
         if (0 === $limit && count($dataSet) >= 5000) {
             $limit = 1000;

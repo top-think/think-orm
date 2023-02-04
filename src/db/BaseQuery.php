@@ -1116,11 +1116,11 @@ abstract class BaseQuery
             $dataSet = $this->options['data'] ?? [];
         }
 
-        if (empty($limit) && !empty($this->options['limit']) && is_numeric($this->options['limit'])) {
-            $limit = (int) $this->options['limit'];
+        if ($limit) {
+            $this->limit($limit);
         }
 
-        return $this->connection->insertAll($this, $dataSet, $limit);
+        return $this->connection->insertAll($this, $dataSet);
     }
 
     /**

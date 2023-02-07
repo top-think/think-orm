@@ -13,6 +13,8 @@ declare(strict_types=1);
 
 namespace think\db;
 
+use Stringable;
+
 /**
  * SQL Raw.
  */
@@ -21,12 +23,12 @@ class Raw
     /**
      * 创建一个查询表达式.
      *
-     * @param string $value
+     * @param string|Stringable $value
      * @param array  $bind
      *
      * @return void
      */
-    public function __construct(protected string $value, protected array $bind = [])
+    public function __construct(protected string|Stringable $value, protected array $bind = [])
     {
     }
 

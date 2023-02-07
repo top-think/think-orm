@@ -15,6 +15,7 @@ namespace think\db;
 
 use Closure;
 use PDO;
+use Stringable;
 use think\db\exception\DbException as Exception;
 
 /**
@@ -535,7 +536,7 @@ abstract class Builder
         }
 
         if ($value instanceof Raw) {
-        } elseif (is_object($value) && method_exists($value, '__toString')) {
+        } elseif ($value instanceof Stringable) {
             // 对象数据写入
             $value = $value->__toString();
         }
@@ -971,8 +972,8 @@ abstract class Builder
      */
     protected function parseRaw(Query $query, Raw $raw): string
     {
-        $sql = $raw->getValue();
-        $bind = $raw->getBind();
+        $sql    = $raw->getValue();
+        $bind   = $raw->getBind();
 
         if ($bind) {
             $query->bindParams($sql, $bind);

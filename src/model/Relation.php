@@ -23,7 +23,7 @@ use think\Model;
  *
  * @mixin Query
  */
-abstract class Relation
+abstract class Relation 
 {
     /**
      * 父模型对象

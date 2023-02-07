@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace think\model\concern;
 
 use InvalidArgumentException;
+use Stringable;
 use think\db\Raw;
 use think\helper\Str;
 use think\model\Relation;
@@ -407,7 +408,7 @@ trait Attribute
         } elseif ($this->isRelationAttr($name)) {
             // 关联属性
             $this->relation[$name] = $value;
-        } elseif ((array_key_exists($name, $this->origin) || empty($this->origin)) && is_object($value) && method_exists($value, '__toString')) {
+        } elseif ((array_key_exists($name, $this->origin) || empty($this->origin)) && $value instanceof Stringable) {
             // 对象类型
             $value = $value->__toString();
         }
@@ -480,7 +481,7 @@ trait Attribute
                 $value = serialize($value);
                 break;
             default:
-                if (is_object($value) && str_contains($type, '\\') && method_exists($value, '__toString')) {
+                if ($value instanceof Stringable && str_contains($type, '\\')) {
                     // 对象类型
                     $value = $value->__toString();
                 }

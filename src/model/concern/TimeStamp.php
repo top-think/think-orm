@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace think\model\concern;
 
 use DateTime;
+use Stringable;
 
 /**
  * 自动时间戳.
@@ -168,7 +169,7 @@ trait TimeStamp
                 if (str_contains($type, '\\')) {
                     // 对象数据写入
                     $obj = new $type();
-                    if (method_exists($obj, '__toString')) {
+                    if ($obj instanceof Stringable) {
                         // 对象数据写入
                         $value = $obj->__toString();
                     }

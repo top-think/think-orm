@@ -1246,6 +1246,8 @@ abstract class PDOConnection extends Connection
                 [$alias, $column] = \explode('.', $column);
             }
 
+            $column = $this->builder->parseKey($query, $column);
+
             $result = \array_column($resultSet, $column, $key);
         } elseif ($key) {
             $result = \array_column($resultSet, null, $key);

@@ -1192,8 +1192,10 @@ abstract class PDOConnection extends Connection
             if ('*' !== $column) {
                 $column = array_map('trim', explode(',', $column));
             }
-        } elseif (is_array($column) && in_array('*', $column)) {
-            $column = '*';
+        } elseif (is_array($column)) {
+            if (in_array('*', $column)) {
+                $column = '*';
+            }
         } else {
             throw new DbException('not support type');
         }

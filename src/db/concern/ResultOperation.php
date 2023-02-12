@@ -224,7 +224,7 @@ trait ResultOperation
      *
      * @return array|Collection|static[]
      */
-    public function selectOrFail($data = null)
+    public function selectOrFail($data = [])
     {
         return $this->failException(true)->select($data);
     }

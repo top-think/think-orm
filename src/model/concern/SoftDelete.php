@@ -145,15 +145,15 @@ trait SoftDelete
 
         if (is_array($data) && key($data) !== 0) {
             $query->where($data);
-            $data = null;
+            $data = [];
         } elseif ($data instanceof \Closure) {
             call_user_func_array($data, [&$query]);
-            $data = null;
+            $data = [];
         } elseif (is_null($data)) {
             return false;
         }
 
-        $resultSet = $query->select($data);
+        $resultSet = $query->select((array) $data);
 
         foreach ($resultSet as $result) {
             /** @var Model $result */

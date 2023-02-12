@@ -934,13 +934,13 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
 
         if (is_array($data) && key($data) !== 0) {
             $query->where($data);
-            $data = null;
+            $data = [];
         } elseif ($data instanceof \Closure) {
             $data($query);
-            $data = null;
+            $data = [];
         }
 
-        $resultSet = $query->select($data);
+        $resultSet = $query->select((array) $data);
 
         foreach ($resultSet as $result) {
             $result->force($force)->delete();

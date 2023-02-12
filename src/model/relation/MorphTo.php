@@ -244,7 +244,7 @@ class MorphTo extends Relation
                 // 多态类型映射
                 $model = $this->parseModel($key);
                 $obj = new $model();
-                if (!\is_null($closure)) {
+                if (!is_null($closure)) {
                     $obj = $closure($obj);
                 }
                 $pk = $obj->getPk();

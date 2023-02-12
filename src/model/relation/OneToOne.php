@@ -204,16 +204,16 @@ abstract class OneToOne extends Relation
     /**
      * 保存（新增）当前关联数据对象
      *
-     * @param mixed $data    数据 可以使用数组 关联模型对象
+     * @param array|Model $data    数据 可以使用数组 关联模型对象
      * @param bool  $replace 是否自动识别更新和写入
      *
      * @return Model|false
      */
-    public function save($data, bool $replace = true)
+    public function save(array|Model $data, bool $replace = true)
     {
-        $model = $this->make($data);
+        $model = $this->make();
 
-        return $model->replace($replace)->save() ? $model : false;
+        return $model->replace($replace)->save($data) ? $model : false;
     }
 
     /**
@@ -223,7 +223,7 @@ abstract class OneToOne extends Relation
      *
      * @return Model
      */
-    public function make($data = []): Model
+    public function make(array|Model $data = []): Model
     {
         if ($data instanceof Model) {
             $data = $data->getData();

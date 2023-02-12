@@ -238,20 +238,12 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
     /**
      * 架构函数.
      *
-     * @param array $data 数据
+     * @param array|Model $data 数据
      */
-    public function __construct(array $data = [])
+    public function __construct(array|Model $data = [])
     {
-        $this->data = $data;
-
-        if (!empty($this->data)) {
-            // 废弃字段
-            foreach ($this->disuse as $key) {
-                if (array_key_exists($key, $this->data)) {
-                    unset($this->data[$key]);
-                }
-            }
-        }
+        // 设置数据
+        $this->data($data);
 
         // 记录原始数据
         $this->origin = $this->data;
@@ -556,13 +548,17 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
     /**
      * 保存当前数据对象
      *
-     * @param array  $data     数据
+     * @param array|Model  $data     数据
      * @param string $sequence 自增序列名
      *
      * @return bool
      */
-    public function save(array $data = [], string $sequence = null): bool
+    public function save(array|Model $data = [], string $sequence = null): bool
     {
+        if ($data instanceof Model) {
+            $data = $data->getData();
+        }
+
         // 数据对象赋值
         $this->setAttrs($data);
 

@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace think\model\concern;
 
+use Closure;
 use InvalidArgumentException;
 use Stringable;
 use think\db\Raw;
@@ -446,52 +447,18 @@ trait Attribute
             [$type, $param] = explode(':', $type, 2);
         }
 
-        switch ($type) {
-            case 'integer':
-                $value = (int) $value;
-                break;
-            case 'float':
-                if (empty($param)) {
-                    $value = (float) $value;
-                } else {
-                    $value = (float) number_format($value, (int) $param, '.', '');
-                }
-                break;
-            case 'boolean':
-                $value = (bool) $value;
-                break;
-            case 'timestamp':
-                if (!is_numeric($value)) {
-                    $value = strtotime($value);
-                }
-                break;
-            case 'datetime':
-                $value = is_numeric($value) ? $value : strtotime($value);
-                $value = $this->formatDateTime('Y-m-d H:i:s.u', $value, true);
-                break;
-            case 'object':
-                if (is_object($value)) {
-                    $value = json_encode($value, JSON_FORCE_OBJECT);
-                }
-                break;
-            case 'array':
-                $value = (array) $value;
-                // no break
-            case 'json':
-                $option = !empty($param) ? (int) $param : JSON_UNESCAPED_UNICODE;
-                $value = json_encode($value, $option);
-                break;
-            case 'serialize':
-                $value = serialize($value);
-                break;
-            default:
-                if ($value instanceof Stringable && str_contains($type, '\\')) {
-                    // 对象类型
-                    $value = $value->__toString();
-                }
-        }
-
-        return $value;
+        return match ($type) {
+            'integer'   =>  (int) $value,
+            'float'     =>  empty($param) ? (float) $value : (float) number_format($value, (int) $param, '.', ''),
+            'boolean'   =>  (bool) $value,
+            'timestamp' =>  !is_numeric($value) ? strtotime($value) : $value,
+            'datetime'  =>  $this->formatDateTime('Y-m-d H:i:s.u', is_numeric($value) ? $value : strtotime($value), true),
+            'object'    =>  is_object($value) ? json_encode($value, JSON_FORCE_OBJECT) : $value,
+            'array'     =>  (array) $value,
+            'json'      =>  json_encode((array) $value, !empty($param) ? (int) $param : JSON_UNESCAPED_UNICODE),
+            'serialize' =>  serialize($value),
+            default     =>  $value instanceof Stringable && str_contains($type, '\\') ? $value->__toString() : $value,
+        };
     }
 
     /**
@@ -631,67 +598,38 @@ trait Attribute
             [$type, $param] = explode(':', $type, 2);
         }
 
-        switch ($type) {
-            case 'integer':
-                $value = (int) $value;
-                break;
-            case 'float':
-                if (empty($param)) {
-                    $value = (float) $value;
-                } else {
-                    $value = (float) number_format($value, (int) $param, '.', '');
-                }
-                break;
-            case 'boolean':
-                $value = (bool) $value;
-                break;
-            case 'timestamp':
-                if (!is_null($value)) {
-                    $format = !empty($param) ? $param : $this->dateFormat;
-                    $value  = $this->formatDateTime($format, $value, true);
-                }
-                break;
-            case 'datetime':
-                if (!is_null($value)) {
-                    $format = !empty($param) ? $param : $this->dateFormat;
-                    $value  = $this->formatDateTime($format, $value);
-                }
-                break;
-            case 'json':
-                $value = json_decode($value, true);
-                break;
-            case 'array':
-                $value = empty($value) ? [] : json_decode($value, true);
-                break;
-            case 'object':
-                $value = empty($value) ? new \stdClass() : json_decode($value);
-                break;
-            case 'serialize':
-                try {
-                    $value = unserialize($value);
-                } catch (\Exception $e) {
-                    $value = null;
-                }
-                break;
-            default:
-                if (str_contains($type, '\\')) {
-                    // 对象类型
-                    $value = new $type($value);
-                }
-        }
+        $call = function ($value) {
+            try {
+                $value = unserialize($value);
+            } catch (\Exception $e) {
+                $value = null;
+            }
+            return $value,
+        };
 
-        return $value;
+        return match ($type) {
+            'integer'   =>  (int) $value,
+            'float'     =>  empty($param) ? (float) $value : (float) number_format($value, (int) $param, '.', ''),
+            'boolean'   =>  (bool) $value,
+            'timestamp' =>  !is_null($value) ? $this->formatDateTime(!empty($param) ? $param : $this->dateFormat, $value, true) : null,
+            'datetime'  =>  !is_null($value) ? $this->formatDateTime(!empty($param) ? $param : $this->dateFormat, $value) : null,
+            'json'      =>  json_decode($value, true),
+            'array'     =>  empty($value) ? [] : json_decode($value, true),
+            'object'    =>  empty($value) ? new \stdClass() : json_decode($value),
+            'serialize' =>  $call($value),
+            default     =>  str_contains($type, '\\') ? new $type($value) : $value,
+        };
     }
 
     /**
      * 设置数据字段获取器.
      *
      * @param string|array $name     字段名
-     * @param callable     $callback 闭包获取器
+     * @param Closure     $callback 闭包获取器
      *
      * @return $this
      */
-    public function withAttr(string|array $name, callable $callback = null)
+    public function withAttr(string|array $name, Closure $callback = null)
     {
         if (is_array($name)) {
             foreach ($name as $key => $val) {

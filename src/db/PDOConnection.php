@@ -277,19 +277,12 @@ abstract class PDOConnection extends Connection
     public function fieldCase(array $info): array
     {
         // 字段大小写转换
-        switch ($this->attrCase) {
-            case PDO::CASE_LOWER:
-                $info = array_change_key_case($info);
-                break;
-            case PDO::CASE_UPPER:
-                $info = array_change_key_case($info, CASE_UPPER);
-                break;
-            case PDO::CASE_NATURAL:
-            default:
-                // 不做转换
-        }
-
-        return $info;
+        return match ($this->attrCase) {
+            PDO::CASE_LOWER =>  array_change_key_case($info),
+            PDO::CASE_UPPER =>  array_change_key_case($info, CASE_UPPER),
+            PDO::CASE_NATURAL =>    $info,
+            default         =>  $info,
+        };
     }
 
     /**

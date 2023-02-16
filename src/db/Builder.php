@@ -184,7 +184,7 @@ abstract class Builder
                     $result[$item] =    match (strtoupper($val[0])) {
                         'INC'   =>  $item . ' + ' . floatval($val[1]),
                         'DEC'   =>  $item . ' - ' . floatval($val[1]),
-                    };                    
+                    };
                 }
             } elseif (is_scalar($val)) {
                 // 过滤非标量数据

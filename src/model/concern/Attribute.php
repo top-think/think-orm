@@ -604,7 +604,7 @@ trait Attribute
             } catch (\Exception $e) {
                 $value = null;
             }
-            return $value,
+            return $value;
         };
 
         return match ($type) {

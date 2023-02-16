@@ -180,17 +180,11 @@ abstract class Builder
             } elseif (is_null($val)) {
                 $result[$item] = 'NULL';
             } elseif (is_array($val) && !empty($val) && is_string($val[0])) {
-                $result[$item] =    match (strtoupper($val[0])) {
-                    'INC'   =>  $item . ' + ' . floatval($val[1]),
-                    'DEC'   =>  $item . ' - ' . floatval($val[1]),
-                };
-                switch (strtoupper($val[0])) {
-                    case 'INC':
-                        $result[$item] = ;
-                        break;
-                    case 'DEC':
-                        $result[$item] = ;
-                        break;
+                if (in_array(strtoupper($val[0]), ['INC', 'DEC'])) {
+                    $result[$item] =    match (strtoupper($val[0])) {
+                        'INC'   =>  $item . ' + ' . floatval($val[1]),
+                        'DEC'   =>  $item . ' - ' . floatval($val[1]),
+                    };                    
                 }
             } elseif (is_scalar($val)) {
                 // 过滤非标量数据

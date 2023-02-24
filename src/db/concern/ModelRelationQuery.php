@@ -579,6 +579,14 @@ trait ModelRelationQuery
             $this->jsonModelResult($result);
         }
 
+        // 实时读取延迟数据
+        if (!empty($this->options['lazy_fields'])) {
+            $id = $this->getKey($result);
+            foreach ($this->options['lazy_fields'] as $field) {
+                $result[$field] += $this->getLazyFieldValue($field, $id);
+            }
+        }
+
         $result = $this->model->newInstance(
             $result,
             !empty($this->options['is_resultSet']) ? null : $this->getModelUpdateCondition($this->options),

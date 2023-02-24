@@ -40,6 +40,11 @@ trait WhereQuery
             return $this;
         }
 
+        $pk = $this->getPk();
+        if ((is_null($condition) || '=' == $op) && is_string($pk) && $pk == $field ) {
+            $this->options['key'] = is_null($condition) ? $op : $condition;
+        }
+
         $param = func_get_args();
         array_shift($param);
 

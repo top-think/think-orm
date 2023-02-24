@@ -124,6 +124,13 @@ trait Attribute
     private $withAttr = [];
 
     /**
+     * 数据表延迟写入的字段
+     *
+     * @var array
+     */
+    protected $lazyFields = [];
+
+    /**
      * 获取模型对象的主键.
      *
      * @return string|array

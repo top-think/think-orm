@@ -388,7 +388,9 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
 
         $query->model($this)
             ->json($this->json, $this->jsonAssoc)
-            ->setFieldType(array_merge($this->schema, $this->jsonType));
+            ->setFieldType(array_merge($this->schema, $this->jsonType))
+            ->setKey($this->getKey())
+            ->lazyFields($this->lazyFields);
 
         // 软删除
         if (property_exists($this, 'withTrashed') && !$this->withTrashed) {

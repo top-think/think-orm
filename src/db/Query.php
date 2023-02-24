@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace think\db;
 
 use PDOStatement;
+use think\db\exception\DbException as Exception;
 
 /**
  * PDO数据查询类.
@@ -385,6 +386,140 @@ class Query extends BaseQuery
         $this->options['data'][$field] = ['DEC', $step];
 
         return $this;
+    }
+
+    /**
+     * 设置延迟写入字段 用于实时获取缓存数据
+     *
+     * @param array $fields 延迟写入字段
+     *
+     * @return $this
+     */
+    public function lazyFields(array $fields)
+    {
+        $this->options['lazy_fields'] = $fields;
+
+        return $this;
+    }
+
+    /**
+     * 字段值增长（支持延迟写入）
+     *
+     * @param string    $field 字段名
+     * @param int       $step  步进值
+     * @param int       $lazyTime 延迟时间（秒）
+     *
+     * @return int|false
+     */
+    public function setInc(string $field, int $step = 1, $lazyTime = 0)
+    {
+        if (empty($this->options['where']) && $this->model) {
+            $this->where($this->model->getWhere());
+        }
+
+        if (empty($this->options['where'])) {
+            // 如果没有任何更新条件则不执行
+            throw new Exception('miss update condition');
+        }
+
+        if ($lazyTime > 0) {
+            $guid = $this->getLazyFieldCacheKey($field);
+            $step = $this->lazyWrite('inc', $guid, $step, $lazyTime);
+            if (false === $step) {
+                return true;
+            }
+        }
+
+        return $this->inc($field, $step)->update();
+    }
+
+    /**
+     * 字段值减少（支持延迟写入）
+     *
+     * @param string    $field 字段名
+     * @param int       $step  步进值
+     * @param int       $lazyTime 延迟时间（秒）
+     *
+     * @return int|false
+     */
+    public function setDec(string $field, int $step = 1, int $lazyTime = 0)
+    {
+        if (empty($this->options['where']) && $this->model) {
+            $this->where($this->model->getWhere());
+        }
+
+        if (empty($this->options['where'])) {
+            // 如果没有任何更新条件则不执行
+            throw new Exception('miss update condition');
+        }
+
+        if ($lazyTime > 0) {
+            $guid = $this->getLazyFieldCacheKey($field);
+            $step = $this->lazyWrite('dec', $guid, $step, $lazyTime);
+            if (false === $step) {
+                return true;
+            }
+            return $this->inc($field, $step)->update();
+        }
+
+        return $this->dec($field, $step)->update();
+    }
+
+    /**
+     * 延时更新检查 返回false表示需要延时
+     * 否则返回实际写入的数值
+     * @access protected
+     * @param  string  $type     自增或者自减
+     * @param  string  $guid     写入标识
+     * @param  int     $step     写入步进值
+     * @param  int     $lazyTime 延时时间(s)
+     * @return false|integer
+     */
+    protected function lazyWrite(string $type, string $guid, int $step, int $lazyTime)
+    {
+        $cache = $this->getCache();
+        if (!$cache->has($guid . '_time')) {
+            // 计时开始
+            $cache->set($guid . '_time', time());
+            $cache->$type($guid, $step);
+        } elseif (time() > $cache->get($guid . '_time') + $lazyTime) {
+            // 删除缓存
+            $value = $cache->$type($guid, $step);
+            $cache->delete($guid);
+            $cache->delete($guid . '_time');
+            return 0 === $value ? false : $value;
+        } else {
+            // 更新缓存
+            $cache->$type($guid, $step);
+        }
+
+        return false;
+    }
+
+    /**
+     * 获取延迟写入字段值.
+     *
+     * @param string $field 字段名称
+     * @param mixed  $id    主键值
+     *
+     * @return int
+     */
+    protected function getLazyFieldValue(string $field, $id = null): int
+    {
+        return (int) $this->getCache()->get($this->getLazyFieldCacheKey($field, $id));
+    }
+
+    /**
+     * 获取延迟写入字段的缓存Key
+     *
+     * @param string  $field 字段名
+     * @param mixed   $id    主键值
+     *
+     * @return string
+     */
+    protected function getLazyFieldCacheKey(string $field, $id = null): string 
+    {
+        return 'lazy_' . $this->getTable() . '_' . $field . '_' . ($id ?: $this->getKey());
     }
 
     /**

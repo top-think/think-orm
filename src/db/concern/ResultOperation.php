@@ -88,6 +88,14 @@ trait ResultOperation
             $this->jsonResult($result);
         }
 
+        // 实时读取延迟数据
+        if (!empty($this->options['lazy_fields'])) {
+            $id = $this->getKey($result);
+            foreach ($this->options['lazy_fields'] as $field) {
+                $result[$field] += $this->getLazyFieldValue($field, $id);
+            }
+        }
+
         // 查询数据处理
         foreach ($this->options['filter'] as $filter) {
             $result = call_user_func_array($filter, [$result, $this->options]);

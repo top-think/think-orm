@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace think\db;
 
 use Closure;
+use Psr\SimpleCache\CacheInterface;
 use think\Collection;
 use think\db\exception\DataNotFoundException;
 use think\db\exception\DbException as Exception;
@@ -201,6 +202,41 @@ abstract class BaseQuery
     public function getName(): string
     {
         return $this->name ?: $this->model->getName();
+    }
+
+    /**
+     * 设置主键值.
+     *
+     * @param mixed $key 主键值
+     *
+     * @return $this
+     */
+    public function setKey($key)
+    {
+        $this->options['key'] = $key;
+
+        return $this;
+    }
+
+    /**
+     * 获取主键值.
+     * @param array $data 数据
+     *
+     * @return mixed
+     */
+    public function getKey(array $data = [])
+    {
+        if (!empty($data)) {
+            $pk = $this->getPk();
+            if (is_string($pk) && isset($data[$pk])) {
+                $id = $data[$pk];
+            } else {
+                $id = null;
+            }
+            return $id;
+        }
+
+        return $this->getOptions('key');
     }
 
     /**
@@ -836,6 +872,16 @@ abstract class BaseQuery
     }
 
     /**
+     * 获取当前的缓存对象
+     *
+     * @return CacheInterface|null
+     */
+    public function getCache()
+    {
+        return $this->getConnection()->getCache();
+    }
+
+    /**
      * 查询缓存 数据为空不缓存.
      *
      * @param mixed         $key    缓存key
@@ -847,7 +893,7 @@ abstract class BaseQuery
      */
     public function cache($key = true, $expire = null, $tag = null, bool $always = false)
     {
-        if (false === $key || !$this->getConnection()->getCache()) {
+        if (false === $key || !$this->getCache()) {
             return $this;
         }
 

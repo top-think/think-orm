@@ -517,7 +517,7 @@ class Query extends BaseQuery
      *
      * @return string
      */
-    protected function getLazyFieldCacheKey(string $field, $id = null): string 
+    protected function getLazyFieldCacheKey(string $field, $id = null): string
     {
         return 'lazy_' . $this->getTable() . '_' . $field . '_' . ($id ?: $this->getKey());
     }

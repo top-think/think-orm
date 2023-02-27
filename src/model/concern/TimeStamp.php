@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace think\model\concern;
 
 use DateTime;
+use DateTimeInterface;
 use Stringable;
 
 /**
@@ -200,11 +201,11 @@ trait TimeStamp
             return new $format($time);
         }
 
-        if ($time instanceof DateTime) {
+        if ($time instanceof DateTimeInterface) {
             $dateTime = $time;
         } elseif ($timestamp) {
             $dateTime = new DateTime();
-            $dateTime->setTimestamp((int) $time);
+            $dateTime->setTimestamp(is_numeric($time) ? (int) $time : strtotime($time));
         } else {
             $dateTime = new DateTime($time);
         }

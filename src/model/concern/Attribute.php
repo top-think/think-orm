@@ -459,7 +459,7 @@ trait Attribute
             'float'     =>  empty($param) ? (float) $value : (float) number_format($value, (int) $param, '.', ''),
             'boolean'   =>  (bool) $value,
             'timestamp' =>  !is_numeric($value) ? strtotime($value) : $value,
-            'datetime'  =>  $this->formatDateTime('Y-m-d H:i:s.u', is_numeric($value) ? $value : strtotime($value), true),
+            'datetime'  =>  $this->formatDateTime('Y-m-d H:i:s.u', $value, true),
             'object'    =>  is_object($value) ? json_encode($value, JSON_FORCE_OBJECT) : $value,
             'array'     =>  (array) $value,
             'json'      =>  json_encode((array) $value, !empty($param) ? (int) $param : JSON_UNESCAPED_UNICODE),

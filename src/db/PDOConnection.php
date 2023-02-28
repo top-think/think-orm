@@ -1736,7 +1736,7 @@ abstract class PDOConnection extends Connection
         $pk = $query->getAutoInc();
 
         if ($pk) {
-            $type = $this->getFieldBindType($pk);
+            $type = $this->getFieldsBind($query->getTable())[$pk];
 
             if (PDO::PARAM_INT == $type) {
                 $insertId = (int) $insertId;

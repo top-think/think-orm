@@ -25,17 +25,17 @@ use think\db\BaseQuery as Query;
  *
  * @mixin Query
  *
- * @method void  onAfterRead(Model $model)     static after_read事件定义
- * @method mixed onBeforeInsert(Model $model)  static before_insert事件定义
- * @method void  onAfterInsert(Model $model)   static after_insert事件定义
- * @method mixed onBeforeUpdate(Model $model)  static before_update事件定义
- * @method void  onAfterUpdate(Model $model)   static after_update事件定义
- * @method mixed onBeforeWrite(Model $model)   static before_write事件定义
- * @method void  onAfterWrite(Model $model)    static after_write事件定义
- * @method mixed onBeforeDelete(Model $model)  static before_write事件定义
- * @method void  onAfterDelete(Model $model)   static after_delete事件定义
- * @method void  onBeforeRestore(Model $model) static before_restore事件定义
- * @method void  onAfterRestore(Model $model)  static after_restore事件定义
+ * @method static void  onAfterRead(Model $model)     after_read事件定义
+ * @method static mixed onBeforeInsert(Model $model)  before_insert事件定义
+ * @method static void  onAfterInsert(Model $model)   after_insert事件定义
+ * @method static mixed onBeforeUpdate(Model $model)  before_update事件定义
+ * @method static void  onAfterUpdate(Model $model)   after_update事件定义
+ * @method static mixed onBeforeWrite(Model $model)   before_write事件定义
+ * @method static void  onAfterWrite(Model $model)    after_write事件定义
+ * @method static mixed onBeforeDelete(Model $model)  before_write事件定义
+ * @method static void  onAfterDelete(Model $model)   after_delete事件定义
+ * @method static void  onBeforeRestore(Model $model) before_restore事件定义
+ * @method static void  onAfterRestore(Model $model)  after_restore事件定义
  */
 abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonable
 {

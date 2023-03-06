@@ -177,6 +177,10 @@ abstract class Builder
                 }
             } elseif (is_scalar($val)) {
                 // 过滤非标量数据
+                if (!$query->isAutoBind() && PDO::PARAM_STR == $bind[$key]) {
+                    $val = '\'' . $val . '\'';
+                }
+
                 $result[$item] = !$query->isAutoBind() ? $val : $this->parseDataBind($query, $key, $val, $bind);
             }
         }
@@ -766,19 +770,15 @@ abstract class Builder
             if ($query->isAutoBind()) {
                 $array = [];
                 foreach ($value as $v) {
-                    $name    = $query->bindValue($v, $bindType);
-                    $array[] = ':' . $name;
+                    $name       = $query->bindValue($v, $bindType);
+                    $array[]    = ':' . $name;
                 }
+                $value = implode(',', $array);
+            } elseif (PDO::PARAM_STR == $bindType) {
+                $value = '\'' . implode('\',\'', $value) . '\'';
             } else {
-                $array = $value;
-            }
-
-            if (count($array) == 1) {
-                return $key . ('IN' == $exp ? ' = ' : ' <> ') . $array[0];
-            }
-
-            $value = implode(',', $array);
-            
+                $value = implode(',', $value);
+            }            
         }
 
         return $key . ' ' . $exp . ' (' . $value . ')';

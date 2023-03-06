@@ -778,7 +778,11 @@ abstract class Builder
                 $value = '\'' . implode('\',\'', $value) . '\'';
             } else {
                 $value = implode(',', $value);
-            }            
+            }
+
+            if (false === strpos($value, ',')) {
+                return $key . ('IN' == $exp ? ' = ' : ' <> ') . $value;
+            }                    
         }
 
         return $key . ' ' . $exp . ' (' . $value . ')';

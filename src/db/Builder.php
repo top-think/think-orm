@@ -778,7 +778,7 @@ abstract class Builder
                 $value = '\'' . implode('\',\'', $value) . '\'';
             } else {
                 $value = implode(',', $value);
-            }            
+            }
         }
 
         return $key . ' ' . $exp . ' (' . $value . ')';

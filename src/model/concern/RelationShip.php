@@ -760,8 +760,9 @@ trait RelationShip
         if (
             $this->parent && !$modelRelation->isSelfRelation()
             && get_class($this->parent) == get_class($modelRelation->getModel())
-            && $modelRelation instanceof OneToOne
+            && ($modelRelation instanceof OneToOne || $modelRelation instanceof HasOneThrough || $modelRelation instanceof MorphTo || $modelRelation instanceof MorphOne)
         ) {
+            if(empty($this->parent->parent)) $this->parent->parent = $this;
             return $this->parent;
         }
 

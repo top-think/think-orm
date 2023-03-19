@@ -130,13 +130,6 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
     protected $globalScope = [];
 
     /**
-     * 延迟保存信息.
-     *
-     * @var bool
-     */
-    private $lazySave = false;
-
-    /**
      * Db对象
      *
      * @var DbManager
@@ -532,22 +525,6 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
     }
 
     /**
-     * 延迟保存当前数据对象
-     *
-     * @param array|bool $data 数据
-     *
-     * @return void
-     */
-    public function lazySave(array|bool $data = []): void
-    {
-        if (is_array($data)) {
-            $this->setAttrs($data);
-        }
-
-        $this->lazySave = false === $data ? false : true;
-    }
-
-    /**
      * 保存当前数据对象
      *
      * @param array|Model  $data     数据
@@ -580,7 +557,6 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
         // 重新记录原始数据
         $this->origin   = $this->data;
         $this->get      = [];
-        $this->lazySave = false;
 
         return true;
     }
@@ -854,7 +830,6 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
         $this->trigger('AfterDelete');
 
         $this->exists   = false;
-        $this->lazySave = false;
 
         return true;
     }
@@ -1095,15 +1070,5 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
         $model = new static();
 
         return call_user_func_array([$model->db(), $method], $args);
-    }
-
-    /**
-     * 析构方法.
-     */
-    public function __destruct()
-    {
-        if ($this->lazySave) {
-            $this->save();
-        }
     }
 }

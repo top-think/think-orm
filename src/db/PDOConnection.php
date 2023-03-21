@@ -699,7 +699,7 @@ abstract class PDOConnection extends Connection
      */
     public function execute(string $sql, array $bind = []): int
     {
-        return $this->pdoExecute($this->newQuery()->bind(), $sql, true);
+        return $this->pdoExecute($this->newQuery()->bind($bind), $sql, true);
     }
 
     /**

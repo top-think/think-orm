@@ -1027,6 +1027,23 @@ abstract class BaseQuery
     }
 
     /**
+     * 批量插入记录
+     * @access public
+     * @param array   $keys 键值
+     * @param array   $values 数据
+     * @param integer $limit   每次写入数据限制
+     * @return integer
+     */
+    public function insertAllByKeys(array $keys, array $values, int $limit = 0): int
+    {
+        if (empty($limit) && !empty($this->options['limit']) && is_numeric($this->options['limit'])) {
+            $limit = (int) $this->options['limit'];
+        }
+
+        return $this->connection->insertAllByKeys($this, $keys, $values, $limit);
+    }
+
+    /**
      * 通过Select方式插入记录
      * @access public
      * @param array  $fields 要插入的数据表字段名

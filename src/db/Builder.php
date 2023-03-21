@@ -1271,7 +1271,6 @@ abstract class Builder
             $values[] = 'SELECT ' . implode(',', $data);
         }
 
-
         return str_replace(
             ['%INSERT%', '%TABLE%', '%EXTRA%', '%FIELD%', '%DATA%', '%COMMENT%'],
             [

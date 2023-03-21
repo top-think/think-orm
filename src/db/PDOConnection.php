@@ -974,6 +974,8 @@ abstract class PDOConnection extends Connection
      */
     public function insertAll(BaseQuery $query, array $dataSet = [], int $limit = 0): int
     {
+        $query->parseOptions();
+
         if (!is_array(reset($dataSet))) {
             return 0;
         }
@@ -1023,7 +1025,7 @@ abstract class PDOConnection extends Connection
      */
     public function insertAllByKeys(BaseQuery $query, array $keys, array $values, int $limit = 0): int
     {
-        $options = $query->parseOptions();
+        $query->parseOptions();
 
         if (0 === $limit && count($dataSet) >= 5000) {
             $limit = 1000;

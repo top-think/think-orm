@@ -173,13 +173,13 @@ trait ModelRelationQuery
                 $field($this, $data[$key] ?? null, $data, $prefix);
             } elseif ($this->model) {
                 // 检测搜索器
-                $fieldName = is_numeric($key) ? $field : $key;
+                $fieldName = is_int($key) ? $field : $key;
                 $method = 'search' . Str::studly($fieldName) . 'Attr';
 
                 if (method_exists($this->model, $method)) {
-                    $this->model->$method($this, $data[$field] ?? null, $data, $prefix);
-                } elseif (isset($data[$field])) {
-                    $this->where($fieldName, in_array($fieldName, $likeFields) ? 'like' : '=', in_array($fieldName, $likeFields) ? '%' . $data[$field] . '%' : $data[$field]);
+                    $this->model->$method($this, $data[$fieldName] ?? null, $data, $prefix);
+                } elseif (isset($data[$fieldName])) {
+                    $this->where($fieldName, in_array($fieldName, $likeFields) ? 'like' : '=', in_array($fieldName, $likeFields) ? '%' . $data[$fieldName] . '%' : $data[$fieldName]);
                 }
             }
         }

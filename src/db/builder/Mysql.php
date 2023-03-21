@@ -228,7 +228,6 @@ class Mysql extends Builder
             $values[] = '( ' . implode(',', $data) . ' )';
         }
 
-
         return str_replace(
             ['%INSERT%', '%EXTRA%', '%TABLE%', '%PARTITION%', '%FIELD%', '%DATA%', '%DUPLICATE%', '%COMMENT%'],
             [

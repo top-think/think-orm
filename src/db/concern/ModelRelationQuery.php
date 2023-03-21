@@ -8,7 +8,7 @@
 // +----------------------------------------------------------------------
 // | Author: liu21st <liu21st@gmail.com>
 // +----------------------------------------------------------------------
-declare (strict_types = 1);
+declare(strict_types=1);
 
 namespace think\db\concern;
 
@@ -166,9 +166,9 @@ trait ModelRelationQuery
                 $method    = 'search' . Str::studly($fieldName) . 'Attr';
 
                 if (method_exists($this->model, $method)) {
-                    $this->model->$method($this, $data[$field] ?? null, $data, $prefix);
-                } elseif (isset($data[$field])) {
-                    $this->where($fieldName, in_array($fieldName, $likeFields) ? 'like' : '=', in_array($fieldName, $likeFields) ? '%' . $data[$field] . '%' : $data[$field]);
+                    $this->model->$method($this, $data[$fieldName] ?? null, $data, $prefix);
+                } elseif (isset($data[$fieldName])) {
+                    $this->where($fieldName, in_array($fieldName, $likeFields) ? 'like' : '=', in_array($fieldName, $likeFields) ? '%' . $data[$fieldName] . '%' : $data[$fieldName]);
                 }
             }
         }
@@ -198,7 +198,6 @@ trait ModelRelationQuery
             [$relation, $field] = explode('.', $name);
 
             if (!empty($this->options['json']) && in_array($relation, $this->options['json'])) {
-
             } else {
                 $this->options['with_relation_attr'][$relation][$field] = $callback;
                 unset($this->options['with_attr'][$name]);
@@ -558,5 +557,4 @@ trait ModelRelationQuery
         // 刷新原始数据
         $result->refreshOrigin();
     }
-
 }

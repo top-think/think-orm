@@ -1093,7 +1093,7 @@ abstract class PDOConnection extends Connection
             $limit = 0;
         }
 
-        if (0 === $limit && count($dataSet) >= 5000) {
+        if (0 === $limit && count($values) >= 5000) {
             $limit = 1000;
         }
 
@@ -1102,11 +1102,11 @@ abstract class PDOConnection extends Connection
             $this->startTrans();
 
             try {
-                $array = array_chunk($dataSet, $limit, true);
+                $array = array_chunk($values, $limit, true);
                 $count = 0;
 
                 foreach ($array as $item) {
-                    $sql = $this->builder->insertAll($query, $item);
+                    $sql = $this->builder->insertAllByKeys($query, $keys, $item);
                     $count += $this->pdoExecute($query, $sql);
                 }
 
@@ -1121,7 +1121,7 @@ abstract class PDOConnection extends Connection
             return $count;
         }
 
-        $sql = $this->builder->insertAll($query, $dataSet);
+        $sql = $this->builder->insertAllByKeys($query, $keys, $values);
 
         return $this->pdoExecute($query, $sql);
     }

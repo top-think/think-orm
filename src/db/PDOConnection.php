@@ -1027,7 +1027,7 @@ abstract class PDOConnection extends Connection
     {
         $query->parseOptions();
 
-        if (0 === $limit && count($dataSet) >= 5000) {
+        if (0 === $limit && count($values) >= 5000) {
             $limit = 1000;
         }
 

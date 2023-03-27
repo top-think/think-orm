@@ -462,7 +462,7 @@ trait Attribute
             'datetime'  =>  $this->formatDateTime('Y-m-d H:i:s.u', $value, true),
             'object'    =>  is_object($value) ? json_encode($value, JSON_FORCE_OBJECT) : $value,
             'array'     =>  json_encode((array) $value, !empty($param) ? (int) $param : JSON_UNESCAPED_UNICODE),
-            'json'      =>  json_encode((array) $value, !empty($param) ? (int) $param : JSON_UNESCAPED_UNICODE),
+            'json'      =>  json_encode($value, !empty($param) ? (int) $param : JSON_UNESCAPED_UNICODE),
             'serialize' =>  serialize($value),
             default     =>  $value instanceof Stringable && str_contains($type, '\\') ? $value->__toString() : $value,
         };

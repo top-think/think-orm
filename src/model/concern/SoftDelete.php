@@ -50,12 +50,12 @@ trait SoftDelete
         return false;
     }
 
-    public function scopeWithTrashed(Query $query)
+    public function scopeWithTrashed(Query $query): void
     {
         $query->removeOption('soft_delete');
     }
 
-    public function scopeOnlyTrashed(Query $query)
+    public function scopeOnlyTrashed(Query $query): void
     {
         $field = $this->getDeleteTimeField(true);
 
@@ -166,7 +166,7 @@ trait SoftDelete
      *
      * @return bool
      */
-    public function restore($where = []): bool
+    public function restore(array $where = []): bool
     {
         $name = $this->getDeleteTimeField();
 

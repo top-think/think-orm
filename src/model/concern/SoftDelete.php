@@ -17,7 +17,7 @@ use think\db\BaseQuery as Query;
 use think\Model;
 
 /**
- * 数据软删除.
+ * 数据软删除
  *
  * @mixin Model
  *
@@ -147,8 +147,6 @@ trait SoftDelete
         } elseif ($data instanceof \Closure) {
             call_user_func_array($data, [&$query]);
             $data = [];
-        } elseif (is_null($data)) {
-            return false;
         }
 
         $resultSet = $query->select((array) $data);

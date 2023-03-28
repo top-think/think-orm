@@ -104,7 +104,7 @@ class MorphTo extends Relation
         // 主键数据
         $pk = $this->parent->$morphKey;
 
-        $relationModel = $this->buildQuery((new $model())->relation($subRelation))->find($pk);
+        $relationModel = class_exists($model) ? $this->buildQuery((new $model())->relation($subRelation))->find($pk) : null;
 
         if ($relationModel) {
             $relationModel->setParent(clone $this->parent);

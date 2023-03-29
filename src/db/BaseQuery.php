@@ -1019,6 +1019,20 @@ abstract class BaseQuery
     }
 
     /**
+     * 设置延迟写入字段 用于实时获取缓存数据
+     *
+     * @param array $fields 延迟写入字段
+     *
+     * @return $this
+     */
+    public function lazyFields(array $fields)
+    {
+        $this->options['lazy_fields'] = $fields;
+
+        return $this;
+    }
+    
+    /**
      * 指定数据表主键.
      *
      * @param string|array $pk 主键

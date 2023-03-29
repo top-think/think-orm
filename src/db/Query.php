@@ -389,20 +389,6 @@ class Query extends BaseQuery
     }
 
     /**
-     * 设置延迟写入字段 用于实时获取缓存数据
-     *
-     * @param array $fields 延迟写入字段
-     *
-     * @return $this
-     */
-    public function lazyFields(array $fields)
-    {
-        $this->options['lazy_fields'] = $fields;
-
-        return $this;
-    }
-
-    /**
      * 字段值增长（支持延迟写入）
      *
      * @param string    $field 字段名

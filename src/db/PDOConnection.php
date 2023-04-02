@@ -722,12 +722,14 @@ abstract class PDOConnection extends Connection
         if ($query->getOptions('cache')) {
             // 检查查询缓存
             $cacheItem = $this->parseCache($query, $query->getOptions('cache'));
-            $key = $cacheItem->getKey();
+            if (!$query->getOptions('force_cache')) {
+                $key = $cacheItem->getKey();
 
-            $data = $this->cache->get($key);
+                $data = $this->cache->get($key);
 
-            if (null !== $data) {
-                return $data;
+                if (null !== $data) {
+                    return $data;
+                }
             }
         }
 
@@ -1226,10 +1228,12 @@ abstract class PDOConnection extends Connection
 
         if (!empty($options['cache'])) {
             $cacheItem = $this->parseCache($query, $options['cache'], 'value');
-            $key = $cacheItem->getKey();
+            if (empty($options['force_cache'])) {
+                $key = $cacheItem->getKey();
 
-            if ($this->cache->has($key)) {
-                return $this->cache->get($key);
+                if ($this->cache->has($key)) {
+                    return $this->cache->get($key);
+                }
             }
         }
 
@@ -1323,10 +1327,12 @@ abstract class PDOConnection extends Connection
         if (!empty($options['cache'])) {
             // 判断查询缓存
             $cacheItem = $this->parseCache($query, $options['cache'], 'column');
-            $name = $cacheItem->getKey();
+            if (empty($options['force_cache'])) {
+                $name = $cacheItem->getKey();
 
-            if ($this->cache->has($name)) {
-                return $this->cache->get($name);
+                if ($this->cache->has($name)) {
+                    return $this->cache->get($name);
+                }
             }
         }
 

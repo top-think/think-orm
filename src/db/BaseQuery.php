@@ -804,6 +804,24 @@ abstract class BaseQuery
     }
 
     /**
+     * 强制更新缓存
+     *
+     * @param mixed         $key    缓存key
+     * @param int|\DateTime $expire 缓存有效期
+     * @param string|array  $tag    缓存标签
+     *
+     * @return $this
+     */
+    public function cacheForce($key = true, $expire = null, $tag = null)
+    {
+        if (is_string($key) && $this->getConnection()->getCache()) {
+            $this->getConnection()->getCache()->delete($key);
+        }
+
+        return $this->cache($key, $expire, $tag);
+    }
+
+    /**
      * 指定查询lock
      * @access public
      * @param bool|string $lock 是否lock

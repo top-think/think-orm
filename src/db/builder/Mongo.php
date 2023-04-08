@@ -117,7 +117,7 @@ class Mongo
             } elseif (isset($val[0]) && 'exp' == $val[0]) {
                 $result[$item] = $val[1];
             } elseif (is_null($val)) {
-                $result[$item] = 'NULL';
+                $result[$item] = null;
             } else {
                 $result[$item] = $this->parseValue($query, $val, $key);
             }

@@ -167,6 +167,10 @@ abstract class BaseQuery
             $query->setFieldType($this->options['field_type']);
         }
 
+        if (isset($this->options['lazy_fields'])) {
+            $query->lazyFields($this->options['lazy_fields']);
+        }
+
         return $query;
     }
 

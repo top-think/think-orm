@@ -52,12 +52,21 @@ trait AggregateQuery
             }
 
             $options = $this->getOptions();
+            if (isset($options['cache'])) {
+                $cache = $options['cache'];
+                unset($options['cache']);
+            }
+
             $subSql = $this->options($options)
                 ->field('count(' . $field . ') AS think_count')
                 ->bind($this->bind)
                 ->buildSql();
 
-            $query = $this->newQuery()->table([$subSql => '_group_count_']);
+            $query = $this->newQuery();
+            if (isset($cache)) {
+                $query->setOption('cache', $cache);
+            }
+            $query->table([$subSql => '_group_count_']);
 
             $count = $query->aggregate('COUNT', '*');
         } else {

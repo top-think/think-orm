@@ -391,7 +391,7 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
         }
 
         // 全局作用域
-        if (is_array($scope)) {
+        if (is_array($scope) && count($scope) > 0) {
             $globalScope = array_diff($this->globalScope, $scope);
             $query->scope($globalScope);
         }

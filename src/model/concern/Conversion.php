@@ -233,6 +233,8 @@ trait Conversion
                     $visible[$val] = true;
                     $hasVisible = true;
                 }
+            } else {
+                $visible[$key] = $val;
             }
         }
 
@@ -244,6 +246,8 @@ trait Conversion
                 } else {
                     $hidden[$val] = true;
                 }
+            } else {
+                $hidden[$key] = $val;
             }
         }
 

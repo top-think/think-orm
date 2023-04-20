@@ -231,9 +231,9 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
     /**
      * 架构函数.
      *
-     * @param array|Model $data 数据
+     * @param array|object $data 数据
      */
-    public function __construct(array|Model $data = [])
+    public function __construct(array|object $data = [])
     {
         // 设置数据
         $this->data($data);

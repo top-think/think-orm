@@ -221,16 +221,18 @@ trait Attribute
     /**
      * 设置数据对象值
      *
-     * @param array|Model $data  数据
+     * @param array|object $data  数据
      * @param bool  $set   是否调用修改器
      * @param array $allow 允许的字段名
      *
      * @return $this
      */
-    public function data(array|Model $data, bool $set = false, array $allow = [])
+    public function data(array|object $data, bool $set = false, array $allow = [])
     {
         if ($data instanceof Model) {
             $data = $data->getData();
+        } elseif (is_object($data)) {
+            $data = get_object_vars($data);
         }
                 
         // 清空数据

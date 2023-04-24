@@ -386,7 +386,7 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
         
         if(method_exists($query, 'lazyFields')){
             $query->lazyFields($this->lazyFields);
-        }        
+        }
 
         // 软删除
         if (property_exists($this, 'withTrashed') && !$this->withTrashed) {

@@ -527,15 +527,17 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
     /**
      * 保存当前数据对象
      *
-     * @param array|Model  $data     数据
+     * @param array|object  $data     数据
      * @param string $sequence 自增序列名
      *
      * @return bool
      */
-    public function save(array|Model $data = [], string $sequence = null): bool
+    public function save(array|object $data = [], string $sequence = null): bool
     {
         if ($data instanceof Model) {
             $data = $data->getData();
+        } elseif (is_object($data)) {
+            $data = get_object_vars($data);
         }
 
         // 数据对象赋值
@@ -788,7 +790,7 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
                 if ($replace) {
                     $exists = true;
                     foreach ((array) $pk as $field) {
-                        if (!isset($data[$field])) {
+                        if (is_string($field) && !isset($data[$field])) {
                             $exists = false;
                         }
                     }

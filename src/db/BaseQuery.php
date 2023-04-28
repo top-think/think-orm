@@ -1053,11 +1053,11 @@ abstract class BaseQuery
     /**
      * 指定数据表主键.
      *
-     * @param string|array $pk 主键
+     * @param string|array|bool $pk 主键
      *
      * @return $this
      */
-    public function pk(string|array $pk)
+    public function pk(string|array|bool $pk)
     {
         $this->pk = $pk;
 

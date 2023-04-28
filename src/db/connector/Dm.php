@@ -30,7 +30,7 @@ class Dm extends PDOConnection
      */
     protected function parseDsn(array $config): string
     {
-        $dsn = sprintf("dm:host=%s;port=%s;dbname=%s", $config['hostname'] ,$config['hostport'] , $config['database']);
+        $dsn = sprintf("dm:host=%s;port=%s;dbname=%s", $config['hostname'], $config['hostport'], $config['database']);
         return  $dsn;
     }
     /**
@@ -42,7 +42,7 @@ class Dm extends PDOConnection
      * @return PDO
      * @throws PDOException
      */
-    public function connect(array $config = [], $linkNum = 0, $autoConnection = false): PDO{
+    public function connect(array $config = [], $linkNum = 0, $autoConnection = false): PDO {
         if (empty($config)) {
             $config = $this->config;
         } else {
@@ -56,7 +56,6 @@ class Dm extends PDOConnection
 
     }
 
-
     /**
      * 取得数据表的字段信息
      * @access public
@@ -65,11 +64,11 @@ class Dm extends PDOConnection
      */
     public function getFields(string $tableName): array
     {
-        $tableName=str_replace("`","",$tableName);
+        $tableName=str_replace("`", "", $tableName);
 
         $sql    =  $sql=sprintf("
 select a.column_name,data_type,decode(nullable,'Y',0,1) notnull,data_default,decode(a.column_name,b.column_name,1,0) pk from user_tab_columns a,(select column_name from user_constraints c,user_cons_columns col where c.constraint_name=col.constraint_name and c.constraint_type='P'and c.table_name='%s') b where table_name='%s' and a.column_name=b.column_name(+)
-",$tableName,$tableName);
+", $tableName, $tableName);
 
         $pdo    = $this->getPDOStatement($sql);
         $result = $pdo->fetchAll(PDO::FETCH_ASSOC);
@@ -84,8 +83,8 @@ select a.column_name,data_type,decode(nullable,'Y',0,1) notnull,data_default,dec
                     'type'    => $val['data_type'],
                     'notnull' => 1 == $val['notnull'],
                     'default' => $val['data_default'],
-                    'primary' => $val['pk']==1,
-                    'autoinc' =>  $val['pk']==1,
+                    'primary' => $val['pk'] == 1,
+                    'autoinc' =>  $val['pk'] == 1,
                     'comment' => '',
                 ];
             }

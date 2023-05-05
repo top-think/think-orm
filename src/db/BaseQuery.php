@@ -274,6 +274,16 @@ abstract class BaseQuery
     }
 
     /**
+     * 获取当前完整的数据库加数据表名.
+     *
+     * @return mixed
+     */
+    public function getFullTable()
+    {
+        return $this->getConfig('database') . '.' . $this->getTable();
+    }
+
+    /**
      * 设置字段类型信息.
      *
      * @param array $type 字段类型信息
@@ -1049,7 +1059,7 @@ abstract class BaseQuery
 
         return $this;
     }
-    
+
     /**
      * 指定数据表主键.
      *

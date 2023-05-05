@@ -90,7 +90,7 @@ abstract class OneToOne extends Relation
         }
 
         // 预载入封装
-        $joinTable  = $this->query->getTable();
+        $joinTable  = $this->query->getFullTable();
         $joinAlias  = $relation;
         $joinType   = $joinType ?: $this->joinType;
 

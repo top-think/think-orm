@@ -216,7 +216,7 @@ class MorphToMany extends BelongsToMany
     {
         // 关联查询封装
         $tableName  = $this->query->getTable();
-        $table      = $this->pivot->db()->getTable();
+        $table      = $this->pivot->db()->getFullTable();
         $fields     = $this->getQueryFields($tableName);
 
         $query = $this->query

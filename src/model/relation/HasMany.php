@@ -300,7 +300,7 @@ class HasMany extends Relation
      */
     public function has(string $operator = '>=', int $count = 1, string $id = '*', string $joinType = 'INNER', Query $query = null): Query
     {
-        $table      = $this->query->getTable();
+        $table      = $this->query->getFullTable();
         $model      = class_basename($this->parent);
         $relation   = class_basename($this->model);
 
@@ -332,7 +332,7 @@ class HasMany extends Relation
      */
     public function hasWhere($where = [], $fields = null, string $joinType = '', Query $query = null): Query
     {
-        $table      = $this->query->getTable();
+        $table      = $this->query->getFullTable();
         $model      = class_basename($this->parent);
         $relation   = class_basename($this->model);
 

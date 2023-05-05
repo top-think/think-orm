@@ -103,11 +103,11 @@ class HasManyThrough extends Relation
     public function has(string $operator = '>=', int $count = 1, string $id = '*', string $joinType = '', Query $query = null): Query
     {
         $model          = Str::snake(class_basename($this->parent));
-        $throughTable   = $this->through->getTable();
+        $throughTable   = $this->through->getFullTable();
         $pk             = $this->throughPk;
         $throughKey     = $this->throughKey;
         $relation       = new $this->model();
-        $relationTable  = $relation->getTable();
+        $relationTable  = $relation->getFullTable();
         $softDelete     = $this->query->getOptions('soft_delete');
 
         if ('*' != $id) {
@@ -138,10 +138,10 @@ class HasManyThrough extends Relation
     public function hasWhere($where = [], $fields = null, $joinType = '', Query $query = null): Query
     {
         $model          = Str::snake(class_basename($this->parent));
-        $throughTable   = $this->through->getTable();
+        $throughTable   = $this->through->getFullTable();
         $pk             = $this->throughPk;
         $throughKey     = $this->throughKey;
-        $modelTable     = (new $this->model())->getTable();
+        $modelTable     = (new $this->model())->getFullTable();
 
         if (is_array($where)) {
             $this->getQueryWhere($where, $modelTable);
@@ -321,10 +321,10 @@ class HasManyThrough extends Relation
         }
 
         $alias = Str::snake(class_basename($this->model));
-        $throughTable = $this->through->getTable();
+        $throughTable = $this->through->getFullTable();
         $pk = $this->throughPk;
         $throughKey = $this->throughKey;
-        $modelTable = $this->parent->getTable();
+        $modelTable = $this->parent->getFullTable();
 
         if (!str_contains($field, '.')) {
             $field = $alias . '.' . $field;
@@ -355,10 +355,10 @@ class HasManyThrough extends Relation
         }
 
         $alias          = Str::snake(class_basename($this->model));
-        $throughTable   = $this->through->getTable();
+        $throughTable   = $this->through->getFullTable();
         $pk             = $this->throughPk;
         $throughKey     = $this->throughKey;
-        $modelTable     = $this->parent->getTable();
+        $modelTable     = $this->parent->getFullTable();
 
         if (!str_contains($field, '.')) {
             $field = $alias . '.' . $field;
@@ -368,7 +368,7 @@ class HasManyThrough extends Relation
             ->alias($alias)
             ->join($throughTable, $throughTable . '.' . $pk . '=' . $alias . '.' . $throughKey)
             ->join($modelTable, $modelTable . '.' . $this->localKey . '=' . $throughTable . '.' . $this->foreignKey)
-            ->whereExp($throughTable . '.' . $this->foreignKey, '=' . $this->parent->getTable() . '.' . $this->localKey)
+            ->whereExp($throughTable . '.' . $this->foreignKey, '=' . $modelTable . '.' . $this->localKey)
             ->fetchSql()
             ->$aggregate($field);
     }
@@ -382,10 +382,10 @@ class HasManyThrough extends Relation
     {
         if (empty($this->baseQuery) && $this->parent->getData()) {
             $alias          = Str::snake(class_basename($this->model));
-            $throughTable   = $this->through->getTable();
+            $throughTable   = $this->through->getFullTable();
             $pk             = $this->throughPk;
             $throughKey     = $this->throughKey;
-            $modelTable     = $this->parent->getTable();
+            $modelTable     = $this->parent->getFullTable();
             $fields         = $this->getQueryFields($alias);
 
             $this->query

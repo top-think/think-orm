@@ -1274,7 +1274,7 @@ abstract class PDOConnection extends Connection
      *
      * @return mixed
      */
-    public function aggregate(BaseQuery $query, string $aggregate, $field, bool $force = false)
+    public function aggregate(BaseQuery $query, string $aggregate, $field, bool $force = false, bool $one = true)
     {
         if (is_string($field) && 0 === stripos($field, 'DISTINCT ')) {
             [$distinct, $field] = explode(' ', $field);
@@ -1282,7 +1282,7 @@ abstract class PDOConnection extends Connection
 
         $field = $aggregate . '(' . (!empty($distinct) ? 'DISTINCT ' : '') . $this->builder->parseKey($query, $field, true) . ') AS think_' . strtolower($aggregate);
 
-        $result = $this->value($query, $field, 0);
+        $result = $this->value($query, $field, 0, $one);
 
         return $force ? (float) $result : $result;
     }

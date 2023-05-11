@@ -30,9 +30,9 @@ trait AggregateQuery
      *
      * @return mixed
      */
-    protected function aggregate(string $aggregate, string|Raw $field, bool $force = false)
+    protected function aggregate(string $aggregate, string|Raw $field, bool $force = false, bool $one = false)
     {
-        return $this->connection->aggregate($this, $aggregate, $field, $force);
+        return $this->connection->aggregate($this, $aggregate, $field, $force, $one);
     }
 
     /**

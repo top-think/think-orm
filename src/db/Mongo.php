@@ -122,7 +122,7 @@ class Mongo extends BaseQuery
      *
      * @return mixed
      */
-    public function aggregate(string $aggregate, $field, bool $force = false)
+    public function aggregate(string $aggregate, $field, bool $force = false, bool $one = false)
     {
         $result = $this->cmd('aggregate', [strtolower($aggregate), $field]);
         $value = $result[0]['aggregate'] ?? 0;

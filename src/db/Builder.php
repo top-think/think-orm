@@ -231,8 +231,6 @@ class Builder extends BaseBuilder
         return empty($whereStr) ? '' : ' WHERE ' . $whereStr;
     }
 
-
-
     /**
      * where子单元分析.
      *
@@ -425,7 +423,6 @@ class Builder extends BaseBuilder
 
         return $key . ' ' . $exp . ' (' . $value . ')';
     }
-
 
     /**
      * 日期时间条件解析.
@@ -727,7 +724,6 @@ class Builder extends BaseBuilder
         }
         return '';
     }
-
 
     /**
      * 生成insertall SQL.

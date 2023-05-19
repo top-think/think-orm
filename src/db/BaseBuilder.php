@@ -383,7 +383,6 @@ abstract class BaseBuilder
      */
     abstract protected function parseWhereItem(Query $query, $field, array $val, array $binds = []): string;
 
-
     /**
      * 模糊查询.
      *
@@ -398,7 +397,6 @@ abstract class BaseBuilder
      * @return string
      */
     abstract protected function parseLike(Query $query, string $key, string $exp, $value, $field, int $bindType, string $logic): string;
-
 
     /**
      * 表达式查询.
@@ -649,7 +647,6 @@ abstract class BaseBuilder
      * @return string
      */
     abstract protected function parseRaw(Query $query, Raw $raw): string;
-
 
     /**
      * 随机排序.

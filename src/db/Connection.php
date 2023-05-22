@@ -21,6 +21,11 @@ use think\DbManager;
  */
 abstract class Connection implements ConnectionInterface
 {
+    const PARAM_INT   = 1;
+    const PARAM_STR   = 2;
+    const PARAM_BOOL  = 5;
+    const PARAM_FLOAT = 21;
+
     /**
      * 当前SQL指令.
      *
@@ -359,6 +364,35 @@ abstract class Connection implements ConnectionInterface
     public function getNumRows(): int
     {
         return $this->numRows;
+    }
+
+    /**
+     * 获取最终的SQL语句.
+     *
+     * @param string $sql  带参数绑定的sql语句
+     * @param array  $bind 参数绑定列表
+     *
+     * @return string
+     */
+    public function getRealSql(string $sql, array $bind = []): string
+    {
+        foreach ($bind as $key => $val) {
+            $value = strval(is_array($val) ? $val[0] : $val);
+            $type = is_array($val) ? $val[1] : self::PARAM_STR;
+
+            if (self::PARAM_FLOAT == $type || self::PARAM_STR == $type) {
+                $value = '\'' . addslashes($value) . '\'';
+            } elseif (self::PARAM_INT == $type && '' === $value) {
+                $value = '0';
+            }
+
+            // 判断占位符
+            $sql = is_numeric($key) ?
+                substr_replace($sql, $value, strpos($sql, '?'), 1) :
+                substr_replace($sql, $value, strpos($sql, ':' . $key), strlen(':' . $key));
+        }
+
+        return rtrim($sql);
     }
 
     /**

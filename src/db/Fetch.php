@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace think\db;
 
+use think\db\BaseQuery as Query;
 use think\db\exception\DbException as Exception;
 use think\helper\Str;
 

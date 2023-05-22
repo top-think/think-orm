@@ -32,8 +32,6 @@ use think\Model;
  */
 abstract class PDOConnection extends Connection
 {
-    const PARAM_FLOAT = 21;
-
     /**
      * 数据库连接参数配置.
      *
@@ -1383,35 +1381,6 @@ abstract class PDOConnection extends Connection
         }
 
         return $result;
-    }
-
-    /**
-     * 根据参数绑定组装最终的SQL语句 便于调试.
-     *
-     * @param string $sql  带参数绑定的sql语句
-     * @param array  $bind 参数绑定列表
-     *
-     * @return string
-     */
-    public function getRealSql(string $sql, array $bind = []): string
-    {
-        foreach ($bind as $key => $val) {
-            $value = strval(is_array($val) ? $val[0] : $val);
-            $type = is_array($val) ? $val[1] : PDO::PARAM_STR;
-
-            if (self::PARAM_FLOAT == $type || PDO::PARAM_STR == $type) {
-                $value = '\'' . addslashes($value) . '\'';
-            } elseif (PDO::PARAM_INT == $type && '' === $value) {
-                $value = '0';
-            }
-
-            // 判断占位符
-            $sql = is_numeric($key) ?
-                substr_replace($sql, $value, strpos($sql, '?'), 1) :
-                substr_replace($sql, $value, strpos($sql, ':' . $key), strlen(':' . $key));
-        }
-
-        return rtrim($sql);
     }
 
     /**

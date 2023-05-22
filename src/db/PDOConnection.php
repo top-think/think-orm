@@ -119,14 +119,14 @@ abstract class PDOConnection extends Connection
      *
      * @var int
      */
-    protected $fetchType = self::FETCH_ASSOC;
+    protected $fetchType = PDO::FETCH_ASSOC;
 
     /**
      * 字段属性大小写.
      *
      * @var int
      */
-    protected $attrCase = self::CASE_LOWER;
+    protected $attrCase = PDO::CASE_LOWER;
 
     /**
      * 数据表信息.

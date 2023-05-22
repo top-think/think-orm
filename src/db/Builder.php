@@ -14,7 +14,6 @@ declare(strict_types=1);
 namespace think\db;
 
 use Closure;
-use PDO;
 use Stringable;
 use think\db\BaseQuery as Query;
 use think\db\exception\DbException as Exception;

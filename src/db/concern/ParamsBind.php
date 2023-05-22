@@ -13,8 +13,6 @@ declare(strict_types=1);
 
 namespace think\db\concern;
 
-use PDO;
-
 /**
  * 参数绑定支持
  */
@@ -54,7 +52,7 @@ trait ParamsBind
     {
         $name = $name ?: 'ThinkBind_' . (count($this->bind) + 1) . '_' . mt_rand() . '_';
 
-        $this->bind[$name] = [$value, $type ?: PDO::PARAM_STR];
+        $this->bind[$name] = [$value, $type ?: Connection::PARAM_STR];
 
         return $name;
     }

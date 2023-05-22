@@ -88,7 +88,7 @@ class Builder extends BaseBuilder
                 }
             } elseif (is_scalar($val)) {
                 // 过滤非标量数据
-                if (!$query->isAutoBind() && PDO::PARAM_STR == $bind[$key]) {
+                if (!$query->isAutoBind() && Connection::PARAM_STR == $bind[$key]) {
                     $val = '\'' . $val . '\'';
                 }
                 $result[$item] = !$query->isAutoBind() ? $val : $this->parseDataBind($query, $key, $val, $bind);
@@ -114,7 +114,7 @@ class Builder extends BaseBuilder
             return $this->parseRaw($query, $data);
         }
 
-        $name = $query->bindValue($data, $bind[$key] ?? PDO::PARAM_STR);
+        $name = $query->bindValue($data, $bind[$key] ?? Connection::PARAM_STR);
 
         return ':' . $name;
     }
@@ -259,9 +259,9 @@ class Builder extends BaseBuilder
         }
 
         if (is_string($field) && 'LIKE' != $exp) {
-            $bindType = $binds[$field] ?? PDO::PARAM_STR;
+            $bindType = $binds[$field] ?? Connection::PARAM_STR;
         } else {
-            $bindType = PDO::PARAM_STR;
+            $bindType = Connection::PARAM_STR;
         }
 
         if ($value instanceof Raw) {
@@ -307,7 +307,7 @@ class Builder extends BaseBuilder
         if (is_array($value)) {
             $array = [];
             foreach ($value as $item) {
-                $name = $query->bindValue($item, PDO::PARAM_STR);
+                $name = $query->bindValue($item, Connection::PARAM_STR);
                 $array[] = $key . ' ' . $exp . ' :' . $name;
             }
 
@@ -410,7 +410,7 @@ class Builder extends BaseBuilder
                     $array[]    = ':' . $name;
                 }
                 $value = implode(',', $array);
-            } elseif (PDO::PARAM_STR == $bindType) {
+            } elseif (Connection::PARAM_STR == $bindType) {
                 $value = '\'' . implode('\',\'', $value) . '\'';
             } else {
                 $value = implode(',', $value);
@@ -750,7 +750,7 @@ class Builder extends BaseBuilder
         foreach ($datas as $k => $data) {
             foreach ($data as $key => &$val) {
                 if (!$query->isAutoBind()) {
-                    $val = PDO::PARAM_STR == $bind[$keys[$key]] ? '\'' . $val . '\'' : $val;
+                    $val = Connection::PARAM_STR == $bind[$keys[$key]] ? '\'' . $val . '\'' : $val;
                 } else {
                     $val = $this->parseDataBind($query, $keys[$key], $val, $bind);
                 }

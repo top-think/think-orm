@@ -1005,7 +1005,7 @@ class Mongo extends Connection
      *
      * @return array
      */
-    public function column(BaseQuery $query, $field, string $key = ''): array
+    public function column(BaseQuery $query, string|array $field, string $key = ''): array
     {
         $options = $query->parseOptions();
 

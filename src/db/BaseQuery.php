@@ -30,6 +30,7 @@ abstract class BaseQuery
     use concern\TimeFieldQuery;
     use concern\AggregateQuery;
     use concern\ModelRelationQuery;
+    use concern\ParamsBind;
     use concern\ResultOperation;
     use concern\Transaction;
     use concern\WhereQuery;

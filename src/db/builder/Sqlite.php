@@ -14,7 +14,7 @@ declare(strict_types=1);
 namespace think\db\builder;
 
 use think\db\Builder;
-use think\db\Query;
+use think\db\BaseQuery as Query;
 use think\db\Raw;
 
 /**

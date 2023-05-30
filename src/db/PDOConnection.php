@@ -32,8 +32,6 @@ use think\Model;
  */
 abstract class PDOConnection extends Connection
 {
-    const PARAM_FLOAT = 21;
-
     /**
      * 数据库连接参数配置.
      *
@@ -163,15 +161,15 @@ abstract class PDOConnection extends Connection
      * @var array
      */
     protected $bindType = [
-        'string'    => PDO::PARAM_STR,
-        'str'       => PDO::PARAM_STR,
-        'integer'   => PDO::PARAM_INT,
-        'int'       => PDO::PARAM_INT,
-        'boolean'   => PDO::PARAM_BOOL,
-        'bool'      => PDO::PARAM_BOOL,
+        'string'    => self::PARAM_STR,
+        'str'       => self::PARAM_STR,
+        'integer'   => self::PARAM_INT,
+        'int'       => self::PARAM_INT,
+        'boolean'   => self::PARAM_BOOL,
+        'bool'      => self::PARAM_BOOL,
         'float'     => self::PARAM_FLOAT,
-        'datetime'  => PDO::PARAM_STR,
-        'timestamp' => PDO::PARAM_STR,
+        'datetime'  => self::PARAM_STR,
+        'timestamp' => self::PARAM_STR,
     ];
 
     /**
@@ -327,15 +325,15 @@ abstract class PDOConnection extends Connection
         if (in_array($type, ['integer', 'string', 'float', 'boolean', 'bool', 'int', 'str'])) {
             $bind = $this->bindType[$type];
         } elseif (str_starts_with($type, 'set') || str_starts_with($type, 'enum')) {
-            $bind = PDO::PARAM_STR;
+            $bind = self::PARAM_STR;
         } elseif (preg_match('/(double|float|decimal|real|numeric)/is', $type)) {
             $bind = self::PARAM_FLOAT;
         } elseif (preg_match('/(int|serial|bit)/is', $type)) {
-            $bind = PDO::PARAM_INT;
+            $bind = self::PARAM_INT;
         } elseif (preg_match('/bool/is', $type)) {
-            $bind = PDO::PARAM_BOOL;
+            $bind = self::PARAM_BOOL;
         } else {
-            $bind = PDO::PARAM_STR;
+            $bind = self::PARAM_STR;
         }
 
         return $bind;
@@ -893,7 +891,7 @@ abstract class PDOConnection extends Connection
      */
     protected function queryPDOStatement(BaseQuery $query, string $sql): PDOStatement
     {
-        $options=   $query->getOptions();
+        $options =   $query->getOptions();
         $bind   =   $query->getBind();
         $master =   !empty($options['master']) ? true : false;
         $procedure = !empty($options['procedure']) ? true : in_array(strtolower(substr(trim($sql), 0, 4)), ['call', 'exec']);
@@ -1091,7 +1089,7 @@ abstract class PDOConnection extends Connection
 
         if (!empty($options['limit']) && is_numeric($options['limit'])) {
             $limit = (int) $options['limit'];
-        }else{
+        } else {
             $limit = 0;
         }
 
@@ -1274,7 +1272,7 @@ abstract class PDOConnection extends Connection
      *
      * @return mixed
      */
-    public function aggregate(BaseQuery $query, string $aggregate, $field, bool $force = false)
+    public function aggregate(BaseQuery $query, string $aggregate, $field, bool $force = false, bool $one = true)
     {
         if (is_string($field) && 0 === stripos($field, 'DISTINCT ')) {
             [$distinct, $field] = explode(' ', $field);
@@ -1282,7 +1280,7 @@ abstract class PDOConnection extends Connection
 
         $field = $aggregate . '(' . (!empty($distinct) ? 'DISTINCT ' : '') . $this->builder->parseKey($query, $field, true) . ') AS think_' . strtolower($aggregate);
 
-        $result = $this->value($query, $field, 0);
+        $result = $this->value($query, $field, 0, $one);
 
         return $force ? (float) $result : $result;
     }
@@ -1386,35 +1384,6 @@ abstract class PDOConnection extends Connection
     }
 
     /**
-     * 根据参数绑定组装最终的SQL语句 便于调试.
-     *
-     * @param string $sql  带参数绑定的sql语句
-     * @param array  $bind 参数绑定列表
-     *
-     * @return string
-     */
-    public function getRealSql(string $sql, array $bind = []): string
-    {
-        foreach ($bind as $key => $val) {
-            $value = strval(is_array($val) ? $val[0] : $val);
-            $type = is_array($val) ? $val[1] : PDO::PARAM_STR;
-
-            if (self::PARAM_FLOAT == $type || PDO::PARAM_STR == $type) {
-                $value = '\'' . addslashes($value) . '\'';
-            } elseif (PDO::PARAM_INT == $type && '' === $value) {
-                $value = '0';
-            }
-
-            // 判断占位符
-            $sql = is_numeric($key) ?
-                substr_replace($sql, $value, strpos($sql, '?'), 1) :
-                substr_replace($sql, $value, strpos($sql, ':' . $key), strlen(':' . $key));
-        }
-
-        return rtrim($sql);
-    }
-
-    /**
      * 参数绑定
      * 支持 ['name'=>'value','id'=>123] 对应命名占位符
      * 或者 ['value',123] 对应问号占位符.
@@ -1432,11 +1401,11 @@ abstract class PDOConnection extends Connection
             $param = is_numeric($key) ? $key + 1 : ':' . $key;
 
             if (is_array($val)) {
-                if (PDO::PARAM_INT == $val[1] && '' === $val[0]) {
+                if (self::PARAM_INT == $val[1] && '' === $val[0]) {
                     $val[0] = 0;
                 } elseif (self::PARAM_FLOAT == $val[1]) {
                     $val[0] = is_string($val[0]) ? (float) $val[0] : $val[0];
-                    $val[1] = PDO::PARAM_STR;
+                    $val[1] = self::PARAM_STR;
                 }
 
                 $result = $this->PDOStatement->bindValue($param, $val[0], $val[1]);
@@ -1792,7 +1761,7 @@ abstract class PDOConnection extends Connection
         if ($pk) {
             $type = $this->getFieldsBind($query->getTable())[$pk];
 
-            if (PDO::PARAM_INT == $type) {
+            if (self::PARAM_INT == $type) {
                 $insertId = (int) $insertId;
             } elseif (self::PARAM_FLOAT == $type) {
                 $insertId = (float) $insertId;

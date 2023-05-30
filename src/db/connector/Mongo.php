@@ -263,7 +263,7 @@ class Mongo extends Connection
         $this->queryStartTime = microtime(true);
 
         if ($session = $this->getSession()) {
-            $this->cursor = $this->mongo->executeQuery($namespace, $query, [
+            $this->cursor = $this->mongo->executeQuery($namespace, $mongoQuery, [
                 'readPreference' => is_null($readPreference) ? new ReadPreference(ReadPreference::RP_PRIMARY) : $readPreference,
                 'session'        => $session,
             ]);
@@ -1005,7 +1005,7 @@ class Mongo extends Connection
      *
      * @return array
      */
-    public function column(BaseQuery $query, $field, string $key = ''): array
+    public function column(BaseQuery $query, string|array $field, string $key = ''): array
     {
         $options = $query->parseOptions();
 

@@ -16,7 +16,7 @@ namespace think\db\builder;
 use PDO;
 use think\db\Builder;
 use think\db\exception\DbException as Exception;
-use think\db\Query;
+use think\db\BaseQuery as Query;
 use think\db\Raw;
 
 /**
@@ -214,7 +214,7 @@ class Mysql extends Builder
      */
     public function insertAllByKeys(Query $query, array $keys, array $datas): string
     {
-        $options= $query->getOptions();
+        $options = $query->getOptions();
         $bind   = $query->getFieldsBindType();
         $fields = [];
         $values = [];

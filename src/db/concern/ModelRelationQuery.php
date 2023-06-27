@@ -555,7 +555,7 @@ trait ModelRelationQuery
                     $resultSet,
                     $this->options[$with],
                     $this->options['with_relation_attr'],
-                    'with_join' == $with ? true : false,
+                    'with_join' == $with,
                     $this->options['with_cache'] ?? false
                 );
             }
@@ -610,7 +610,7 @@ trait ModelRelationQuery
                     $result->eagerlyResult(
                         $this->options[$with],
                         $this->options['with_relation_attr'],
-                        'with_join' == $with ? true : false,
+                        'with_join' == $with,
                         $this->options['with_cache'] ?? false
                     );
                 }

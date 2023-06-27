@@ -61,11 +61,7 @@ trait TimeFieldQuery
     public function whereTime(string $field, string $op, $range = null, string $logic = 'AND')
     {
         if (is_null($range)) {
-            if (isset($this->timeRule[$op])) {
-                $range = $this->timeRule[$op];
-            } else {
-                $range = $op;
-            }
+            $range = $this->timeRule[$op] ?? $op;
             $op = is_array($range) ? 'between' : '>=';
         }
 

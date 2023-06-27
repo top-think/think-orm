@@ -29,9 +29,7 @@ class Sqlite extends PDOConnection
      */
     protected function parseDsn(array $config): string
     {
-        $dsn = 'sqlite:' . $config['database'];
-
-        return $dsn;
+        return 'sqlite:' . $config['database'];
     }
 
     /**

@@ -86,7 +86,7 @@ trait ModelEvent
                 $result = true;
             }
 
-            return false === $result ? false : true;
+            return !(false === $result);
         } catch (ModelEventException $e) {
             return false;
         }

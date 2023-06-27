@@ -376,7 +376,7 @@ trait Conversion
     }
 
     // JsonSerializable
-    public function jsonSerialize(): mixed
+    public function jsonSerialize(): array
     {
         return $this->toArray();
     }

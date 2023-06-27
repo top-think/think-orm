@@ -342,7 +342,7 @@ abstract class OneToOne extends Relation
         // 预载入关联查询 支持嵌套预载入
         if ($closure) {
             $this->baseQuery = true;
-            $closure($this->query);
+            $closure($this->getClosureType($closure));
         }
 
         $list = $this->query
@@ -361,5 +361,24 @@ abstract class OneToOne extends Relation
         }
 
         return $data;
+    }
+
+    /**
+     * 判断闭包的参数类型
+     * @access protected
+     * @return mixed
+     */
+    protected function getClosureType(Closure $closure, $query = null)
+    {
+        $reflect = new \ReflectionFunction($closure);
+        $params  = $reflect->getParameters();
+
+        if (!empty($params)) {
+            $type  = $params[0]->getType();
+            $query = $query ?: $this->query;
+            return is_null($type) || Relation::class == $type->getName() ? $this : $query;
+        }
+
+        return $this;
     }
 }

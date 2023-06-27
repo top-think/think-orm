@@ -123,11 +123,7 @@ trait Conversion
     {
         $relation = Str::camel($attr);
 
-        if (isset($this->relation[$relation])) {
-            $model = $this->relation[$relation];
-        } else {
-            $model = $this->getRelationData($this->$relation());
-        }
+        $model = $this->relation[$relation] ?? $this->getRelationData($this->$relation());
 
         if ($model instanceof Model) {
             foreach ($append as $key => $attr) {

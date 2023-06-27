@@ -737,7 +737,7 @@ abstract class PDOConnection extends Connection
         }
 
         if (!isset($master)) {
-            $master = (bool)$query->getOptions('master');
+            $master = (bool) $query->getOptions('master');
         }
 
         $procedure = $query->getOptions('procedure') || in_array(strtolower(substr(trim($sql), 0, 4)), ['call', 'exec']);

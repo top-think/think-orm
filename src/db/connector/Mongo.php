@@ -1122,11 +1122,7 @@ class Mongo extends Connection
             $this->commit();
 
             return $result;
-        } catch (\Exception $e) {
-            $this->rollback();
-
-            throw $e;
-        } catch (\Throwable $e) {
+        }  catch (\Throwable $e) {
             $this->rollback();
 
             throw $e;

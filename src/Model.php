@@ -1061,6 +1061,7 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
 
     /**
      * 创建一个查询对象
+     * @return Query
      */
     public static function query(): Query
     {

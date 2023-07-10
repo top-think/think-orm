@@ -24,7 +24,7 @@ trait Transaction
      * @param callable $callback 数据操作方法回调
      * @param array    $dbs      多个查询对象或者连接对象
      *
-     * @throws PDOException
+     * @throws \PDOException
      * @throws \Exception
      * @throws \Throwable
      *
@@ -60,7 +60,7 @@ trait Transaction
     /**
      * 用于非自动提交状态下面的查询提交.
      *
-     * @throws PDOException
+     * @throws \PDOException
      *
      * @return void
      */
@@ -72,7 +72,7 @@ trait Transaction
     /**
      * 事务回滚.
      *
-     * @throws PDOException
+     * @throws \PDOException
      *
      * @return void
      */

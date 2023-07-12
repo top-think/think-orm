@@ -26,8 +26,10 @@ class Mongo
 {
     // connection对象实例
     protected $connection;
+
     // 最后插入ID
     protected $insertId = [];
+
     // 查询表达式
     protected $exp = ['<>' => 'ne', '=' => 'eq', '>' => 'gt', '>=' => 'gte', '<' => 'lt', '<=' => 'lte', 'in' => 'in', 'not in' => 'nin', 'nin' => 'nin', 'mod' => 'mod', 'exists' => 'exists', 'null' => 'null', 'notnull' => 'not null', 'not null' => 'not null', 'regex' => 'regex', 'type' => 'type', 'all' => 'all', '> time' => '> time', '< time' => '< time', 'between' => 'between', 'not between' => 'not between', 'between time' => 'between time', 'not between time' => 'not between time', 'notbetween time' => 'not between time', 'like' => 'like', 'near' => 'near', 'size' => 'size'];
 
@@ -169,15 +171,15 @@ class Mongo
 
         $filter = [];
         foreach ($where as $logic => $val) {
-            $logic = '$'.strtolower($logic);
+            $logic = '$' . strtolower($logic);
             foreach ($val as $field => $value) {
                 if (is_array($value)) {
                     if (key($value) !== 0) {
-                        throw new Exception('where express error:'.var_export($value, true));
+                        throw new Exception('where express error:' . var_export($value, true));
                     }
                     $field = array_shift($value);
                 } elseif (!($value instanceof \Closure)) {
-                    throw new Exception('where express error:'.var_export($value, true));
+                    throw new Exception('where express error:' . var_export($value, true));
                 }
 
                 if ($value instanceof \Closure) {
@@ -239,7 +241,7 @@ class Mongo
                         $exp = $this->exp[$exp];
                     }
                 }
-                $k = '$'.$exp;
+                $k = '$' . $exp;
                 $data[$k] = $value;
             }
             $result[$key] = $data;
@@ -250,7 +252,7 @@ class Mongo
             if (isset($this->exp[$exp])) {
                 $exp = $this->exp[$exp];
             } else {
-                throw new Exception('where express error:'.$exp);
+                throw new Exception('where express error:' . $exp);
             }
         }
 
@@ -260,7 +262,7 @@ class Mongo
             $result[$key] = $this->parseValue($query, $value, $key);
         } elseif (in_array($exp, ['neq', 'ne', 'gt', 'egt', 'gte', 'lt', 'lte', 'elt', 'mod'])) {
             // 比较运算
-            $k = '$'.$exp;
+            $k = '$' . $exp;
             $result[$key] = [$k => $this->parseValue($query, $value, $key)];
         } elseif ('null' == $exp) {
             // NULL 查询
@@ -296,7 +298,7 @@ class Mongo
             foreach ($value as $k => $val) {
                 $value[$k] = $this->parseValue($query, $val, $key);
             }
-            $result[$key] = ['$'.$exp => $value];
+            $result[$key] = ['$' . $exp => $value];
         } elseif ('regex' == $exp) {
             $result[$key] = $value instanceof Regex ? $value : new Regex($value, 'i');
         } elseif ('< time' == $exp) {
@@ -544,11 +546,11 @@ class Mongo
             $field = '_id';
         }
 
-        $group = isset($options['group']) ? '$'.$options['group'] : null;
+        $group = isset($options['group']) ? '$' . $options['group'] : null;
 
         $pipeline = [
-            ['$match' => (object) $this->parseWhere($query, $options['where'])],
-            ['$group' => ['_id' => $group, 'aggregate' => ['$'.$fun => '$'.$field]]],
+            ['$match' => (object)$this->parseWhere($query, $options['where'])],
+            ['$group' => ['_id' => $group, 'aggregate' => ['$' . $fun => '$' . $field]]],
         ];
 
         $cmd = [
@@ -588,11 +590,11 @@ class Mongo
         $groups = ['_id' => []];
 
         foreach ($groupBy as $field) {
-            $groups['_id'][$field] = '$'.$field;
+            $groups['_id'][$field] = '$' . $field;
         }
 
         foreach ($aggregate as $fun => $field) {
-            $groups[$field.'_'.$fun] = ['$'.$fun => '$'.$field];
+            $groups[$field . '_' . $fun] = ['$' . $fun => '$' . $field];
         }
 
         $pipeline = [

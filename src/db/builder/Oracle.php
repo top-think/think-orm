@@ -51,7 +51,7 @@ class Oracle extends Builder
     /**
      * 设置锁机制.
      *
-     * @param Query      $query 查询对象
+     * @param Query $query 查询对象
      * @param bool|string $lock
      *
      * @return string
@@ -68,13 +68,13 @@ class Oracle extends Builder
     /**
      * 字段和表名处理.
      *
-     * @param Query  $query  查询对象
+     * @param Query $query 查询对象
      * @param string|int|Raw $key
-     * @param bool   $strict
-     *
-     * @throws Exception
+     * @param bool $strict
      *
      * @return string
+     * @throws Exception
+     *
      */
     public function parseKey(Query $query, string|int|Raw $key, bool $strict = false): string
     {

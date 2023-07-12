@@ -34,11 +34,11 @@ class HasMany extends Relation
      */
     public function __construct(Model $parent, string $model, string $foreignKey, string $localKey)
     {
-        $this->parent       = $parent;
-        $this->model        = $model;
-        $this->foreignKey   = $foreignKey;
-        $this->localKey     = $localKey;
-        $this->query        = (new $model())->db();
+        $this->parent = $parent;
+        $this->model = $model;
+        $this->foreignKey = $foreignKey;
+        $this->localKey = $localKey;
+        $this->query = (new $model())->db();
 
         if (get_class($parent) == $model) {
             $this->selfRelation = true;
@@ -79,8 +79,8 @@ class HasMany extends Relation
      */
     public function eagerlyResultSet(array &$resultSet, string $relation, array $subRelation, Closure $closure = null, array $cache = []): void
     {
-        $localKey   = $this->localKey;
-        $range      = [];
+        $localKey = $this->localKey;
+        $range = [];
 
         foreach ($resultSet as $result) {
             // 获取关联外键列表
@@ -122,8 +122,8 @@ class HasMany extends Relation
         $localKey = $this->localKey;
 
         if (isset($result->$localKey)) {
-            $pk     = $result->$localKey;
-            $data   = $this->eagerlyOneToMany([
+            $pk = $result->$localKey;
+            $data = $this->eagerlyOneToMany([
                 [$this->foreignKey, '=', $pk],
             ], $subRelation, $closure, $cache);
 
@@ -237,8 +237,8 @@ class HasMany extends Relation
     /**
      * 保存（新增）当前关联数据对象
      *
-     * @param array|Model $data    数据 可以使用数组 关联模型对象
-     * @param bool  $replace 是否自动识别更新和写入
+     * @param array|Model $data 数据 可以使用数组 关联模型对象
+     * @param bool $replace 是否自动识别更新和写入
      *
      * @return Model|false
      */
@@ -300,9 +300,9 @@ class HasMany extends Relation
      */
     public function has(string $operator = '>=', int $count = 1, string $id = '*', string $joinType = 'INNER', Query $query = null): Query
     {
-        $table      = $this->query->getTable();
-        $model      = class_basename($this->parent);
-        $relation   = class_basename($this->model);
+        $table = $this->query->getTable();
+        $model = class_basename($this->parent);
+        $relation = class_basename($this->model);
 
         if ('*' != $id) {
             $id = $relation . '.' . (new $this->model())->getPk();
@@ -332,9 +332,9 @@ class HasMany extends Relation
      */
     public function hasWhere($where = [], $fields = null, string $joinType = '', Query $query = null): Query
     {
-        $table      = $this->query->getTable();
-        $model      = class_basename($this->parent);
-        $relation   = class_basename($this->model);
+        $table = $this->query->getTable();
+        $model = class_basename($this->parent);
+        $relation = class_basename($this->model);
 
         if (is_array($where)) {
             $this->getQueryWhere($where, $relation);

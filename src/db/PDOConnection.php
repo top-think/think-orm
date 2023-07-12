@@ -276,10 +276,10 @@ abstract class PDOConnection extends Connection
     {
         // 字段大小写转换
         return match ($this->attrCase) {
-            PDO::CASE_LOWER =>  array_change_key_case($info),
-            PDO::CASE_UPPER =>  array_change_key_case($info, CASE_UPPER),
-            PDO::CASE_NATURAL =>    $info,
-            default         =>  $info,
+            PDO::CASE_LOWER => array_change_key_case($info),
+            PDO::CASE_UPPER => array_change_key_case($info, CASE_UPPER),
+            PDO::CASE_NATURAL => $info,
+            default => $info,
         };
     }
 
@@ -891,8 +891,8 @@ abstract class PDOConnection extends Connection
      */
     protected function queryPDOStatement(BaseQuery $query, string $sql): PDOStatement
     {
-        $options =   $query->getOptions();
-        $bind   =   $query->getBind();
+        $options = $query->getOptions();
+        $bind = $query->getBind();
         $master = !empty($options['master']);
         $procedure = !empty($options['procedure']) || in_array(strtolower(substr(trim($sql), 0, 4)), ['call', 'exec']);
 
@@ -1074,14 +1074,14 @@ abstract class PDOConnection extends Connection
     /**
      * 批量插入记录.
      *
-     * @param BaseQuery $query   查询对象
-     * @param array     $keys 键值
-     * @param array     $values 数据
-     *
-     * @throws \Exception
-     * @throws \Throwable
+     * @param BaseQuery $query 查询对象
+     * @param array $keys 键值
+     * @param array $values 数据
      *
      * @return int
+     * @throws \Throwable
+     *
+     * @throws \Exception
      */
     public function insertAllByKeys(BaseQuery $query, array $keys, array $values): int
     {

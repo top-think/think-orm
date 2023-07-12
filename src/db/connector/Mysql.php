@@ -74,8 +74,8 @@ class Mysql extends PDOConnection
                 $val = array_change_key_case($val);
 
                 $info[$val['field']] = [
-                    'name'    => $val['field'],
-                    'type'    => $val['type'],
+                    'name' => $val['field'],
+                    'type' => $val['type'],
                     'notnull' => 'NO' == $val['null'],
                     'default' => $val['default'],
                     'primary' => strtolower($val['key']) == 'pri',

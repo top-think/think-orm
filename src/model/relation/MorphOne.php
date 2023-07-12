@@ -62,12 +62,12 @@ class MorphOne extends Relation
      */
     public function __construct(Model $parent, string $model, string $morphKey, string $morphType, string $type)
     {
-        $this->parent       = $parent;
-        $this->model        = $model;
-        $this->type         = $type;
-        $this->morphKey     = $morphKey;
-        $this->morphType    = $morphType;
-        $this->query        = (new $model())->db();
+        $this->parent = $parent;
+        $this->model = $model;
+        $this->type = $type;
+        $this->morphKey = $morphKey;
+        $this->morphType = $morphType;
+        $this->query = (new $model())->db();
     }
 
     /**
@@ -147,10 +147,10 @@ class MorphOne extends Relation
      */
     public function eagerlyResultSet(array &$resultSet, string $relation, array $subRelation, Closure $closure = null, array $cache = []): void
     {
-        $morphType  = $this->morphType;
-        $morphKey   = $this->morphKey;
-        $type       = $this->type;
-        $range      = [];
+        $morphType = $this->morphType;
+        $morphKey = $this->morphKey;
+        $type = $this->type;
+        $range = [];
 
         foreach ($resultSet as $result) {
             $pk = $result->getPk();
@@ -269,8 +269,8 @@ class MorphOne extends Relation
     /**
      * 保存（新增）当前关联数据对象
      *
-     * @param array|Model $data    数据 可以使用数组 关联模型对象
-     * @param bool  $replace 是否自动识别更新和写入
+     * @param array|Model $data 数据 可以使用数组 关联模型对象
+     * @param bool $replace 是否自动识别更新和写入
      *
      * @return Model|false
      */

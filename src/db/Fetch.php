@@ -43,8 +43,8 @@ class Fetch
      */
     public function __construct(protected Query $query)
     {
-        $this->connection   = $query->getConnection();
-        $this->builder      = $this->connection->getBuilder();
+        $this->connection = $query->getConnection();
+        $this->builder = $this->connection->getBuilder();
     }
 
     /**

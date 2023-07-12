@@ -41,7 +41,7 @@ trait WhereQuery
         }
 
         $pk = $this->getPk();
-        if ((is_null($condition) || '=' == $op) && is_string($pk) && $pk == $field ) {
+        if ((is_null($condition) || '=' == $op) && is_string($pk) && $pk == $field) {
             $this->options['key'] = is_null($condition) ? $op : $condition;
         }
 

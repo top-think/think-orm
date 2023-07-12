@@ -64,7 +64,7 @@ class HasOneThrough extends HasManyThrough
         $localKey   = $this->localKey;
         $foreignKey = $this->foreignKey;
 
-        $range      = [];
+        $range = [];
         foreach ($resultSet as $result) {
             // 获取关联外键列表
             if (isset($result->$localKey)) {

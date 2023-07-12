@@ -51,10 +51,10 @@ trait TimeFieldQuery
     /**
      * 查询日期或者时间.
      *
-     * @param string       $field 日期字段名
-     * @param string       $op    比较运算符或者表达式
-     * @param mixed        $range 比较范围
-     * @param string       $logic AND OR
+     * @param string $field 日期字段名
+     * @param string $op 比较运算符或者表达式
+     * @param mixed $range 比较范围
+     * @param string $logic AND OR
      *
      * @return $this
      */

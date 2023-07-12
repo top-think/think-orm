@@ -64,9 +64,10 @@ class Sqlsrv extends PDOConnection
     public function getFields(string $tableName): array
     {
         [$tableName] = explode(' ', $tableName);
+
         str_contains($tableName, '.') && $tableName = substr($tableName, strpos($tableName, '.') + 1);
 
-        $sql    = "SELECT   column_name,   data_type,   column_default,   is_nullable
+        $sql = "SELECT   column_name,   data_type,   column_default,   is_nullable
             FROM    information_schema.tables AS t
             JOIN    information_schema.columns AS c
             ON  t.table_catalog = c.table_catalog

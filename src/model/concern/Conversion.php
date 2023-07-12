@@ -218,6 +218,7 @@ trait Conversion
     public function toArray(): array
     {
         $item = $visible = $hidden = [];
+
         $hasVisible = false;
 
         foreach ($this->visible as $key => $val) {
@@ -303,11 +304,11 @@ trait Conversion
         } elseif (str_contains($name, '.')) {
             // 追加单个关联对象属性
             [$key, $attr] = explode('.', $name);
-            $relation   = $this->getRelationWith($key, $hidden, $visible);
+            $relation = $this->getRelationWith($key, $hidden, $visible);
             $item[$key] = $relation ? $relation->append([$attr])->toArray() : [];
         } else {
-            $value          = $this->getAttr($name);
-            $item[$name]    = $value;
+            $value = $this->getAttr($name);
+            $item[$name] = $value;
 
             $this->getBindAttrValue($name, $value, $item);
         }
@@ -315,7 +316,7 @@ trait Conversion
 
     protected function getRelationWith(string $key, array $hidden, array $visible)
     {
-        $relation   = $this->getRelation($key, true);
+        $relation = $this->getRelation($key, true);
         if ($relation) {
             if (isset($visible[$key])) {
                 $relation->visible($visible[$key]);

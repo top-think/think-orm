@@ -32,11 +32,11 @@ class HasOne extends OneToOne
      */
     public function __construct(Model $parent, string $model, string $foreignKey, string $localKey)
     {
-        $this->parent       = $parent;
-        $this->model        = $model;
-        $this->foreignKey   = $foreignKey;
-        $this->localKey     = $localKey;
-        $this->query        = (new $model())->db();
+        $this->parent = $parent;
+        $this->model = $model;
+        $this->foreignKey = $foreignKey;
+        $this->localKey = $localKey;
+        $this->query = (new $model())->db();
 
         if (get_class($parent) == $model) {
             $this->selfRelation = true;
@@ -174,9 +174,9 @@ class HasOne extends OneToOne
      */
     public function hasWhere($where = [], $fields = null, string $joinType = '', Query $query = null): Query
     {
-        $table      = $this->query->getTable();
-        $model      = class_basename($this->parent);
-        $relation   = class_basename($this->model);
+        $table = $this->query->getTable();
+        $model = class_basename($this->parent);
+        $relation = class_basename($this->model);
 
         if (is_array($where)) {
             $this->getQueryWhere($where, $relation);
@@ -216,7 +216,7 @@ class HasOne extends OneToOne
         $localKey   = $this->localKey;
         $foreignKey = $this->foreignKey;
 
-        $range      = [];
+        $range = [];
         foreach ($resultSet as $result) {
             // 获取关联外键列表
             if (isset($result->$localKey)) {

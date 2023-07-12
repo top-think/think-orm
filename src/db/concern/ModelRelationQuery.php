@@ -294,7 +294,7 @@ trait ModelRelationQuery
             return $this;
         }
 
-        $with = (array) $with;
+        $with = (array)$with;
         $first = true;
 
         foreach ($with as $key => $relation) {

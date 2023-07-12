@@ -23,7 +23,6 @@ use think\db\exception\DbException as Exception;
  */
 class Builder extends BaseBuilder
 {
-
     /**
      * 数据分析.
      *
@@ -80,9 +79,9 @@ class Builder extends BaseBuilder
                 $result[$item] = 'NULL';
             } elseif (is_array($val) && !empty($val) && is_string($val[0])) {
                 if (in_array(strtoupper($val[0]), ['INC', 'DEC'])) {
-                    $result[$item] =    match (strtoupper($val[0])) {
-                        'INC'   =>  $item . ' + ' . floatval($val[1]),
-                        'DEC'   =>  $item . ' - ' . floatval($val[1]),
+                    $result[$item] = match (strtoupper($val[0])) {
+                        'INC' => $item . ' + ' . floatval($val[1]),
+                        'DEC' => $item . ' - ' . floatval($val[1]),
                     };
                 }
             } elseif (is_scalar($val)) {
@@ -180,7 +179,7 @@ class Builder extends BaseBuilder
     /**
      * table分析.
      *
-     * @param Query $query  查询对象
+     * @param Query $query 查询对象
      * @param array|string $tables 表名
      *
      * @return string
@@ -405,8 +404,8 @@ class Builder extends BaseBuilder
             if ($query->isAutoBind()) {
                 $array = [];
                 foreach ($value as $v) {
-                    $name       = $query->bindValue($v, $bindType);
-                    $array[]    = ':' . $name;
+                    $name = $query->bindValue($v, $bindType);
+                    $array[] = ':' . $name;
                 }
                 $value = implode(',', $array);
             } elseif (Connection::PARAM_STR == $bindType) {
@@ -563,8 +562,8 @@ class Builder extends BaseBuilder
      */
     protected function parseRaw(Query $query, Raw $raw): string
     {
-        $sql    = $raw->getValue();
-        $bind   = $raw->getBind();
+        $sql = $raw->getValue();
+        $bind = $raw->getBind();
 
         if ($bind) {
             $query->bindParams($sql, $bind);
@@ -727,9 +726,9 @@ class Builder extends BaseBuilder
     /**
      * 生成insertall SQL.
      *
-     * @param Query $query   查询对象
-     * @param  array $keys  字段名
-     * @param  array $datas 数据
+     * @param Query $query 查询对象
+     * @param array $keys 字段名
+     * @param array $datas 数据
      *
      * @return string
      */

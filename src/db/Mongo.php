@@ -592,7 +592,7 @@ class Mongo extends BaseQuery
 
         $page = max($page, 1);
 
-        $config['path'] = $config['path'] ?? Paginator::getCurrentPath();
+        $config['path'] ??= Paginator::getCurrentPath();
 
         if (!isset($total) && !$simple) {
             $options = $this->getOptions();

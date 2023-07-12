@@ -23,10 +23,10 @@ trait JoinAndViewQuery
     /**
      * 查询SQL组装 join.
      *
-     * @param array|string|Raw   $join      关联的表名
-     * @param mixed  $condition 条件
-     * @param string $type      JOIN类型
-     * @param array  $bind      参数绑定
+     * @param array|string|Raw $join 关联的表名
+     * @param mixed $condition 条件
+     * @param string $type JOIN类型
+     * @param array $bind 参数绑定
      *
      * @return $this
      */
@@ -46,9 +46,9 @@ trait JoinAndViewQuery
     /**
      * LEFT JOIN.
      *
-     * @param array|string|Raw  $join      关联的表名
+     * @param array|string|Raw $join 关联的表名
      * @param mixed $condition 条件
-     * @param array $bind      参数绑定
+     * @param array $bind 参数绑定
      *
      * @return $this
      */
@@ -60,9 +60,9 @@ trait JoinAndViewQuery
     /**
      * RIGHT JOIN.
      *
-     * @param array|string|Raw  $join      关联的表名
+     * @param array|string|Raw $join 关联的表名
      * @param mixed $condition 条件
-     * @param array $bind      参数绑定
+     * @param array $bind 参数绑定
      *
      * @return $this
      */
@@ -74,9 +74,9 @@ trait JoinAndViewQuery
     /**
      * FULL JOIN.
      *
-     * @param array|string|Raw  $join      关联的表名
+     * @param array|string|Raw $join 关联的表名
      * @param mixed $condition 条件
-     * @param array $bind      参数绑定
+     * @param array $bind 参数绑定
      *
      * @return $this
      */
@@ -137,11 +137,11 @@ trait JoinAndViewQuery
     /**
      * 指定JOIN查询字段.
      *
-     * @param array|string|Raw  $join  数据表
+     * @param array|string|Raw $join 数据表
      * @param string|array|bool $field 查询字段
-     * @param string       $on    JOIN条件
-     * @param string       $type  JOIN类型
-     * @param array        $bind  参数绑定
+     * @param string $on JOIN条件
+     * @param string $type JOIN类型
+     * @param array $bind 参数绑定
      *
      * @return $this
      */

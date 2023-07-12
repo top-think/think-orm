@@ -21,10 +21,10 @@ use think\DbManager;
  */
 abstract class Connection implements ConnectionInterface
 {
-    const PARAM_INT   = 1;
-    const PARAM_STR   = 2;
-    const PARAM_BOOL  = 5;
-    const PARAM_FLOAT = 21;
+    public const PARAM_INT = 1;
+    public const PARAM_STR = 2;
+    public const PARAM_BOOL = 5;
+    public const PARAM_FLOAT = 21;
 
     /**
      * 当前SQL指令.

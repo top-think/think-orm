@@ -63,9 +63,9 @@ class Pgsql extends Builder
     /**
      * 字段和表名处理.
      *
-     * @param Query $query  查询对象
-     * @param string|int|Raw $key    字段名
-     * @param bool  $strict 严格检测
+     * @param Query $query 查询对象
+     * @param string|int|Raw $key 字段名
+     * @param bool $strict 严格检测
      *
      * @return string
      */

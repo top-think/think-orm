@@ -724,7 +724,7 @@ class Mongo extends BaseQuery
             // 根据页数计算limit
             [$page, $listRows] = $options['page'];
 
-            $page             = $page     > 0 ? $page : 1;
+            $page             = $page > 0 ? $page : 1;
             $listRows         = $listRows > 0 ? $listRows : (is_numeric($options['limit']) ? $options['limit'] : 20);
             $offset           = $listRows * ($page - 1);
             $options['skip']  = intval($offset);

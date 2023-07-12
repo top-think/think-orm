@@ -78,7 +78,7 @@ class Mysql extends PDOConnection
                     'type'    => $val['type'],
                     'notnull' => 'NO' == $val['null'],
                     'default' => $val['default'],
-                    'primary' => strtolower($val['key'])   == 'pri',
+                    'primary' => strtolower($val['key']) == 'pri',
                     'autoinc' => strtolower($val['extra']) == 'auto_increment',
                     'comment' => $val['comment'],
                 ];

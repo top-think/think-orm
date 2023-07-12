@@ -379,7 +379,7 @@ abstract class PDOConnection extends Connection
                 }
             }
 
-            $pk      = $info['_pk']      ?? null;
+            $pk      = $info['_pk'] ?? null;
             $autoinc = $info['_autoinc'] ?? null;
             unset($info['_pk'], $info['_autoinc']);
 

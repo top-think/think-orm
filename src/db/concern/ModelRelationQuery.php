@@ -174,7 +174,7 @@ trait ModelRelationQuery
             } elseif ($this->model) {
                 // 检测搜索器
                 $fieldName = is_numeric($key) ? $field : $key;
-                $method = 'search' . Str::studly($fieldName) . 'Attr';
+                $method    = 'search' . Str::studly($fieldName) . 'Attr';
 
                 if (method_exists($this->model, $method)) {
                     $this->model->$method($this, $data[$field] ?? null, $data, $prefix);
@@ -294,19 +294,19 @@ trait ModelRelationQuery
             return $this;
         }
 
-        $with = (array) $with;
+        $with  = (array) $with;
         $first = true;
 
         foreach ($with as $key => $relation) {
             $closure = null;
-            $field = true;
+            $field   = true;
 
             if ($relation instanceof Closure) {
                 // 支持闭包查询过滤关联条件
-                $closure = $relation;
+                $closure  = $relation;
                 $relation = $key;
             } elseif (is_array($relation)) {
-                $field = $relation;
+                $field    = $relation;
                 $relation = $key;
             } elseif (is_string($relation) && str_contains($relation, '.')) {
                 $relation = strstr($relation, '.', true);
@@ -380,7 +380,7 @@ trait ModelRelationQuery
 
         if ($key instanceof \DateTimeInterface || $key instanceof \DateInterval || (is_int($key) && is_null($expire))) {
             $expire = $key;
-            $key = true;
+            $key    = true;
         }
 
         if (true === $relation || is_numeric($relation)) {

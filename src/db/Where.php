@@ -78,7 +78,7 @@ class Where implements ArrayAccess
      */
     protected function parseItem(string $field, array $where = []): array
     {
-        $op = $where[0];
+        $op        = $where[0];
         $condition = $where[1] ?? null;
 
         if (is_array($op)) {

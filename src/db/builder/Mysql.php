@@ -161,8 +161,8 @@ class Mysql extends Builder
      */
     public function insertAll(Query $query, array $dataSet): string
     {
-        $options    = $query->getOptions();
-        $bind       = $query->getFieldsBindType();
+        $options = $query->getOptions();
+        $bind    = $query->getFieldsBindType();
 
         // 获取合法的字段
         if (empty($options['field']) || '*' == $options['field']) {
@@ -207,17 +207,17 @@ class Mysql extends Builder
     /**
      * 生成insertall SQL
      * @access public
-     * @param  Query    $query   查询对象
-     * @param  array    $keys 键值
-     * @param  array    $values 数据
+     * @param  Query  $query  查询对象
+     * @param  array  $keys   键值
+     * @param  array  $values 数据
      * @return string
      */
     public function insertAllByKeys(Query $query, array $keys, array $datas): string
     {
         $options = $query->getOptions();
-        $bind   = $query->getFieldsBindType();
-        $fields = [];
-        $values = [];
+        $bind    = $query->getFieldsBindType();
+        $fields  = [];
+        $values  = [];
 
         foreach ($keys as $field) {
             $fields[] = $this->parseKey($query, $field);
@@ -259,8 +259,8 @@ class Mysql extends Builder
      */
     public function update(Query $query): string
     {
-        $options    = $query->getOptions();
-        $data       = $this->parseData($query, $options['data']);
+        $options = $query->getOptions();
+        $data    = $this->parseData($query, $options['data']);
 
         if (empty($data)) {
             return '';
@@ -435,10 +435,10 @@ class Mysql extends Builder
      */
     protected function parseNull(Query $query, string $key, string $exp, $value, $field, int $bindType): string
     {
-        if (str_starts_with($key, "json_extract")) {
+        if (str_starts_with($key, 'json_extract')) {
             if ($exp === 'NULL') {
                 return '(' . $key . ' is null OR json_type(' . $key . ') = \'NULL\')';
-            }elseif ($exp === 'NOT NULL'){
+            } elseif ($exp === 'NOT NULL') {
                 return '(' . $key . ' is not null AND json_type(' . $key . ') != \'NULL\')';
             }
         }
@@ -504,12 +504,12 @@ class Mysql extends Builder
         $updates = [];
         foreach ($duplicate as $key => $val) {
             if (is_numeric($key)) {
-                $val = $this->parseKey($query, $val);
+                $val       = $this->parseKey($query, $val);
                 $updates[] = $val . ' = VALUES(' . $val . ')';
             } elseif ($val instanceof Raw) {
                 $updates[] = $this->parseKey($query, $key) . ' = ' . $this->parseRaw($query, $val);
             } else {
-                $name = $query->bindValue($val, $query->getConnection()->getFieldBindType($key));
+                $name      = $query->bindValue($val, $query->getConnection()->getFieldBindType($key));
                 $updates[] = $this->parseKey($query, $key) . ' = :' . $name;
             }
         }

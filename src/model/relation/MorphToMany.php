@@ -65,9 +65,9 @@ class MorphToMany extends BelongsToMany
      */
     public function __construct(Model $parent, string $model, string $middle, string $morphType, string $morphKey, string $localKey, bool $inverse = false)
     {
-        $this->morphType    = $morphType;
-        $this->inverse      = $inverse;
-        $this->morphClass   = $inverse ? $model : get_class($parent);
+        $this->morphType  = $morphType;
+        $this->inverse    = $inverse;
+        $this->morphClass = $inverse ? $model : get_class($parent);
 
         if (isset(static::$morphMap[$this->morphClass])) {
             $this->morphClass = static::$morphMap[$this->morphClass];
@@ -92,8 +92,8 @@ class MorphToMany extends BelongsToMany
      */
     public function eagerlyResultSet(array &$resultSet, string $relation, array $subRelation, Closure $closure = null, array $cache = []): void
     {
-        $pk     = $resultSet[0]->getPk();
-        $range  = [];
+        $pk    = $resultSet[0]->getPk();
+        $range = [];
 
         foreach ($resultSet as $result) {
             // 获取关联外键列表
@@ -215,9 +215,9 @@ class MorphToMany extends BelongsToMany
     protected function belongsToManyQuery(string $foreignKey, string $localKey, array $condition = []): Query
     {
         // 关联查询封装
-        $tableName  = $this->query->getTable();
-        $table      = $this->pivot->db()->getTable();
-        $fields     = $this->getQueryFields($tableName);
+        $tableName = $this->query->getTable();
+        $table     = $this->pivot->db()->getTable();
+        $fields    = $this->getQueryFields($tableName);
 
         $query = $this->query
             ->field($fields)
@@ -303,7 +303,7 @@ class MorphToMany extends BelongsToMany
             } else {
                 // 保存关联表数据
                 $model = new $this->model();
-                $id = $model->insertGetId($data);
+                $id    = $model->insertGetId($data);
             }
         } elseif (is_numeric($data) || is_string($data)) {
             // 根据关联表主键直接写入中间表
@@ -315,9 +315,9 @@ class MorphToMany extends BelongsToMany
 
         if (!empty($id)) {
             // 保存中间表数据
-            $pivot[$this->localKey] = $this->parent->getKey();
+            $pivot[$this->localKey]  = $this->parent->getKey();
             $pivot[$this->morphType] = $this->morphClass;
-            $ids = (array) $id;
+            $ids                     = (array) $id;
 
             $result = [];
 
@@ -466,7 +466,7 @@ class MorphToMany extends BelongsToMany
     {
         if (empty($this->baseQuery)) {
             $foreignKey = $this->foreignKey;
-            $localKey = $this->localKey;
+            $localKey   = $this->localKey;
 
             // 关联查询
             $this->belongsToManyQuery($foreignKey, $localKey, [

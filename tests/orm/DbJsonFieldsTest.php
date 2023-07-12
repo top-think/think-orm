@@ -94,13 +94,13 @@ SQL
      */
     public function testJsonFieldMemberNotEqual()
     {
-        $data = Db::table(self::$table)->where('extend->brand', '<>', 'TP8')->whereNull('extend->brand', "or")->select();
+        $data = Db::table(self::$table)->where('extend->brand', '<>', 'TP8')->whereNull('extend->brand', 'or')->select();
         $this->assertSame($data->count(), self::$testGoodsDataCollect->where('extend.brand', '<>', 'TP8')->count());
 
-        $data = Db::table(self::$table)->where('extend->standard', '<>', '大')->whereNull('extend->standard', "or")->select();
+        $data = Db::table(self::$table)->where('extend->standard', '<>', '大')->whereNull('extend->standard', 'or')->select();
         $this->assertSame($data->count(), self::$testGoodsDataCollect->where('extend.standard', '<>', '大')->count());
 
-        $data = Db::table(self::$table)->where('extend->type', '<>', '清洁')->whereNull('extend->type', "or")->select();
+        $data = Db::table(self::$table)->where('extend->type', '<>', '清洁')->whereNull('extend->type', 'or')->select();
         $this->assertSame($data->count(), self::$testGoodsDataCollect->where('extend.type', '<>', '清洁')->count());
     }
 }

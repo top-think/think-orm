@@ -24,7 +24,7 @@ class Raw
      * 创建一个查询表达式.
      *
      * @param string|Stringable $value
-     * @param array  $bind
+     * @param array             $bind
      *
      * @return void
      */

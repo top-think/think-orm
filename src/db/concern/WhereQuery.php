@@ -41,7 +41,7 @@ trait WhereQuery
         }
 
         $pk = $this->getPk();
-        if ((is_null($condition) || '=' == $op) && is_string($pk) && $pk == $field ) {
+        if ((is_null($condition) || '=' == $op) && is_string($pk) && $pk == $field) {
             $this->options['key'] = is_null($condition) ? $op : $condition;
         }
 
@@ -61,7 +61,7 @@ trait WhereQuery
     protected function parseQueryWhere(BaseQuery $query): void
     {
         $this->options['where'] = $query->getOptions('where') ?? [];
-        $via = $query->getOptions('via');
+        $via                    = $query->getOptions('via');
 
         if ($via) {
             foreach ($this->options['where'] as $logic => &$where) {
@@ -285,7 +285,7 @@ trait WhereQuery
     public function whereColumn(string $field1, string $operator, string $field2 = null, string $logic = 'AND')
     {
         if (is_null($field2)) {
-            $field2 = $operator;
+            $field2   = $operator;
             $operator = '=';
         }
 
@@ -340,7 +340,7 @@ trait WhereQuery
     {
         if (is_null($condition)) {
             $condition = $op;
-            $op = '=';
+            $op        = '=';
         }
 
         $this->options['where'][$logic][] = [new Raw($field), $op, $condition];

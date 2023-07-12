@@ -48,8 +48,8 @@ trait Virtual
     /**
      * 保存当前数据对象
      *
-     * @param array|object  $data     数据
-     * @param string $sequence 自增序列名
+     * @param array|object $data     数据
+     * @param string       $sequence 自增序列名
      *
      * @return bool
      */

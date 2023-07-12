@@ -28,6 +28,7 @@ class Sqlsrv extends Builder
      * @var string
      */
     protected $selectSql = 'SELECT T1.* FROM (SELECT thinkphp.*, ROW_NUMBER() OVER (%ORDER%) AS ROW_NUMBER FROM (SELECT %DISTINCT% %FIELD% FROM %TABLE%%JOIN%%WHERE%%GROUP%%HAVING%) AS thinkphp) AS T1 %LIMIT%%COMMENT%';
+
     /**
      * SELECT INSERT SQL表达式.
      *
@@ -91,7 +92,7 @@ class Sqlsrv extends Builder
                     $sort = $val;
                 }
 
-                $sort = in_array(strtolower($sort), ['asc', 'desc'], true) ? ' ' . $sort : '';
+                $sort    = in_array(strtolower($sort), ['asc', 'desc'], true) ? ' ' . $sort : '';
                 $array[] = $this->parseKey($query, $key, true) . $sort;
             }
         }
@@ -114,9 +115,9 @@ class Sqlsrv extends Builder
     /**
      * 字段和表名处理.
      *
-     * @param Query $query  查询对象
+     * @param Query          $query  查询对象
      * @param string|int|Raw $key    字段名
-     * @param bool  $strict 严格检测
+     * @param bool           $strict 严格检测
      *
      * @return string
      */

@@ -74,21 +74,21 @@ class Bootstrap extends Paginator
             'last'   => null,
         ];
 
-        $side = 3;
+        $side   = 3;
         $window = $side * 2;
 
         if ($this->lastPage < $window + 6) {
             $block['first'] = $this->getUrlRange(1, $this->lastPage);
         } elseif ($this->currentPage <= $window) {
             $block['first'] = $this->getUrlRange(1, $window + 2);
-            $block['last'] = $this->getUrlRange($this->lastPage - 1, $this->lastPage);
+            $block['last']  = $this->getUrlRange($this->lastPage - 1, $this->lastPage);
         } elseif ($this->currentPage > ($this->lastPage - $window)) {
             $block['first'] = $this->getUrlRange(1, 2);
-            $block['last'] = $this->getUrlRange($this->lastPage - ($window + 2), $this->lastPage);
+            $block['last']  = $this->getUrlRange($this->lastPage - ($window + 2), $this->lastPage);
         } else {
-            $block['first'] = $this->getUrlRange(1, 2);
+            $block['first']  = $this->getUrlRange(1, 2);
             $block['slider'] = $this->getUrlRange($this->currentPage - $side, $this->currentPage + $side);
-            $block['last'] = $this->getUrlRange($this->lastPage - 1, $this->lastPage);
+            $block['last']   = $this->getUrlRange($this->lastPage - 1, $this->lastPage);
         }
 
         $html = '';

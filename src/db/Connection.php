@@ -21,10 +21,10 @@ use think\DbManager;
  */
 abstract class Connection implements ConnectionInterface
 {
-    const PARAM_INT   = 1;
-    const PARAM_STR   = 2;
-    const PARAM_BOOL  = 5;
-    const PARAM_FLOAT = 21;
+    public const PARAM_INT   = 1;
+    public const PARAM_STR   = 2;
+    public const PARAM_BOOL  = 5;
+    public const PARAM_FLOAT = 21;
 
     /**
      * 当前SQL指令.
@@ -282,7 +282,7 @@ abstract class Connection implements ConnectionInterface
         }
 
         $runtime = number_format((microtime(true) - $this->queryStartTime), 6);
-        $sql = $sql ?: $this->getLastsql();
+        $sql     = $sql ?: $this->getLastsql();
 
         if (empty($this->config['deploy'])) {
             $master = null;
@@ -378,7 +378,7 @@ abstract class Connection implements ConnectionInterface
     {
         foreach ($bind as $key => $val) {
             $value = strval(is_array($val) ? $val[0] : $val);
-            $type = is_array($val) ? $val[1] : self::PARAM_STR;
+            $type  = is_array($val) ? $val[1] : self::PARAM_STR;
 
             if (self::PARAM_FLOAT == $type || self::PARAM_STR == $type) {
                 $value = '\'' . addslashes($value) . '\'';

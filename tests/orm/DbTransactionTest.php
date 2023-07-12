@@ -6,10 +6,11 @@ namespace tests\orm;
 
 use Exception;
 use tests\Base;
-use function tests\mysql_kill_connection;
-use function tests\query_mysql_connection_id;
 use think\facade\Db;
 use Throwable;
+
+use function tests\mysql_kill_connection;
+use function tests\query_mysql_connection_id;
 
 class DbTransactionTest extends Base
 {
@@ -42,7 +43,7 @@ SQL
     public function testTransaction()
     {
         $testData = self::$testData;
-        $connect = Db::connect();
+        $connect  = Db::connect();
 
         $connect->table('test_tran_a')->startTrans();
         $connect->table('test_tran_a')->insertAll($testData);
@@ -70,7 +71,7 @@ SQL
     {
         $testData = self::$testData;
         // 初始化配置
-        $config = Db::getConfig();
+        $config                                            = Db::getConfig();
         $config['connections']['mysql']['break_reconnect'] = true;
         $config['connections']['mysql']['break_match_str'] = [
             'query execution was interrupted',
@@ -180,7 +181,7 @@ SQL
     {
         $testData = self::$testData;
         // 初始化配置
-        $config = Db::getConfig();
+        $config                                            = Db::getConfig();
         $config['connections']['mysql']['break_reconnect'] = true;
         $config['connections']['mysql']['break_match_str'] = [
             'query execution was interrupted',

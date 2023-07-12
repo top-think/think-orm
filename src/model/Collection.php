@@ -240,7 +240,7 @@ class Collection extends BaseCollection
             return new static($items);
         }
 
-        $diff = [];
+        $diff       = [];
         $dictionary = $this->dictionary($items, $indexKey);
 
         if (is_string($indexKey)) {
@@ -268,7 +268,7 @@ class Collection extends BaseCollection
             return new static([]);
         }
 
-        $intersect = [];
+        $intersect  = [];
         $dictionary = $this->dictionary($items, $indexKey);
 
         if (is_string($indexKey)) {

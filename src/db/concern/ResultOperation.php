@@ -214,12 +214,12 @@ trait ResultOperation
         if (!empty($this->model)) {
             $class = get_class($this->model);
 
-            throw new ModelNotFoundException('model data Not Found:'.$class, $class, $this->options);
+            throw new ModelNotFoundException('model data Not Found:' . $class, $class, $this->options);
         }
 
         $table = $this->getTable();
 
-        throw new DataNotFoundException('table data not Found:'.$table, $table, $this->options);
+        throw new DataNotFoundException('table data not Found:' . $table, $table, $this->options);
     }
 
     /**

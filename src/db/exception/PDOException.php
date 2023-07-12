@@ -29,7 +29,7 @@ class PDOException extends DbException
      */
     public function __construct(\PDOException $exception, array $config = [], string $sql = '', int $code = 10501)
     {
-        $error = $exception->errorInfo;
+        $error   = $exception->errorInfo;
         $message = $exception->getMessage();
 
         if (!empty($error)) {

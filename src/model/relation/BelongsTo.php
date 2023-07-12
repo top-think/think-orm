@@ -33,12 +33,12 @@ class BelongsTo extends OneToOne
      */
     public function __construct(Model $parent, string $model, string $foreignKey, string $localKey, string $relation = null)
     {
-        $this->parent       = $parent;
-        $this->model        = $model;
-        $this->foreignKey   = $foreignKey;
-        $this->localKey     = $localKey;
-        $this->query        = (new $model())->db();
-        $this->relation     = $relation;
+        $this->parent     = $parent;
+        $this->model      = $model;
+        $this->foreignKey = $foreignKey;
+        $this->localKey   = $localKey;
+        $this->query      = (new $model())->db();
+        $this->relation   = $relation;
 
         if (get_class($parent) == $model) {
             $this->selfRelation = true;
@@ -59,8 +59,8 @@ class BelongsTo extends OneToOne
             $closure($this->query);
         }
 
-        $foreignKey     = $this->foreignKey;
-        $relationModel  = $this->query
+        $foreignKey    = $this->foreignKey;
+        $relationModel = $this->query
             ->removeWhereField($this->localKey)
             ->where($this->localKey, $this->parent->$foreignKey)
             ->relation($subRelation)
@@ -74,7 +74,7 @@ class BelongsTo extends OneToOne
 
             $relationModel->setParent(clone $this->parent);
         } else {
-            $default = $this->query->getOptions('default_model');
+            $default       = $this->query->getOptions('default_model');
             $relationModel = $this->getDefaultModel($default);
         }
 
@@ -174,9 +174,9 @@ class BelongsTo extends OneToOne
      */
     public function hasWhere($where = [], $fields = null, string $joinType = '', Query $query = null): Query
     {
-        $table      = $this->query->getTable();
-        $model      = class_basename($this->parent);
-        $relation   = class_basename($this->model);
+        $table    = $this->query->getTable();
+        $model    = class_basename($this->parent);
+        $relation = class_basename($this->model);
 
         if (is_array($where)) {
             $this->getQueryWhere($where, $relation);
@@ -216,7 +216,7 @@ class BelongsTo extends OneToOne
         $localKey   = $this->localKey;
         $foreignKey = $this->foreignKey;
 
-        $range      = [];
+        $range = [];
         foreach ($resultSet as $result) {
             // 获取关联外键列表
             if (isset($result->$foreignKey)) {
@@ -226,7 +226,7 @@ class BelongsTo extends OneToOne
 
         if (!empty($range)) {
             $this->query->removeWhereField($localKey);
-            $default = $this->query->getOptions('default_model');
+            $default      = $this->query->getOptions('default_model');
             $defaultModel = $this->getDefaultModel($default);
 
             $data = $this->eagerlyWhere([
@@ -279,7 +279,7 @@ class BelongsTo extends OneToOne
 
         // 关联模型
         if (!isset($data[$result->$foreignKey])) {
-            $default = $this->query->getOptions('default_model');
+            $default       = $this->query->getOptions('default_model');
             $relationModel = $this->getDefaultModel($default);
         } else {
             $relationModel = $data[$result->$foreignKey];

@@ -391,9 +391,9 @@ class Query extends BaseQuery
     /**
      * 字段值增长（支持延迟写入）
      *
-     * @param string    $field 字段名
-     * @param int       $step  步进值
-     * @param int       $lazyTime 延迟时间（秒）
+     * @param string $field    字段名
+     * @param int    $step     步进值
+     * @param int    $lazyTime 延迟时间（秒）
      *
      * @return int|false
      */
@@ -422,9 +422,9 @@ class Query extends BaseQuery
     /**
      * 字段值减少（支持延迟写入）
      *
-     * @param string    $field 字段名
-     * @param int       $step  步进值
-     * @param int       $lazyTime 延迟时间（秒）
+     * @param string $field    字段名
+     * @param int    $step     步进值
+     * @param int    $lazyTime 延迟时间（秒）
      *
      * @return int|false
      */
@@ -455,10 +455,10 @@ class Query extends BaseQuery
      * 延时更新检查 返回false表示需要延时
      * 否则返回实际写入的数值
      * @access protected
-     * @param  string  $type     自增或者自减
-     * @param  string  $guid     写入标识
-     * @param  int     $step     写入步进值
-     * @param  int     $lazyTime 延时时间(s)
+     * @param  string        $type     自增或者自减
+     * @param  string        $guid     写入标识
+     * @param  int           $step     写入步进值
+     * @param  int           $lazyTime 延时时间(s)
      * @return false|integer
      */
     protected function lazyWrite(string $type, string $guid, int $step, int $lazyTime)
@@ -498,8 +498,8 @@ class Query extends BaseQuery
     /**
      * 获取延迟写入字段的缓存Key
      *
-     * @param string  $field 字段名
-     * @param mixed   $id    主键值
+     * @param string $field 字段名
+     * @param mixed  $id    主键值
      *
      * @return string
      */
@@ -566,7 +566,7 @@ class Query extends BaseQuery
     public function chunk(int $count, callable $callback, string|array $column = null, string $order = 'asc'): bool
     {
         $options = $this->getOptions();
-        $column = $column ?: $this->getPk();
+        $column  = $column ?: $this->getPk();
 
         if (isset($options['order'])) {
             unset($options['order']);
@@ -598,7 +598,7 @@ class Query extends BaseQuery
                 $times++;
                 $query = $this->options($options)->page($times, $count);
             } else {
-                $end = $resultSet->pop();
+                $end    = $resultSet->pop();
                 $lastId = is_array($end) ? $end[$key] : $end->getData($key);
 
                 $query = $this->options($options)

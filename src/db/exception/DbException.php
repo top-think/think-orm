@@ -31,7 +31,7 @@ class DbException extends Exception
     public function __construct(string $message, array $config = [], string $sql = '', int $code = 10500)
     {
         $this->message = $message;
-        $this->code = $code;
+        $this->code    = $code;
 
         $this->setData('Database Status', [
             'Error Code'    => $code,

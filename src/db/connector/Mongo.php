@@ -43,10 +43,15 @@ class Mongo extends Connection
 {
     // 查询数据类型
     protected $dbName = '';
+
     protected $typeMap = 'array';
+
     protected $mongo; // MongoDb Object
+
     protected $cursor; // MongoCursor Object
+
     protected $session_uuid; // sessions会话列表当前会话数组key 随机生成
+
     protected $sessions = []; // 会话列表
 
     /** @var Builder */
@@ -154,7 +159,7 @@ class Mongo extends Connection
                 $config = array_merge($this->config, $config);
             }
 
-            $this->dbName = $config['database'];
+            $this->dbName  = $config['database'];
             $this->typeMap = $config['type_map'];
 
             if ($config['pk_convert_id'] && '_id' == $config['pk']) {
@@ -243,8 +248,8 @@ class Mongo extends Connection
         $this->initConnect($master);
         $this->db->updateQueryTimes();
 
-        $options    = $query->getOptions();
-        $namespace  = $options['table'];
+        $options   = $query->getOptions();
+        $namespace = $options['table'];
 
         if (!str_contains($namespace, '.')) {
             $namespace = $this->dbName . '.' . $namespace;
@@ -259,7 +264,7 @@ class Mongo extends Connection
             $mongoQuery = $mongoQuery($query);
         }
 
-        $readPreference = $options['readPreference'] ?? null;
+        $readPreference       = $options['readPreference'] ?? null;
         $this->queryStartTime = microtime(true);
 
         if ($session = $this->getSession()) {
@@ -333,8 +338,8 @@ class Mongo extends Connection
 
         if ($query->getOptions('cache')) {
             // 检查查询缓存
-            $cacheItem  = $this->parseCache($query, $query->getOptions('cache'));
-            $key        = $cacheItem->getKey();
+            $cacheItem = $this->parseCache($query, $query->getOptions('cache'));
+            $key       = $cacheItem->getKey();
 
             if ($this->cache->has($key)) {
                 return $this->cache->get($key);
@@ -378,8 +383,8 @@ class Mongo extends Connection
         $this->initConnect(true);
         $this->db->updateQueryTimes();
 
-        $options    = $query->getOptions();
-        $namespace  = $options['table'];
+        $options   = $query->getOptions();
+        $namespace = $options['table'];
         if (!str_contains($namespace, '.')) {
             $namespace = $this->dbName . '.' . $namespace;
         }
@@ -389,7 +394,7 @@ class Mongo extends Connection
             $this->queryStr = 'db' . strstr($namespace, '.') . '.' . $this->queryStr;
         }
 
-        $writeConcern = $options['writeConcern'] ?? null;
+        $writeConcern         = $options['writeConcern'] ?? null;
         $this->queryStartTime = microtime(true);
 
         if ($session = $this->getSession()) {
@@ -410,9 +415,9 @@ class Mongo extends Connection
 
         if ($query->getOptions('cache')) {
             // 清理缓存数据
-            $cacheItem  = $this->parseCache($query, $query->getOptions('cache'));
-            $key        = $cacheItem->getKey();
-            $tag        = $cacheItem->getTag();
+            $cacheItem = $this->parseCache($query, $query->getOptions('cache'));
+            $key       = $cacheItem->getKey();
+            $tag       = $cacheItem->getTag();
 
             if (isset($key) && $this->cache->has($key)) {
                 $this->cache->delete($key);
@@ -592,11 +597,11 @@ class Mongo extends Connection
      */
     public function close()
     {
-        $this->mongo        = null;
-        $this->cursor       = null;
-        $this->linkRead     = null;
-        $this->linkWrite    = null;
-        $this->links        = [];
+        $this->mongo     = null;
+        $this->cursor    = null;
+        $this->linkRead  = null;
+        $this->linkWrite = null;
+        $this->links     = [];
     }
 
     /**
@@ -683,9 +688,9 @@ class Mongo extends Connection
      */
     public function replicaSetConnect(): Manager
     {
-        $this->dbName   = $this->config['database'];
-        $this->typeMap  = $this->config['type_map'];
-        $startTime      = microtime(true);
+        $this->dbName  = $this->config['database'];
+        $this->typeMap = $this->config['type_map'];
+        $startTime     = microtime(true);
 
         $this->config['params']['replicaSet'] = $this->config['database'];
 
@@ -742,17 +747,17 @@ class Mongo extends Connection
         }
 
         // 生成bulk对象
-        $bulk           = $this->builder->insert($query);
-        $writeResult    = $this->mongoExecute($query, $bulk);
-        $result         = $writeResult->getInsertedCount();
+        $bulk        = $this->builder->insert($query);
+        $writeResult = $this->mongoExecute($query, $bulk);
+        $result      = $writeResult->getInsertedCount();
 
         if ($result) {
-            $data       = $options['data'];
-            $lastInsId  = $this->getLastInsID($query);
+            $data      = $options['data'];
+            $lastInsId = $this->getLastInsID($query);
 
             if ($lastInsId) {
-                $pk         = $query->getPk();
-                $data[$pk]  = $lastInsId;
+                $pk        = $query->getPk();
+                $data[$pk] = $lastInsId;
             }
 
             $query->setOption('data', $data);
@@ -770,7 +775,7 @@ class Mongo extends Connection
     /**
      * 获取最近插入的ID.
      *
-     * @param BaseQuery $query 查询对象
+     * @param BaseQuery $query    查询对象
      * @param string    $sequence 自增序列名
      *
      * @return mixed
@@ -816,8 +821,8 @@ class Mongo extends Connection
         }
 
         // 生成bulkWrite对象
-        $bulk           = $this->builder->insertAll($query, $dataSet);
-        $writeResult    = $this->mongoExecute($query, $bulk);
+        $bulk        = $this->builder->insertAll($query, $dataSet);
+        $writeResult = $this->mongoExecute($query, $bulk);
 
         return $writeResult->getInsertedCount();
     }
@@ -841,9 +846,9 @@ class Mongo extends Connection
         $query->parseOptions();
 
         // 生成bulkWrite对象
-        $bulk           = $this->builder->update($query);
-        $writeResult    = $this->mongoExecute($query, $bulk);
-        $result         = $writeResult->getModifiedCount();
+        $bulk        = $this->builder->update($query);
+        $writeResult = $this->mongoExecute($query, $bulk);
+        $result      = $writeResult->getModifiedCount();
 
         if ($result) {
             $this->db->trigger('after_update', $query);
@@ -872,10 +877,10 @@ class Mongo extends Connection
         $query->parseOptions();
 
         // 生成bulkWrite对象
-        $bulk           = $this->builder->delete($query);
+        $bulk = $this->builder->delete($query);
         // 执行操作
-        $writeResult    = $this->mongoExecute($query, $bulk);
-        $result         = $writeResult->getDeletedCount();
+        $writeResult = $this->mongoExecute($query, $bulk);
+        $result      = $writeResult->getDeletedCount();
 
         if ($result) {
             $this->db->trigger('after_delete', $query);
@@ -962,7 +967,7 @@ class Mongo extends Connection
 
         if (!empty($options['cache'])) {
             $cacheItem = $this->parseCache($query, $options['cache']);
-            $key = $cacheItem->getKey();
+            $key       = $cacheItem->getKey();
 
             if ($this->cache->has($key)) {
                 return $this->cache->get($key);
@@ -1026,8 +1031,8 @@ class Mongo extends Connection
 
         if (!empty($options['cache'])) {
             // 判断查询缓存
-            $cacheItem  = $this->parseCache($query, $options['cache']);
-            $key        = $cacheItem->getKey();
+            $cacheItem = $this->parseCache($query, $options['cache']);
+            $key       = $cacheItem->getKey();
 
             if ($this->cache->has($key)) {
                 return $this->cache->get($key);
@@ -1122,7 +1127,7 @@ class Mongo extends Connection
             $this->commit();
 
             return $result;
-        }  catch (\Throwable $e) {
+        } catch (\Throwable $e) {
             $this->rollback();
 
             throw $e;
@@ -1140,7 +1145,7 @@ class Mongo extends Connection
     public function startTrans()
     {
         $this->initConnect(true);
-        $this->session_uuid = uniqid();
+        $this->session_uuid                  = uniqid();
         $this->sessions[$this->session_uuid] = $this->getMongo()->startSession();
 
         $this->sessions[$this->session_uuid]->startTransaction([]);

@@ -125,7 +125,7 @@ class Mongo extends BaseQuery
     public function aggregate(string $aggregate, $field, bool $force = false, bool $one = false)
     {
         $result = $this->cmd('aggregate', [strtolower($aggregate), $field]);
-        $value = $result[0]['aggregate'] ?? 0;
+        $value  = $result[0]['aggregate'] ?? 0;
 
         if ($force) {
             $value += 0;
@@ -469,7 +469,7 @@ class Mongo extends BaseQuery
             $offset = 0;
         }
 
-        $this->options['skip'] = $offset;
+        $this->options['skip']  = $offset;
         $this->options['limit'] = $length;
 
         return $this;
@@ -569,7 +569,7 @@ class Mongo extends BaseQuery
     public function paginate($listRows = null, $simple = false): Paginator
     {
         if (is_int($simple)) {
-            $total = $simple;
+            $total  = $simple;
             $simple = false;
         }
 
@@ -581,10 +581,10 @@ class Mongo extends BaseQuery
         ];
 
         if (is_array($listRows)) {
-            $config = array_merge($defaultConfig, $listRows);
+            $config   = array_merge($defaultConfig, $listRows);
             $listRows = intval($config['list_rows']);
         } else {
-            $config = $defaultConfig;
+            $config   = $defaultConfig;
             $listRows = intval($listRows ?: $config['list_rows']);
         }
 
@@ -592,18 +592,18 @@ class Mongo extends BaseQuery
 
         $page = max($page, 1);
 
-        $config['path'] = $config['path'] ?? Paginator::getCurrentPath();
+        $config['path'] ??= Paginator::getCurrentPath();
 
         if (!isset($total) && !$simple) {
             $options = $this->getOptions();
 
             unset($this->options['order'], $this->options['limit'], $this->options['page'], $this->options['field']);
 
-            $total = $this->count();
+            $total   = $this->count();
             $results = $this->options($options)->page($page, $listRows)->select();
         } elseif ($simple) {
             $results = $this->limit(($page - 1) * $listRows, $listRows + 1)->select();
-            $total = null;
+            $total   = null;
         } else {
             $results = $this->page($page, $listRows)->select();
         }
@@ -629,7 +629,7 @@ class Mongo extends BaseQuery
     public function chunk(int $count, callable $callback, $column = null, string $order = 'asc'): bool
     {
         $options = $this->getOptions();
-        $column = $column ?: $this->getPk();
+        $column  = $column ?: $this->getPk();
 
         if (isset($options['order'])) {
             unset($options['order']);
@@ -659,7 +659,7 @@ class Mongo extends BaseQuery
                 $times++;
                 $query = $this->options($options)->page($times, $count);
             } else {
-                $end = $resultSet->pop();
+                $end    = $resultSet->pop();
                 $lastId = is_array($end) ? $end[$key] : $end->getData($key);
 
                 $query = $this->options($options)
@@ -724,10 +724,10 @@ class Mongo extends BaseQuery
             // 根据页数计算limit
             [$page, $listRows] = $options['page'];
 
-            $page = $page > 0 ? $page : 1;
-            $listRows = $listRows > 0 ? $listRows : (is_numeric($options['limit']) ? $options['limit'] : 20);
-            $offset = $listRows * ($page - 1);
-            $options['skip'] = intval($offset);
+            $page             = $page     > 0 ? $page : 1;
+            $listRows         = $listRows > 0 ? $listRows : (is_numeric($options['limit']) ? $options['limit'] : 20);
+            $offset           = $listRows * ($page - 1);
+            $options['skip']  = intval($offset);
             $options['limit'] = intval($listRows);
         }
 

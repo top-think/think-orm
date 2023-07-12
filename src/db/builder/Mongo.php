@@ -26,8 +26,10 @@ class Mongo
 {
     // connection对象实例
     protected $connection;
+
     // 最后插入ID
     protected $insertId = [];
+
     // 查询表达式
     protected $exp = ['<>' => 'ne', '=' => 'eq', '>' => 'gt', '>=' => 'gte', '<' => 'lt', '<=' => 'lte', 'in' => 'in', 'not in' => 'nin', 'nin' => 'nin', 'mod' => 'mod', 'exists' => 'exists', 'null' => 'null', 'notnull' => 'not null', 'not null' => 'not null', 'regex' => 'regex', 'type' => 'type', 'all' => 'all', '> time' => '> time', '< time' => '< time', 'between' => 'between', 'not between' => 'not between', 'between time' => 'between time', 'not between time' => 'not between time', 'notbetween time' => 'not between time', 'like' => 'like', 'near' => 'near', 'size' => 'size'];
 
@@ -169,15 +171,15 @@ class Mongo
 
         $filter = [];
         foreach ($where as $logic => $val) {
-            $logic = '$'.strtolower($logic);
+            $logic = '$' . strtolower($logic);
             foreach ($val as $field => $value) {
                 if (is_array($value)) {
                     if (key($value) !== 0) {
-                        throw new Exception('where express error:'.var_export($value, true));
+                        throw new Exception('where express error:' . var_export($value, true));
                     }
                     $field = array_shift($value);
                 } elseif (!($value instanceof \Closure)) {
-                    throw new Exception('where express error:'.var_export($value, true));
+                    throw new Exception('where express error:' . var_export($value, true));
                 }
 
                 if ($value instanceof \Closure) {
@@ -200,7 +202,7 @@ class Mongo
                         }
                     } else {
                         // 对字段使用表达式查询
-                        $field = is_string($field) ? $field : '';
+                        $field            = is_string($field) ? $field : '';
                         $filter[$logic][] = $this->parseWhereItem($query, $field, $value);
                     }
                 }
@@ -211,7 +213,7 @@ class Mongo
         if (!empty($options['soft_delete'])) {
             // 附加软删除条件
             [$field, $condition] = $options['soft_delete'];
-            $filter['$and'][] = $this->parseWhereItem($query, $field, $condition);
+            $filter['$and'][]    = $this->parseWhereItem($query, $field, $condition);
         }
 
         return $filter;
@@ -231,7 +233,7 @@ class Mongo
         if (is_array($exp)) {
             $data = [];
             foreach ($val as $value) {
-                $exp = $value[0];
+                $exp   = $value[0];
                 $value = $value[1];
                 if (!in_array($exp, $this->exp)) {
                     $exp = strtolower($exp);
@@ -239,7 +241,7 @@ class Mongo
                         $exp = $this->exp[$exp];
                     }
                 }
-                $k = '$'.$exp;
+                $k        = '$' . $exp;
                 $data[$k] = $value;
             }
             $result[$key] = $data;
@@ -250,7 +252,7 @@ class Mongo
             if (isset($this->exp[$exp])) {
                 $exp = $this->exp[$exp];
             } else {
-                throw new Exception('where express error:'.$exp);
+                throw new Exception('where express error:' . $exp);
             }
         }
 
@@ -260,7 +262,7 @@ class Mongo
             $result[$key] = $this->parseValue($query, $value, $key);
         } elseif (in_array($exp, ['neq', 'ne', 'gt', 'egt', 'gte', 'lt', 'lte', 'elt', 'mod'])) {
             // 比较运算
-            $k = '$'.$exp;
+            $k            = '$' . $exp;
             $result[$key] = [$k => $this->parseValue($query, $value, $key)];
         } elseif ('null' == $exp) {
             // NULL 查询
@@ -272,11 +274,11 @@ class Mongo
             $result[$key] = ['$all', $this->parseValue($query, $value, $key)];
         } elseif ('between' == $exp) {
             // 区间查询
-            $value = is_array($value) ? $value : explode(',', $value);
+            $value        = is_array($value) ? $value : explode(',', $value);
             $result[$key] = ['$gte' => $this->parseValue($query, $value[0], $key), '$lte' => $this->parseValue($query, $value[1], $key)];
         } elseif ('not between' == $exp) {
             // 范围查询
-            $value = is_array($value) ? $value : explode(',', $value);
+            $value        = is_array($value) ? $value : explode(',', $value);
             $result[$key] = ['$lt' => $this->parseValue($query, $value[0], $key), '$gt' => $this->parseValue($query, $value[1], $key)];
         } elseif ('exists' == $exp) {
             // 字段是否存在
@@ -296,7 +298,7 @@ class Mongo
             foreach ($value as $k => $val) {
                 $value[$k] = $this->parseValue($query, $val, $key);
             }
-            $result[$key] = ['$'.$exp => $value];
+            $result[$key] = ['$' . $exp => $value];
         } elseif ('regex' == $exp) {
             $result[$key] = $value instanceof Regex ? $value : new Regex($value, 'i');
         } elseif ('< time' == $exp) {
@@ -305,11 +307,11 @@ class Mongo
             $result[$key] = ['$gt' => $this->parseDateTime($query, $value, $field)];
         } elseif ('between time' == $exp) {
             // 区间查询
-            $value = is_array($value) ? $value : explode(',', $value);
+            $value        = is_array($value) ? $value : explode(',', $value);
             $result[$key] = ['$gte' => $this->parseDateTime($query, $value[0], $field), '$lte' => $this->parseDateTime($query, $value[1], $field)];
         } elseif ('not between time' == $exp) {
             // 范围查询
-            $value = is_array($value) ? $value : explode(',', $value);
+            $value        = is_array($value) ? $value : explode(',', $value);
             $result[$key] = ['$lt' => $this->parseDateTime($query, $value[0], $field), '$gt' => $this->parseDateTime($query, $value[1], $field)];
         } elseif ('near' == $exp) {
             // 经纬度查询
@@ -403,7 +405,7 @@ class Mongo
      */
     public function insertAll(Query $query, array $dataSet): BulkWrite
     {
-        $bulk = new BulkWrite();
+        $bulk    = new BulkWrite();
         $options = $query->getOptions();
 
         $this->insertId = [];
@@ -431,7 +433,7 @@ class Mongo
     {
         $options = $query->getOptions();
 
-        $data = $this->parseSet($query, $options['data']);
+        $data  = $this->parseSet($query, $options['data']);
         $where = $this->parseWhere($query, $options['where']);
 
         if (1 == $options['limit']) {
@@ -459,7 +461,7 @@ class Mongo
     public function delete(Query $query): BulkWrite
     {
         $options = $query->getOptions();
-        $where = $this->parseWhere($query, $options['where']);
+        $where   = $this->parseWhere($query, $options['where']);
 
         $bulk = new BulkWrite();
 
@@ -537,18 +539,18 @@ class Mongo
      */
     public function aggregate(Query $query, array $extra): Command
     {
-        $options = $query->getOptions();
+        $options       = $query->getOptions();
         [$fun, $field] = $extra;
 
         if ('id' == $field && $this->connection->getConfig('pk_convert_id')) {
             $field = '_id';
         }
 
-        $group = isset($options['group']) ? '$'.$options['group'] : null;
+        $group = isset($options['group']) ? '$' . $options['group'] : null;
 
         $pipeline = [
             ['$match' => (object) $this->parseWhere($query, $options['where'])],
-            ['$group' => ['_id' => $group, 'aggregate' => ['$'.$fun => '$'.$field]]],
+            ['$group' => ['_id' => $group, 'aggregate' => ['$' . $fun => '$' . $field]]],
         ];
 
         $cmd = [
@@ -588,11 +590,11 @@ class Mongo
         $groups = ['_id' => []];
 
         foreach ($groupBy as $field) {
-            $groups['_id'][$field] = '$'.$field;
+            $groups['_id'][$field] = '$' . $field;
         }
 
         foreach ($aggregate as $fun => $field) {
-            $groups[$field.'_'.$fun] = ['$'.$fun => '$'.$field];
+            $groups[$field . '_' . $fun] = ['$' . $fun => '$' . $field];
         }
 
         $pipeline = [
@@ -658,7 +660,7 @@ class Mongo
      */
     public function listcollections(): Command
     {
-        $cmd = ['listCollections' => 1];
+        $cmd     = ['listCollections' => 1];
         $command = new Command($cmd);
 
         $this->log('cmd', 'listCollections', $cmd);
@@ -677,7 +679,7 @@ class Mongo
     {
         $options = $query->getOptions();
 
-        $cmd = ['collStats' => $options['table']];
+        $cmd     = ['collStats' => $options['table']];
         $command = new Command($cmd);
 
         $this->log('cmd', 'collStats', $cmd);

@@ -63,9 +63,9 @@ class Pgsql extends Builder
     /**
      * 字段和表名处理.
      *
-     * @param Query $query  查询对象
+     * @param Query          $query  查询对象
      * @param string|int|Raw $key    字段名
-     * @param bool  $strict 严格检测
+     * @param bool           $strict 严格检测
      *
      * @return string
      */
@@ -82,7 +82,7 @@ class Pgsql extends Builder
         if (str_contains($key, '->') && !str_contains($key, '(')) {
             // JSON字段支持
             [$field, $name] = explode('->', $key);
-            $key = '"' . $field . '"' . '->>\'' . $name . '\'';
+            $key            = '"' . $field . '"' . '->>\'' . $name . '\'';
         } elseif (str_contains($key, '.')) {
             [$table, $key] = explode('.', $key, 2);
 

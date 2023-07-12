@@ -23,7 +23,6 @@ use think\db\exception\DbException as Exception;
  */
 class Builder extends BaseBuilder
 {
-
     /**
      * 数据分析.
      *
@@ -69,7 +68,7 @@ class Builder extends BaseBuilder
 
             if (str_contains($key, '->')) {
                 [$key, $name] = explode('->', $key, 2);
-                $item = $this->parseKey($query, $key);
+                $item         = $this->parseKey($query, $key);
 
                 $result[$item . '->' . $name] = 'json_set(' . $item . ', \'$.' . $name . '\', ' . $this->parseDataBind($query, $key . '->' . $name, $val, $bind) . ')';
             } elseif (!str_contains($key, '.') && !in_array($key, $fields, true)) {
@@ -80,9 +79,9 @@ class Builder extends BaseBuilder
                 $result[$item] = 'NULL';
             } elseif (is_array($val) && !empty($val) && is_string($val[0])) {
                 if (in_array(strtoupper($val[0]), ['INC', 'DEC'])) {
-                    $result[$item] =    match (strtoupper($val[0])) {
-                        'INC'   =>  $item . ' + ' . floatval($val[1]),
-                        'DEC'   =>  $item . ' - ' . floatval($val[1]),
+                    $result[$item] = match (strtoupper($val[0])) {
+                        'INC' => $item . ' + ' . floatval($val[1]),
+                        'DEC' => $item . ' - ' . floatval($val[1]),
                     };
                 }
             } elseif (is_scalar($val)) {
@@ -180,14 +179,14 @@ class Builder extends BaseBuilder
     /**
      * table分析.
      *
-     * @param Query $query  查询对象
+     * @param Query        $query  查询对象
      * @param array|string $tables 表名
      *
      * @return string
      */
     protected function parseTable(Query $query, array|string $tables): string
     {
-        $item = [];
+        $item    = [];
         $options = $query->getOptions();
 
         foreach ((array) $tables as $key => $table) {
@@ -215,14 +214,14 @@ class Builder extends BaseBuilder
      */
     protected function parseWhere(Query $query, array $where): string
     {
-        $options = $query->getOptions();
+        $options  = $query->getOptions();
         $whereStr = $this->buildWhere($query, $where);
 
         if (!empty($options['soft_delete'])) {
             // 附加软删除条件
             [$field, $condition] = $options['soft_delete'];
 
-            $binds = $query->getFieldsBindType();
+            $binds    = $query->getFieldsBindType();
             $whereStr = $whereStr ? '( ' . $whereStr . ' ) AND ' : '';
             $whereStr = $whereStr . $this->parseWhereItem($query, $field, $condition, $binds);
         }
@@ -272,7 +271,7 @@ class Builder extends BaseBuilder
         if (is_scalar($value) && !in_array($exp, ['EXP', 'NOT NULL', 'NULL', 'IN', 'NOT IN', 'BETWEEN', 'NOT BETWEEN']) && !str_contains($exp, 'TIME')) {
             if (is_string($value) && str_starts_with($value, ':') && $query->isBind(substr($value, 1))) {
             } else {
-                $name = $query->bindValue($value, $bindType);
+                $name  = $query->bindValue($value, $bindType);
                 $value = ':' . $name;
             }
         }
@@ -306,7 +305,7 @@ class Builder extends BaseBuilder
         if (is_array($value)) {
             $array = [];
             foreach ($value as $item) {
-                $name = $query->bindValue($item, Connection::PARAM_STR);
+                $name    = $query->bindValue($item, Connection::PARAM_STR);
                 $array[] = $key . ' ' . $exp . ' :' . $name;
             }
 
@@ -405,8 +404,8 @@ class Builder extends BaseBuilder
             if ($query->isAutoBind()) {
                 $array = [];
                 foreach ($value as $v) {
-                    $name       = $query->bindValue($v, $bindType);
-                    $array[]    = ':' . $name;
+                    $name    = $query->bindValue($v, $bindType);
+                    $array[] = ':' . $name;
                 }
                 $value = implode(',', $array);
             } elseif (Connection::PARAM_STR == $bindType) {
@@ -541,8 +540,8 @@ class Builder extends BaseBuilder
                 }
 
                 if (preg_match('/^[\w\.]+$/', $key)) {
-                    $sort = strtoupper($sort);
-                    $sort = in_array($sort, ['ASC', 'DESC'], true) ? ' ' . $sort : '';
+                    $sort    = strtoupper($sort);
+                    $sort    = in_array($sort, ['ASC', 'DESC'], true) ? ' ' . $sort : '';
                     $array[] = $this->parseKey($query, $key, true) . $sort;
                 } else {
                     throw new Exception('order express error:' . $key);
@@ -563,8 +562,8 @@ class Builder extends BaseBuilder
      */
     protected function parseRaw(Query $query, Raw $raw): string
     {
-        $sql    = $raw->getValue();
-        $bind   = $raw->getBind();
+        $sql  = $raw->getValue();
+        $bind = $raw->getBind();
 
         if ($bind) {
             $query->bindParams($sql, $bind);
@@ -727,9 +726,9 @@ class Builder extends BaseBuilder
     /**
      * 生成insertall SQL.
      *
-     * @param Query $query   查询对象
-     * @param  array $keys  字段名
-     * @param  array $datas 数据
+     * @param Query $query 查询对象
+     * @param array $keys  字段名
+     * @param array $datas 数据
      *
      * @return string
      */

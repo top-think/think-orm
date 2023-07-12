@@ -4,18 +4,19 @@ declare(strict_types=1);
 
 namespace tests\orm;
 
-use function array_column;
-use function array_keys;
-use function array_unique;
-use function array_values;
-use function tests\array_column_ex;
-use function tests\array_value_sort;
 use tests\Base;
 use think\Collection;
 use think\db\exception\DbException;
 use think\db\Raw;
 use think\Exception as ThinkException;
 use think\facade\Db;
+
+use function array_column;
+use function array_keys;
+use function array_unique;
+use function array_values;
+use function tests\array_column_ex;
+use function tests\array_value_sort;
 
 class DbTest extends Base
 {
@@ -66,37 +67,37 @@ SQL
         $this->assertEquals(array_column($users, 'username'), $result);
 
         // 获取某字段唯一
-        $result = Db::table('test_user')->column('DISTINCT type');
+        $result   = Db::table('test_user')->column('DISTINCT type');
         $expected = array_unique(array_column($users, 'type'));
         $this->assertEquals($expected, $result);
 
         // 字段别名
-        $result = Db::table('test_user')->column('username as name2');
+        $result   = Db::table('test_user')->column('username as name2');
         $expected = array_column($users, 'username');
         $this->assertEquals($expected, $result);
 
         // 表别名
-        $result = Db::table('test_user')->alias('test2')->column('test2.username');
+        $result   = Db::table('test_user')->alias('test2')->column('test2.username');
         $expected = array_column($users, 'username');
         $this->assertEquals($expected, $result);
 
         // 获取若干列
-        $result = Db::table('test_user')->column('username,nickname', 'id');
+        $result   = Db::table('test_user')->column('username,nickname', 'id');
         $expected = array_column_ex($users, ['username', 'nickname', 'id'], 'id');
         $this->assertEquals($expected, $result);
 
         // 获取若干列不指定key时不报错
-        $result = Db::table('test_user')->column('username,nickname,id');
+        $result   = Db::table('test_user')->column('username,nickname,id');
         $expected = array_column_ex($users, ['username', 'nickname', 'id']);
         $this->assertEquals($expected, $result);
 
         // 数组方式获取
-        $result = Db::table('test_user')->column(['username', 'nickname', 'type'], 'id');
+        $result   = Db::table('test_user')->column(['username', 'nickname', 'type'], 'id');
         $expected = array_column_ex($users, ['username', 'nickname', 'type', 'id'], 'id');
         $this->assertEquals($expected, $result);
 
         // 数组方式获取（重命名字段）
-        $result = Db::table('test_user')->column(['username' => 'my_name', 'nickname'], 'id');
+        $result   = Db::table('test_user')->column(['username' => 'my_name', 'nickname'], 'id');
         $expected = array_column_ex($users, ['username' => 'my_name', 'nickname', 'id'], 'id');
         array_value_sort($result);
         array_value_sort($expected);
@@ -114,7 +115,7 @@ SQL
             [
                 'username' => 'my_name',
                 'nickname',
-                'type2' => function ($value) {
+                'type2'    => function ($value) {
                     return $value['type'] + 1000;
                 },
                 'id',
@@ -134,26 +135,26 @@ SQL
         });
 
         $expected = Collection::make(self::$testUserData)->whereIn('type', [1, 3])->values()->toArray();
-        $result = Db::table('test_user')->whereIn('type', [1, 3])->column('*');
+        $result   = Db::table('test_user')->whereIn('type', [1, 3])->column('*');
         $this->assertEquals($expected, $result);
 
         $expected = Collection::make(self::$testUserData)->whereIn('type', [1])->values()->toArray();
-        $result = Db::table('test_user')->whereIn('type', [1])->column('*');
+        $result   = Db::table('test_user')->whereIn('type', [1])->column('*');
         $this->assertEquals($expected, $result);
 
         $expected = Collection::make(self::$testUserData)->whereIn('type', [1, ''])->values()->toArray();
-        $result = Db::table('test_user')->whereIn('type', [1, ''])->column('*');
+        $result   = Db::table('test_user')->whereIn('type', [1, ''])->column('*');
         $this->assertEquals($expected, $result);
 
         $result = Db::table('test_user')->whereIn('type', [])->column('*');
         $this->assertEquals([], $result);
 
         $expected = Collection::make(self::$testUserData)->whereNotIn('type', [1, 3])->values()->toArray();
-        $result = Db::table('test_user')->whereNotIn('type', [1, 3])->column('*');
+        $result   = Db::table('test_user')->whereNotIn('type', [1, 3])->column('*');
         $this->assertEquals($expected, $result);
 
         $expected = Collection::make(self::$testUserData)->values()->toArray();
-        $result = Db::table('test_user')->whereNotIn('type', [])->column('*');
+        $result   = Db::table('test_user')->whereNotIn('type', [])->column('*');
         $this->assertEquals($expected, $result);
 
         $this->assertEquals([

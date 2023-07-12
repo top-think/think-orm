@@ -6,6 +6,7 @@ namespace tests;
 
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Runner\Version;
+
 use function version_compare;
 
 class Base extends TestCase

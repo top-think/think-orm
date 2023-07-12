@@ -51,10 +51,10 @@ trait TimeFieldQuery
     /**
      * 查询日期或者时间.
      *
-     * @param string       $field 日期字段名
-     * @param string       $op    比较运算符或者表达式
-     * @param mixed        $range 比较范围
-     * @param string       $logic AND OR
+     * @param string $field 日期字段名
+     * @param string $op    比较运算符或者表达式
+     * @param mixed  $range 比较范围
+     * @param string $logic AND OR
      *
      * @return $this
      */
@@ -62,7 +62,7 @@ trait TimeFieldQuery
     {
         if (is_null($range)) {
             $range = $this->timeRule[$op] ?? $op;
-            $op = is_array($range) ? 'between' : '>=';
+            $op    = is_array($range) ? 'between' : '>=';
         }
 
         return $this->parseWhereExp($logic, $field, strtolower($op) . ' time', $range, [], true);
@@ -82,7 +82,7 @@ trait TimeFieldQuery
     public function whereTimeInterval(string $field, string $start, string $interval = 'day', int $step = 1, string $logic = 'AND')
     {
         $startTime = strtotime($start);
-        $endTime = strtotime(($step > 0 ? '+' : '-') . abs($step) . ' ' . $interval . (abs($step) > 1 ? 's' : ''), $startTime);
+        $endTime   = strtotime(($step > 0 ? '+' : '-') . abs($step) . ' ' . $interval . (abs($step) > 1 ? 's' : ''), $startTime);
 
         return $this->whereTime($field, 'between', $step > 0 ? [$startTime, $endTime - 1] : [$endTime, $startTime - 1], $logic);
     }

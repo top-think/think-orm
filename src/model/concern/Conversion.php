@@ -217,17 +217,17 @@ trait Conversion
      */
     public function toArray(): array
     {
-        $item = $visible = $hidden = [];
+        $item       = $visible = $hidden = [];
         $hasVisible = false;
 
         foreach ($this->visible as $key => $val) {
             if (is_string($val)) {
                 if (str_contains($val, '.')) {
-                    [$relation, $name] = explode('.', $val);
+                    [$relation, $name]    = explode('.', $val);
                     $visible[$relation][] = $name;
                 } else {
                     $visible[$val] = true;
-                    $hasVisible = true;
+                    $hasVisible    = true;
                 }
             } else {
                 $visible[$key] = $val;
@@ -237,7 +237,7 @@ trait Conversion
         foreach ($this->hidden as $key => $val) {
             if (is_string($val)) {
                 if (str_contains($val, '.')) {
-                    [$relation, $name] = explode('.', $val);
+                    [$relation, $name]   = explode('.', $val);
                     $hidden[$relation][] = $name;
                 } else {
                     $hidden[$val] = true;
@@ -303,11 +303,11 @@ trait Conversion
         } elseif (str_contains($name, '.')) {
             // 追加单个关联对象属性
             [$key, $attr] = explode('.', $name);
-            $relation   = $this->getRelationWith($key, $hidden, $visible);
-            $item[$key] = $relation ? $relation->append([$attr])->toArray() : [];
+            $relation     = $this->getRelationWith($key, $hidden, $visible);
+            $item[$key]   = $relation ? $relation->append([$attr])->toArray() : [];
         } else {
-            $value          = $this->getAttr($name);
-            $item[$name]    = $value;
+            $value       = $this->getAttr($name);
+            $item[$name] = $value;
 
             $this->getBindAttrValue($name, $value, $item);
         }
@@ -315,7 +315,7 @@ trait Conversion
 
     protected function getRelationWith(string $key, array $hidden, array $visible)
     {
-        $relation   = $this->getRelation($key, true);
+        $relation = $this->getRelation($key, true);
         if ($relation) {
             if (isset($visible[$key])) {
                 $relation->visible($visible[$key]);

@@ -182,7 +182,7 @@ abstract class BaseBuilder
     /**
      * table分析.
      *
-     * @param Query $query  查询对象
+     * @param Query        $query  查询对象
      * @param array|string $tables 表名
      *
      * @return string
@@ -273,7 +273,7 @@ abstract class BaseBuilder
                 $where[] = $this->parseFieldsAnd($query, $value, $field, $logic, $binds);
             } else {
                 // 对字段使用表达式查询
-                $field = is_string($field) ? $field : '';
+                $field   = is_string($field) ? $field : '';
                 $where[] = ' ' . $logic . ' ' . $this->parseWhereItem($query, $field, $value, $binds);
             }
         }
@@ -471,12 +471,12 @@ abstract class BaseBuilder
     /**
      * Exists查询.
      *
-     * @param Query  $query    查询对象
-     * @param string $key
-     * @param string $exp
-     * @param Raw|Closure  $value
-     * @param string $field
-     * @param int    $bindType
+     * @param Query       $query    查询对象
+     * @param string      $key
+     * @param string      $exp
+     * @param Raw|Closure $value
+     * @param string      $field
+     * @param int         $bindType
      *
      * @return string
      */
@@ -582,9 +582,9 @@ abstract class BaseBuilder
     /**
      * 闭包子查询.
      *
-     * @param Query    $query 查询对象
-     * @param Closure  $call
-     * @param bool     $show
+     * @param Query   $query 查询对象
+     * @param Closure $call
+     * @param bool    $show
      *
      * @return string
      */

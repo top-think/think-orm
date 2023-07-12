@@ -65,14 +65,14 @@ class BelongsToMany extends Relation
      */
     public function __construct(Model $parent, string $model, string $middle, string $foreignKey, string $localKey)
     {
-        $this->parent       = $parent;
-        $this->model        = $model;
-        $this->foreignKey   = $foreignKey;
-        $this->localKey     = $localKey;
+        $this->parent     = $parent;
+        $this->model      = $model;
+        $this->foreignKey = $foreignKey;
+        $this->localKey   = $localKey;
 
         if (str_contains($middle, '\\')) {
             $this->pivotName = $middle;
-            $this->middle = class_basename($middle);
+            $this->middle    = class_basename($middle);
         } else {
             $this->middle = $middle;
         }
@@ -242,9 +242,9 @@ class BelongsToMany extends Relation
      */
     public function eagerlyResultSet(array &$resultSet, string $relation, array $subRelation, Closure $closure = null, array $cache = []): void
     {
-        $localKey   = $this->localKey;
-        $pk         = $resultSet[0]->getPk();
-        $range      = [];
+        $localKey = $this->localKey;
+        $pk       = $resultSet[0]->getPk();
+        $range    = [];
 
         foreach ($resultSet as $result) {
             // 获取关联外键列表
@@ -385,7 +385,7 @@ class BelongsToMany extends Relation
         $data = [];
         foreach ($list as $set) {
             $pivot = $this->matchPivot($set);
-            $key = $pivot[$this->localKey];
+            $key   = $pivot[$this->localKey];
 
             if ($withLimit && isset($data[$key]) && count($data[$key]) >= $withLimit) {
                 continue;
@@ -411,8 +411,8 @@ class BelongsToMany extends Relation
         // 关联查询封装
         if (empty($this->baseQuery)) {
             $tableName = $this->query->getTable();
-            $table = $this->pivot->db()->getTable();
-            $fields = $this->getQueryFields($tableName);
+            $table     = $this->pivot->db()->getTable();
+            $fields    = $this->getQueryFields($tableName);
 
             $this->query
                 ->field($fields)
@@ -482,7 +482,7 @@ class BelongsToMany extends Relation
             } else {
                 // 保存关联表数据
                 $model = new $this->model();
-                $id = $model->insertGetId($data);
+                $id    = $model->insertGetId($data);
             }
         } elseif (is_numeric($data) || is_string($data)) {
             // 根据关联表主键直接写入中间表
@@ -561,7 +561,7 @@ class BelongsToMany extends Relation
         }
 
         // 删除中间表数据
-        $pivot = [];
+        $pivot   = [];
         $pivot[] = [$this->localKey, '=', $this->parent->getKey()];
 
         if (isset($id)) {
@@ -637,7 +637,7 @@ class BelongsToMany extends Relation
     {
         if (empty($this->baseQuery)) {
             $foreignKey = $this->foreignKey;
-            $localKey = $this->localKey;
+            $localKey   = $this->localKey;
 
             $this->query->filter(function ($result, $options) {
                 $this->matchPivot($result);

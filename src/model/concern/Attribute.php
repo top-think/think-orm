@@ -222,8 +222,8 @@ trait Attribute
      * 设置数据对象值
      *
      * @param array|object $data  数据
-     * @param bool  $set   是否调用修改器
-     * @param array $allow 允许的字段名
+     * @param bool         $set   是否调用修改器
+     * @param array        $allow 允许的字段名
      *
      * @return $this
      */
@@ -234,7 +234,7 @@ trait Attribute
         } elseif (is_object($data)) {
             $data = get_object_vars($data);
         }
-                
+
         // 清空数据
         $this->data = [];
 
@@ -457,16 +457,16 @@ trait Attribute
         }
 
         return match ($type) {
-            'integer'   =>  (int) $value,
-            'float'     =>  empty($param) ? (float) $value : (float) number_format($value, (int) $param, '.', ''),
-            'boolean'   =>  (bool) $value,
-            'timestamp' =>  !is_numeric($value) ? strtotime($value) : $value,
-            'datetime'  =>  $this->formatDateTime('Y-m-d H:i:s.u', $value, true),
-            'object'    =>  is_object($value) ? json_encode($value, JSON_FORCE_OBJECT) : $value,
-            'array'     =>  json_encode((array) $value, !empty($param) ? (int) $param : JSON_UNESCAPED_UNICODE),
-            'json'      =>  json_encode($value, !empty($param) ? (int) $param : JSON_UNESCAPED_UNICODE),
-            'serialize' =>  serialize($value),
-            default     =>  $value instanceof Stringable && str_contains($type, '\\') ? $value->__toString() : $value,
+            'integer'   => (int) $value,
+            'float'     => empty($param) ? (float) $value : (float) number_format($value, (int) $param, '.', ''),
+            'boolean'   => (bool) $value,
+            'timestamp' => !is_numeric($value) ? strtotime($value) : $value,
+            'datetime'  => $this->formatDateTime('Y-m-d H:i:s.u', $value, true),
+            'object'    => is_object($value) ? json_encode($value, JSON_FORCE_OBJECT) : $value,
+            'array'     => json_encode((array) $value, !empty($param) ? (int) $param : JSON_UNESCAPED_UNICODE),
+            'json'      => json_encode($value, !empty($param) ? (int) $param : JSON_UNESCAPED_UNICODE),
+            'serialize' => serialize($value),
+            default     => $value instanceof Stringable && str_contains($type, '\\') ? $value->__toString() : $value,
         };
     }
 
@@ -482,11 +482,11 @@ trait Attribute
     public function getAttr(string $name)
     {
         try {
-            $relation   = false;
-            $value      = $this->getData($name);
+            $relation = false;
+            $value    = $this->getData($name);
         } catch (InvalidArgumentException $e) {
-            $relation   = $this->isRelationAttr($name);
-            $value      = null;
+            $relation = $this->isRelationAttr($name);
+            $value    = null;
         }
 
         return $this->getValue($name, $value, $relation);
@@ -617,16 +617,16 @@ trait Attribute
         };
 
         return match ($type) {
-            'integer'   =>  (int) $value,
-            'float'     =>  empty($param) ? (float) $value : (float) number_format($value, (int) $param, '.', ''),
-            'boolean'   =>  (bool) $value,
-            'timestamp' =>  !is_null($value) ? $this->formatDateTime(!empty($param) ? $param : $this->dateFormat, $value, true) : null,
-            'datetime'  =>  !is_null($value) ? $this->formatDateTime(!empty($param) ? $param : $this->dateFormat, $value) : null,
-            'json'      =>  json_decode($value, true),
-            'array'     =>  empty($value) ? [] : json_decode($value, true),
-            'object'    =>  empty($value) ? new \stdClass() : json_decode($value),
-            'serialize' =>  $call($value),
-            default     =>  str_contains($type, '\\') ? new $type($value) : $value,
+            'integer'   => (int) $value,
+            'float'     => empty($param) ? (float) $value : (float) number_format($value, (int) $param, '.', ''),
+            'boolean'   => (bool) $value,
+            'timestamp' => !is_null($value) ? $this->formatDateTime(!empty($param) ? $param : $this->dateFormat, $value, true) : null,
+            'datetime'  => !is_null($value) ? $this->formatDateTime(!empty($param) ? $param : $this->dateFormat, $value) : null,
+            'json'      => json_decode($value, true),
+            'array'     => empty($value) ? [] : json_decode($value, true),
+            'object'    => empty($value) ? new \stdClass() : json_decode($value),
+            'serialize' => $call($value),
+            default     => str_contains($type, '\\') ? new $type($value) : $value,
         };
     }
 
@@ -634,7 +634,7 @@ trait Attribute
      * 设置数据字段获取器.
      *
      * @param string|array $name     字段名
-     * @param Closure     $callback 闭包获取器
+     * @param Closure      $callback 闭包获取器
      *
      * @return $this
      */

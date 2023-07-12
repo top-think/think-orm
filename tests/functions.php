@@ -2,6 +2,9 @@
 
 namespace tests;
 
+use think\db\ConnectionInterface;
+use think\facade\Db;
+
 use function array_column;
 use function array_combine;
 use function array_map;
@@ -9,8 +12,6 @@ use function call_user_func;
 use function is_callable;
 use function is_int;
 use function sort;
-use think\db\ConnectionInterface;
-use think\facade\Db;
 
 function array_column_ex(array $arr, array $column, ?string $key = null): array
 {

@@ -573,8 +573,6 @@ class Mongo extends Connection
                 $this->queryStr = $data . '(' . json_encode($options) . ');';
                 break;
         }
-
-        $this->options = $options;
     }
 
     /**

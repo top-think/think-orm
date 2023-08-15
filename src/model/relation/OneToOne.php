@@ -274,8 +274,8 @@ abstract class OneToOne extends Relation
         foreach ($result->getData() as $key => $val) {
             if (str_contains($key, '__')) {
                 [$name, $attr] = explode('__', $key, 2);
-                if ($name == $relation) {
-                    $list[$name][$attr] = $val;
+                if ($name == strtolower($relation)) {
+                    $list[$relation][$attr] = $val;
                     unset($result->$key);
                 }
             }

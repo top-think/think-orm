@@ -590,7 +590,7 @@ class Mongo extends BaseQuery
 
         $page = isset($config['page']) ? (int) $config['page'] : Paginator::getCurrentPage($config['var_page']);
 
-        $page = $page < 1 ? 1 : $page;
+        $page = max($page, 1);
 
         $config['path'] = $config['path'] ?? Paginator::getCurrentPath();
 

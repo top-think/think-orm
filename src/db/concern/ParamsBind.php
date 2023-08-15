@@ -13,6 +13,8 @@ declare(strict_types=1);
 
 namespace think\db\concern;
 
+use think\db\Connection;
+
 /**
  * 参数绑定支持
  */

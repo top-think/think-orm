@@ -1059,6 +1059,15 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
         return $model;
     }
 
+    /**
+     * 创建一个查询对象
+     * @return Query
+     */
+    public static function query(): Query
+    {
+        return (new static())->db();
+    }
+
     public function __call($method, $args)
     {
         if (isset(static::$macro[static::class][$method])) {

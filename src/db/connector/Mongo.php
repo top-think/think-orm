@@ -218,7 +218,7 @@ class Mongo extends Connection
 
         // 生成MongoQuery对象
         $mongoQuery = $this->builder->select($query);
-        $master     = $query->getOptions('master') ? true : false;
+        $master     = (bool) $query->getOptions('master');
 
         // 执行查询操作
         return $this->getCursor($query, $mongoQuery, $master);
@@ -345,7 +345,7 @@ class Mongo extends Connection
             $mongoQuery = $mongoQuery($query);
         }
 
-        $master = $query->getOptions('master') ? true : false;
+        $master = (bool) $query->getOptions('master');
         $this->getCursor($query, $mongoQuery, $master);
 
         $resultSet = $this->getResult($options['typeMap']);
@@ -573,8 +573,6 @@ class Mongo extends Connection
                 $this->queryStr = $data . '(' . json_encode($options) . ');';
                 break;
         }
-
-        $this->options = $options;
     }
 
     /**
@@ -1122,11 +1120,7 @@ class Mongo extends Connection
             $this->commit();
 
             return $result;
-        } catch (\Exception $e) {
-            $this->rollback();
-
-            throw $e;
-        } catch (\Throwable $e) {
+        }  catch (\Throwable $e) {
             $this->rollback();
 
             throw $e;

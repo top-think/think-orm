@@ -737,10 +737,10 @@ abstract class PDOConnection extends Connection
         }
 
         if (!isset($master)) {
-            $master = $query->getOptions('master') ? true : false;
+            $master = (bool) $query->getOptions('master');
         }
 
-        $procedure = $query->getOptions('procedure') ? true : in_array(strtolower(substr(trim($sql), 0, 4)), ['call', 'exec']);
+        $procedure = $query->getOptions('procedure') || in_array(strtolower(substr(trim($sql), 0, 4)), ['call', 'exec']);
 
         $this->getPDOStatement($sql, $bind, $master, $procedure);
 
@@ -893,8 +893,8 @@ abstract class PDOConnection extends Connection
     {
         $options =   $query->getOptions();
         $bind   =   $query->getBind();
-        $master =   !empty($options['master']) ? true : false;
-        $procedure = !empty($options['procedure']) ? true : in_array(strtolower(substr(trim($sql), 0, 4)), ['call', 'exec']);
+        $master = !empty($options['master']);
+        $procedure = !empty($options['procedure']) || in_array(strtolower(substr(trim($sql), 0, 4)), ['call', 'exec']);
 
         return $this->getPDOStatement($sql, $bind, $master, $procedure);
     }

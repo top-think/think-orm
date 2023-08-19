@@ -57,7 +57,7 @@ trait RelationShip
      * @var array
      */    
     protected $with = [];
-    
+
     /**
      * 关联写入定义信息.
      *
@@ -306,6 +306,8 @@ trait RelationShip
             }
 
             $relationResult->eagerlyResultSet($resultSet, $relationName, $subRelation, $closure, $relationCache, $join);
+
+            $this->with[$relationName] = true;
         }
     }
 

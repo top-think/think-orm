@@ -180,7 +180,7 @@ trait RelationShip
                 $relationResult->withAttr($withRelationAttr[$relationName]);
             }
 
-            $this->relation[$relation] = $relationResult->getRelation((array) $subRelation, $closure);
+            $this->setRelation($relation, $relationResult->getRelation((array) $subRelation, $closure));
         }
     }
 

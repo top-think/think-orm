@@ -264,7 +264,7 @@ trait RelationShip
      * 预载入关联查询 返回数据集.
      *
      * @param array  $resultSet        数据集
-     * @param string $relation         关联名
+     * @param array  $relations        关联名
      * @param array  $withRelationAttr 关联获取器
      * @param bool   $join             是否为JOIN方式
      * @param mixed  $cache            关联缓存
@@ -306,6 +306,8 @@ trait RelationShip
             }
 
             $relationResult->eagerlyResultSet($resultSet, $relationName, $subRelation, $closure, $relationCache, $join);
+
+            $this->with[$relationName] = true;
         }
     }
 

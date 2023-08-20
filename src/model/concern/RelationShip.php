@@ -137,7 +137,10 @@ trait RelationShip
             $value = $this->$method($value, array_merge($this->data, $data));
         }
 
-        $this->relation[$this->getRealFieldName($name)] = $value;
+        $name = $this->getRealFieldName($name);
+
+        $this->relation[$name]  = $value;
+        $this->with[$name]      = true;
 
         return $this;
     }
@@ -306,8 +309,6 @@ trait RelationShip
             }
 
             $relationResult->eagerlyResultSet($resultSet, $relationName, $subRelation, $closure, $relationCache, $join);
-
-            $this->with[$relationName] = true;
         }
     }
 
@@ -356,8 +357,6 @@ trait RelationShip
             }
 
             $relationResult->eagerlyResult($this, $relationName, $subRelation, $closure, $relationCache, $join);
-
-            $this->with[$relationName] = true;
         }
     }
 

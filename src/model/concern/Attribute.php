@@ -18,6 +18,8 @@ use InvalidArgumentException;
 use Stringable;
 use think\db\Raw;
 use think\helper\Str;
+use think\Model;
+use think\model\Collection as ModelCollection;
 use think\model\Relation;
 
 /**
@@ -409,6 +411,10 @@ trait Attribute
         // 检测修改器
         $method = 'set' . Str::studly($name) . 'Attr';
 
+        if ($value instanceof Model || $value instanceof ModelCollection) {
+            $this->with[$name]  = true;
+        }
+
         if (method_exists($this, $method)) {
             $array = $this->data;
             $value = $this->$method($value, array_merge($this->data, $data));
@@ -421,7 +427,7 @@ trait Attribute
             $value = $this->writeTransform($value, $this->type[$name]);
         } elseif ($this->isRelationAttr($name)) {
             // 关联属性
-            $this->relation[$name] = $value;
+            $this->relation[$name]  = $value;
         } elseif ((array_key_exists($name, $this->origin) || empty($this->origin)) && $value instanceof Stringable) {
             // 对象类型
             $value = $value->__toString();

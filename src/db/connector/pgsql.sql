@@ -58,7 +58,7 @@ BEGIN
            CASE WHEN pg_attribute.attnotnull  THEN ''not null''
            ELSE ''''
            END AS fields_not_null,
-           pg_attrdef.adsrc AS fields_default,
+           pg_get_expr(pg_attrdef.adbin, pg_attrdef.adrelid) AS fields_default,
            pg_description.description AS fields_comment
      FROM
            pg_attribute

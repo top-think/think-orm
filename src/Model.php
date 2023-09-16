@@ -331,7 +331,7 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
      * 设置当前模型的数据库连接.
      *
      * @param string $connection 数据表连接标识
-     *
+     * 
      * @return $this
      */
     public function setConnection(string $connection)

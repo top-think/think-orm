@@ -86,8 +86,8 @@ abstract class Paginator implements ArrayAccess, Countable, IteratorAggregate, J
      */
     protected $options = [
         'var_page' => 'page',
-        'path'     => '/',
-        'query'    => [],
+        'path' => '/',
+        'query' => [],
         'fragment' => '',
     ];
 
@@ -116,7 +116,7 @@ abstract class Paginator implements ArrayAccess, Countable, IteratorAggregate, J
 
         $this->options['path'] = '/' != $this->options['path'] ? rtrim($this->options['path'], '/') : $this->options['path'];
 
-        $this->simple   = $simple;
+        $this->simple = $simple;
         $this->listRows = $listRows;
 
         if (!$items instanceof Collection) {
@@ -124,14 +124,14 @@ abstract class Paginator implements ArrayAccess, Countable, IteratorAggregate, J
         }
 
         if ($simple) {
-            $this->currentPage  = $this->setCurrentPage($currentPage);
-            $this->hasMore      = count($items) > ($this->listRows);
-            $items              = $items->slice(0, $this->listRows);
+            $this->currentPage = $this->setCurrentPage($currentPage);
+            $this->hasMore = count($items) > ($this->listRows);
+            $items = $items->slice(0, $this->listRows);
         } else {
-            $this->total        = $total;
-            $this->lastPage     = (int) ceil($total / $listRows);
-            $this->currentPage  = $this->setCurrentPage($currentPage);
-            $this->hasMore      = $this->currentPage < $this->lastPage;
+            $this->total = $total;
+            $this->lastPage = (int) ceil($total / $listRows);
+            $this->currentPage = $this->setCurrentPage($currentPage);
+            $this->hasMore = $this->currentPage < $this->lastPage;
         }
         $this->items = $items;
     }
@@ -184,10 +184,10 @@ abstract class Paginator implements ArrayAccess, Countable, IteratorAggregate, J
 
         if (!str_contains($this->options['path'], '[PAGE]')) {
             $parameters = [$this->options['var_page'] => $page];
-            $path       = $this->options['path'];
+            $path = $this->options['path'];
         } else {
             $parameters = [];
-            $path       = str_replace('[PAGE]', (string) $page, $this->options['path']);
+            $path = str_replace('[PAGE]', (string) $page, $this->options['path']);
         }
 
         if (count($this->options['query']) > 0) {
@@ -526,11 +526,11 @@ abstract class Paginator implements ArrayAccess, Countable, IteratorAggregate, J
         }
 
         return [
-            'total'        => $total,
-            'per_page'     => $this->listRows(),
+            'total' => $total,
+            'per_page' => $this->listRows(),
             'current_page' => $this->currentPage(),
-            'last_page'    => $this->lastPage,
-            'data'         => $this->items->toArray(),
+            'last_page' => $this->lastPage,
+            'data' => $this->items->toArray(),
         ];
     }
 

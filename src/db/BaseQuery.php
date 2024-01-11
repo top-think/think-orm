@@ -84,8 +84,8 @@ abstract class BaseQuery
      */
     public function __construct(ConnectionInterface $connection)
     {
-        $this->connection   = $connection;
-        $this->prefix       = $this->connection->getConfig('prefix');
+        $this->connection = $connection;
+        $this->prefix = $this->connection->getConfig('prefix');
     }
 
     /**
@@ -418,7 +418,7 @@ abstract class BaseQuery
         if (true === $field) {
             // 获取全部字段
             $fields = $this->getTableFields();
-            $field  = $fields ?: ['*'];
+            $field = $fields ?: ['*'];
         }
 
         if (isset($this->options['field'])) {
@@ -449,7 +449,7 @@ abstract class BaseQuery
 
         // 字段排除
         $fields = $this->getTableFields();
-        $field  = $fields ? array_diff($fields, $field) : $field;
+        $field = $fields ? array_diff($fields, $field) : $field;
 
         if (isset($this->options['field'])) {
             $field = array_merge((array) $this->options['field'], $field);
@@ -483,7 +483,7 @@ abstract class BaseQuery
         if (true === $field) {
             // 获取全部字段
             $fields = $this->getTableFields($tableName);
-            $field  = $fields ?: ['*'];
+            $field = $fields ?: ['*'];
         }
 
         // 添加统一的前缀
@@ -530,8 +530,8 @@ abstract class BaseQuery
     public function removeOption(string $option = '')
     {
         if ('' === $option) {
-            $this->options  = [];
-            $this->bind     = [];
+            $this->options = [];
+            $this->bind = [];
         } elseif (isset($this->options[$option])) {
             unset($this->options[$option]);
         }
@@ -710,27 +710,27 @@ abstract class BaseQuery
     public function paginate(int|array $listRows = null, int|bool $simple = false): Paginator
     {
         if (is_int($simple)) {
-            $total  = $simple;
+            $total = $simple;
             $simple = false;
         }
 
         $defaultConfig = [
-            'query'     => [], //url额外参数
-            'fragment'  => '', //url锚点
-            'var_page'  => 'page', //分页变量
+            'query' => [], //url额外参数
+            'fragment' => '', //url锚点
+            'var_page' => 'page', //分页变量
             'list_rows' => 15, //每页数量
         ];
 
         if (is_array($listRows)) {
-            $config     = array_merge($defaultConfig, $listRows);
-            $listRows   = intval($config['list_rows']);
+            $config = array_merge($defaultConfig, $listRows);
+            $listRows = intval($config['list_rows']);
         } else {
-            $config     = $defaultConfig;
-            $listRows   = intval($listRows ?: $config['list_rows']);
+            $config = $defaultConfig;
+            $listRows = intval($listRows ?: $config['list_rows']);
         }
 
-        $page           = isset($config['page']) ? (int) $config['page'] : Paginator::getCurrentPage($config['var_page']);
-        $page           = max($page, 1);
+        $page = isset($config['page']) ? (int) $config['page'] : Paginator::getCurrentPage($config['var_page']);
+        $page = max($page, 1);
         $config['path'] = $config['path'] ?? Paginator::getCurrentPath();
 
         if (!isset($total) && !$simple) {
@@ -738,8 +738,8 @@ abstract class BaseQuery
 
             unset($this->options['order'], $this->options['cache'], $this->options['limit'], $this->options['page'], $this->options['field']);
 
-            $bind   = $this->bind;
-            $total  = $this->count();
+            $bind = $this->bind;
+            $total = $this->count();
             if ($total > 0) {
                 $results = $this->options($options)->bind($bind)->page($page, $listRows)->select();
             } else {
@@ -750,10 +750,10 @@ abstract class BaseQuery
                 }
             }
         } elseif ($simple) {
-            $results    = $this->limit(($page - 1) * $listRows, $listRows + 1)->select();
-            $total      = null;
+            $results = $this->limit(($page - 1) * $listRows, $listRows + 1)->select();
+            $total = null;
         } else {
-            $results    = $this->page($page, $listRows)->select();
+            $results = $this->page($page, $listRows)->select();
         }
 
         $this->removeOption('limit');
@@ -776,21 +776,21 @@ abstract class BaseQuery
     public function paginateX(int|array $listRows = null, string $key = null, string $sort = null): Paginator
     {
         $defaultConfig = [
-            'query'     => [], //url额外参数
-            'fragment'  => '', //url锚点
-            'var_page'  => 'page', //分页变量
+            'query' => [], //url额外参数
+            'fragment' => '', //url锚点
+            'var_page' => 'page', //分页变量
             'list_rows' => 15, //每页数量
         ];
 
-        $config     = is_array($listRows) ? array_merge($defaultConfig, $listRows) : $defaultConfig;
-        $listRows   = is_int($listRows) ? $listRows : (int) $config['list_rows'];
-        $page       = isset($config['page']) ? (int) $config['page'] : Paginator::getCurrentPage($config['var_page']);
-        $page       = max($page, 1);
+        $config = is_array($listRows) ? array_merge($defaultConfig, $listRows) : $defaultConfig;
+        $listRows = is_int($listRows) ? $listRows : (int) $config['list_rows'];
+        $page = isset($config['page']) ? (int) $config['page'] : Paginator::getCurrentPage($config['var_page']);
+        $page = max($page, 1);
 
         $config['path'] = $config['path'] ?? Paginator::getCurrentPath();
 
-        $key        = $key ?: $this->getPk();
-        $options    = $this->getOptions();
+        $key = $key ?: $this->getPk();
+        $options = $this->getOptions();
 
         if (is_null($sort)) {
             $order = $options['order'] ?? '';
@@ -871,7 +871,7 @@ abstract class BaseQuery
         $result->first();
 
         return [
-            'data'   => $result,
+            'data' => $result,
             'lastId' => $last ? $last[$key] : null,
         ];
     }
@@ -903,10 +903,10 @@ abstract class BaseQuery
 
         if ($key instanceof \DateTimeInterface || $key instanceof \DateInterval || (is_int($key) && is_null($expire))) {
             $expire = $key;
-            $key    = true;
+            $key = true;
         }
 
-        $this->options['cache']     = [$key, $expire, $tag ?: $this->getTable()];
+        $this->options['cache'] = [$key, $expire, $tag ?: $this->getTable()];
         return $this;
     }
 
@@ -921,7 +921,7 @@ abstract class BaseQuery
      */
     public function cacheAlways($key = true, $expire = null, $tag = null)
     {
-        $this->options['cache_always']  = true;
+        $this->options['cache_always'] = true;
         return $this->cache($key, $expire, $tag);
     }
 
@@ -936,7 +936,7 @@ abstract class BaseQuery
      */
     public function cacheForce($key = true, $expire = null, $tag = null)
     {
-        $this->options['force_cache']  = true;
+        $this->options['force_cache'] = true;
 
         return $this->cache($key, $expire, $tag);
     }
@@ -1031,8 +1031,8 @@ abstract class BaseQuery
      */
     public function json(array $json = [], bool $assoc = false)
     {
-        $this->options['json']          = $json;
-        $this->options['json_assoc']    = $assoc;
+        $this->options['json'] = $json;
+        $this->options['json_assoc'] = $assoc;
 
         return $this;
     }
@@ -1423,9 +1423,9 @@ abstract class BaseQuery
             // 根据页数计算limit
             [$page, $listRows] = $options['page'];
 
-            $page       = $page > 0 ? $page : 1;
-            $listRows   = $listRows ?: (is_numeric($options['limit']) ? $options['limit'] : 20);
-            $offset     = $listRows * ($page - 1);
+            $page = $page > 0 ? $page : 1;
+            $listRows = $listRows ?: (is_numeric($options['limit']) ? $options['limit'] : 20);
+            $offset = $listRows * ($page - 1);
 
             $options['limit'] = $offset . ',' . $listRows;
         }

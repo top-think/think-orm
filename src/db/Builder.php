@@ -63,6 +63,10 @@ class Builder extends BaseBuilder
             if ($val instanceof Raw) {
                 $result[$item] = $this->parseRaw($query, $val);
                 continue;
+            }elseif (is_null($val)) {
+                // json字段默认为NULL，需要优先处理，不然会出现json字段写入字符串null的情况
+                $result[$item] = 'NULL';
+                continue;
             } elseif (!is_scalar($val) && (in_array($key, (array) $query->getOptions('json')) || 'json' == $query->getFieldType($key))) {
                 $val = json_encode($val);
             }
@@ -76,8 +80,6 @@ class Builder extends BaseBuilder
                 if ($options['strict']) {
                     throw new Exception('fields not exists:[' . $key . ']');
                 }
-            } elseif (is_null($val)) {
-                $result[$item] = 'NULL';
             } elseif (is_array($val) && !empty($val) && is_string($val[0])) {
                 if (in_array(strtoupper($val[0]), ['INC', 'DEC'])) {
                     $result[$item] =    match (strtoupper($val[0])) {

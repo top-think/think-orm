@@ -58,12 +58,13 @@ trait ModelRelationQuery
      * 设置需要隐藏的输出属性.
      *
      * @param array $hidden 属性列表
+     * @param bool $merge 是否合并
      *
      * @return $this
      */
-    public function hidden(array $hidden = [])
+    public function hidden(array $hidden = [], bool $merge = false)
     {
-        $this->options['hidden'] = $hidden;
+        $this->options['hidden'] = $merge ? array_merge($this->options['hidden'], $hidden) : $hidden;
 
         return $this;
     }
@@ -71,13 +72,14 @@ trait ModelRelationQuery
     /**
      * 设置需要输出的属性.
      *
-     * @param array $visible
+     * @param array $visible 属性列表
+     * @param bool  $merge 是否合并
      *
      * @return $this
      */
-    public function visible(array $visible = [])
+    public function visible(array $visible = [], bool $merge = false)
     {
-        $this->options['visible'] = $visible;
+        $this->options['visible'] = $merge ? array_merge($this->options['visible'], $visible) : $visible;
 
         return $this;
     }
@@ -86,12 +88,13 @@ trait ModelRelationQuery
      * 设置需要附加的输出属性.
      *
      * @param array $append 属性列表
+     * @param bool  $merge  是否合并
      *
      * @return $this
      */
-    public function append(array $append = [])
+    public function append(array $append = [], bool $merge = false)
     {
-        $this->options['append'] = $append;
+        $this->options['append'] = $merge ? array_merge($this->options['append'], $append) : $append;
 
         return $this;
     }

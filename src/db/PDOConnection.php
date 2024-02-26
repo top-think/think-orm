@@ -39,45 +39,45 @@ abstract class PDOConnection extends Connection
      */
     protected $config = [
         // 数据库类型
-        'type'            => '',
+        'type' => '',
         // 服务器地址
-        'hostname'        => '',
+        'hostname' => '',
         // 数据库名
-        'database'        => '',
+        'database' => '',
         // 用户名
-        'username'        => '',
+        'username' => '',
         // 密码
-        'password'        => '',
+        'password' => '',
         // 端口
-        'hostport'        => '',
+        'hostport' => '',
         // 连接dsn
-        'dsn'             => '',
+        'dsn' => '',
         // 数据库连接参数
-        'params'          => [],
+        'params' => [],
         // 数据库编码默认采用utf8
-        'charset'         => 'utf8',
+        'charset' => 'utf8',
         // 数据库表前缀
-        'prefix'          => '',
+        'prefix' => '',
         // 数据库部署方式:0 集中式(单一服务器),1 分布式(主从服务器)
-        'deploy'          => 0,
+        'deploy' => 0,
         // 数据库读写是否分离 主从式有效
-        'rw_separate'     => false,
+        'rw_separate' => false,
         // 读写分离后 主服务器数量
-        'master_num'      => 1,
+        'master_num' => 1,
         // 指定从服务器序号
-        'slave_no'        => '',
+        'slave_no' => '',
         // 模型写入后自动读取主服务器
-        'read_master'     => false,
+        'read_master' => false,
         // 是否严格检查字段是否存在
-        'fields_strict'   => true,
+        'fields_strict' => true,
         // 开启字段缓存
-        'fields_cache'    => false,
+        'fields_cache' => false,
         // 监听SQL
-        'trigger_sql'     => true,
+        'trigger_sql' => true,
         // Builder类
-        'builder'         => '',
+        'builder' => '',
         // Query类
-        'query'           => '',
+        'query' => '',
         // 是否需要断线重连
         'break_reconnect' => false,
         // 断线标识字符串
@@ -148,11 +148,11 @@ abstract class PDOConnection extends Connection
      * @var array
      */
     protected $params = [
-        PDO::ATTR_CASE              => PDO::CASE_NATURAL,
-        PDO::ATTR_ERRMODE           => PDO::ERRMODE_EXCEPTION,
-        PDO::ATTR_ORACLE_NULLS      => PDO::NULL_NATURAL,
+        PDO::ATTR_CASE => PDO::CASE_NATURAL,
+        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+        PDO::ATTR_ORACLE_NULLS => PDO::NULL_NATURAL,
         PDO::ATTR_STRINGIFY_FETCHES => false,
-        PDO::ATTR_EMULATE_PREPARES  => false,
+        PDO::ATTR_EMULATE_PREPARES => false,
     ];
 
     /**
@@ -161,14 +161,14 @@ abstract class PDOConnection extends Connection
      * @var array
      */
     protected $bindType = [
-        'string'    => self::PARAM_STR,
-        'str'       => self::PARAM_STR,
-        'integer'   => self::PARAM_INT,
-        'int'       => self::PARAM_INT,
-        'boolean'   => self::PARAM_BOOL,
-        'bool'      => self::PARAM_BOOL,
-        'float'     => self::PARAM_FLOAT,
-        'datetime'  => self::PARAM_STR,
+        'string' => self::PARAM_STR,
+        'str' => self::PARAM_STR,
+        'integer' => self::PARAM_INT,
+        'int' => self::PARAM_INT,
+        'boolean' => self::PARAM_BOOL,
+        'bool' => self::PARAM_BOOL,
+        'float' => self::PARAM_FLOAT,
+        'datetime' => self::PARAM_STR,
         'timestamp' => self::PARAM_STR,
     ];
 
@@ -276,10 +276,10 @@ abstract class PDOConnection extends Connection
     {
         // 字段大小写转换
         return match ($this->attrCase) {
-            PDO::CASE_LOWER =>  array_change_key_case($info),
-            PDO::CASE_UPPER =>  array_change_key_case($info, CASE_UPPER),
-            PDO::CASE_NATURAL =>    $info,
-            default         =>  $info,
+            PDO::CASE_LOWER => array_change_key_case($info),
+            PDO::CASE_UPPER => array_change_key_case($info, CASE_UPPER),
+            PDO::CASE_NATURAL => $info,
+            default => $info,
         };
     }
 
@@ -389,10 +389,10 @@ abstract class PDOConnection extends Connection
             }
 
             $this->info[$schema] = [
-                'fields'  => array_keys($info),
-                'type'    => $info,
-                'bind'    => $bind,
-                'pk'      => $pk,
+                'fields' => array_keys($info),
+                'type' => $info,
+                'bind' => $bind,
+                'pk' => $pk,
                 'autoinc' => $autoinc,
             ];
         }
@@ -891,8 +891,8 @@ abstract class PDOConnection extends Connection
      */
     protected function queryPDOStatement(BaseQuery $query, string $sql): PDOStatement
     {
-        $options =   $query->getOptions();
-        $bind   =   $query->getBind();
+        $options = $query->getOptions();
+        $bind = $query->getBind();
         $master = !empty($options['master']);
         $procedure = !empty($options['procedure']) || in_array(strtolower(substr(trim($sql), 0, 4)), ['call', 'exec']);
 

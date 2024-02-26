@@ -26,9 +26,9 @@ class Sqlsrv extends PDOConnection
      * @var array
      */
     protected $params = [
-        PDO::ATTR_CASE              => PDO::CASE_NATURAL,
-        PDO::ATTR_ERRMODE           => PDO::ERRMODE_EXCEPTION,
-        PDO::ATTR_ORACLE_NULLS      => PDO::NULL_NATURAL,
+        PDO::ATTR_CASE => PDO::CASE_NATURAL,
+        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+        PDO::ATTR_ORACLE_NULLS => PDO::NULL_NATURAL,
         PDO::ATTR_STRINGIFY_FETCHES => false,
     ];
 
@@ -66,24 +66,24 @@ class Sqlsrv extends PDOConnection
         [$tableName] = explode(' ', $tableName);
         str_contains($tableName, '.') && $tableName = substr($tableName, strpos($tableName, '.') + 1);
 
-        $sql    = "SELECT   column_name,   data_type,   column_default,   is_nullable
+        $sql = "SELECT   column_name,   data_type,   column_default,   is_nullable
             FROM    information_schema.tables AS t
             JOIN    information_schema.columns AS c
             ON  t.table_catalog = c.table_catalog
             AND t.table_schema  = c.table_schema
             AND t.table_name    = c.table_name
             WHERE   t.table_name = '$tableName'";
-        $pdo    = $this->getPDOStatement($sql);
+        $pdo = $this->getPDOStatement($sql);
         $result = $pdo->fetchAll(PDO::FETCH_ASSOC);
-        $info   = [];
+        $info = [];
 
         if (!empty($result)) {
             foreach ($result as $key => $val) {
                 $val = array_change_key_case($val);
 
                 $info[$val['column_name']] = [
-                    'name'    => $val['column_name'],
-                    'type'    => $val['data_type'],
+                    'name' => $val['column_name'],
+                    'type' => $val['data_type'],
                     'notnull' => (bool) ('' === $val['is_nullable']), // not null is empty, null is yes
                     'default' => $val['column_default'],
                     'primary' => false,
@@ -92,8 +92,8 @@ class Sqlsrv extends PDOConnection
             }
         }
 
-        $sql    = "SELECT column_name FROM information_schema.key_column_usage WHERE table_name='$tableName'";
-        $pdo    = $this->linkID->query($sql);
+        $sql = "SELECT column_name FROM information_schema.key_column_usage WHERE table_name='$tableName'";
+        $pdo = $this->linkID->query($sql);
         $result = $pdo->fetch(PDO::FETCH_ASSOC);
 
         if ($result) {
@@ -117,9 +117,9 @@ class Sqlsrv extends PDOConnection
             WHERE TABLE_TYPE = 'BASE TABLE'
             ";
 
-        $pdo    = $this->getPDOStatement($sql);
+        $pdo = $this->getPDOStatement($sql);
         $result = $pdo->fetchAll(PDO::FETCH_ASSOC);
-        $info   = [];
+        $info = [];
 
         foreach ($result as $key => $val) {
             $info[$key] = current($val);

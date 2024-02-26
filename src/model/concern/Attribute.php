@@ -422,8 +422,8 @@ trait Attribute
             $value = $this->writeTransform($value, $this->type[$name]);
         } elseif ($this->isRelationAttr($name)) {
             // 关联属性
-            $this->relation[$name]  = $value;
-            $this->with[$name]      = true;
+            $this->relation[$name] = $value;
+            $this->with[$name] = true;
         } elseif ((array_key_exists($name, $this->origin) || empty($this->origin)) && $value instanceof Stringable) {
             // 对象类型
             $value = $value->__toString();
@@ -459,16 +459,16 @@ trait Attribute
         }
 
         return match ($type) {
-            'integer'   =>  (int) $value,
-            'float'     =>  empty($param) ? (float) $value : (float) number_format($value, (int) $param, '.', ''),
-            'boolean'   =>  (bool) $value,
-            'timestamp' =>  !is_numeric($value) ? strtotime($value) : $value,
-            'datetime'  =>  $this->formatDateTime('Y-m-d H:i:s.u', $value, true),
-            'object'    =>  is_object($value) ? json_encode($value, JSON_FORCE_OBJECT) : $value,
-            'array'     =>  json_encode((array) $value, !empty($param) ? (int) $param : JSON_UNESCAPED_UNICODE),
-            'json'      =>  json_encode($value, !empty($param) ? (int) $param : JSON_UNESCAPED_UNICODE),
-            'serialize' =>  serialize($value),
-            default     =>  $value instanceof Stringable && str_contains($type, '\\') ? $value->__toString() : $value,
+            'integer' => (int) $value,
+            'float' => empty($param) ? (float) $value : (float) number_format($value, (int) $param, '.', ''),
+            'boolean' => (bool) $value,
+            'timestamp' => !is_numeric($value) ? strtotime($value) : $value,
+            'datetime' => $this->formatDateTime('Y-m-d H:i:s.u', $value, true),
+            'object' => is_object($value) ? json_encode($value, JSON_FORCE_OBJECT) : $value,
+            'array' => json_encode((array) $value, !empty($param) ? (int) $param : JSON_UNESCAPED_UNICODE),
+            'json' => json_encode($value, !empty($param) ? (int) $param : JSON_UNESCAPED_UNICODE),
+            'serialize' => serialize($value),
+            default => $value instanceof Stringable && str_contains($type, '\\') ? $value->__toString() : $value,
         };
     }
 
@@ -484,11 +484,11 @@ trait Attribute
     public function getAttr(string $name)
     {
         try {
-            $relation   = false;
-            $value      = $this->getData($name);
+            $relation = false;
+            $value = $this->getData($name);
         } catch (InvalidArgumentException $e) {
-            $relation   = $this->isRelationAttr($name);
-            $value      = null;
+            $relation = $this->isRelationAttr($name);
+            $value = null;
         }
 
         return $this->getValue($name, $value, $relation);
@@ -619,16 +619,16 @@ trait Attribute
         };
 
         return match ($type) {
-            'integer'   =>  (int) $value,
-            'float'     =>  empty($param) ? (float) $value : (float) number_format($value, (int) $param, '.', ''),
-            'boolean'   =>  (bool) $value,
-            'timestamp' =>  !is_null($value) ? $this->formatDateTime(!empty($param) ? $param : $this->dateFormat, $value, true) : null,
-            'datetime'  =>  !is_null($value) ? $this->formatDateTime(!empty($param) ? $param : $this->dateFormat, $value) : null,
-            'json'      =>  json_decode($value, true),
-            'array'     =>  empty($value) ? [] : json_decode($value, true),
-            'object'    =>  empty($value) ? new \stdClass() : json_decode($value),
-            'serialize' =>  $call($value),
-            default     =>  str_contains($type, '\\') ? new $type($value) : $value,
+            'integer' => (int) $value,
+            'float' => empty($param) ? (float) $value : (float) number_format($value, (int) $param, '.', ''),
+            'boolean' => (bool) $value,
+            'timestamp' => !is_null($value) ? $this->formatDateTime(!empty($param) ? $param : $this->dateFormat, $value, true) : null,
+            'datetime' => !is_null($value) ? $this->formatDateTime(!empty($param) ? $param : $this->dateFormat, $value) : null,
+            'json' => json_decode($value, true),
+            'array' => empty($value) ? [] : json_decode($value, true),
+            'object' => empty($value) ? new \stdClass() : json_decode($value),
+            'serialize' => $call($value),
+            default => str_contains($type, '\\') ? new $type($value) : $value,
         };
     }
 

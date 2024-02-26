@@ -492,9 +492,9 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
     public function refresh(bool $relation = false)
     {
         if ($this->exists) {
-            $this->data     = $this->db()->find($this->getKey())->getData();
-            $this->origin   = $this->data;
-            $this->get      = [];
+            $this->data = $this->db()->find($this->getKey())->getData();
+            $this->origin = $this->data;
+            $this->get = [];
 
             if ($relation) {
                 $this->relation = [];
@@ -571,8 +571,8 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
         $this->trigger('AfterWrite');
 
         // 重新记录原始数据
-        $this->origin   = $this->data;
-        $this->get      = [];
+        $this->origin = $this->data;
+        $this->get = [];
 
         return true;
     }
@@ -663,9 +663,9 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
         $db = $this->db();
 
         $db->transaction(function () use ($data, $allowFields, $db) {
-            $this->key  = null;
-            $where      = $this->getWhere();
-            $result     = $db->where($where)
+            $this->key = null;
+            $where = $this->getWhere();
+            $result = $db->where($where)
                 ->strict(false)
                 ->cache(true)
                 ->setOption('key', $this->key)
@@ -705,7 +705,7 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
         // 时间戳自动写入
         if ($this->autoWriteTimestamp) {
             if ($this->createTime && !array_key_exists($this->createTime, $data)) {
-                $data[$this->createTime]       = $this->autoWriteTimestamp();
+                $data[$this->createTime] = $this->autoWriteTimestamp();
                 $this->data[$this->createTime] = $data[$this->createTime];
             }
 
@@ -835,8 +835,8 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
         }
 
         // 读取更新条件
-        $where  = $this->getWhere();
-        $db     = $this->db();
+        $where = $this->getWhere();
+        $db = $this->db();
 
         $db->transaction(function () use ($where, $db) {
             // 删除当前模型数据
@@ -850,7 +850,7 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
 
         $this->trigger('AfterDelete');
 
-        $this->exists   = false;
+        $this->exists = false;
 
         return true;
     }

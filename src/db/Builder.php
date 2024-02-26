@@ -82,9 +82,9 @@ class Builder extends BaseBuilder
                 }
             } elseif (is_array($val) && !empty($val) && is_string($val[0])) {
                 if (in_array(strtoupper($val[0]), ['INC', 'DEC'])) {
-                    $result[$item] =    match (strtoupper($val[0])) {
-                        'INC'   =>  $item . ' + ' . floatval($val[1]),
-                        'DEC'   =>  $item . ' - ' . floatval($val[1]),
+                    $result[$item] = match (strtoupper($val[0])) {
+                        'INC' => $item . ' + ' . floatval($val[1]),
+                        'DEC' => $item . ' - ' . floatval($val[1]),
                     };
                 }
             } elseif (is_scalar($val)) {
@@ -407,8 +407,8 @@ class Builder extends BaseBuilder
             if ($query->isAutoBind()) {
                 $array = [];
                 foreach ($value as $v) {
-                    $name       = $query->bindValue($v, $bindType);
-                    $array[]    = ':' . $name;
+                    $name = $query->bindValue($v, $bindType);
+                    $array[] = ':' . $name;
                 }
                 $value = implode(',', $array);
             } elseif (Connection::PARAM_STR == $bindType) {
@@ -565,8 +565,8 @@ class Builder extends BaseBuilder
      */
     protected function parseRaw(Query $query, Raw $raw): string
     {
-        $sql    = $raw->getValue();
-        $bind   = $raw->getBind();
+        $sql = $raw->getValue();
+        $bind = $raw->getBind();
 
         if ($bind) {
             $query->bindParams($sql, $bind);
@@ -740,7 +740,7 @@ class Builder extends BaseBuilder
         $options = $query->getOptions();
 
         // 获取绑定信息
-        $bind   = $query->getFieldsBindType();
+        $bind = $query->getFieldsBindType();
         $fields = [];
         $values = [];
 

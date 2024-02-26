@@ -34,8 +34,8 @@ class PDOException extends DbException
 
         if (!empty($error)) {
             $this->setData('PDO Error Info', [
-                'SQLSTATE'             => $error[0],
-                'Driver Error Code'    => $error[1] ?? 0,
+                'SQLSTATE' => $error[0],
+                'Driver Error Code' => $error[1] ?? 0,
                 'Driver Error Message' => $error[2] ?? '',
             ]);
         }

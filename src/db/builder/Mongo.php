@@ -552,10 +552,10 @@ class Mongo
         ];
 
         $cmd = [
-            'aggregate'    => $options['table'],
+            'aggregate' => $options['table'],
             'allowDiskUse' => true,
-            'pipeline'     => $pipeline,
-            'cursor'       => new \stdClass(),
+            'pipeline' => $pipeline,
+            'cursor' => new \stdClass(),
         ];
 
         foreach (['explain', 'collation', 'bypassDocumentValidation', 'readConcern'] as $option) {
@@ -601,10 +601,10 @@ class Mongo
         ];
 
         $cmd = [
-            'aggregate'    => $options['table'],
+            'aggregate' => $options['table'],
             'allowDiskUse' => true,
-            'pipeline'     => $pipeline,
-            'cursor'       => new \stdClass(),
+            'pipeline' => $pipeline,
+            'cursor' => new \stdClass(),
         ];
 
         foreach (['explain', 'collation', 'bypassDocumentValidation', 'readConcern'] as $option) {
@@ -633,7 +633,7 @@ class Mongo
 
         $cmd = [
             'distinct' => $options['table'],
-            'key'      => $field,
+            'key' => $field,
         ];
 
         if (!empty($options['where'])) {

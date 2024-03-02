@@ -67,6 +67,13 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
     private $replace = false;
 
     /**
+     * 保存数据额外参数.
+     *
+     * @var string
+     */
+    private $extraSave = '';
+
+    /**
      * 数据表后缀
      *
      * @var string
@@ -483,6 +490,20 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
     }
 
     /**
+     * 设置保存数据的额外参数.
+     *
+     * @param string $extraSave 额外信息
+     *
+     * @return $this
+     */
+    public function extraSave(string $extraSave)
+    {
+        $this->extraSave = $extraSave;
+
+        return $this;
+    }
+
+    /**
      * 刷新模型数据.
      *
      * @param bool $relation 是否刷新关联数据
@@ -670,6 +691,7 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
                 ->cache(true)
                 ->setOption('key', $this->key)
                 ->field($allowFields)
+                ->extra($this->extraSave)
                 ->update($data);
 
             $this->checkResult($result);
@@ -724,6 +746,7 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
             $result = $db->strict(false)
                 ->field($allowFields)
                 ->replace($this->replace)
+                ->extra($this->extraSave)
                 ->sequence($sequence)
                 ->insert($data, true);
 
@@ -862,10 +885,11 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
      * @param array  $allowField 允许字段
      * @param bool   $replace    使用Replace
      * @param string $suffix     数据表后缀
+     * @param string $extraSave  保存数据额外参数
      *
      * @return static
      */
-    public static function create(array $data, array $allowField = [], bool $replace = false, string $suffix = ''): Model
+    public static function create(array $data, array $allowField = [], bool $replace = false, string $suffix = '', string $extraSave = ''): Model
     {
         $model = new static();
 
@@ -877,7 +901,7 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
             $model->setSuffix($suffix);
         }
 
-        $model->replace($replace)->save($data);
+        $model->replace($replace)->extraSave($extraSave)->save($data);
 
         return $model;
     }

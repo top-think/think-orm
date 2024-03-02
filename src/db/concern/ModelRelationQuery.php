@@ -583,7 +583,9 @@ trait ModelRelationQuery
         if (!empty($this->options['lazy_fields'])) {
             $id = $this->getKey($result);
             foreach ($this->options['lazy_fields'] as $field) {
-                $result[$field] += $this->getLazyFieldValue($field, $id);
+                if(isset($result[$field])){
+                    $result[$field] += $this->getLazyFieldValue($field, $id);
+                }
             }
         }
 

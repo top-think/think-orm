@@ -1404,7 +1404,7 @@ abstract class PDOConnection extends Connection
                 if (self::PARAM_INT == $val[1] && '' === $val[0]) {
                     $val[0] = 0;
                 } elseif (self::PARAM_FLOAT == $val[1]) {
-                    $val[0] = is_string($val[0]) ? (float) $val[0] : $val[0];
+                    $val[0] = (is_string($val[0]) && !preg_match("/^\d+(\.\d+)?$/", $val[0]))  ? (float) $val[0] : $val[0];
                     $val[1] = self::PARAM_STR;
                 }
 

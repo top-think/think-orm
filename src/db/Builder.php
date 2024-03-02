@@ -63,7 +63,7 @@ class Builder extends BaseBuilder
             if ($val instanceof Raw) {
                 $result[$item] = $this->parseRaw($query, $val);
                 continue;
-            }elseif (is_null($val)) {
+            } elseif (is_null($val)) {
                 // json字段默认为NULL，需要优先处理，不然会出现json字段写入字符串null的情况
                 $result[$item] = 'NULL';
                 continue;

@@ -261,7 +261,7 @@ abstract class BaseQuery
      *
      * @param string $name 不含前缀的数据表名字
      *
-     * @return mixed
+     * @return string|array
      */
     public function getTable(string $name = '')
     {

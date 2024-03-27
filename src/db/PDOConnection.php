@@ -724,9 +724,10 @@ abstract class PDOConnection extends Connection
                 $key = $cacheItem->getKey();
 
                 $data = $this->cache->get($key);
-
-                if (null !== $data) {
+                if (gettype($data) !== 'boolean' && null !== $data) {
                     return $data;
+                } else {
+                    return [];
                 }
             }
         }

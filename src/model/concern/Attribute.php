@@ -18,6 +18,7 @@ use InvalidArgumentException;
 use Stringable;
 use think\db\Raw;
 use think\helper\Str;
+use think\Model;
 use think\model\Relation;
 
 /**
@@ -234,7 +235,7 @@ trait Attribute
         } elseif (is_object($data)) {
             $data = get_object_vars($data);
         }
-                
+
         // 清空数据
         $this->data = [];
 

@@ -4,22 +4,23 @@
 // +----------------------------------------------------------------------
 // | Licensed ( http://www.apache.org/licenses/LICENSE-2.0 )
 // +----------------------------------------------------------------------
-// | Author: idcpj <260083304@qq.com>
+// | Author: liu21st <liu21st@gmail.com>
 // +----------------------------------------------------------------------
 declare (strict_types = 1);
 
 namespace think\db\builder;
 
 use think\db\Builder;
+use think\db\Query;
 use think\db\exception\DbException as Exception;
 use think\db\Raw;
-use think\db\BaseQuery as Query;
 
 /**
- * dm数据库驱动
+ * Oracle数据库驱动
  */
 class Dm extends Builder
 {
+//    protected $selectSql = 'SELECT * FROM (SELECT thinkphp.*, rownum AS numrow FROM (SELECT  %DISTINCT% %FIELD% FROM %TABLE%%JOIN%%WHERE%%GROUP%%HAVING%%ORDER%) thinkphp ) %LIMIT%%COMMENT%';
 
     /**
      * limit分析
@@ -72,7 +73,7 @@ class Dm extends Builder
         if (strpos($key, '->') && false === strpos($key, '(')) {
             // JSON字段支持
             [$field, $name] = explode($key, '->');
-            $key            = $field . '."' . $name . '"';
+            $key = $field . '."' . $name . '"';
         } elseif (strpos($key, '.') && !preg_match('/[,\'\"\(\)\[\s]/', $key)) {
             [$table, $key] = explode('.', $key, 2);
 

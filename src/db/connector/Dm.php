@@ -6,7 +6,7 @@
 // +----------------------------------------------------------------------
 // | Licensed ( http://www.apache.org/licenses/LICENSE-2.0 )
 // +----------------------------------------------------------------------
-// | Author: idcpj <260083304@qq.com>
+// | Author: liu21st <liu21st@gmail.com>
 // +----------------------------------------------------------------------
 declare (strict_types = 1);
 
@@ -17,7 +17,7 @@ use think\db\exception\PDOException;
 use think\db\PDOConnection;
 
 /**
- * DM数据库驱动
+ * mysql数据库驱动
  */
 class Dm extends PDOConnection
 {
@@ -64,27 +64,27 @@ class Dm extends PDOConnection
      */
     public function getFields(string $tableName): array
     {
-        $tableName=str_replace("`", "", $tableName);
+        $tableName = str_replace("`", "", $tableName);
 
-        $sql    =  $sql=sprintf("
+        $sql = $sql = sprintf("
 select a.column_name,data_type,decode(nullable,'Y',0,1) notnull,data_default,decode(a.column_name,b.column_name,1,0) pk from user_tab_columns a,(select column_name from user_constraints c,user_cons_columns col where c.constraint_name=col.constraint_name and c.constraint_type='P'and c.table_name='%s') b where table_name='%s' and a.column_name=b.column_name(+)
 ", $tableName, $tableName);
 
-        $pdo    = $this->getPDOStatement($sql);
+        $pdo = $this->getPDOStatement($sql);
         $result = $pdo->fetchAll(PDO::FETCH_ASSOC);
-        $info   = [];
+        $info = [];
 
         if (!empty($result)) {
             foreach ($result as $key => $val) {
                 $val = array_change_key_case($val);
 
                 $info[$val['column_name']] = [
-                    'name'    => $val['column_name'],
-                    'type'    => $val['data_type'],
+                    'name' => $val['column_name'],
+                    'type' => $val['data_type'],
                     'notnull' => 1 == $val['notnull'],
                     'default' => $val['data_default'],
                     'primary' => $val['pk'] == 1,
-                    'autoinc' =>  $val['pk'] == 1,
+                    'autoinc' => $val['pk'] == 1,
                     'comment' => '',
                 ];
             }
@@ -101,10 +101,10 @@ select a.column_name,data_type,decode(nullable,'Y',0,1) notnull,data_default,dec
      */
     public function getTables(string $dbName = ''): array
     {
-        $sql    =" SELECT table_name FROM USER_TABLES  where TABLESPACE_NAME='MAIN'";
-        $pdo    = $this->getPDOStatement($sql);
+        $sql = " SELECT table_name FROM USER_TABLES  where TABLESPACE_NAME='MAIN'";
+        $pdo = $this->getPDOStatement($sql);
         $result = $pdo->fetchAll(PDO::FETCH_ASSOC);
-        $info   = [];
+        $info = [];
 
         foreach ($result as $key => $val) {
             $info[$key] = current($val);

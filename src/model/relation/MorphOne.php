@@ -57,12 +57,12 @@ class MorphOne extends Relation
      */
     public function __construct(Model $parent, string $model, string $morphKey, string $morphType, string $type)
     {
-        $this->parent    = $parent;
-        $this->model     = $model;
-        $this->type      = $type;
-        $this->morphKey  = $morphKey;
+        $this->parent = $parent;
+        $this->model = $model;
+        $this->type = $type;
+        $this->morphKey = $morphKey;
         $this->morphType = $morphType;
-        $this->query     = (new $model)->db();
+        $this->query = (new $model)->db();
     }
 
     /**
@@ -138,9 +138,9 @@ class MorphOne extends Relation
     public function eagerlyResultSet(array &$resultSet, string $relation, array $subRelation, Closure $closure = null, array $cache = []): void
     {
         $morphType = $this->morphType;
-        $morphKey  = $this->morphKey;
-        $type      = $this->type;
-        $range     = [];
+        $morphKey = $this->morphKey;
+        $type = $this->type;
+        $range = [];
 
         foreach ($resultSet as $result) {
             $pk = $result->getPk();
@@ -192,7 +192,7 @@ class MorphOne extends Relation
         $pk = $result->getPk();
 
         if (isset($result->$pk)) {
-            $pk   = $result->$pk;
+            $pk = $result->$pk;
             $data = $this->eagerlyMorphToOne([
                 [$this->morphKey, '=', $pk],
                 [$this->morphType, '=', $this->type],
@@ -281,7 +281,7 @@ class MorphOne extends Relation
         // 保存关联表数据
         $pk = $this->parent->getPk();
 
-        $data[$this->morphKey]  = $this->parent->$pk;
+        $data[$this->morphKey] = $this->parent->$pk;
         $data[$this->morphType] = $this->type;
 
         return new $this->model($data);
@@ -339,7 +339,7 @@ class MorphOne extends Relation
     protected function bindAttr(Model $result, Model $model = null): void
     {
         foreach ($this->bindAttr as $key => $attr) {
-            $key   = is_numeric($key) ? $attr : $key;
+            $key = is_numeric($key) ? $attr : $key;
             $value = $result->getOrigin($key);
 
             if (!is_null($value)) {

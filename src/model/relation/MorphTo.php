@@ -60,11 +60,11 @@ class MorphTo extends Relation
      */
     public function __construct(Model $parent, string $morphType, string $morphKey, array $alias = [], string $relation = null)
     {
-        $this->parent    = $parent;
+        $this->parent = $parent;
         $this->morphType = $morphType;
-        $this->morphKey  = $morphKey;
-        $this->alias     = $alias;
-        $this->relation  = $relation;
+        $this->morphKey = $morphKey;
+        $this->alias = $alias;
+        $this->relation = $relation;
     }
 
     /**
@@ -75,7 +75,7 @@ class MorphTo extends Relation
     public function getModel(): Model
     {
         $morphType = $this->morphType;
-        $model     = $this->parseModel($this->parent->$morphType);
+        $model = $this->parseModel($this->parent->$morphType);
 
         return (new $model);
     }
@@ -89,7 +89,7 @@ class MorphTo extends Relation
      */
     public function getRelation(array $subRelation = [], Closure $closure = null)
     {
-        $morphKey  = $this->morphKey;
+        $morphKey = $this->morphKey;
         $morphType = $this->morphType;
 
         // 多态模型
@@ -218,9 +218,9 @@ class MorphTo extends Relation
      */
     public function eagerlyResultSet(array &$resultSet, string $relation, array $subRelation, Closure $closure = null, array $cache = []): void
     {
-        $morphKey  = $this->morphKey;
+        $morphKey = $this->morphKey;
         $morphType = $this->morphType;
-        $range     = [];
+        $range = [];
 
         foreach ($resultSet as $result) {
             // 获取关联外键列表
@@ -234,11 +234,11 @@ class MorphTo extends Relation
             foreach ($range as $key => $val) {
                 // 多态类型映射
                 $model = $this->parseModel($key);
-                $obj   = new $model;
+                $obj = new $model;
                 if (!\is_null($closure)) {
                     $obj = $closure($obj);
                 }
-                $pk   = $obj->getPk();
+                $pk = $obj->getPk();
                 $list = $obj->with($subRelation)
                     ->cache($cache[0] ?? false, $cache[1] ?? null, $cache[2] ?? null)
                     ->select($val);
@@ -337,9 +337,9 @@ class MorphTo extends Relation
      */
     public function associate(Model $model, string $type = ''): Model
     {
-        $morphKey  = $this->morphKey;
+        $morphKey = $this->morphKey;
         $morphType = $this->morphType;
-        $pk        = $model->getPk();
+        $pk = $model->getPk();
 
         $this->parent->setAttr($morphKey, $model->$pk);
         $this->parent->setAttr($morphType, $type ?: get_class($model));
@@ -355,7 +355,7 @@ class MorphTo extends Relation
      */
     public function dissociate(): Model
     {
-        $morphKey  = $this->morphKey;
+        $morphKey = $this->morphKey;
         $morphType = $this->morphType;
 
         $this->parent->setAttr($morphKey, null);

@@ -41,7 +41,7 @@ class Mongo extends Connection
 {
 
     // 查询数据类型
-    protected $dbName  = '';
+    protected $dbName = '';
     protected $typeMap = 'array';
     protected $mongo; // MongoDb Object
     protected $cursor; // MongoCursor Object
@@ -54,53 +54,53 @@ class Mongo extends Connection
     // 数据库连接参数配置
     protected $config = [
         // 数据库类型
-        'type'            => '',
+        'type' => '',
         // 服务器地址
-        'hostname'        => '',
+        'hostname' => '',
         // 数据库名
-        'database'        => '',
+        'database' => '',
         // 是否是复制集
-        'is_replica_set'  => false,
+        'is_replica_set' => false,
         // 用户名
-        'username'        => '',
+        'username' => '',
         // 密码
-        'password'        => '',
+        'password' => '',
         // 端口
-        'hostport'        => '',
+        'hostport' => '',
         // 连接dsn
-        'dsn'             => '',
+        'dsn' => '',
         // 数据库连接参数
-        'params'          => [],
+        'params' => [],
         // 数据库编码默认采用utf8
-        'charset'         => 'utf8',
+        'charset' => 'utf8',
         // 主键名
-        'pk'              => '_id',
+        'pk' => '_id',
         // 主键类型
-        'pk_type'         => 'ObjectID',
+        'pk_type' => 'ObjectID',
         // 数据库表前缀
-        'prefix'          => '',
+        'prefix' => '',
         // 数据库部署方式:0 集中式(单一服务器),1 分布式(主从服务器)
-        'deploy'          => 0,
+        'deploy' => 0,
         // 数据库读写是否分离 主从式有效
-        'rw_separate'     => false,
+        'rw_separate' => false,
         // 读写分离后 主服务器数量
-        'master_num'      => 1,
+        'master_num' => 1,
         // 指定从服务器序号
-        'slave_no'        => '',
+        'slave_no' => '',
         // 是否严格检查字段是否存在
-        'fields_strict'   => true,
+        'fields_strict' => true,
         // 开启字段缓存
-        'fields_cache'    => false,
+        'fields_cache' => false,
         // 监听SQL
-        'trigger_sql'     => true,
+        'trigger_sql' => true,
         // 自动写入时间戳字段
-        'auto_timestamp'  => false,
+        'auto_timestamp' => false,
         // 时间字段取出后的默认时间格式
         'datetime_format' => 'Y-m-d H:i:s',
         // 是否_id转换为id
-        'pk_convert_id'   => false,
+        'pk_convert_id' => false,
         // typeMap
-        'type_map'        => ['root' => 'array', 'document' => 'array'],
+        'type_map' => ['root' => 'array', 'document' => 'array'],
     ];
 
     /**
@@ -151,7 +151,7 @@ class Mongo extends Connection
                 $config = array_merge($this->config, $config);
             }
 
-            $this->dbName  = $config['database'];
+            $this->dbName = $config['database'];
             $this->typeMap = $config['type_map'];
 
             if ($config['pk_convert_id'] && '_id' == $config['pk']) {
@@ -238,7 +238,7 @@ class Mongo extends Connection
         $this->initConnect($master);
         $this->db->updateQueryTimes();
 
-        $options   = $query->getOptions();
+        $options = $query->getOptions();
         $namespace = $options['table'];
 
         if (false === strpos($namespace, '.')) {
@@ -254,13 +254,13 @@ class Mongo extends Connection
             $mongoQuery = $mongoQuery($query);
         }
 
-        $readPreference       = $options['readPreference'] ?? null;
+        $readPreference = $options['readPreference'] ?? null;
         $this->queryStartTime = microtime(true);
 
         if ($session = $this->getSession()) {
             $this->cursor = $this->mongo->executeQuery($namespace, $mongoQuery, [
                 'readPreference' => is_null($readPreference) ? new ReadPreference(ReadPreference::RP_PRIMARY) : $readPreference,
-                'session'        => $session,
+                'session' => $session,
             ]);
         } else {
             $this->cursor = $this->mongo->executeQuery($namespace, $mongoQuery, $readPreference);
@@ -323,7 +323,7 @@ class Mongo extends Connection
         if ($query->getOptions('cache')) {
             // 检查查询缓存
             $cacheItem = $this->parseCache($query, $query->getOptions('cache'));
-            $key       = $cacheItem->getKey();
+            $key = $cacheItem->getKey();
 
             if ($this->cache->has($key)) {
                 return $this->cache->get($key);
@@ -378,12 +378,12 @@ class Mongo extends Connection
             $this->queryStr = 'db' . strstr($namespace, '.') . '.' . $this->queryStr;
         }
 
-        $writeConcern         = $options['writeConcern'] ?? null;
+        $writeConcern = $options['writeConcern'] ?? null;
         $this->queryStartTime = microtime(true);
 
         if ($session = $this->getSession()) {
             $writeResult = $this->mongo->executeBulkWrite($namespace, $bulk, [
-                'session'      => $session,
+                'session' => $session,
                 'writeConcern' => is_null($writeConcern) ? new WriteConcern(1) : $writeConcern,
             ]);
         } else {
@@ -400,8 +400,8 @@ class Mongo extends Connection
         if ($query->getOptions('cache')) {
             // 清理缓存数据
             $cacheItem = $this->parseCache($query, $query->getOptions('cache'));
-            $key       = $cacheItem->getKey();
-            $tag       = $cacheItem->getTag();
+            $key = $cacheItem->getKey();
+            $tag = $cacheItem->getTag();
 
             if (isset($key) && $this->cache->has($key)) {
                 $this->cache->delete($key);
@@ -443,7 +443,7 @@ class Mongo extends Connection
         if ($session = $this->getSession()) {
             $this->cursor = $this->mongo->executeCommand($dbName, $command, [
                 'readPreference' => is_null($readPreference) ? new ReadPreference(ReadPreference::RP_PRIMARY) : $readPreference,
-                'session'        => $session,
+                'session' => $session,
             ]);
         } else {
             $this->cursor = $this->mongo->executeCommand($dbName, $command, $readPreference);
@@ -577,11 +577,11 @@ class Mongo extends Connection
      */
     public function close()
     {
-        $this->mongo     = null;
-        $this->cursor    = null;
-        $this->linkRead  = null;
+        $this->mongo = null;
+        $this->cursor = null;
+        $this->linkRead = null;
         $this->linkWrite = null;
-        $this->links     = [];
+        $this->links = [];
     }
 
     /**
@@ -666,7 +666,7 @@ class Mongo extends Connection
      */
     public function replicaSetConnect(): Manager
     {
-        $this->dbName  = $this->config['database'];
+        $this->dbName = $this->config['database'];
         $this->typeMap = $this->config['type_map'];
 
         $startTime = microtime(true);
@@ -726,14 +726,14 @@ class Mongo extends Connection
         $bulk = $this->builder->insert($query);
 
         $writeResult = $this->mongoExecute($query, $bulk);
-        $result      = $writeResult->getInsertedCount();
+        $result = $writeResult->getInsertedCount();
 
         if ($result) {
-            $data      = $options['data'];
+            $data = $options['data'];
             $lastInsId = $this->getLastInsID($query);
 
             if ($lastInsId) {
-                $pk        = $query->getPk();
+                $pk = $query->getPk();
                 $data[$pk] = $lastInsId;
             }
 
@@ -936,7 +936,7 @@ class Mongo extends Connection
 
         if (!empty($options['cache'])) {
             $cacheItem = $this->parseCache($query, $options['cache']);
-            $key       = $cacheItem->getKey();
+            $key = $cacheItem->getKey();
 
             if ($this->cache->has($key)) {
                 return $this->cache->get($key);
@@ -955,7 +955,7 @@ class Mongo extends Connection
         $resultSet = $this->mongoQuery($query, $mongoQuery);
 
         if (!empty($resultSet)) {
-            $data   = array_shift($resultSet);
+            $data = array_shift($resultSet);
             $result = $data[$field];
         } else {
             $result = false;
@@ -1000,7 +1000,7 @@ class Mongo extends Connection
         if (!empty($options['cache'])) {
             // 判断查询缓存
             $cacheItem = $this->parseCache($query, $options['cache']);
-            $key       = $cacheItem->getKey();
+            $key = $cacheItem->getKey();
 
             if ($this->cache->has($key)) {
                 return $this->cache->get($key);
@@ -1109,7 +1109,7 @@ class Mongo extends Connection
     public function startTrans()
     {
         $this->initConnect(true);
-        $this->session_uuid                  = uniqid();
+        $this->session_uuid = uniqid();
         $this->sessions[$this->session_uuid] = $this->getMongo()->startSession();
 
         $this->sessions[$this->session_uuid]->startTransaction([]);

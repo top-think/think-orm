@@ -256,7 +256,7 @@ trait WhereQuery
     public function whereColumn(string $field1, string $operator, string $field2 = null, string $logic = 'AND')
     {
         if (is_null($field2)) {
-            $field2   = $operator;
+            $field2 = $operator;
             $operator = '=';
         }
 
@@ -308,7 +308,7 @@ trait WhereQuery
     {
         if (is_null($condition)) {
             $condition = $op;
-            $op        = '=';
+            $op = '=';
         }
 
         $this->options['where'][$logic][] = [new Raw($field), $op, $condition];

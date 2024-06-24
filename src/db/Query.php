@@ -402,7 +402,7 @@ class Query extends BaseQuery
     public function chunk(int $count, callable $callback, $column = null, string $order = 'asc'): bool
     {
         $options = $this->getOptions();
-        $column  = $column ?: $this->getPk();
+        $column = $column ?: $this->getPk();
 
         if (isset($options['order'])) {
             unset($options['order']);
@@ -434,7 +434,7 @@ class Query extends BaseQuery
                 $times++;
                 $query = $this->options($options)->page($times, $count);
             } else {
-                $end    = $resultSet->pop();
+                $end = $resultSet->pop();
                 $lastId = is_array($end) ? $end[$key] : $end->getData($key);
 
                 $query = $this->options($options)

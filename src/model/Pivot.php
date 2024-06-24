@@ -63,7 +63,7 @@ class Pivot extends Model
         $model = parent::newInstance($data, $where, $options);
 
         $model->parent = $this->parent;
-        $model->name   = $this->name;
+        $model->name = $this->name;
 
         return $model;
     }

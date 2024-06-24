@@ -253,7 +253,7 @@ abstract class Connection implements ConnectionInterface
         }
 
         $runtime = number_format((microtime(true) - $this->queryStartTime), 6);
-        $sql     = $sql ?: $this->getLastsql();
+        $sql = $sql ?: $this->getLastsql();
 
         if (empty($this->config['deploy'])) {
             $master = null;

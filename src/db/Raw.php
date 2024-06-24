@@ -41,7 +41,7 @@ class Raw
     public function __construct(string $value, array $bind = [])
     {
         $this->value = $value;
-        $this->bind  = $bind;
+        $this->bind = $bind;
     }
 
     /**

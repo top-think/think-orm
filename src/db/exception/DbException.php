@@ -34,9 +34,9 @@ class DbException extends Exception
         $this->code = $code;
 
         $this->setData('Database Status', [
-            'Error Code'    => $code,
+            'Error Code' => $code,
             'Error Message' => $message,
-            'Error SQL'     => $sql,
+            'Error SQL' => $sql,
         ]);
 
         unset($config['username'], $config['password']);

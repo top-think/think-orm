@@ -574,9 +574,9 @@ class Mongo extends BaseQuery
         }
 
         $defaultConfig = [
-            'query'     => [], //url额外参数
-            'fragment'  => '', //url锚点
-            'var_page'  => 'page', //分页变量
+            'query' => [], //url额外参数
+            'fragment' => '', //url锚点
+            'var_page' => 'page', //分页变量
             'list_rows' => 15, //每页数量
         ];
 

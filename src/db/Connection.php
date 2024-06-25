@@ -21,9 +21,9 @@ use think\DbManager;
  */
 abstract class Connection implements ConnectionInterface
 {
-    const PARAM_INT   = 1;
-    const PARAM_STR   = 2;
-    const PARAM_BOOL  = 5;
+    const PARAM_INT = 1;
+    const PARAM_STR = 2;
+    const PARAM_BOOL = 5;
     const PARAM_FLOAT = 21;
 
     /**

@@ -38,16 +38,16 @@ abstract class Builder
      * @var array
      */
     protected $parser = [
-        'parseCompare'     => ['=', '<>', '>', '>=', '<', '<='],
-        'parseLike'        => ['LIKE', 'NOT LIKE'],
-        'parseBetween'     => ['NOT BETWEEN', 'BETWEEN'],
-        'parseIn'          => ['NOT IN', 'IN'],
-        'parseExp'         => ['EXP'],
-        'parseNull'        => ['NOT NULL', 'NULL'],
+        'parseCompare' => ['=', '<>', '>', '>=', '<', '<='],
+        'parseLike' => ['LIKE', 'NOT LIKE'],
+        'parseBetween' => ['NOT BETWEEN', 'BETWEEN'],
+        'parseIn' => ['NOT IN', 'IN'],
+        'parseExp' => ['EXP'],
+        'parseNull' => ['NOT NULL', 'NULL'],
         'parseBetweenTime' => ['BETWEEN TIME', 'NOT BETWEEN TIME'],
-        'parseTime'        => ['< TIME', '> TIME', '<= TIME', '>= TIME'],
-        'parseExists'      => ['NOT EXISTS', 'EXISTS'],
-        'parseColumn'      => ['COLUMN'],
+        'parseTime' => ['< TIME', '> TIME', '<= TIME', '>= TIME'],
+        'parseExists' => ['NOT EXISTS', 'EXISTS'],
+        'parseColumn' => ['COLUMN'],
     ];
 
     /**
@@ -156,8 +156,8 @@ abstract class Builder
             }
 
             if (false !== strpos($key, '->')) {
-                [$key, $name]  = explode('->', $key, 2);
-                $item          = $this->parseKey($query, $key);
+                [$key, $name] = explode('->', $key, 2);
+                $item = $this->parseKey($query, $key);
 
                 $result[$item . '->' . $name] = 'json_set(' . $item . ', \'$.' . $name . '\', ' . $this->parseDataBind($query, $key . '->' . $name, $val, $bind) . ')';
             } elseif (false === strpos($key, '.') && !in_array($key, $fields, true)) {
@@ -273,7 +273,7 @@ abstract class Builder
      */
     protected function parseTable(Query $query, $tables): string
     {
-        $item    = [];
+        $item = [];
         $options = $query->getOptions();
 
         foreach ((array) $tables as $key => $table) {
@@ -300,14 +300,14 @@ abstract class Builder
      */
     protected function parseWhere(Query $query, array $where): string
     {
-        $options  = $query->getOptions();
+        $options = $query->getOptions();
         $whereStr = $this->buildWhere($query, $where);
 
         if (!empty($options['soft_delete'])) {
             // 附加软删除条件
             [$field, $condition] = $options['soft_delete'];
 
-            $binds    = $query->getFieldsBindType();
+            $binds = $query->getFieldsBindType();
             $whereStr = $whereStr ? '( ' . $whereStr . ' ) AND ' : '';
             $whereStr = $whereStr . $this->parseWhereItem($query, $field, $condition, $binds);
         }
@@ -387,7 +387,7 @@ abstract class Builder
                 $where[] = $this->parseFieldsAnd($query, $value, $field, $logic, $binds);
             } else {
                 // 对字段使用表达式查询
-                $field   = is_string($field) ? $field : '';
+                $field = is_string($field) ? $field : '';
                 $where[] = ' ' . $logic . ' ' . $this->parseWhereItem($query, $field, $value, $binds);
             }
         }
@@ -523,7 +523,7 @@ abstract class Builder
         if (is_scalar($value) && !in_array($exp, ['EXP', 'NOT NULL', 'NULL', 'IN', 'NOT IN', 'BETWEEN', 'NOT BETWEEN']) && strpos($exp, 'TIME') === false) {
             if (is_string($value) && 0 === strpos($value, ':') && $query->isBind(substr($value, 1))) {
             } else {
-                $name  = $query->bindValue($value, $bindType);
+                $name = $query->bindValue($value, $bindType);
                 $value = ':' . $name;
             }
         }
@@ -556,7 +556,7 @@ abstract class Builder
         if (is_array($value)) {
             $array = [];
             foreach ($value as $item) {
-                $name    = $query->bindValue($item, PDO::PARAM_STR);
+                $name = $query->bindValue($item, PDO::PARAM_STR);
                 $array[] = $key . ' ' . $exp . ' :' . $name;
             }
 
@@ -770,8 +770,8 @@ abstract class Builder
             if ($query->isAutoBind()) {
                 $array = [];
                 foreach ($value as $v) {
-                    $name       = $query->bindValue($v, $bindType);
-                    $array[]    = ':' . $name;
+                    $name = $query->bindValue($v, $bindType);
+                    $array[] = ':' . $name;
                 }
                 $value = implode(',', $array);
             } elseif (PDO::PARAM_STR == $bindType) {
@@ -918,8 +918,8 @@ abstract class Builder
                 }
 
                 if (preg_match('/^[\w\.]+$/', $key)) {
-                    $sort    = strtoupper($sort);
-                    $sort    = in_array($sort, ['ASC', 'DESC'], true) ? ' ' . $sort : '';
+                    $sort = strtoupper($sort);
+                    $sort = in_array($sort, ['ASC', 'DESC'], true) ? ' ' . $sort : '';
                     $array[] = $this->parseKey($query, $key, true) . $sort;
                 } else {
                     throw new Exception('order express error:' . $key);
@@ -939,7 +939,7 @@ abstract class Builder
      */
     protected function parseRaw(Query $query, Raw $raw): string
     {
-        $sql  = $raw->getValue();
+        $sql = $raw->getValue();
         $bind = $raw->getBind();
 
         if ($bind) {
@@ -1251,7 +1251,7 @@ abstract class Builder
         $options = $query->getOptions();
 
         // 获取绑定信息
-        $bind   = $query->getFieldsBindType();
+        $bind = $query->getFieldsBindType();
         $fields = [];
         $values = [];
 

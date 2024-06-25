@@ -45,9 +45,9 @@ class Fetch
      */
     public function __construct(Query $query)
     {
-        $this->query      = $query;
+        $this->query = $query;
         $this->connection = $query->getConnection();
-        $this->builder    = $this->connection->getBuilder();
+        $this->builder = $this->connection->getBuilder();
     }
 
     /**
@@ -207,10 +207,10 @@ class Fetch
         }
 
         if ($limit) {
-            $array    = array_chunk($dataSet, $limit, true);
+            $array = array_chunk($dataSet, $limit, true);
             $fetchSql = [];
             foreach ($array as $item) {
-                $sql  = $this->builder->insertAll($this->query, $item);
+                $sql = $this->builder->insertAll($this->query, $item);
                 $bind = $this->query->getBind();
 
                 $fetchSql[] = $this->connection->getRealSql($sql, $bind);
@@ -422,7 +422,7 @@ class Fetch
         if (!empty($options['group'])) {
             // 支持GROUP
             $subSql = $this->query->field('count(' . $field . ') AS think_count')->buildSql();
-            $query  = $this->query->newQuery()->table([$subSql => '_group_count_']);
+            $query = $this->query->newQuery()->table([$subSql => '_group_count_']);
 
             return $query->fetchsql()->aggregate('COUNT', '*');
         } else {

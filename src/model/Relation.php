@@ -261,7 +261,7 @@ abstract class Relation
             $model = (new $this->model)->data($this->default);
         } elseif ($this->default instanceof Closure) {
             $closure = $this->default;
-            $model   = new $this->model;
+            $model = new $this->model;
             $closure($model);
         } else {
             $model = $this->default;
@@ -278,10 +278,10 @@ abstract class Relation
     protected function getClosureType(Closure $closure, $query = null)
     {
         $reflect = new ReflectionFunction($closure);
-        $params  = $reflect->getParameters();
+        $params = $reflect->getParameters();
 
         if (!empty($params)) {
-            $type  = $params[0]->getType();
+            $type = $params[0]->getType();
             $query = $query ?: $this->query;
             return is_null($type) || Relation::class == $type->getName() ? $this : $query;
         }

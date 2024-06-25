@@ -33,11 +33,11 @@ class HasMany extends Relation
      */
     public function __construct(Model $parent, string $model, string $foreignKey, string $localKey)
     {
-        $this->parent     = $parent;
-        $this->model      = $model;
+        $this->parent = $parent;
+        $this->model = $model;
         $this->foreignKey = $foreignKey;
-        $this->localKey   = $localKey;
-        $this->query      = (new $model)->db();
+        $this->localKey = $localKey;
+        $this->query = (new $model)->db();
 
         if (get_class($parent) == $model) {
             $this->selfRelation = true;
@@ -77,7 +77,7 @@ class HasMany extends Relation
     public function eagerlyResultSet(array &$resultSet, string $relation, array $subRelation, Closure $closure = null, array $cache = []): void
     {
         $localKey = $this->localKey;
-        $range    = [];
+        $range = [];
 
         foreach ($resultSet as $result) {
             // 获取关联外键列表
@@ -118,7 +118,7 @@ class HasMany extends Relation
         $localKey = $this->localKey;
 
         if (isset($result->$localKey)) {
-            $pk   = $result->$localKey;
+            $pk = $result->$localKey;
             $data = $this->eagerlyOneToMany([
                 [$this->foreignKey, '=', $pk],
             ], $subRelation, $closure, $cache);
@@ -217,7 +217,7 @@ class HasMany extends Relation
             ->select();
 
         // 组装模型数据
-        $data      = [];
+        $data = [];
         
         foreach ($list as $set) {
             $key = $set->$foreignKey;
@@ -299,7 +299,7 @@ class HasMany extends Relation
     {
         $table = $this->query->getTable();
 
-        $model    = class_basename($this->parent);
+        $model = class_basename($this->parent);
         $relation = class_basename($this->model);
 
         if ('*' != $id) {
@@ -307,7 +307,7 @@ class HasMany extends Relation
         }
 
         $softDelete = $this->query->getOptions('soft_delete');
-        $query      = $query ?: $this->parent->db()->alias($model);
+        $query = $query ?: $this->parent->db()->alias($model);
 
         return $query->field($model . '.*')
             ->join([$table => $relation], $model . '.' . $this->localKey . '=' . $relation . '.' . $this->foreignKey, $joinType)
@@ -329,8 +329,8 @@ class HasMany extends Relation
      */
     public function hasWhere($where = [], $fields = null, string $joinType = '', Query $query = null): Query
     {
-        $table    = $this->query->getTable();
-        $model    = class_basename($this->parent);
+        $table = $this->query->getTable();
+        $model = class_basename($this->parent);
         $relation = class_basename($this->model);
 
         if (is_array($where)) {
@@ -342,9 +342,9 @@ class HasMany extends Relation
             $where = $this->query;
         }
 
-        $fields     = $this->getRelationQueryFields($fields, $model);
+        $fields = $this->getRelationQueryFields($fields, $model);
         $softDelete = $this->query->getOptions('soft_delete');
-        $query      = $query ?: $this->parent->db();
+        $query = $query ?: $this->parent->db();
 
         return $query->alias($model)
             ->group($model . '.' . $this->localKey)

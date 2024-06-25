@@ -26,7 +26,7 @@ class ModelNotFoundException extends DbException
     public function __construct(string $message, string $model = '', array $config = [])
     {
         $this->message = $message;
-        $this->model   = $model;
+        $this->model = $model;
 
         $this->setData('Database Config', $config);
     }

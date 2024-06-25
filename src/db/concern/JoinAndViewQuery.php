@@ -143,7 +143,7 @@ trait JoinAndViewQuery
         $this->options['view'] = true;
 
         $fields = [];
-        $table  = $this->getJoinTable($join, $alias);
+        $table = $this->getJoinTable($join, $alias);
 
         if (true === $field) {
             $fields = $alias . '.*';

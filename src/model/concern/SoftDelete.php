@@ -82,7 +82,7 @@ trait SoftDelete
             return false;
         }
 
-        $name  = $this->getDeleteTimeField();
+        $name = $this->getDeleteTimeField();
         $force = $this->isForce();
 
         if ($name && !$force) {

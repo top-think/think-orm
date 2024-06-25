@@ -32,12 +32,12 @@ class BelongsTo extends OneToOne
      */
     public function __construct(Model $parent, string $model, string $foreignKey, string $localKey, string $relation = null)
     {
-        $this->parent     = $parent;
-        $this->model      = $model;
+        $this->parent = $parent;
+        $this->model = $model;
         $this->foreignKey = $foreignKey;
-        $this->localKey   = $localKey;
-        $this->query      = (new $model)->db();
-        $this->relation   = $relation;
+        $this->localKey = $localKey;
+        $this->query = (new $model)->db();
+        $this->relation = $relation;
 
         if (get_class($parent) == $model) {
             $this->selfRelation = true;
@@ -139,13 +139,13 @@ class BelongsTo extends OneToOne
      */
     public function has(string $operator = '>=', int $count = 1, string $id = '*', string $joinType = '', Query $query = null): Query
     {
-        $table      = $this->query->getTable();
-        $model      = class_basename($this->parent);
-        $relation   = class_basename($this->model);
-        $localKey   = $this->localKey;
+        $table = $this->query->getTable();
+        $model = class_basename($this->parent);
+        $relation = class_basename($this->model);
+        $localKey = $this->localKey;
         $foreignKey = $this->foreignKey;
         $softDelete = $this->query->getOptions('soft_delete');
-        $query      = $query ?: $this->parent->db()->alias($model);
+        $query = $query ?: $this->parent->db()->alias($model);
 
         return $query->whereExists(function ($query) use ($table, $model, $relation, $localKey, $foreignKey, $softDelete) {
             $query->table([$table => $relation])
@@ -168,8 +168,8 @@ class BelongsTo extends OneToOne
      */
     public function hasWhere($where = [], $fields = null, string $joinType = '', Query $query = null): Query
     {
-        $table    = $this->query->getTable();
-        $model    = class_basename($this->parent);
+        $table = $this->query->getTable();
+        $model = class_basename($this->parent);
         $relation = class_basename($this->model);
 
         if (is_array($where)) {
@@ -181,9 +181,9 @@ class BelongsTo extends OneToOne
             $where = $this->query;
         }
 
-        $fields     = $this->getRelationQueryFields($fields, $model);
+        $fields = $this->getRelationQueryFields($fields, $model);
         $softDelete = $this->query->getOptions('soft_delete');
-        $query      = $query ?: $this->parent->db();
+        $query = $query ?: $this->parent->db();
 
         return $query->alias($model)
             ->field($fields)
@@ -206,7 +206,7 @@ class BelongsTo extends OneToOne
      */
     protected function eagerlySet(array &$resultSet, string $relation, array $subRelation = [], Closure $closure = null, array $cache = []): void
     {
-        $localKey   = $this->localKey;
+        $localKey = $this->localKey;
         $foreignKey = $this->foreignKey;
 
         $range = [];
@@ -258,7 +258,7 @@ class BelongsTo extends OneToOne
      */
     protected function eagerlyOne(Model $result, string $relation, array $subRelation = [], Closure $closure = null, array $cache = []): void
     {
-        $localKey   = $this->localKey;
+        $localKey = $this->localKey;
         $foreignKey = $this->foreignKey;
 
         $this->query->removeWhereField($localKey);

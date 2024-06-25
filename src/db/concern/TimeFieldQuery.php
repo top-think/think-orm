@@ -22,14 +22,14 @@ trait TimeFieldQuery
      * @var array
      */
     protected $timeRule = [
-        'today'      => ['today', 'tomorrow -1second'],
-        'yesterday'  => ['yesterday', 'today -1second'],
-        'week'       => ['this week 00:00:00', 'next week 00:00:00 -1second'],
-        'last week'  => ['last week 00:00:00', 'this week 00:00:00 -1second'],
-        'month'      => ['first Day of this month 00:00:00', 'first Day of next month 00:00:00 -1second'],
+        'today' => ['today', 'tomorrow -1second'],
+        'yesterday' => ['yesterday', 'today -1second'],
+        'week' => ['this week 00:00:00', 'next week 00:00:00 -1second'],
+        'last week' => ['last week 00:00:00', 'this week 00:00:00 -1second'],
+        'month' => ['first Day of this month 00:00:00', 'first Day of next month 00:00:00 -1second'],
         'last month' => ['first Day of last month 00:00:00', 'first Day of this month 00:00:00 -1second'],
-        'year'       => ['this year 1/1', 'next year 1/1 -1second'],
-        'last year'  => ['last year 1/1', 'this year 1/1 -1second'],
+        'year' => ['this year 1/1', 'next year 1/1 -1second'],
+        'last year' => ['last year 1/1', 'this year 1/1 -1second'],
     ];
 
     /**
@@ -80,7 +80,7 @@ trait TimeFieldQuery
     public function whereTimeInterval(string $field, string $start, string $interval = 'day', int $step = 1, string $logic = 'AND')
     {
         $startTime = strtotime($start);
-        $endTime   = strtotime(($step > 0 ? '+' : '-') . abs($step) . ' ' . $interval . (abs($step) > 1 ? 's' : ''), $startTime);
+        $endTime = strtotime(($step > 0 ? '+' : '-') . abs($step) . ' ' . $interval . (abs($step) > 1 ? 's' : ''), $startTime);
 
         return $this->whereTime($field, 'between', $step > 0 ? [$startTime, $endTime - 1] : [$endTime, $startTime - 1], $logic);
     }

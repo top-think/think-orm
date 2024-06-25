@@ -86,7 +86,7 @@ abstract class OneToOne extends Relation
         // 预载入封装
         $joinTable = $this->query->getTable();
         $joinAlias = $relation;
-        $joinType  = $joinType ?: $this->joinType;
+        $joinType = $joinType ?: $this->joinType;
 
         $query->via($joinAlias);
 
@@ -303,7 +303,7 @@ abstract class OneToOne extends Relation
     protected function bindAttr(Model $result, Model $model = null): void
     {
         foreach ($this->bindAttr as $key => $attr) {
-            $key   = is_numeric($key) ? $attr : $key;
+            $key = is_numeric($key) ? $attr : $key;
             $value = $result->getOrigin($key);
 
             if (!is_null($value)) {

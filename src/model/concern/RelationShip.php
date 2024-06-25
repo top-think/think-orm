@@ -139,8 +139,8 @@ trait RelationShip
 
         $name = $this->getRealFieldName($name);
 
-        $this->relation[$name]  = $value;
-        $this->with[$name]      = true;
+        $this->relation[$name] = $value;
+        $this->with[$name] = true;
 
         return $this;
     }
@@ -161,19 +161,19 @@ trait RelationShip
 
             if ($relation instanceof Closure) {
                 // 支持闭包查询过滤关联条件
-                $closure    = $relation;
-                $relation   = $key;
+                $closure = $relation;
+                $relation = $key;
             }
 
             if (is_array($relation)) {
-                $subRelation    = $relation;
-                $relation       = $key;
+                $subRelation = $relation;
+                $relation = $key;
             } elseif (str_contains($relation, '.')) {
                 [$relation, $subRelation] = explode('.', $relation, 2);
             }
 
-            $method         = Str::camel($relation);
-            $relationName   = Str::snake($relation);
+            $method = Str::camel($relation);
+            $relationName = Str::snake($relation);
             $relationResult = $this->$method();
 
             if (isset($withRelationAttr[$relationName])) {
@@ -251,8 +251,8 @@ trait RelationShip
      */
     public function eagerly(Query $query, string $relation, $field, string $joinType = '', Closure $closure = null, bool $first = false): bool
     {
-        $relation   = Str::camel($relation);
-        $class      = $this->$relation();
+        $relation = Str::camel($relation);
+        $class = $this->$relation();
 
         if ($class instanceof OneToOne) {
             $class->eagerly($query, $relation, $field, $joinType, $closure, $first);
@@ -277,25 +277,25 @@ trait RelationShip
     public function eagerlyResultSet(array &$resultSet, array $relations, array $withRelationAttr = [], bool $join = false, $cache = false): void
     {
         foreach ($relations as $key => $relation) {
-            $subRelation    = [];
-            $closure        = null;
+            $subRelation = [];
+            $closure = null;
 
             if ($relation instanceof Closure) {
-                $closure    = $relation;
-                $relation   = $key;
+                $closure = $relation;
+                $relation = $key;
             }
 
             if (is_array($relation)) {
-                $subRelation    = $relation;
-                $relation       = $key;
+                $subRelation = $relation;
+                $relation = $key;
             } elseif (str_contains($relation, '.')) {
                 [$relation, $subRelation] = explode('.', $relation, 2);
 
                 $subRelation = [$subRelation];
             }
 
-            $relationName   = $relation;
-            $relation       = Str::camel($relation);
+            $relationName = $relation;
+            $relation = Str::camel($relation);
             $relationResult = $this->$relation();
 
             if (isset($withRelationAttr[$relationName])) {
@@ -327,25 +327,25 @@ trait RelationShip
     public function eagerlyResult(array $relations, array $withRelationAttr = [], bool $join = false, $cache = false): void
     {
         foreach ($relations as $key => $relation) {
-            $subRelation    = [];
-            $closure        = null;
+            $subRelation = [];
+            $closure = null;
 
             if ($relation instanceof Closure) {
-                $closure    = $relation;
-                $relation   = $key;
+                $closure = $relation;
+                $relation = $key;
             }
 
             if (is_array($relation)) {
-                $subRelation    = $relation;
-                $relation       = $key;
+                $subRelation = $relation;
+                $relation = $key;
             } elseif (str_contains($relation, '.')) {
                 [$relation, $subRelation] = explode('.', $relation, 2);
 
                 $subRelation = [$subRelation];
             }
 
-            $relationName   = $relation;
-            $relation       = Str::camel($relation);
+            $relationName = $relation;
+            $relation = Str::camel($relation);
             $relationResult = $this->$relation();
 
             if (isset($withRelationAttr[$relationName])) {
@@ -377,8 +377,8 @@ trait RelationShip
         $relation = $this->getRelation($relation, true);
 
         foreach ($attrs as $key => $attr) {
-            $key    = is_numeric($key) ? $attr : $key;
-            $value  = $this->getOrigin($key);
+            $key = is_numeric($key) ? $attr : $key;
+            $value = $this->getOrigin($key);
 
             if (!is_null($value)) {
                 throw new Exception('bind attr has exists:' . $key);
@@ -407,11 +407,11 @@ trait RelationShip
             $closure = $name = null;
 
             if ($relation instanceof Closure) {
-                $closure    = $relation;
-                $relation   = $key;
+                $closure = $relation;
+                $relation = $key;
             } elseif (is_string($key)) {
-                $name       = $relation;
-                $relation   = $key;
+                $name = $relation;
+                $relation = $key;
             }
 
             $relation = Str::camel($relation);
@@ -446,8 +446,8 @@ trait RelationShip
     public function hasOne(string $model, string $foreignKey = '', string $localKey = ''): HasOne
     {
         // 记录当前关联信息
-        $model      = $this->parseModel($model);
-        $localKey   = $localKey ?: $this->getPk();
+        $model = $this->parseModel($model);
+        $localKey = $localKey ?: $this->getPk();
         $foreignKey = $foreignKey ?: $this->getForeignKey($this->name);
 
         return new HasOne($this, $model, $foreignKey, $localKey);
@@ -465,11 +465,11 @@ trait RelationShip
     public function belongsTo(string $model, string $foreignKey = '', string $localKey = ''): BelongsTo
     {
         // 记录当前关联信息
-        $model      = $this->parseModel($model);
+        $model = $this->parseModel($model);
         $foreignKey = $foreignKey ?: $this->getForeignKey((new $model())->getName());
-        $localKey   = $localKey ?: (new $model())->getPk();
-        $trace      = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2);
-        $relation   = Str::snake($trace[1]['function']);
+        $localKey = $localKey ?: (new $model())->getPk();
+        $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2);
+        $relation = Str::snake($trace[1]['function']);
 
         return new BelongsTo($this, $model, $foreignKey, $localKey, $relation);
     }
@@ -486,8 +486,8 @@ trait RelationShip
     public function hasMany(string $model, string $foreignKey = '', string $localKey = ''): HasMany
     {
         // 记录当前关联信息
-        $model      = $this->parseModel($model);
-        $localKey   = $localKey ?: $this->getPk();
+        $model = $this->parseModel($model);
+        $localKey = $localKey ?: $this->getPk();
         $foreignKey = $foreignKey ?: $this->getForeignKey($this->name);
 
         return new HasMany($this, $model, $foreignKey, $localKey);
@@ -508,12 +508,12 @@ trait RelationShip
     public function hasManyThrough(string $model, string $through, string $foreignKey = '', string $throughKey = '', string $localKey = '', string $throughPk = ''): HasManyThrough
     {
         // 记录当前关联信息
-        $model      = $this->parseModel($model);
-        $through    = $this->parseModel($through);
-        $localKey   = $localKey ?: $this->getPk();
+        $model = $this->parseModel($model);
+        $through = $this->parseModel($through);
+        $localKey = $localKey ?: $this->getPk();
         $foreignKey = $foreignKey ?: $this->getForeignKey($this->name);
         $throughKey = $throughKey ?: $this->getForeignKey((new $through())->getName());
-        $throughPk  = $throughPk ?: (new $through())->getPk();
+        $throughPk = $throughPk ?: (new $through())->getPk();
 
         return new HasManyThrough($this, $model, $through, $foreignKey, $throughKey, $localKey, $throughPk);
     }
@@ -533,12 +533,12 @@ trait RelationShip
     public function hasOneThrough(string $model, string $through, string $foreignKey = '', string $throughKey = '', string $localKey = '', string $throughPk = ''): HasOneThrough
     {
         // 记录当前关联信息
-        $model      = $this->parseModel($model);
-        $through    = $this->parseModel($through);
-        $localKey   = $localKey ?: $this->getPk();
+        $model = $this->parseModel($model);
+        $through = $this->parseModel($through);
+        $localKey = $localKey ?: $this->getPk();
         $foreignKey = $foreignKey ?: $this->getForeignKey($this->name);
         $throughKey = $throughKey ?: $this->getForeignKey((new $through())->getName());
-        $throughPk  = $throughPk ?: (new $through())->getPk();
+        $throughPk = $throughPk ?: (new $through())->getPk();
 
         return new HasOneThrough($this, $model, $through, $foreignKey, $throughKey, $localKey, $throughPk);
     }
@@ -556,11 +556,11 @@ trait RelationShip
     public function belongsToMany(string $model, string $middle = '', string $foreignKey = '', string $localKey = ''): BelongsToMany
     {
         // 记录当前关联信息
-        $model      = $this->parseModel($model);
-        $name       = Str::snake(class_basename($model));
-        $middle     = $middle ?: Str::snake($this->name) . '_' . $name;
+        $model = $this->parseModel($model);
+        $name = Str::snake(class_basename($model));
+        $middle = $middle ?: Str::snake($this->name) . '_' . $name;
         $foreignKey = $foreignKey ?: $name . '_id';
-        $localKey   = $localKey ?: $this->getForeignKey($this->name);
+        $localKey = $localKey ?: $this->getForeignKey($this->name);
 
         return new BelongsToMany($this, $model, $middle, $foreignKey, $localKey);
     }
@@ -627,11 +627,11 @@ trait RelationShip
      */
     public function morphTo(string|array $morph = null, array $alias = []): MorphTo
     {
-        $trace      = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2);
-        $relation   = Str::snake($trace[1]['function']);
+        $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2);
+        $relation = Str::snake($trace[1]['function']);
 
         if (is_null($morph)) {
-            $morph  = $relation;
+            $morph = $relation;
         }
 
         [$morphType, $foreignKey] = $this->parseMorph($morph);
@@ -657,9 +657,9 @@ trait RelationShip
 
         [$morphType, $morphKey] = $this->parseMorph($morph);
 
-        $model      = $this->parseModel($model);
-        $name       = Str::snake(class_basename($model));
-        $localKey   = $localKey ?: $this->getForeignKey($name);
+        $model = $this->parseModel($model);
+        $name = Str::snake(class_basename($model));
+        $localKey = $localKey ?: $this->getForeignKey($name);
 
         return new MorphToMany($this, $model, $middle, $morphType, $morphKey, $localKey);
     }
@@ -682,7 +682,7 @@ trait RelationShip
 
         [$morphType, $morphKey] = $this->parseMorph($morph);
 
-        $model      = $this->parseModel($model);
+        $model = $this->parseModel($model);
         $foreignKey = $foreignKey ?: $this->getForeignKey($this->name);
 
         return new MorphToMany($this, $model, $middle, $morphType, $morphKey, $foreignKey, true);
@@ -700,7 +700,7 @@ trait RelationShip
         if (is_array($morph)) {
             [$morphType, $foreignKey] = $morph;
         } else {
-            $morphType  = $morph . '_type';
+            $morphType = $morph . '_type';
             $foreignKey = $morph . '_id';
         }
 
@@ -855,7 +855,7 @@ trait RelationShip
     protected function autoRelationDelete($force = false): void
     {
         foreach ($this->relationWrite as $key => $name) {
-            $name   = is_numeric($key) ? $name : $key;
+            $name = is_numeric($key) ? $name : $key;
             $result = $this->getRelation($name, true);
 
             if ($result instanceof Model) {

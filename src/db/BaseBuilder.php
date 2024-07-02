@@ -42,16 +42,16 @@ abstract class BaseBuilder
      * @var array
      */
     protected $parser = [
-        'parseCompare'     => ['=', '<>', '>', '>=', '<', '<='],
-        'parseLike'        => ['LIKE', 'NOT LIKE'],
-        'parseBetween'     => ['NOT BETWEEN', 'BETWEEN'],
-        'parseIn'          => ['NOT IN', 'IN'],
-        'parseExp'         => ['EXP'],
-        'parseNull'        => ['NOT NULL', 'NULL'],
+        'parseCompare' => ['=', '<>', '>', '>=', '<', '<='],
+        'parseLike' => ['LIKE', 'NOT LIKE'],
+        'parseBetween' => ['NOT BETWEEN', 'BETWEEN'],
+        'parseIn' => ['NOT IN', 'IN'],
+        'parseExp' => ['EXP'],
+        'parseNull' => ['NOT NULL', 'NULL'],
         'parseBetweenTime' => ['BETWEEN TIME', 'NOT BETWEEN TIME'],
-        'parseTime'        => ['< TIME', '> TIME', '<= TIME', '>= TIME'],
-        'parseExists'      => ['NOT EXISTS', 'EXISTS'],
-        'parseColumn'      => ['COLUMN'],
+        'parseTime' => ['< TIME', '> TIME', '<= TIME', '>= TIME'],
+        'parseExists' => ['NOT EXISTS', 'EXISTS'],
+        'parseColumn' => ['COLUMN'],
     ];
 
     /**

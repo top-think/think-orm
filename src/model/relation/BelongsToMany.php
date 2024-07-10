@@ -65,10 +65,10 @@ class BelongsToMany extends Relation
      */
     public function __construct(Model $parent, string $model, string $middle, string $foreignKey, string $localKey)
     {
-        $this->parent       = $parent;
-        $this->model        = $model;
-        $this->foreignKey   = $foreignKey;
-        $this->localKey     = $localKey;
+        $this->parent = $parent;
+        $this->model = $model;
+        $this->foreignKey = $foreignKey;
+        $this->localKey = $localKey;
 
         if (str_contains($middle, '\\')) {
             $this->pivotName = $middle;
@@ -242,9 +242,9 @@ class BelongsToMany extends Relation
      */
     public function eagerlyResultSet(array &$resultSet, string $relation, array $subRelation, Closure $closure = null, array $cache = []): void
     {
-        $localKey   = $this->localKey;
-        $pk         = $resultSet[0]->getPk();
-        $range      = [];
+        $localKey = $this->localKey;
+        $pk = $resultSet[0]->getPk();
+        $range = [];
 
         foreach ($resultSet as $result) {
             // 获取关联外键列表
@@ -591,7 +591,7 @@ class BelongsToMany extends Relation
         $changes = [
             'attached' => [],
             'detached' => [],
-            'updated'  => [],
+            'updated' => [],
         ];
 
         $current = $this->pivot

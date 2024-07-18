@@ -3,7 +3,7 @@ name: codecov
 on: [push, pull_request]
 
 jobs:
-  phpunit:
+  tests:
     runs-on: ubuntu-latest
     services:
       mysql:

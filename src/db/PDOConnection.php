@@ -1749,10 +1749,17 @@ abstract class PDOConnection extends Connection
      */
     public function getLastInsID(BaseQuery $query, string $sequence = null)
     {
-        try {
-            $insertId = $this->linkID->lastInsertId($sequence);
-        } catch (\Exception $e) {
-            $insertId = '';
+        $data = $query->getOptions('data');
+        $pk = $query->getAutoInc();
+        if ($pk && $data[$pk]) {
+            // 已指定主键自增值时直接获取
+            $insertId = (string) $data[$pk];
+        } else {
+            try {
+                $insertId = $this->linkID->lastInsertId($sequence);
+            } catch (\Exception $e) {
+                $insertId = '';
+            }
         }
 
         return $this->autoInsIDType($query, $insertId);

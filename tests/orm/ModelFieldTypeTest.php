@@ -44,7 +44,7 @@ SQL
         $this->assertNotEmpty($result->count());
         foreach ($result as $index => $item) {
             $this->assertEquals(TestFieldJsonDTO::fromData($data[$index]['t_json']), $item->t_json);
-            $this->assertEquals(TestFieldPhpDTO::fromData($data[$index]['t_php']), $item->t_php);
+            $this->assertEquals((string) TestFieldPhpDTO::fromData($data[$index]['t_php']), (string) $item->t_php);
         }
     }
 
@@ -62,6 +62,7 @@ SQL
         /** @var FieldTypeModel $result */
         $result = FieldTypeModel::query()->where('id', '=', 3)->find();
         $this->assertEquals(new TestFieldJsonDTO(30, 'ddd'), $result->t_json);
-        $this->assertEquals(new TestFieldPhpDTO(40, 'eee'), $result->t_php);
+        $this->assertEquals((string) new TestFieldPhpDTO(40, 'eee'), (string) $result->t_php);
+        $this->assertEquals($result->id, $result->t_php->getId());
     }
 }

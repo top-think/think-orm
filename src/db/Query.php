@@ -517,7 +517,12 @@ class Query extends BaseQuery
      */
     public function getQueryGuid($data = null): string
     {
-        return md5($this->getConfig('database') . serialize(var_export($data ?: $this->options, true)) . serialize($this->getBind(false)));
+        if (null === $data) {
+            $data = $this->options;
+            unset($data['scope']);
+        }
+
+        return md5($this->getConfig('database') . serialize(var_export($data, true)) . serialize($this->getBind(false)));
     }
 
     /**
@@ -554,10 +559,10 @@ class Query extends BaseQuery
     /**
      * 分批数据返回处理.
      *
-     * @param int          $count    每次处理的数据数量
-     * @param callable     $callback 处理回调方法
-     * @param string|array $column   分批处理的字段名
-     * @param string       $order    字段排序
+     * @param int               $count    每次处理的数据数量
+     * @param callable          $callback 处理回调方法
+     * @param string|array|null $column   分批处理的字段名
+     * @param string            $order    字段排序
      *
      * @throws Exception
      *

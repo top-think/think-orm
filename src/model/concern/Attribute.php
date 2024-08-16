@@ -469,7 +469,7 @@ trait Attribute
         $typeTransform = static function (string $type, $value, $model) {
             if (str_contains($type, '\\') && class_exists($type)) {
                 if (is_subclass_of($type, FieldTypeTransform::class)) {
-                    $value = $type::modelWriteValue($value, $model);
+                    $value = $type::set($value, $model);
                 } elseif ($value instanceof Stringable) {
                     $value = $value->__toString();
                 }
@@ -641,7 +641,7 @@ trait Attribute
         $typeTransform = static function (string $type, $value, $model) {
             if (str_contains($type, '\\') && class_exists($type)) {
                 if (is_subclass_of($type, FieldTypeTransform::class)) {
-                    $value = $type::modelReadValue($value, $model);
+                    $value = $type::get($value, $model);
                 } else {
                     // 对象类型
                     $value = new $type($value);

@@ -33,12 +33,12 @@ class TestFieldJsonDTO implements FieldTypeTransform, \JsonSerializable
         return json_encode($this);
     }
 
-    public static function modelReadValue(mixed $value, Model $model): static
+    public static function get(mixed $value, Model $model): static
     {
         return static::fromData($value);
     }
 
-    public static function modelWriteValue($value, $model): string
+    public static function set($value, $model): string
     {
         return (string) $value;
     }

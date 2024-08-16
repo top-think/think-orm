@@ -44,14 +44,14 @@ class TestFieldPhpDTO implements FieldTypeTransform
         return serialize($this);
     }
 
-    public static function modelReadValue(mixed $value, Model $model): static
+    public static function get(mixed $value, Model $model): static
     {
         $d = static::fromData($value);
         $d->id = $model->getData('id');
         return $d;
     }
 
-    public static function modelWriteValue($value, $model): string
+    public static function set($value, $model): string
     {
         return (string) $value;
     }

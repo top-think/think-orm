@@ -8,10 +8,10 @@ use think\Model;
 
 interface FieldTypeTransform
 {
-    public static function modelReadValue(mixed $value, Model $model): static;
+    public static function get(mixed $value, Model $model): static;
 
     /**
      * @return static|mixed
      */
-    public static function modelWriteValue($value, Model $model): mixed;
+    public static function set($value, Model $model): mixed;
 }

@@ -14,7 +14,8 @@ class ModelFieldTypeTest extends TestCase
     public static function setUpBeforeClass(): void
     {
         Db::execute('DROP TABLE IF EXISTS `test_field_type`;');
-        Db::execute(<<<SQL
+        Db::execute(
+            <<<SQL
 CREATE TABLE `test_field_type` (
      `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
      `t_json` json DEFAULT NULL,
@@ -64,5 +65,20 @@ SQL
         $this->assertEquals(new TestFieldJsonDTO(30, 'ddd'), $result->t_json);
         $this->assertEquals((string) new TestFieldPhpDTO(40, 'eee'), (string) $result->t_php);
         $this->assertEquals($result->id, $result->t_php->getId());
+    }
+
+    /**
+     * @depends testFieldTypeSelect
+     */
+    public function testFieldReadInvalid()
+    {
+
+        $model = new FieldTypeModel([
+            'id' => 1,
+            't_json' => '???Invalid',
+            't_php' => '???Invalid',
+        ]);
+        $this->assertNull($model->t_json);
+        $this->assertNull($model->t_php);
     }
 }

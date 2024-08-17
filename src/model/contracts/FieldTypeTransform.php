@@ -8,7 +8,7 @@ use think\Model;
 
 interface FieldTypeTransform
 {
-    public static function get(mixed $value, Model $model): static;
+    public static function get(mixed $value, Model $model): ?static;
 
     /**
      * @return static|mixed

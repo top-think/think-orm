@@ -15,10 +15,13 @@ class TestFieldJsonDTO implements FieldTypeTransform, \JsonSerializable
     {
     }
 
-    public static function fromData(array|string $data): static
+    public static function fromData(array|string $data): ?static
     {
         if (is_string($data)) {
             $data = json_decode($data, true);
+            if (empty($data)) {
+                return null;
+            }
         }
         return new self(...$data);
     }
@@ -33,7 +36,7 @@ class TestFieldJsonDTO implements FieldTypeTransform, \JsonSerializable
         return json_encode($this);
     }
 
-    public static function get(mixed $value, Model $model): static
+    public static function get(mixed $value, Model $model): ?static
     {
         return static::fromData($value);
     }
@@ -43,4 +46,3 @@ class TestFieldJsonDTO implements FieldTypeTransform, \JsonSerializable
         return (string) $value;
     }
 }
-

@@ -22,9 +22,14 @@ class TestFieldPhpDTO implements FieldTypeTransform
         return $this->id;
     }
 
-    public static function fromData(string $data): static
+    public static function fromData(string $data): ?static
     {
-        return unserialize($data);
+        $result = @unserialize($data);
+        if (empty($result)) {
+            return null;
+        }
+
+        return $result;
     }
 
     public function __serialize(): array
@@ -44,9 +49,12 @@ class TestFieldPhpDTO implements FieldTypeTransform
         return serialize($this);
     }
 
-    public static function get(mixed $value, Model $model): static
+    public static function get(mixed $value, Model $model): ?static
     {
         $d = static::fromData($value);
+        if (empty($d)) {
+            return null;
+        }
         $d->id = $model->getData('id');
         return $d;
     }
@@ -56,4 +64,3 @@ class TestFieldPhpDTO implements FieldTypeTransform
         return (string) $value;
     }
 }
-

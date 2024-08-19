@@ -9,6 +9,7 @@ use think\Model;
  * @property int $id
  * @property TestFieldJsonDTO $t_json
  * @property TestFieldPhpDTO $t_php
+ * @property string $bigint
  */
 class FieldTypeModel extends Model
 {
@@ -21,5 +22,6 @@ class FieldTypeModel extends Model
     protected $type = [
         't_json' => TestFieldJsonDTO::class,
         't_php' => TestFieldPhpDTO::class,
+        'bigint' => 'string',
     ];
 }

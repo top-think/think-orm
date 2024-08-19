@@ -479,6 +479,7 @@ trait Attribute
         };
 
         return match ($type) {
+            'string'    =>  (string) $value,
             'integer'   =>  (int) $value,
             'float'     =>  empty($param) ? (float) $value : (float) number_format($value, (int) $param, '.', ''),
             'boolean'   =>  (bool) $value,
@@ -652,6 +653,7 @@ trait Attribute
         };
 
         return match ($type) {
+            'string'    =>  (string) $value,
             'integer'   =>  (int) $value,
             'float'     =>  empty($param) ? (float) $value : (float) number_format($value, (int) $param, '.', ''),
             'boolean'   =>  (bool) $value,

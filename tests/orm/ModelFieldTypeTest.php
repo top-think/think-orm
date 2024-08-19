@@ -19,7 +19,8 @@ class ModelFieldTypeTest extends TestCase
 CREATE TABLE `test_field_type` (
      `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
      `t_json` json DEFAULT NULL,
-     `t_php` varchar(512) DEFAULT NULL
+     `t_php` varchar(512) DEFAULT NULL,
+     `bigint` bigint UNSIGNED DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 SQL
         );
@@ -28,9 +29,9 @@ SQL
     public function testFieldTypeSelect()
     {
         $data = [
-            ['id' => 1, 't_json' => '{"num1": 1, "str1": "a"}', 't_php' => (string) (new TestFieldPhpDTO(1, 'a'))],
-            ['id' => 2, 't_json' => '{"num1": 2, "str1": "b"}', 't_php' => (string) (new TestFieldPhpDTO(2, 'b'))],
-            ['id' => 3, 't_json' => '{"num1": 3, "str1": "c"}', 't_php' => (string) (new TestFieldPhpDTO(3, 'c'))],
+            ['id' => 1, 't_json' => '{"num1": 1, "str1": "a"}', 't_php' => (string) (new TestFieldPhpDTO(1, 'a')), 'bigint' => '0'],
+            ['id' => 2, 't_json' => '{"num1": 2, "str1": "b"}', 't_php' => (string) (new TestFieldPhpDTO(2, 'b')), 'bigint' => '244791959321042944'],
+            ['id' => 3, 't_json' => '{"num1": 3, "str1": "c"}', 't_php' => (string) (new TestFieldPhpDTO(3, 'c')), 'bigint' => '18374686479671623679'],
         ];
 
         (new FieldTypeModel())->insertAll($data);
@@ -46,6 +47,7 @@ SQL
         foreach ($result as $index => $item) {
             $this->assertEquals(TestFieldJsonDTO::fromData($data[$index]['t_json']), $item->t_json);
             $this->assertEquals((string) TestFieldPhpDTO::fromData($data[$index]['t_php']), (string) $item->t_php);
+            $this->assertSame($data[$index]['bigint'], $item->bigint);
         }
     }
 

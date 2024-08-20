@@ -23,14 +23,14 @@ trait JoinAndViewQuery
     /**
      * 查询SQL组装 join.
      *
-     * @param array|string|Raw   $join      关联的表名
-     * @param mixed  $condition 条件
-     * @param string $type      JOIN类型
-     * @param array  $bind      参数绑定
+     * @param array|string|Raw $join      关联的表名
+     * @param string|null      $condition 条件
+     * @param string           $type      JOIN类型
+     * @param array            $bind      参数绑定
      *
      * @return $this
      */
-    public function join(array | string | Raw $join, string $condition = null, string $type = 'INNER', array $bind = [])
+    public function join(array | string | Raw $join, ?string $condition = null, string $type = 'INNER', array $bind = [])
     {
         $table = $this->getJoinTable($join);
 
@@ -46,13 +46,13 @@ trait JoinAndViewQuery
     /**
      * LEFT JOIN.
      *
-     * @param array|string|Raw  $join      关联的表名
-     * @param mixed $condition 条件
-     * @param array $bind      参数绑定
+     * @param array|string|Raw $join      关联的表名
+     * @param string|null      $condition 条件
+     * @param array            $bind      参数绑定
      *
      * @return $this
      */
-    public function leftJoin(array | string | Raw $join, string $condition = null, array $bind = [])
+    public function leftJoin(array | string | Raw $join, ?string $condition = null, array $bind = [])
     {
         return $this->join($join, $condition, 'LEFT', $bind);
     }
@@ -60,13 +60,13 @@ trait JoinAndViewQuery
     /**
      * RIGHT JOIN.
      *
-     * @param array|string|Raw  $join      关联的表名
-     * @param mixed $condition 条件
-     * @param array $bind      参数绑定
+     * @param array|string|Raw $join      关联的表名
+     * @param string|null      $condition 条件
+     * @param array            $bind      参数绑定
      *
      * @return $this
      */
-    public function rightJoin(array | string | Raw $join, string $condition = null, array $bind = [])
+    public function rightJoin(array | string | Raw $join, ?string $condition = null, array $bind = [])
     {
         return $this->join($join, $condition, 'RIGHT', $bind);
     }
@@ -74,13 +74,13 @@ trait JoinAndViewQuery
     /**
      * FULL JOIN.
      *
-     * @param array|string|Raw  $join      关联的表名
-     * @param mixed $condition 条件
-     * @param array $bind      参数绑定
+     * @param array|string|Raw $join      关联的表名
+     * @param string|null      $condition 条件
+     * @param array            $bind      参数绑定
      *
      * @return $this
      */
-    public function fullJoin(array | string | Raw $join, string $condition = null, array $bind = [])
+    public function fullJoin(array | string | Raw $join, ?string $condition = null, array $bind = [])
     {
         return $this->join($join, $condition, 'FULL');
     }
@@ -90,11 +90,11 @@ trait JoinAndViewQuery
      * ['prefix_table或者子查询'=>'alias'] 'table alias'.
      *
      * @param array|string|Raw $join  JION表名
-     * @param string           $alias 别名
+     * @param string|null      $alias 别名
      *
      * @return string|array
      */
-    protected function getJoinTable(array | string | Raw $join, string &$alias = null)
+    protected function getJoinTable(array | string | Raw $join, ?string &$alias = null)
     {
         if (is_array($join)) {
             $table = $join;
@@ -140,13 +140,13 @@ trait JoinAndViewQuery
      *
      * @param array|string|Raw  $join  数据表
      * @param string|array|bool $field 查询字段
-     * @param string       $on    JOIN条件
-     * @param string       $type  JOIN类型
-     * @param array        $bind  参数绑定
+     * @param string|null       $on    JOIN条件
+     * @param string            $type  JOIN类型
+     * @param array             $bind  参数绑定
      *
      * @return $this
      */
-    public function view(array | string | Raw $join, string | array | bool $field = true, string $on = null, string $type = 'INNER', array $bind = []): self
+    public function view(array | string | Raw $join, string | array | bool $field = true, ?string $on = null, string $type = 'INNER', array $bind = []): self
     {
         $this->options['view'] = true;
 

@@ -34,10 +34,10 @@ class Mongo extends BaseQuery
     /**
      * 执行指令 返回数据集.
      *
-     * @param Command        $command        指令
-     * @param string         $dbName
-     * @param ReadPreference $readPreference readPreference
-     * @param string|array   $typeMap        指定返回的typeMap
+     * @param Command             $command        指令
+     * @param string              $dbName
+     * @param ReadPreference|null $readPreference readPreference
+     * @param null                $typeMap        指定返回的typeMap
      *
      * @throws AuthenticationException
      * @throws InvalidArgumentException
@@ -46,7 +46,7 @@ class Mongo extends BaseQuery
      *
      * @return mixed
      */
-    public function command(Command $command, string $dbName = '', ReadPreference $readPreference = null, $typeMap = null)
+    public function command(Command $command, string $dbName = '', ?ReadPreference $readPreference = null, $typeMap = null)
     {
         return $this->connection->command($command, $dbName, $readPreference, $typeMap);
     }
@@ -102,11 +102,11 @@ class Mongo extends BaseQuery
     /**
      * COUNT查询.
      *
-     * @param string $field 字段名
+     * @param string|null $field 字段名
      *
      * @return int
      */
-    public function count(string $field = null): int
+    public function count(?string $field = null): int
     {
         $result = $this->cmd('count');
 
@@ -457,12 +457,12 @@ class Mongo extends BaseQuery
     /**
      * 指定查询数量.
      *
-     * @param int $offset 起始位置
-     * @param int $length 查询数量
+     * @param int      $offset 起始位置
+     * @param int|null $length 查询数量
      *
      * @return $this
      */
-    public function limit(int $offset, int $length = null)
+    public function limit(int $offset, ?int $length = null)
     {
         if (is_null($length)) {
             $length = $offset;
@@ -592,7 +592,7 @@ class Mongo extends BaseQuery
 
         $page = max($page, 1);
 
-        $config['path'] = $config['path'] ?? Paginator::getCurrentPath();
+        $config['path'] ??= Paginator::getCurrentPath();
 
         if (!isset($total) && !$simple) {
             $options = $this->getOptions();

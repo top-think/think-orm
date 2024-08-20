@@ -30,12 +30,12 @@ trait ResultOperation
     /**
      * 设置数据处理（支持模型）.
      *
-     * @param callable $filter 数据处理Callable
-     * @param string   $index  索引（唯一）
+     * @param callable    $filter 数据处理Callable
+     * @param string|null $index  索引（唯一）
      *
      * @return $this
      */
-    public function filter(callable $filter, string $index = null)
+    public function filter(callable $filter, ?string $index = null)
     {
         if ($index) {
             $this->options['filter'][$index] = $filter;

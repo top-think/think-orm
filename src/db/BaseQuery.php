@@ -334,7 +334,7 @@ abstract class BaseQuery
      *
      * @return mixed
      */
-    public function getLastInsID(string $sequence = null)
+    public function getLastInsID(?string $sequence = null)
     {
         return $this->connection->getLastInsID($this, $sequence);
     }
@@ -566,7 +566,7 @@ abstract class BaseQuery
      *
      * @return $this
      */
-    public function limit(int $offset, int $length = null)
+    public function limit(int $offset, ?int $length = null)
     {
         $this->options['limit'] = $offset . ($length ? ',' . $length : '');
 
@@ -581,7 +581,7 @@ abstract class BaseQuery
      *
      * @return $this
      */
-    public function page(int $page, int $listRows = null)
+    public function page(int $page, ?int $listRows = null)
     {
         $this->options['page'] = [$page, $listRows];
 
@@ -726,7 +726,7 @@ abstract class BaseQuery
      *
      * @throws Exception
      */
-    public function paginate(int | array $listRows = null, int | bool $simple = false): Paginator
+    public function paginate(int | array | null $listRows = null, int | bool $simple = false): Paginator
     {
         if (is_int($simple)) {
             $total  = $simple;
@@ -750,7 +750,7 @@ abstract class BaseQuery
 
         $page           = isset($config['page']) ? (int) $config['page'] : Paginator::getCurrentPage($config['var_page']);
         $page           = max($page, 1);
-        $config['path'] = $config['path'] ?? Paginator::getCurrentPath();
+        $config['path'] ??= Paginator::getCurrentPath();
 
         if (!isset($total) && !$simple) {
             $options = $this->getOptions();
@@ -792,7 +792,7 @@ abstract class BaseQuery
      *
      * @throws Exception
      */
-    public function paginateX(int | array $listRows = null, string $key = null, string $sort = null): Paginator
+    public function paginateX(int | array | null $listRows = null, ?string $key = null, ?string $sort = null): Paginator
     {
         $defaultConfig = [
             'query' => [], //url额外参数
@@ -806,7 +806,7 @@ abstract class BaseQuery
         $page     = isset($config['page']) ? (int) $config['page'] : Paginator::getCurrentPage($config['var_page']);
         $page     = max($page, 1);
 
-        $config['path'] = $config['path'] ?? Paginator::getCurrentPath();
+        $config['path'] ??= Paginator::getCurrentPath();
 
         $key     = $key ?: $this->getPk();
         $options = $this->getOptions();
@@ -865,7 +865,7 @@ abstract class BaseQuery
      *
      * @throws Exception
      */
-    public function more(int $limit, int | string $lastId = null, string $key = null, string $sort = null): array
+    public function more(int $limit, int | string | null $lastId = null, ?string $key = null, ?string $sort = null): array
     {
         $key = $key ?: $this->getPk();
 
@@ -1033,7 +1033,7 @@ abstract class BaseQuery
      *
      * @return $this
      */
-    public function sequence(string $sequence = null)
+    public function sequence(?string $sequence = null)
     {
         $this->options['sequence'] = $sequence;
 
@@ -1306,7 +1306,7 @@ abstract class BaseQuery
 
         if (!empty($this->options['soft_delete'])) {
             // 软删除
-            list($field, $condition) = $this->options['soft_delete'];
+            [$field, $condition] = $this->options['soft_delete'];
             if ($condition) {
                 unset($this->options['soft_delete']);
                 $this->options['data'] = [$field => $condition];
@@ -1359,16 +1359,16 @@ abstract class BaseQuery
     /**
      * 查找单条记录.
      *
-     * @param mixed   $data 主键数据
-     * @param Closure $closure 闭包数据
-     *
-     * @throws Exception
-     * @throws ModelNotFoundException
-     * @throws DataNotFoundException
+     * @param mixed        $data    主键数据
+     * @param Closure|null $closure 闭包数据
      *
      * @return mixed
+     *
+     * @throws DataNotFoundException
+     * @throws Exception
+     * @throws ModelNotFoundException
      */
-    public function find($data = null, Closure $closure = null)
+    public function find($data = null, ?Closure $closure = null)
     {
         if ($data instanceof Closure) {
             $closure = $data;

@@ -166,12 +166,12 @@ class Collection extends BaseCollection
     /**
      * 设置数据字段获取器.
      *
-     * @param string|array $name     字段名
-     * @param callable     $callback 闭包获取器
+     * @param string|array  $name     字段名
+     * @param callable|null $callback 闭包获取器
      *
      * @return $this
      */
-    public function withAttr(string|array $name, callable $callback = null)
+    public function withAttr(string|array $name, ?callable $callback = null)
     {
         $this->each(function (Model $model) use ($name, $callback) {
             $model->withAttr($name, $callback);
@@ -185,8 +185,6 @@ class Collection extends BaseCollection
      *
      * @param string $relation 关联名称
      * @param array  $attrs    绑定属性
-     *
-     * @throws Exception
      *
      * @return $this
      */
@@ -207,7 +205,7 @@ class Collection extends BaseCollection
      *
      * @return array
      */
-    public function dictionary($items = null, string &$indexKey = null)
+    public function dictionary($items = null, ?string &$indexKey = null)
     {
         if ($items instanceof self || $items instanceof Paginator) {
             $items = $items->all();
@@ -234,7 +232,7 @@ class Collection extends BaseCollection
      *
      * @return static
      */
-    public function diff($items, string $indexKey = null)
+    public function diff($items, ?string $indexKey = null)
     {
         if ($this->isEmpty()) {
             return new static($items);
@@ -262,7 +260,7 @@ class Collection extends BaseCollection
      *
      * @return static
      */
-    public function intersect($items, string $indexKey = null)
+    public function intersect($items, ?string $indexKey = null)
     {
         if ($this->isEmpty()) {
             return new static([]);

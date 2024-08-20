@@ -303,11 +303,11 @@ trait Attribute
     /**
      * 获取对象原始数据 如果不存在指定字段返回null.
      *
-     * @param string $name 字段名 留空获取全部
+     * @param string|null $name 字段名 留空获取全部
      *
      * @return mixed
      */
-    public function getOrigin(string $name = null)
+    public function getOrigin(?string $name = null)
     {
         if (is_null($name)) {
             return $this->origin;
@@ -321,13 +321,13 @@ trait Attribute
     /**
      * 获取当前对象数据 如果不存在指定字段返回false.
      *
-     * @param string $name 字段名 留空获取全部
+     * @param string|null $name 字段名 留空获取全部
      *
      * @throws InvalidArgumentException
      *
      * @return mixed
      */
-    public function getData(string $name = null)
+    public function getData(?string $name = null)
     {
         if (is_null($name)) {
             return $this->data;
@@ -675,7 +675,7 @@ trait Attribute
      *
      * @return $this
      */
-    public function withAttr(string|array $name, Closure $callback = null)
+    public function withAttr(string|array $name, ?Closure $callback = null)
     {
         if (is_array($name)) {
             foreach ($name as $key => $val) {

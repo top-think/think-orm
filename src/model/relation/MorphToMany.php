@@ -82,15 +82,15 @@ class MorphToMany extends BelongsToMany
     /**
      * 预载入关联查询（数据集）.
      *
-     * @param array   $resultSet   数据集
-     * @param string  $relation    当前关联名
-     * @param array   $subRelation 子关联名
-     * @param Closure $closure     闭包
-     * @param array   $cache       关联缓存
+     * @param array        $resultSet   数据集
+     * @param string       $relation    当前关联名
+     * @param array        $subRelation 子关联名
+     * @param Closure|null $closure     闭包
+     * @param array        $cache       关联缓存
      *
      * @return void
      */
-    public function eagerlyResultSet(array &$resultSet, string $relation, array $subRelation, Closure $closure = null, array $cache = []): void
+    public function eagerlyResultSet(array &$resultSet, string $relation, array $subRelation, ?Closure $closure = null, array $cache = []): void
     {
         $pk     = $resultSet[0]->getPk();
         $range  = [];
@@ -123,15 +123,15 @@ class MorphToMany extends BelongsToMany
     /**
      * 预载入关联查询（单个数据）.
      *
-     * @param Model   $result      数据对象
-     * @param string  $relation    当前关联名
-     * @param array   $subRelation 子关联名
-     * @param Closure $closure     闭包
-     * @param array   $cache       关联缓存
+     * @param Model        $result      数据对象
+     * @param string       $relation    当前关联名
+     * @param array        $subRelation 子关联名
+     * @param Closure|null $closure     闭包
+     * @param array        $cache       关联缓存
      *
      * @return void
      */
-    public function eagerlyResult(Model $result, string $relation, array $subRelation, Closure $closure = null, array $cache = []): void
+    public function eagerlyResult(Model $result, string $relation, array $subRelation, ?Closure $closure = null, array $cache = []): void
     {
         $pk = $result->getPk();
 
@@ -155,15 +155,15 @@ class MorphToMany extends BelongsToMany
     /**
      * 关联统计
      *
-     * @param Model   $result    数据对象
-     * @param Closure $closure   闭包
-     * @param string  $aggregate 聚合查询方法
-     * @param string  $field     字段
-     * @param string  $name      统计字段别名
+     * @param Model        $result    数据对象
+     * @param Closure|null $closure   闭包
+     * @param string       $aggregate 聚合查询方法
+     * @param string       $field     字段
+     * @param string|null  $name      统计字段别名
      *
      * @return int
      */
-    public function relationCount(Model $result, Closure $closure = null, string $aggregate = 'count', string $field = '*', string &$name = null)
+    public function relationCount(Model $result, ?Closure $closure = null, string $aggregate = 'count', string $field = '*', ?string &$name = null)
     {
         $pk = $result->getPk();
 
@@ -184,14 +184,14 @@ class MorphToMany extends BelongsToMany
     /**
      * 获取关联统计子查询.
      *
-     * @param Closure $closure   闭包
-     * @param string  $aggregate 聚合查询方法
-     * @param string  $field     字段
-     * @param string  $name      统计字段别名
+     * @param Closure|null $closure   闭包
+     * @param string       $aggregate 聚合查询方法
+     * @param string       $field     字段
+     * @param string|null  $name      统计字段别名
      *
      * @return string
      */
-    public function getRelationCountQuery(Closure $closure = null, string $aggregate = 'count', string $field = '*', string &$name = null): string
+    public function getRelationCountQuery(?Closure $closure = null, string $aggregate = 'count', string $field = '*', ?string &$name = null): string
     {
         if ($closure) {
             $closure($this->query, $name);
@@ -235,14 +235,14 @@ class MorphToMany extends BelongsToMany
     /**
      * 多对多 关联模型预查询.
      *
-     * @param array   $where       关联预查询条件
-     * @param array   $subRelation 子关联
-     * @param Closure $closure     闭包
-     * @param array   $cache       关联缓存
+     * @param array        $where       关联预查询条件
+     * @param array        $subRelation 子关联
+     * @param Closure|null $closure     闭包
+     * @param array        $cache       关联缓存
      *
      * @return array
      */
-    protected function eagerlyManyToMany(array $where, array $subRelation = [], Closure $closure = null, array $cache = []): array
+    protected function eagerlyManyToMany(array $where, array $subRelation = [], ?Closure $closure = null, array $cache = []): array
     {
         if ($closure) {
             $closure($this->query);
@@ -486,7 +486,7 @@ class MorphToMany extends BelongsToMany
      *
      * @return array
      */
-    public static function morphMap(array $map = null, $merge = true): array
+    public static function morphMap(?array $map = null, $merge = true): array
     {
         if (is_array($map)) {
             static::$morphMap = $merge && static::$morphMap

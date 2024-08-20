@@ -217,10 +217,10 @@ interface ConnectionInterface
     /**
      * 获取最近插入的ID.
      *
-     * @param BaseQuery $query    查询对象
-     * @param string    $sequence 自增序列名
+     * @param BaseQuery   $query    查询对象
+     * @param string|null $sequence 自增序列名
      *
      * @return mixed
      */
-    public function getLastInsID(BaseQuery $query, string $sequence = null);
+    public function getLastInsID(BaseQuery $query, ?string $sequence = null);
 }

@@ -99,12 +99,12 @@ trait RelationShip
     /**
      * 获取当前模型的关联模型数据.
      *
-     * @param string $name 关联方法名
-     * @param bool   $auto 不存在是否自动获取
+     * @param string|null $name 关联方法名
+     * @param bool        $auto 不存在是否自动获取
      *
      * @return mixed
      */
-    public function getRelation(string $name = null, bool $auto = false)
+    public function getRelation(?string $name = null, bool $auto = false)
     {
         if (is_null($name)) {
             return $this->relation;
@@ -203,16 +203,16 @@ trait RelationShip
     /**
      * 根据关联条件查询当前模型.
      *
-     * @param string $relation 关联方法名
-     * @param mixed  $operator 比较操作符
-     * @param int    $count    个数
-     * @param string $id       关联表的统计字段
-     * @param string $joinType JOIN类型
-     * @param Query  $query    Query对象
+     * @param string     $relation 关联方法名
+     * @param mixed      $operator 比较操作符
+     * @param int        $count    个数
+     * @param string     $id       关联表的统计字段
+     * @param string     $joinType JOIN类型
+     * @param Query|null $query    Query对象
      *
      * @return Query
      */
-    public static function has(string $relation, string $operator = '>=', int $count = 1, string $id = '*', string $joinType = '', Query $query = null): Query
+    public static function has(string $relation, string $operator = '>=', int $count = 1, string $id = '*', string $joinType = '', ?Query $query = null): Query
     {
         return (new static())
             ->$relation()
@@ -222,15 +222,15 @@ trait RelationShip
     /**
      * 根据关联条件查询当前模型.
      *
-     * @param string $relation 关联方法名
-     * @param mixed  $where    查询条件（数组或者闭包）
-     * @param mixed  $fields   字段
-     * @param string $joinType JOIN类型
-     * @param Query  $query    Query对象
+     * @param string     $relation 关联方法名
+     * @param mixed      $where    查询条件（数组或者闭包）
+     * @param mixed      $fields   字段
+     * @param string     $joinType JOIN类型
+     * @param Query|null $query    Query对象
      *
      * @return Query
      */
-    public static function hasWhere(string $relation, $where = [], string $fields = '*', string $joinType = '', Query $query = null): Query
+    public static function hasWhere(string $relation, $where = [], string $fields = '*', string $joinType = '', ?Query $query = null): Query
     {
         return (new static())
             ->$relation()
@@ -240,16 +240,16 @@ trait RelationShip
     /**
      * 预载入关联查询 JOIN方式.
      *
-     * @param Query   $query    Query对象
-     * @param string  $relation 关联方法名
-     * @param mixed   $field    字段
-     * @param string  $joinType JOIN类型
-     * @param Closure $closure  闭包
-     * @param bool    $first
+     * @param Query        $query    Query对象
+     * @param string       $relation 关联方法名
+     * @param mixed        $field    字段
+     * @param string       $joinType JOIN类型
+     * @param Closure|null $closure  闭包
+     * @param bool         $first
      *
      * @return bool
      */
-    public function eagerly(Query $query, string $relation, $field, string $joinType = '', Closure $closure = null, bool $first = false): bool
+    public function eagerly(Query $query, string $relation, $field, string $joinType = '', ?Closure $closure = null, bool $first = false): bool
     {
         $relation   = Str::camel($relation);
         $class      = $this->$relation();
@@ -568,13 +568,13 @@ trait RelationShip
     /**
      * MORPH  One 关联定义.
      *
-     * @param string       $model 模型名
-     * @param string|array $morph 多态字段信息
-     * @param string       $type  多态类型
+     * @param string            $model 模型名
+     * @param string|array|null $morph 多态字段信息
+     * @param string            $type  多态类型
      *
      * @return MorphOne
      */
-    public function morphOne(string $model, string|array $morph = null, string $type = ''): MorphOne
+    public function morphOne(string $model, string|array|null $morph = null, string $type = ''): MorphOne
     {
         // 记录当前关联信息
         $model = $this->parseModel($model);
@@ -594,13 +594,13 @@ trait RelationShip
     /**
      * MORPH  MANY 关联定义.
      *
-     * @param string       $model 模型名
-     * @param string|array $morph 多态字段信息
-     * @param string       $type  多态类型
+     * @param string            $model 模型名
+     * @param string|array|null $morph 多态字段信息
+     * @param string            $type  多态类型
      *
      * @return MorphMany
      */
-    public function morphMany(string $model, string|array $morph = null, string $type = ''): MorphMany
+    public function morphMany(string $model, string|array|null $morph = null, string $type = ''): MorphMany
     {
         // 记录当前关联信息
         $model = $this->parseModel($model);
@@ -620,12 +620,12 @@ trait RelationShip
     /**
      * MORPH TO 关联定义.
      *
-     * @param string|array $morph 多态字段信息
-     * @param array        $alias 多态别名定义
+     * @param string|array|null $morph 多态字段信息
+     * @param array             $alias 多态别名定义
      *
      * @return MorphTo
      */
-    public function morphTo(string|array $morph = null, array $alias = []): MorphTo
+    public function morphTo(string|array|null $morph = null, array $alias = []): MorphTo
     {
         $trace      = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2);
         $relation   = Str::snake($trace[1]['function']);
@@ -642,14 +642,14 @@ trait RelationShip
     /**
      * MORPH TO MANY关联定义.
      *
-     * @param string       $model    模型名
-     * @param string       $middle   中间表名/模型名
-     * @param string|array $morph    多态字段信息
-     * @param string       $localKey 当前模型关联键
+     * @param string            $model    模型名
+     * @param string            $middle   中间表名/模型名
+     * @param string|array|null $morph    多态字段信息
+     * @param string|null       $localKey 当前模型关联键
      *
      * @return MorphToMany
      */
-    public function morphToMany(string $model, string $middle, string|array $morph = null, string $localKey = null): MorphToMany
+    public function morphToMany(string $model, string $middle, string|array|null $morph = null, ?string $localKey = null): MorphToMany
     {
         if (is_null($morph)) {
             $morph = $middle;
@@ -667,14 +667,14 @@ trait RelationShip
     /**
      * MORPH BY MANY关联定义.
      *
-     * @param string       $model      模型名
-     * @param string       $middle     中间表名/模型名
-     * @param string|array $morph      多态字段信息
-     * @param string       $foreignKey 关联外键
+     * @param string            $model      模型名
+     * @param string            $middle     中间表名/模型名
+     * @param string|array|null $morph      多态字段信息
+     * @param string|null       $foreignKey 关联外键
      *
      * @return MorphToMany
      */
-    public function morphByMany(string $model, string $middle, string|array $morph = null, string $foreignKey = null): MorphToMany
+    public function morphByMany(string $model, string $middle, string|array|null $morph = null, ?string $foreignKey = null): MorphToMany
     {
         if (is_null($morph)) {
             $morph = $middle;

@@ -23,12 +23,12 @@ class HasOneThrough extends HasManyThrough
     /**
      * 延迟获取关联数据.
      *
-     * @param array   $subRelation 子关联名
-     * @param Closure $closure     闭包查询条件
+     * @param array        $subRelation 子关联名
+     * @param Closure|null $closure     闭包查询条件
      *
      * @return Model
      */
-    public function getRelation(array $subRelation = [], Closure $closure = null)
+    public function getRelation(array $subRelation = [], ?Closure $closure = null)
     {
         if ($closure) {
             $closure($this->query);
@@ -51,15 +51,15 @@ class HasOneThrough extends HasManyThrough
     /**
      * 预载入关联查询（数据集）.
      *
-     * @param array   $resultSet   数据集
-     * @param string  $relation    当前关联名
-     * @param array   $subRelation 子关联名
-     * @param Closure $closure     闭包
-     * @param array   $cache       关联缓存
+     * @param array        $resultSet   数据集
+     * @param string       $relation    当前关联名
+     * @param array        $subRelation 子关联名
+     * @param Closure|null $closure     闭包
+     * @param array        $cache       关联缓存
      *
      * @return void
      */
-    public function eagerlyResultSet(array &$resultSet, string $relation, array $subRelation = [], Closure $closure = null, array $cache = []): void
+    public function eagerlyResultSet(array &$resultSet, string $relation, array $subRelation = [], ?Closure $closure = null, array $cache = []): void
     {
         $localKey   = $this->localKey;
         $foreignKey = $this->foreignKey;
@@ -101,15 +101,15 @@ class HasOneThrough extends HasManyThrough
     /**
      * 预载入关联查询（数据）.
      *
-     * @param Model   $result      数据对象
-     * @param string  $relation    当前关联名
-     * @param array   $subRelation 子关联名
-     * @param Closure $closure     闭包
-     * @param array   $cache       关联缓存
+     * @param Model        $result      数据对象
+     * @param string       $relation    当前关联名
+     * @param array        $subRelation 子关联名
+     * @param Closure|null $closure     闭包
+     * @param array        $cache       关联缓存
      *
      * @return void
      */
-    public function eagerlyResult(Model $result, string $relation, array $subRelation = [], Closure $closure = null, array $cache = []): void
+    public function eagerlyResult(Model $result, string $relation, array $subRelation = [], ?Closure $closure = null, array $cache = []): void
     {
         $localKey   = $this->localKey;
         $foreignKey = $this->foreignKey;
@@ -136,15 +136,15 @@ class HasOneThrough extends HasManyThrough
     /**
      * 关联模型预查询.
      *
-     * @param array   $where       关联预查询条件
-     * @param string  $key         关联键名
-     * @param array   $subRelation 子关联
-     * @param Closure $closure
-     * @param array   $cache       关联缓存
+     * @param array        $where       关联预查询条件
+     * @param string       $key         关联键名
+     * @param array        $subRelation 子关联
+     * @param Closure|null $closure
+     * @param array        $cache       关联缓存
      *
      * @return array
      */
-    protected function eagerlyWhere(array $where, string $key, array $subRelation = [], Closure $closure = null, array $cache = []): array
+    protected function eagerlyWhere(array $where, string $key, array $subRelation = [], ?Closure $closure = null, array $cache = []): array
     {
         // 预载入关联查询 支持嵌套预载入
         $keys = $this->through->where($where)->column($this->throughPk, $this->foreignKey);

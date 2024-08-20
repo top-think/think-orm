@@ -110,7 +110,7 @@ abstract class Paginator implements ArrayAccess, Countable, IteratorAggregate, J
      */
     protected static $maker;
 
-    public function __construct($items, int $listRows, int $currentPage = 1, int $total = null, bool $simple = false, array $options = [])
+    public function __construct($items, int $listRows, int $currentPage = 1, ?int $total = null, bool $simple = false, array $options = [])
     {
         $this->options = array_merge($this->options, $options);
 
@@ -137,16 +137,16 @@ abstract class Paginator implements ArrayAccess, Countable, IteratorAggregate, J
     }
 
     /**
-     * @param mixed $items
-     * @param int   $listRows
-     * @param int   $currentPage
-     * @param int   $total
-     * @param bool  $simple
-     * @param array $options
+     * @param mixed    $items
+     * @param int      $listRows
+     * @param int      $currentPage
+     * @param int|null $total
+     * @param bool     $simple
+     * @param array    $options
      *
      * @return Paginator
      */
-    public static function make($items, int $listRows, int $currentPage = 1, int $total = null, bool $simple = false, array $options = [])
+    public static function make($items, int $listRows, int $currentPage = 1, ?int $total = null, bool $simple = false, array $options = [])
     {
         if (isset(static::$maker)) {
             return call_user_func(static::$maker, $items, $listRows, $currentPage, $total, $simple, $options);
@@ -339,7 +339,7 @@ abstract class Paginator implements ArrayAccess, Countable, IteratorAggregate, J
      *
      * @return $this
      */
-    public function fragment(string $fragment = null)
+    public function fragment(?string $fragment = null)
     {
         $this->options['fragment'] = $fragment;
 

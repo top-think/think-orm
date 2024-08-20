@@ -195,11 +195,11 @@ class Mongo extends Connection
     /**
      * 设置/获取当前操作的database.
      *
-     * @param string $db db
+     * @param string|null $db db
      *
-     * @return string
+     * @return string|void
      */
-    public function db(string $db = null)
+    public function db(?string $db = null)
     {
         if (is_null($db)) {
             return $this->dbName;
@@ -431,11 +431,11 @@ class Mongo extends Connection
     /**
      * 执行指令.
      *
-     * @param Command        $command        指令
-     * @param string         $dbName         当前数据库名
-     * @param ReadPreference $readPreference readPreference
-     * @param string|array   $typeMap        指定返回的typeMap
-     * @param bool           $master         是否主库操作
+     * @param Command             $command        指令
+     * @param string              $dbName         当前数据库名
+     * @param ReadPreference|null $readPreference readPreference
+     * @param null                $typeMap        指定返回的typeMap
+     * @param bool                $master         是否主库操作
      *
      * @throws AuthenticationException
      * @throws InvalidArgumentException
@@ -444,7 +444,7 @@ class Mongo extends Connection
      *
      * @return array
      */
-    public function command(Command $command, string $dbName = '', ReadPreference $readPreference = null, $typeMap = null, bool $master = false): array
+    public function command(Command $command, string $dbName = '', ?ReadPreference $readPreference = null, $typeMap = null, bool $master = false): array
     {
         $this->initConnect($master);
         $this->db->updateQueryTimes();
@@ -773,12 +773,12 @@ class Mongo extends Connection
     /**
      * 获取最近插入的ID.
      *
-     * @param BaseQuery $query 查询对象
-     * @param string    $sequence 自增序列名
+     * @param BaseQuery   $query    查询对象
+     * @param string|null $sequence 自增序列名
      *
      * @return mixed
      */
-    public function getLastInsID(BaseQuery $query, string $sequence = null)
+    public function getLastInsID(BaseQuery $query, ?string $sequence = null)
     {
         $id = $this->builder->getLastInsID();
 

@@ -218,7 +218,7 @@ class DbManager
      *
      * @return ConnectionInterface
      */
-    public function connect(string $name = null, bool $force = false)
+    public function connect(?string $name = null, bool $force = false)
     {
         return $this->instance($name, $force);
     }
@@ -231,7 +231,7 @@ class DbManager
      *
      * @return ConnectionInterface
      */
-    protected function instance(string $name = null, bool $force = false): ConnectionInterface
+    protected function instance(?string $name = null, bool $force = false): ConnectionInterface
     {
         if (empty($name)) {
             $name = $this->getConfig('default', 'mysql');
@@ -264,7 +264,7 @@ class DbManager
     /**
      * 创建连接.
      *
-     * @param $name
+     * @param string $name
      *
      * @return ConnectionInterface
      */
@@ -295,6 +295,7 @@ class DbManager
      * 使用表达式设置数据.
      *
      * @param string $value 表达式
+     * @param array  $bind  数据
      *
      * @return Raw
      */
@@ -383,7 +384,7 @@ class DbManager
      * @param string $event  事件名
      * @param mixed  $params 传入参数
      *
-     * @return mixed
+     * @return void
      */
     public function trigger(string $event, $params = null)
     {

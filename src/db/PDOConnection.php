@@ -503,12 +503,12 @@ abstract class PDOConnection extends Connection
     /**
      * 获取数据表字段类型.
      *
-     * @param mixed  $tableName 数据表名
-     * @param string $field     字段名
+     * @param mixed       $tableName 数据表名
+     * @param string|null $field     字段名
      *
      * @return array|string
      */
-    public function getFieldsType($tableName, string $field = null)
+    public function getFieldsType($tableName, ?string $field = null)
     {
         $result = $this->getTableInfo($tableName, 'type');
 
@@ -705,13 +705,14 @@ abstract class PDOConnection extends Connection
      *
      * @param BaseQuery $query  查询对象
      * @param mixed     $sql    sql指令
-     * @param bool      $master 主库读取
+     * @param bool|null $master 主库读取
+     *
+     * @return array
      *
      * @throws DbException
      *
-     * @return array
      */
-    protected function pdoQuery(BaseQuery $query, $sql, bool $master = null): array
+    protected function pdoQuery(BaseQuery $query, $sql, ?bool $master = null): array
     {
         // 分析查询表达式
         $query->parseOptions();
@@ -1733,12 +1734,12 @@ abstract class PDOConnection extends Connection
     /**
      * 获取最近插入的ID.
      *
-     * @param BaseQuery $query    查询对象
-     * @param string    $sequence 自增序列名
+     * @param BaseQuery   $query    查询对象
+     * @param string|null $sequence 自增序列名
      *
      * @return mixed
      */
-    public function getLastInsID(BaseQuery $query, string $sequence = null)
+    public function getLastInsID(BaseQuery $query, ?string $sequence = null)
     {
         try {
             $insertId = $this->linkID->lastInsertId($sequence);

@@ -193,12 +193,12 @@ class Fetch
     /**
      * 批量插入记录.
      *
-     * @param array $dataSet 数据集
-     * @param int   $limit   每次写入数据限制
+     * @param array    $dataSet 数据集
+     * @param int|null $limit   每次写入数据限制
      *
      * @return string
      */
-    public function insertAll(array $dataSet = [], int $limit = null): string
+    public function insertAll(array $dataSet = [], ?int $limit = null): string
     {
         $options = $this->query->parseOptions();
 

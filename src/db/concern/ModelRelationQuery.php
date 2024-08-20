@@ -276,12 +276,12 @@ trait ModelRelationQuery
     /**
      * 设置数据字段获取器.
      *
-     * @param string|array $name     字段名
-     * @param callable     $callback 闭包获取器
+     * @param string|array  $name     字段名
+     * @param callable|null $callback 闭包获取器
      *
      * @return $this
      */
-    public function withAttr(string | array $name, callable $callback = null)
+    public function withAttr(string | array $name, ?callable $callback = null)
     {
         if (is_array($name)) {
             foreach ($name as $key => $val) {
@@ -407,12 +407,12 @@ trait ModelRelationQuery
      *
      * @param string|array|bool $relation 关联方法名
      * @param mixed             $key      缓存key
-     * @param int|\DateTime     $expire   缓存有效期
-     * @param string            $tag      缓存标签
+     * @param null              $expire   缓存有效期
+     * @param string|null       $tag      缓存标签
      *
      * @return $this
      */
-    public function withCache(string | array | bool $relation = true, $key = true, $expire = null, string $tag = null)
+    public function withCache(string | array | bool $relation = true, $key = true, $expire = null, ?string $tag = null)
     {
         if (empty($this->model)) {
             return $this;

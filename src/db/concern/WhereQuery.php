@@ -276,14 +276,14 @@ trait WhereQuery
     /**
      * 比较两个字段.
      *
-     * @param string $field1   查询字段
-     * @param string $operator 比较操作符
-     * @param string $field2   比较字段
-     * @param string $logic    查询逻辑 and or xor
+     * @param string      $field1   查询字段
+     * @param string      $operator 比较操作符
+     * @param string|null $field2   比较字段
+     * @param string      $logic    查询逻辑 and or xor
      *
      * @return $this
      */
-    public function whereColumn(string $field1, string $operator, string $field2 = null, string $logic = 'AND')
+    public function whereColumn(string $field1, string $operator, ?string $field2 = null, string $logic = 'AND')
     {
         if (is_null($field2)) {
             $field2   = $operator;
@@ -574,13 +574,13 @@ trait WhereQuery
     /**
      * 条件查询.
      *
-     * @param mixed         $condition 满足条件（支持闭包）
-     * @param Closure|array $query     满足条件后执行的查询表达式（闭包或数组）
-     * @param Closure|array $otherwise 不满足条件后执行
+     * @param mixed              $condition 满足条件（支持闭包）
+     * @param Closure|array      $query     满足条件后执行的查询表达式（闭包或数组）
+     * @param Closure|array|null $otherwise 不满足条件后执行
      *
      * @return $this
      */
-    public function when($condition, Closure | array $query, Closure | array $otherwise = null): self
+    public function when($condition, Closure | array $query, Closure | array | null $otherwise = null): self
     {
         // 处理条件为 Closure 的情况
         if ($condition instanceof Closure) {

@@ -568,7 +568,7 @@ class Query extends BaseQuery
      *
      * @return bool
      */
-    public function chunk(int $count, callable $callback, string | array $column = null, string $order = 'asc'): bool
+    public function chunk(int $count, callable $callback, string | array | null $column = null, string $order = 'asc'): bool
     {
         $options = $this->getOptions();
         $column  = $column ?: $this->getPk();

@@ -16,6 +16,8 @@ Db::setConfig([
             'type'     => 'mysql',
             // 主机地址
             'hostname' => getenv('TESTS_DB_MYSQL_HOSTNAME'),
+            // 主机端口
+            'hostport' => getenv('TESTS_DB_MYSQL_HOSTPORT'),
             // 数据库名
             'database' => getenv('TESTS_DB_MYSQL_DATABASE'),
             // 用户名
@@ -38,6 +40,8 @@ Db::setConfig([
             'type'     => 'mysql',
             // 主机地址
             'hostname' => getenv('TESTS_DB_MYSQL_HOSTNAME'),
+            // 主机端口
+            'hostport' => getenv('TESTS_DB_MYSQL_HOSTPORT'),
             // 数据库名
             'database' => getenv('TESTS_DB_MYSQL_DATABASE'),
             // 用户名

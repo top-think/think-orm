@@ -1061,24 +1061,24 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
     }
 
     // ArrayAccess
-    public function offsetSet(mixed $name, mixed $value): void
+    public function offsetSet(mixed $offset, mixed $value): void
     {
-        $this->setAttr($name, $value);
+        $this->setAttr($offset, $value);
     }
 
-    public function offsetExists(mixed $name): bool
+    public function offsetExists(mixed $offset): bool
     {
-        return $this->__isset($name);
+        return $this->__isset($offset);
     }
 
-    public function offsetUnset(mixed $name): void
+    public function offsetUnset(mixed $offset): void
     {
-        $this->__unset($name);
+        $this->__unset($offset);
     }
 
-    public function offsetGet(mixed $name): mixed
+    public function offsetGet(mixed $offset): mixed
     {
-        return $this->getAttr($name);
+        return $this->getAttr($offset);
     }
 
     /**

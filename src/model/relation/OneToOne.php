@@ -15,6 +15,7 @@ namespace think\model\relation;
 use Closure;
 use think\db\BaseQuery as Query;
 use think\db\exception\DbException as Exception;
+use think\db\exception\InvalidArgumentException;
 use think\helper\Str;
 use think\Model;
 use think\model\Relation;
@@ -315,14 +316,25 @@ abstract class OneToOne extends Relation
     protected function bindAttr(Model $result, Model $model = null): void
     {
         foreach ($this->bindAttr as $key => $attr) {
-            $key    = is_numeric($key) ? $attr : $key;
-            $value  = $result->getOrigin($key);
+            if (is_numeric($key)) {
+                if (!is_string($attr)) {
+                    throw new InvalidArgumentException('bind attr must be string:' . $key);
+                }
 
-            if (!is_null($value)) {
+                $key = $attr;
+            }
+
+            if (null !== $result->getOrigin($key)) {
                 throw new Exception('bind attr has exists:' . $key);
             }
 
-            $result->setAttr($key, $model?->getAttr($attr));
+            if (is_callable($attr)) {
+                $value = $attr($model, $key, $result);
+            } else {
+                $value = $model?->getAttr($attr);
+            }
+
+            $result->setAttr($key, $value);
         }
     }
 

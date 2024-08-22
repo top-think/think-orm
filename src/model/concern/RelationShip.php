@@ -17,6 +17,7 @@ use Closure;
 use think\Collection;
 use think\db\BaseQuery as Query;
 use think\db\exception\DbException as Exception;
+use think\db\exception\InvalidArgumentException;
 use think\helper\Str;
 use think\Model;
 use think\model\Relation;
@@ -377,14 +378,25 @@ trait RelationShip
         $relation = $this->getRelation($relation, true);
 
         foreach ($attrs as $key => $attr) {
-            $key    = is_numeric($key) ? $attr : $key;
-            $value  = $this->getOrigin($key);
+            if (is_numeric($key)) {
+                if (!is_string($attr)) {
+                    throw new InvalidArgumentException('bind attr must be string:' . $key);
+                }
 
-            if (!is_null($value)) {
+                $key = $attr;
+            }
+
+            if (null !== $this->getOrigin($key)) {
                 throw new Exception('bind attr has exists:' . $key);
             }
 
-            $this->set($key, $relation ? $relation->getAttr($attr) : null);
+            if (is_callable($attr)) {
+                $value = $attr($relation, $key, $this);
+            } else {
+                $value = $relation?->getAttr($attr);
+            }
+
+            $this->set($key, $value);
         }
 
         return $this;

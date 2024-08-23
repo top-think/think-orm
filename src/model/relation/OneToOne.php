@@ -90,9 +90,9 @@ abstract class OneToOne extends Relation
         }
 
         // 预载入封装
-        $joinTable  = $this->query->getTable();
-        $joinAlias  = $relation;
-        $joinType   = $joinType ?: $this->joinType;
+        $joinTable = $this->query->getTable();
+        $joinAlias = $relation;
+        $joinType = $joinType ?: $this->joinType;
 
         $query->via($joinAlias);
 
@@ -274,8 +274,8 @@ abstract class OneToOne extends Relation
         foreach ($result->getData() as $key => $val) {
             if (str_contains($key, '__')) {
                 [$name, $attr] = explode('__', $key, 2);
-                if ($name == $relation) {
-                    $list[$name][$attr] = $val;
+                if ($name === strtolower($relation)) {
+                    $list[$relation][$attr] = $val;
                     unset($result->$key);
                 }
             }
@@ -315,8 +315,8 @@ abstract class OneToOne extends Relation
     protected function bindAttr(Model $result, Model $model = null): void
     {
         foreach ($this->bindAttr as $key => $attr) {
-            $key    = is_numeric($key) ? $attr : $key;
-            $value  = $result->getOrigin($key);
+            $key = is_numeric($key) ? $attr : $key;
+            $value = $result->getOrigin($key);
 
             if (!is_null($value)) {
                 throw new Exception('bind attr has exists:' . $key);

@@ -390,7 +390,7 @@ trait RelationShip
                 throw new Exception('bind attr has exists:' . $key);
             }
 
-            if (is_callable($attr)) {
+            if ($attr instanceof Closure) {
                 $value = $attr($relation, $key, $this);
             } else {
                 $value = $relation?->getAttr($attr);

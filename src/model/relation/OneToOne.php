@@ -328,7 +328,7 @@ abstract class OneToOne extends Relation
                 throw new Exception('bind attr has exists:' . $key);
             }
 
-            if (is_callable($attr)) {
+            if ($attr instanceof Closure) {
                 $value = $attr($model, $key, $result);
             } else {
                 $value = $model?->getAttr($attr);

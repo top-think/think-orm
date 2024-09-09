@@ -95,6 +95,11 @@ SQL
         $expected = array_column_ex($users, ['username', 'nickname', 'type', 'id'], 'id');
         $this->assertEquals($expected, $result);
 
+        // 数组方式获取（单字段）
+        $result = Db::table('test_user')->column(['type'], 'id');
+        $expected = array_column($users, 'type', 'id');
+        $this->assertEquals($expected, $result);
+
         // 数组方式获取（重命名字段）
         $result = Db::table('test_user')->column(['username' => 'my_name', 'nickname'], 'id');
         $expected = array_column_ex($users, ['username' => 'my_name', 'nickname', 'id'], 'id');

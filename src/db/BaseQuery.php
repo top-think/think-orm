@@ -416,6 +416,11 @@ abstract class BaseQuery
                 $this->result($item);
                 return $item;
             }
+
+            if (is_array($field) && 1 === count($field)) {
+                $field = current($field);
+            }
+
             $array[$field] = $item;
             if ($this->model && $useModelAttr) {
                 if (!empty($this->options['json'])) {

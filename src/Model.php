@@ -937,14 +937,14 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
     /**
      * 写入数据.
      *
-     * @param array  $data       数据数组
-     * @param array  $allowField 允许字段
-     * @param bool   $replace    使用Replace
-     * @param string $suffix     数据表后缀
+     * @param array|object  $data 数据
+     * @param array  $allowField  允许字段
+     * @param bool   $replace     使用Replace
+     * @param string $suffix      数据表后缀
      *
      * @return static
      */
-    public static function create(array $data, array $allowField = [], bool $replace = false, string $suffix = ''): Model
+    public static function create(array | object $data, array $allowField = [], bool $replace = false, string $suffix = ''): Model
     {
         $model = new static();
 
@@ -964,14 +964,14 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
     /**
      * 更新数据.
      *
-     * @param array  $data       数据数组
-     * @param mixed  $where      更新条件
-     * @param array  $allowField 允许字段
-     * @param string $suffix     数据表后缀
+     * @param array|object  $data  数据
+     * @param mixed  $where        更新条件
+     * @param array  $allowField   允许字段
+     * @param string $suffix       数据表后缀
      *
      * @return static
      */
-    public static function update(array $data, $where = [], array $allowField = [], string $suffix = '')
+    public static function update(array | object $data, $where = [], array $allowField = [], string $suffix = '')
     {
         $model = new static();
 

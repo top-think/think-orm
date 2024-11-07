@@ -408,7 +408,7 @@ trait ModelRelationQuery
      *
      * @return $this
      */
-    protected function withAggregate(string | array $relations, string $aggregate = 'count', $field = '*', bool $subQuery = true)
+    protected function withAggregate(string | array $relations, string $aggregate = 'count', string $field = '*', bool $subQuery = true)
     {
         if (empty($this->model)) {
             return $this;

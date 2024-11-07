@@ -303,8 +303,8 @@ trait ModelRelationQuery
     /**
      * 设置数据字段获取器.
      *
-     * @param string|array $name     字段名
-     * @param callable     $callback 闭包获取器
+     * @param string|array  $name     字段名
+     * @param callable|null $callback 闭包获取器
      *
      * @return $this
      */
@@ -334,7 +334,7 @@ trait ModelRelationQuery
     }
 
     /**
-     * 关联预载入 In方式.
+     * 关联预载入 In 方式.
      *
      * @param array|string $with 关联方法名称
      *
@@ -352,7 +352,7 @@ trait ModelRelationQuery
     }
 
     /**
-     * 关联预载入 JOIN方式.
+     * 关联预载入 JOIN 方式.
      *
      * @param array|string $with     关联方法名
      * @param string       $joinType JOIN方式
@@ -435,7 +435,7 @@ trait ModelRelationQuery
      * @param string|array|bool $relation 关联方法名
      * @param mixed             $key      缓存key
      * @param int|\DateTime     $expire   缓存有效期
-     * @param string            $tag      缓存标签
+     * @param string|null       $tag      缓存标签
      *
      * @return $this
      */

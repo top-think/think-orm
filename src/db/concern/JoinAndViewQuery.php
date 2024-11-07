@@ -24,10 +24,10 @@ trait JoinAndViewQuery
     /**
      * 查询SQL组装 join.
      *
-     * @param array|string|Raw   $join      关联的表名
-     * @param mixed  $condition 条件
-     * @param string $type      JOIN类型
-     * @param array  $bind      参数绑定
+     * @param array|string|Raw $join      关联的表名
+     * @param string|null      $condition 条件
+     * @param string           $type      JOIN类型
+     * @param array            $bind      参数绑定
      *
      * @return $this
      */
@@ -47,9 +47,9 @@ trait JoinAndViewQuery
     /**
      * LEFT JOIN.
      *
-     * @param array|string|Raw  $join      关联的表名
-     * @param mixed $condition 条件
-     * @param array $bind      参数绑定
+     * @param array|string|Raw $join      关联的表名
+     * @param string|null      $condition 条件
+     * @param array            $bind      参数绑定
      *
      * @return $this
      */
@@ -61,9 +61,9 @@ trait JoinAndViewQuery
     /**
      * RIGHT JOIN.
      *
-     * @param array|string|Raw  $join      关联的表名
-     * @param mixed $condition 条件
-     * @param array $bind      参数绑定
+     * @param array|string|Raw $join      关联的表名
+     * @param string|null      $condition 条件
+     * @param array            $bind      参数绑定
      *
      * @return $this
      */
@@ -75,9 +75,9 @@ trait JoinAndViewQuery
     /**
      * FULL JOIN.
      *
-     * @param array|string|Raw  $join      关联的表名
-     * @param mixed $condition 条件
-     * @param array $bind      参数绑定
+     * @param array|string|Raw $join      关联的表名
+     * @param string|null      $condition 条件
+     * @param array            $bind      参数绑定
      *
      * @return $this
      */
@@ -90,8 +90,8 @@ trait JoinAndViewQuery
      * 获取Join表名及别名 支持
      * ['prefix_table或者子查询'=>'alias'] 'table alias'.
      *
-     * @param array|string|Raw $join  JION表名
-     * @param string           $alias 别名
+     * @param array|string|Raw $join  JOIN表名
+     * @param string|null      $alias 别名
      *
      * @return string|array
      */
@@ -137,9 +137,9 @@ trait JoinAndViewQuery
      *
      * @param array|string|Raw  $join  数据表
      * @param string|array|bool $field 查询字段
-     * @param string       $on    JOIN条件
-     * @param string       $type  JOIN类型
-     * @param array        $bind  参数绑定
+     * @param string|null       $on    JOIN条件
+     * @param string            $type  JOIN类型
+     * @param array             $bind  参数绑定
      *
      * @return $this
      */

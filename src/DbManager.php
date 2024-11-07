@@ -264,7 +264,7 @@ class DbManager
     /**
      * 创建连接.
      *
-     * @param $name
+     * @param string $name
      *
      * @return ConnectionInterface
      */
@@ -295,7 +295,7 @@ class DbManager
      * 使用表达式设置数据.
      *
      * @param string $value 表达式
-     *
+     * @param array  $bind  绑定参数
      * @return Raw
      */
     public function raw(string $value, array $bind = []): Raw

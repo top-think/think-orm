@@ -47,7 +47,7 @@ class CacheItem
     /**
      * 缓存tag.
      *
-     * @var string
+     * @var string|array|null
      */
     protected $tag;
 
@@ -104,7 +104,7 @@ class CacheItem
     /**
      * 获取缓存Tag.
      *
-     * @return string|array
+     * @return string|array|null
      */
     public function getTag()
     {
@@ -149,7 +149,7 @@ class CacheItem
     /**
      * 为此缓存项设置所属标签.
      *
-     * @param string|array $tag
+     * @param string|array|null $tag
      *
      * @return $this
      */

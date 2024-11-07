@@ -44,9 +44,9 @@ trait ParamsBind
     /**
      * 单个参数绑定.
      *
-     * @param mixed  $value 绑定变量值
-     * @param int    $type  绑定类型
-     * @param string $name  绑定标识
+     * @param mixed       $value 绑定变量值
+     * @param int|null    $type  绑定类型
+     * @param string|null $name  绑定标识
      *
      * @return string
      */

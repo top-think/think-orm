@@ -91,7 +91,7 @@ class BelongsToMany extends Relation
     /**
      * 设置中间表模型.
      *
-     * @param $pivot
+     * @param string $pivot
      *
      * @return $this
      */
@@ -133,7 +133,7 @@ class BelongsToMany extends Relation
     /**
      * 实例化中间表模型.
      *
-     * @param $data
+     * @param array $data
      *
      * @throws Exception
      *
@@ -154,8 +154,8 @@ class BelongsToMany extends Relation
     /**
      * 延迟获取关联数据.
      *
-     * @param array   $subRelation 子关联名
-     * @param Closure $closure     闭包查询条件
+     * @param array        $subRelation 子关联名
+     * @param Closure|null $closure     闭包查询条件
      *
      * @return Collection
      */
@@ -218,11 +218,11 @@ class BelongsToMany extends Relation
     /**
      * 根据关联条件查询当前模型.
      *
-     * @param string $operator 比较操作符
-     * @param int    $count    个数
-     * @param string $id       关联表的统计字段
-     * @param string $joinType JOIN类型
-     * @param Query  $query    Query对象
+     * @param string     $operator 比较操作符
+     * @param int        $count    个数
+     * @param string     $id       关联表的统计字段
+     * @param string     $joinType JOIN类型
+     * @param Query|null $query    Query对象
      *
      * @return Model
      */
@@ -234,10 +234,10 @@ class BelongsToMany extends Relation
     /**
      * 根据关联条件查询当前模型.
      *
-     * @param mixed  $where    查询条件（数组或者闭包）
-     * @param mixed  $fields   字段
-     * @param string $joinType JOIN类型
-     * @param Query  $query    Query对象
+     * @param mixed      $where    查询条件（数组或者闭包）
+     * @param mixed      $fields   字段
+     * @param string     $joinType JOIN类型
+     * @param Query|null $query    Query对象
      *
      * @throws Exception
      *
@@ -267,11 +267,11 @@ class BelongsToMany extends Relation
     /**
      * 预载入关联查询（数据集）.
      *
-     * @param array   $resultSet   数据集
-     * @param string  $relation    当前关联名
-     * @param array   $subRelation 子关联名
-     * @param Closure $closure     闭包
-     * @param array   $cache       关联缓存
+     * @param array        $resultSet   数据集
+     * @param string       $relation    当前关联名
+     * @param array        $subRelation 子关联名
+     * @param Closure|null $closure     闭包
+     * @param array        $cache       关联缓存
      *
      * @return void
      */
@@ -308,11 +308,11 @@ class BelongsToMany extends Relation
     /**
      * 预载入关联查询（单个数据）.
      *
-     * @param Model   $result      数据对象
-     * @param string  $relation    当前关联名
-     * @param array   $subRelation 子关联名
-     * @param Closure $closure     闭包
-     * @param array   $cache       关联缓存
+     * @param Model        $result      数据对象
+     * @param string       $relation    当前关联名
+     * @param array        $subRelation 子关联名
+     * @param Closure|null $closure     闭包
+     * @param array        $cache       关联缓存
      *
      * @return void
      */
@@ -339,11 +339,11 @@ class BelongsToMany extends Relation
     /**
      * 关联统计
      *
-     * @param Model   $result    数据对象
-     * @param Closure $closure   闭包
-     * @param string  $aggregate 聚合查询方法
-     * @param string  $field     字段
-     * @param string  $name      统计字段别名
+     * @param Model        $result    数据对象
+     * @param Closure|null $closure   闭包
+     * @param string       $aggregate 聚合查询方法
+     * @param string       $field     字段
+     * @param string|null  $name      统计字段别名
      *
      * @return int
      */
@@ -369,10 +369,10 @@ class BelongsToMany extends Relation
     /**
      * 获取关联统计子查询.
      *
-     * @param Closure $closure   闭包
-     * @param string  $aggregate 聚合查询方法
-     * @param string  $field     字段
-     * @param string  $name      统计字段别名
+     * @param Closure|null $closure   闭包
+     * @param string       $aggregate 聚合查询方法
+     * @param string       $field     字段
+     * @param string|null  $name      统计字段别名
      *
      * @return string
      */
@@ -392,10 +392,10 @@ class BelongsToMany extends Relation
     /**
      * 多对多 关联模型预查询.
      *
-     * @param array   $where       关联预查询条件
-     * @param array   $subRelation 子关联
-     * @param Closure $closure     闭包
-     * @param array   $cache       关联缓存
+     * @param array        $where       关联预查询条件
+     * @param array        $subRelation 子关联
+     * @param Closure|null $closure     闭包
+     * @param array        $cache       关联缓存
      *
      * @return array
      */
@@ -577,8 +577,8 @@ class BelongsToMany extends Relation
     /**
      * 解除关联的一个中间表数据.
      *
-     * @param int|array $data        数据 可以使用关联对象的主键
-     * @param bool      $relationDel 是否同时删除关联表数据
+     * @param int|array|null $data        数据 可以使用关联对象的主键
+     * @param bool           $relationDel 是否同时删除关联表数据
      *
      * @return int
      */

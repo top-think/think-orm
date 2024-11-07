@@ -112,8 +112,8 @@ trait Conversion
     /**
      * 设置附加关联对象的属性.
      *
-     * @param string       $attr   关联属性
-     * @param string|array $append 追加属性名
+     * @param string $attr   关联属性
+     * @param array  $append 追加属性名
      *
      * @throws Exception
      *
@@ -384,7 +384,7 @@ trait Conversion
      * 转换数据集为数据集对象
      *
      * @param array|Collection $collection    数据集
-     * @param string           $resultSetType 数据集类
+     * @param string|null      $resultSetType 数据集类
      *
      * @return Collection
      */

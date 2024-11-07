@@ -30,8 +30,8 @@ trait ResultOperation
     /**
      * 设置数据处理（支持模型）.
      *
-     * @param callable $filter 数据处理Callable
-     * @param string   $index  索引（唯一）
+     * @param callable    $filter 数据处理 Callable
+     * @param string|null $index  索引（唯一）
      *
      * @return $this
      */
@@ -155,7 +155,7 @@ trait ResultOperation
 
     /**
      * 处理空数据.
-     * @param Closure $closure 闭包数据
+     * @param Closure|null $closure 闭包数据
      * @throws DbException
      * @throws ModelNotFoundException
      * @throws DataNotFoundException

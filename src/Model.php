@@ -598,8 +598,8 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
     /**
      * 保存当前数据对象
      *
-     * @param array|object  $data     数据
-     * @param string $sequence 自增序列名
+     * @param array|object $data     数据
+     * @param string|null  $sequence 自增序列名
      *
      * @return bool
      */
@@ -754,7 +754,7 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
     /**
      * 新增写入数据.
      *
-     * @param string $sequence 自增名
+     * @param string|null $sequence 自增名
      *
      * @return bool
      */
@@ -1115,7 +1115,7 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
     /**
      * 设置不使用的全局查询范围.
      *
-     * @param array $scope 不启用的全局查询范围
+     * @param array|null $scope 不启用的全局查询范围
      *
      * @return Query
      */

@@ -158,8 +158,8 @@ abstract class Relation
     /**
      * 封装关联数据集.
      *
-     * @param array $resultSet 数据集
-     * @param Model $parent    父模型
+     * @param array      $resultSet 数据集
+     * @param Model|null $parent    父模型
      *
      * @return mixed
      */

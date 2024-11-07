@@ -182,8 +182,8 @@ class Collection extends BaseCollection
     /**
      * 设置数据字段获取器.
      *
-     * @param string|array $name     字段名
-     * @param callable     $callback 闭包获取器
+     * @param string|array  $name     字段名
+     * @param callable|null $callback 闭包获取器
      *
      * @return $this
      */
@@ -202,7 +202,7 @@ class Collection extends BaseCollection
      * @param string $relation 关联名称
      * @param array  $attrs    绑定属性
      *
-     * @throws Exception
+     * @throws \think\db\exception\DbException
      *
      * @return $this
      */

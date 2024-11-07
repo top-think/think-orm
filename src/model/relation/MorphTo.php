@@ -117,11 +117,11 @@ class MorphTo extends Relation
     /**
      * 根据关联条件查询当前模型.
      *
-     * @param string $operator 比较操作符
-     * @param int    $count    个数
-     * @param string $id       关联表的统计字段
-     * @param string $joinType JOIN类型
-     * @param Query  $query    Query对象
+     * @param string     $operator 比较操作符
+     * @param int        $count    个数
+     * @param string     $id       关联表的统计字段
+     * @param string     $joinType JOIN类型
+     * @param Query|null $query    Query对象
      *
      * @return Query
      */

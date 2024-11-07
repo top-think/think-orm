@@ -104,7 +104,7 @@ class Query extends BaseQuery
     /**
      * 表达式方式指定当前操作的数据表.
      *
-     * @param mixed $table 表名
+     * @param string $table 表名
      *
      * @return $this
      */

@@ -303,10 +303,10 @@ trait WhereQuery
     /**
      * 比较两个字段.
      *
-     * @param string $field1   查询字段
-     * @param string $operator 比较操作符
-     * @param string $field2   比较字段
-     * @param string $logic    查询逻辑 and or xor
+     * @param string      $field1   查询字段
+     * @param string      $operator 比较操作符
+     * @param string|null $field2   比较字段
+     * @param string      $logic    查询逻辑 and or xor
      *
      * @return $this
      */
@@ -601,9 +601,9 @@ trait WhereQuery
     /**
      * 条件查询.
      *
-     * @param mixed         $condition 满足条件（支持闭包）
-     * @param Closure|array $query     满足条件后执行的查询表达式（闭包或数组）
-     * @param Closure|array $otherwise 不满足条件后执行
+     * @param mixed              $condition 满足条件（支持闭包）
+     * @param Closure|array      $query     满足条件后执行的查询表达式（闭包或数组）
+     * @param Closure|array|null $otherwise 不满足条件后执行
      *
      * @return $this
      */

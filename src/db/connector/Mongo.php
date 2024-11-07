@@ -195,7 +195,7 @@ class Mongo extends Connection
     /**
      * 设置/获取当前操作的database.
      *
-     * @param string $db db
+     * @param string|null $db db
      *
      * @return string
      */
@@ -431,11 +431,11 @@ class Mongo extends Connection
     /**
      * 执行指令.
      *
-     * @param Command        $command        指令
-     * @param string         $dbName         当前数据库名
-     * @param ReadPreference $readPreference readPreference
-     * @param string|array   $typeMap        指定返回的typeMap
-     * @param bool           $master         是否主库操作
+     * @param Command             $command        指令
+     * @param string              $dbName         当前数据库名
+     * @param ReadPreference|null $readPreference readPreference
+     * @param string|array        $typeMap        指定返回的typeMap
+     * @param bool                $master         是否主库操作
      *
      * @throws AuthenticationException
      * @throws InvalidArgumentException
@@ -773,8 +773,8 @@ class Mongo extends Connection
     /**
      * 获取最近插入的ID.
      *
-     * @param BaseQuery $query 查询对象
-     * @param string    $sequence 自增序列名
+     * @param BaseQuery   $query    查询对象
+     * @param string|null $sequence 自增序列名
      *
      * @return mixed
      */
@@ -1107,7 +1107,7 @@ class Mongo extends Connection
      *
      * @param callable $callback 数据操作方法回调
      *
-     * @throws PDOException
+     * @throws \PDOException
      * @throws \Exception
      * @throws \Throwable
      *
@@ -1152,7 +1152,7 @@ class Mongo extends Connection
     /**
      * 用于非自动提交状态下面的查询提交.
      *
-     * @throws PDOException
+     * @throws \PDOException
      *
      * @return void
      */
@@ -1167,7 +1167,7 @@ class Mongo extends Connection
     /**
      * 事务回滚.
      *
-     * @throws PDOException
+     * @throws \PDOException
      *
      * @return void
      */

@@ -503,8 +503,8 @@ abstract class PDOConnection extends Connection
     /**
      * 获取数据表字段类型.
      *
-     * @param mixed  $tableName 数据表名
-     * @param string $field     字段名
+     * @param mixed       $tableName 数据表名
+     * @param string|null $field     字段名
      *
      * @return array|string
      */
@@ -705,7 +705,7 @@ abstract class PDOConnection extends Connection
      *
      * @param BaseQuery $query  查询对象
      * @param mixed     $sql    sql指令
-     * @param bool      $master 主库读取
+     * @param bool|null $master 主库读取
      *
      * @throws DbException
      *
@@ -1733,8 +1733,8 @@ abstract class PDOConnection extends Connection
     /**
      * 获取最近插入的ID.
      *
-     * @param BaseQuery $query    查询对象
-     * @param string    $sequence 自增序列名
+     * @param BaseQuery   $query    查询对象
+     * @param string|null $sequence 自增序列名
      *
      * @return mixed
      */

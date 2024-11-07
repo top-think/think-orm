@@ -34,10 +34,10 @@ class Mongo extends BaseQuery
     /**
      * 执行指令 返回数据集.
      *
-     * @param Command        $command        指令
-     * @param string         $dbName
-     * @param ReadPreference $readPreference readPreference
-     * @param string|array   $typeMap        指定返回的typeMap
+     * @param Command             $command        指令
+     * @param string              $dbName
+     * @param ReadPreference|null $readPreference readPreference
+     * @param string|array        $typeMap        指定返回的typeMap
      *
      * @throws AuthenticationException
      * @throws InvalidArgumentException
@@ -102,7 +102,7 @@ class Mongo extends BaseQuery
     /**
      * COUNT查询.
      *
-     * @param string $field 字段名
+     * @param string|null $field 字段名
      *
      * @return int
      */
@@ -457,8 +457,8 @@ class Mongo extends BaseQuery
     /**
      * 指定查询数量.
      *
-     * @param int $offset 起始位置
-     * @param int $length 查询数量
+     * @param int      $offset 起始位置
+     * @param int|null $length 查询数量
      *
      * @return $this
      */

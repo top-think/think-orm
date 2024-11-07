@@ -319,7 +319,7 @@ trait Attribute
     /**
      * 获取对象原始数据 如果不存在指定字段返回null.
      *
-     * @param string $name 字段名 留空获取全部
+     * @param string|null $name 字段名 留空获取全部
      *
      * @return mixed
      */
@@ -337,7 +337,7 @@ trait Attribute
     /**
      * 获取当前对象数据 如果不存在指定字段返回false.
      *
-     * @param string $name 字段名 留空获取全部
+     * @param string|null $name 字段名 留空获取全部
      *
      * @throws InvalidArgumentException
      *
@@ -711,7 +711,7 @@ trait Attribute
      * 设置数据字段获取器.
      *
      * @param string|array $name     字段名
-     * @param Closure     $callback 闭包获取器
+     * @param Closure|null $callback 闭包获取器
      *
      * @return $this
      */

@@ -73,8 +73,8 @@ class MorphOne extends Relation
     /**
      * 延迟获取关联数据.
      *
-     * @param array   $subRelation 子关联名
-     * @param Closure $closure     闭包查询条件
+     * @param array        $subRelation 子关联名
+     * @param Closure|null $closure     闭包查询条件
      *
      * @return Model
      */
@@ -106,11 +106,11 @@ class MorphOne extends Relation
     /**
      * 根据关联条件查询当前模型.
      *
-     * @param string $operator 比较操作符
-     * @param int    $count    个数
-     * @param string $id       关联表的统计字段
-     * @param string $joinType JOIN类型
-     * @param Query  $query    Query对象
+     * @param string     $operator 比较操作符
+     * @param int        $count    个数
+     * @param string     $id       关联表的统计字段
+     * @param string     $joinType JOIN类型
+     * @param Query|null $query    Query对象
      *
      * @return Query
      */
@@ -122,10 +122,10 @@ class MorphOne extends Relation
     /**
      * 根据关联条件查询当前模型.
      *
-     * @param mixed  $where    查询条件（数组或者闭包）
-     * @param mixed  $fields   字段
-     * @param string $joinType JOIN类型
-     * @param Query  $query    Query对象
+     * @param mixed      $where    查询条件（数组或者闭包）
+     * @param mixed      $fields   字段
+     * @param string     $joinType JOIN类型
+     * @param Query|null $query    Query对象
      *
      * @return Query
      */
@@ -137,11 +137,11 @@ class MorphOne extends Relation
     /**
      * 预载入关联查询.
      *
-     * @param array   $resultSet   数据集
-     * @param string  $relation    当前关联名
-     * @param array   $subRelation 子关联名
-     * @param Closure $closure     闭包
-     * @param array   $cache       关联缓存
+     * @param array        $resultSet   数据集
+     * @param string       $relation    当前关联名
+     * @param array        $subRelation 子关联名
+     * @param Closure|null $closure     闭包
+     * @param array        $cache       关联缓存
      *
      * @return void
      */
@@ -193,11 +193,11 @@ class MorphOne extends Relation
     /**
      * 预载入关联查询.
      *
-     * @param Model   $result      数据对象
-     * @param string  $relation    当前关联名
-     * @param array   $subRelation 子关联名
-     * @param Closure $closure     闭包
-     * @param array   $cache       关联缓存
+     * @param Model        $result      数据对象
+     * @param string       $relation    当前关联名
+     * @param array        $subRelation 子关联名
+     * @param Closure|null $closure     闭包
+     * @param array        $cache       关联缓存
      *
      * @return void
      */
@@ -234,10 +234,10 @@ class MorphOne extends Relation
     /**
      * 多态一对一 关联模型预查询.
      *
-     * @param array   $where       关联预查询条件
-     * @param array   $subRelation 子关联
-     * @param Closure $closure     闭包
-     * @param array   $cache       关联缓存
+     * @param array        $where       关联预查询条件
+     * @param array        $subRelation 子关联
+     * @param Closure|null $closure     闭包
+     * @param array        $cache       关联缓存
      *
      * @return array
      */
@@ -348,8 +348,8 @@ class MorphOne extends Relation
     /**
      * 绑定关联属性到父模型.
      *
-     * @param Model $result 父模型对象
-     * @param Model $model  关联模型对象
+     * @param Model      $result 父模型对象
+     * @param Model|null $model  关联模型对象
      *
      * @throws Exception
      *

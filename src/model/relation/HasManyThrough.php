@@ -102,7 +102,7 @@ class HasManyThrough extends Relation
      */
     public function has(string $operator = '>=', int $count = 1, string $id = '*', string $joinType = '', ?Query $query = null): Query
     {
-        $model         = Str::snake(class_basename($this->parent));
+        $model         = class_basename($this->parent);
         $throughTable  = $this->through->getTable();
         $pk            = $this->throughPk;
         $throughKey    = $this->throughKey;
@@ -137,7 +137,7 @@ class HasManyThrough extends Relation
      */
     public function hasWhere($where = [], $fields = null, $joinType = '', ?Query $query = null): Query
     {
-        $model        = Str::snake(class_basename($this->parent));
+        $model        = class_basename($this->parent);
         $throughTable = $this->through->getTable();
         $pk           = $this->throughPk;
         $throughKey   = $this->throughKey;

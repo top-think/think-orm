@@ -106,17 +106,17 @@ trait AutoWriteData
 
     public function getAutoWriteTimestamp(): bool
     {
-        return $this->getOption('auto_timestamp') ? true : false;
+        return $this->getOption('autoWriteTimestamp') ? true : false;
     }
 
     public function isAutoWriteTimestamp(bool $auto)
     {
-        $this->setOption('auto_timestamp', $auto);
+        $this->setOption('autoWriteTimestamp', $auto);
     }
 
     public function getDateFormat()
     {
-        return $this->getOption('datetime_format');
+        return $this->getOption('dateFormat');
     }
 
     public function setDateFormat(string $format)

@@ -65,7 +65,7 @@ class ModelOneToOneTest extends TestCase
         $user = UserModel::find($userID)
             ->bindAttr(
                 'profile',
-                ['email', 'nick_name' => 'nickname', 'true_name' => fn ($model) =>$model?->getAttr('nickname')]
+                ['email', 'nick_name' => 'nickname', 'true_name' => fn ($model) =>$model?->get('nickname')]
             );
         $this->assertEquals(
             [$userID, $email, $nickname, $nickname],

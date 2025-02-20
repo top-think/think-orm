@@ -325,7 +325,6 @@ class MorphToMany extends BelongsToMany
                 $pivot[$this->foreignKey] = $id;
 
                 $this->pivot->replace()
-                    ->exists(false)
                     ->data([])
                     ->save($pivot);
                 $result[] = $this->newPivot($pivot);

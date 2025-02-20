@@ -388,7 +388,7 @@ abstract class BaseQuery
             if (!empty($this->options['json'])) {
                 $this->jsonModelResult($array);
             }
-            return $this->model->newInstance($array)->getAttr($field);
+            return $this->model->newInstance($array)->get($field);
         }
 
         if (!empty($this->options['json'])) {
@@ -446,7 +446,7 @@ abstract class BaseQuery
                 if (!empty($this->options['json'])) {
                     $this->jsonModelResult($array);
                 }
-                return $this->model->newInstance($array)->getAttr($field);
+                return $this->model->newInstance($array)->get($field);
             }
             if (!empty($this->options['json'])) {
                 $this->jsonResult($array);
@@ -1359,10 +1359,6 @@ abstract class BaseQuery
             $this->parseUpdateData($this->options['data']);
         }
 
-        if (empty($this->options['where']) && $this->model) {
-            $this->where($this->model->getWhere());
-        }
-
         if (empty($this->options['where']) && empty($this->options['scope'])) {
             // 如果没有任何更新条件则不执行
             throw new Exception('miss update condition');
@@ -1396,15 +1392,11 @@ abstract class BaseQuery
             $this->parsePkWhere($data);
         }
 
-        if (empty($this->options['where'])) {
-            if ($this->model && $this->model instanceof Model) {
-                $this->where($this->model->getWhere());
-            } elseif (!empty($this->options['key'])) {
-                if (is_array($this->pk)) {
-                    $this->where($this->options['key']);
-                } else {
-                    $this->where($this->pk, '=', $this->options['key']);
-                }
+        if (empty($this->options['where']) && !empty($this->options['key'])) {
+            if (is_array($this->pk)) {
+                $this->where($this->options['key']);
+            } else {
+                $this->where($this->pk, '=', $this->options['key']);
             }
         }
 

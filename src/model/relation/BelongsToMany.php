@@ -198,7 +198,7 @@ class BelongsToMany extends Relation
                         if (null !== $result->getOrigin($attr)) {
                             throw new Exception('bind attr has exists:' . $attr);
                         }
-                        $result->setAttr($attr, $val);
+                        $result->set($attr, $val);
                     }
                     unset($result->$key);
                 }
@@ -420,7 +420,7 @@ class BelongsToMany extends Relation
         $data = [];
         foreach ($list as $set) {
             $pivot = $this->matchPivot($set);
-            $key = $pivot[$this->localKey];
+            $key   = $pivot[$this->localKey];
 
             if ($withLimit && isset($data[$key]) && count($data[$key]) >= $withLimit) {
                 continue;
@@ -446,8 +446,8 @@ class BelongsToMany extends Relation
         // 关联查询封装
         if (empty($this->baseQuery)) {
             $tableName = $this->query->getTable(true);
-            $table = $this->pivot->db()->getTable();
-            $fields = $this->getQueryFields($tableName);
+            $table     = $this->pivot->db()->getTable();
+            $fields    = $this->getQueryFields($tableName);
 
             $this->query
                 ->field($fields)

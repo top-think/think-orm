@@ -252,16 +252,6 @@ abstract class OneToOne extends Relation
     }
 
     /**
-     * 获取绑定属性.
-     *
-     * @return array
-     */
-    public function getBindAttr(): array
-    {
-        return $this->bindAttr;
-    }
-
-    /**
      * 一对一 关联模型预查询拼装.
      *
      * @param string $model    模型名称
@@ -272,85 +262,13 @@ abstract class OneToOne extends Relation
      */
     protected function match(string $model, string $relation, Model $result): void
     {
-        if ($result instanceof Entity) {
-            $data = $result->getRelation($relation);
-            if (!empty($data)) {
-                if ($this->bindAttr) {
-                    $result->bindRelationAttr($data, $this->bindAttr);
-                } else {
-                    $relationModel = (new $model())->newInstance($data);
-                    $result->setRelation($relation, $relationModel);
-                }
-            }
-        } else {
-            // 重新组装模型数据
-            foreach ($result->getData() as $key => $val) {
-                if (str_contains($key, '__')) {
-                    [$name, $attr] = explode('__', $key, 2);
-                    if (Str::snake($relation) == $name) {
-                        $list[$relation][$attr] = $val;
-                        unset($result->$key);
-                    }
-                }
-            }
-
-            if (isset($list[$relation])) {
-                $array = array_unique($list[$relation]);
-
-                if (count($array) == 1 && null === current($array)) {
-                    $relationModel = null;
-                } else {
-                    $relationModel = new $model($list[$relation]);
-                    $relationModel->setParent(clone $result);
-                    $relationModel->exists(true);
-                }
-
-                if (!empty($this->bindAttr)) {
-                    $this->bindAttr($result, $relationModel);
-                }
+        $data = $result->getRelation($relation);
+        if (!empty($data)) {
+            if ($this->bindAttr) {
+                $result->bindRelationAttr($data, $this->bindAttr);
             } else {
-                $relationModel = null;
-            }
-
-            $result->setRelation($relation, $relationModel);
-        }
-    }
-
-    /**
-     * 绑定关联属性到父模型.
-     *
-     * @param Model $result 父模型对象
-     * @param Model $model  关联模型对象
-     *
-     * @throws Exception
-     *
-     * @return void
-     */
-    protected function bindAttr(Model $result, ?Model $model = null): void
-    {
-        if ($result instanceof Entity && $model) {
-            $result->bindRelationAttr($model, $this->bindAttr);
-        } else {
-            foreach ($this->bindAttr as $key => $attr) {
-                if (is_numeric($key)) {
-                    if (!is_string($attr)) {
-                        throw new InvalidArgumentException('bind attr must be string:' . $key);
-                    }
-
-                    $key = $attr;
-                }
-
-                if (null !== $result->getOrigin($key)) {
-                    throw new Exception('bind attr has exists:' . $key);
-                }
-
-                if ($attr instanceof Closure) {
-                    $value = $attr($model, $key, $result);
-                } else {
-                    $value = $model?->getAttr($attr);
-                }
-
-                $result->setAttr($key, $value);
+                $relationModel = new $model($data);
+                $result->setRelation($relation, $relationModel);
             }
         }
     }

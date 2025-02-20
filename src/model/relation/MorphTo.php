@@ -272,7 +272,6 @@ class MorphTo extends Relation
                         } else {
                             $relationModel = $data[$result->$morphKey];
                             $relationModel->setParent(clone $result);
-                            $relationModel->exists(true);
                         }
 
                         $result->setRelation($relation, $relationModel);
@@ -339,7 +338,6 @@ class MorphTo extends Relation
 
             if ($data) {
                 $data->setParent(clone $result);
-                $data->exists(true);
             }
         }
 
@@ -360,8 +358,8 @@ class MorphTo extends Relation
         $morphType  = $this->morphType;
         $pk         = $model->getPk();
 
-        $this->parent->setAttr($morphKey, $model->$pk);
-        $this->parent->setAttr($morphType, $type ?: get_class($model));
+        $this->parent->set($morphKey, $model->$pk);
+        $this->parent->set($morphType, $type ?: get_class($model));
         $this->parent->save();
 
         return $this->parent->setRelation($this->relation, $model);
@@ -377,8 +375,8 @@ class MorphTo extends Relation
         $morphKey   = $this->morphKey;
         $morphType  = $this->morphType;
 
-        $this->parent->setAttr($morphKey, null);
-        $this->parent->setAttr($morphType, null);
+        $this->parent->set($morphKey, null);
+        $this->parent->set($morphType, null);
         $this->parent->save();
 
         return $this->parent->setRelation($this->relation, null);

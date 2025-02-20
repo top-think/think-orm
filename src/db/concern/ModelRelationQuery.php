@@ -623,7 +623,7 @@ trait ModelRelationQuery
             $this->resultToModel($result);
         }
 
-        if ($this->model instanceof \think\Model) {
+        if ($result instanceof \think\Model) {
             foreach (['with', 'with_join'] as $with) {
                 // 关联预载入
                 if (!empty($this->options[$with])) {
@@ -635,7 +635,7 @@ trait ModelRelationQuery
                         $this->options['with_cache'] ?? false
                     );
                 }
-            }            
+            }
         }
 
         // 模型数据集转换

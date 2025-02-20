@@ -11,39 +11,23 @@
 // +----------------------------------------------------------------------
 declare (strict_types = 1);
 
-namespace think\entity;
+namespace think\model;
 
-use think\Entity;
+use think\Model;
 
 /**
- * Class View.
- * 视图实体模型
+ * Class Virtual.
+ * 虚拟模型
  */
-abstract class View extends Entity
+abstract class Virtual extends Model
 {
     /**
-     * 设置为视图模型.
+     * 设置为虚拟模型.
      *
      * @return bool
      */
-    public function isView(): bool
+    public function isVirtual(): bool
     {
         return true;
-    }
-
-    /**
-     * 指定视图查询.
-     *
-     * @param string  $model  实体模型类名
-     * @param string|array|bool $field 查询字段
-     * @param string       $on    JOIN条件
-     * @param string       $type  JOIN类型
-     *
-     * @return $this
-     */
-    public function view(string $model, $field, ?string $on = null, string $joinType = 'INNER')
-    {
-        $this->model()->view($model::getTable() . ' ' . class_basename($model), $field, $on, $joinType);
-        return $this;
     }
 }

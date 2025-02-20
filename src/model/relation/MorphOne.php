@@ -176,7 +176,6 @@ class MorphOne extends Relation
                 } else {
                     $relationModel = $data[$result->$pk];
                     $relationModel->setParent(clone $result);
-                    $relationModel->exists(true);
                 }
 
                 if (!empty($this->bindAttr)) {
@@ -215,7 +214,6 @@ class MorphOne extends Relation
             if (isset($data[$pk])) {
                 $relationModel = $data[$pk];
                 $relationModel->setParent(clone $result);
-                $relationModel->exists(true);
             } else {
                 $default = $this->query->getOptions('default_model');
                 $relationModel = $this->getDefaultModel($default);
@@ -358,14 +356,14 @@ class MorphOne extends Relation
     protected function bindAttr(Model $result, ?Model $model = null): void
     {
         foreach ($this->bindAttr as $key => $attr) {
-            $key = is_numeric($key) ? $attr : $key;
+            $key   = is_numeric($key) ? $attr : $key;
             $value = $result->getOrigin($key);
 
             if (!is_null($value)) {
                 throw new Exception('bind attr has exists:' . $key);
             }
 
-            $result->setAttr($key, $model?->getAttr($attr));
+            $result->set($key, $model?->get($attr));
         }
     }
 }

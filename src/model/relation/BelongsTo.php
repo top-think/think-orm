@@ -251,11 +251,10 @@ class BelongsTo extends OneToOne
                 } else {
                     $relationModel = $data[$result->$foreignKey];
                     $relationModel->setParent(clone $result);
-                    $relationModel->exists(true);
                 }
 
                 // 设置关联属性
-                if ($relationModel instanceof Entity && !empty($this->bindAttr)) {
+                if (!empty($this->bindAttr)) {
                     $result->bindRelationAttr($relationModel, $this->bindAttr);
                 } else {
                     $result->setRelation($relation, $relationModel);
@@ -298,7 +297,6 @@ class BelongsTo extends OneToOne
         } else {
             $relationModel = $data[$result->$foreignKey];
             $relationModel->setParent(clone $result);
-            $relationModel->exists(true);
         }
 
         // 动态绑定参数
@@ -308,15 +306,10 @@ class BelongsTo extends OneToOne
         }
 
         // 设置关联属性
-        if ($relationModel instanceof Entity && !empty($this->bindAttr)) {
+        if (!empty($this->bindAttr)) {
             $result->bindRelationAttr($relationModel, $this->bindAttr);
         } else {
             $result->setRelation($relation, $relationModel);
-            if (!empty($this->bindAttr)) {
-                // 绑定关联属性
-                $this->bindAttr($result, $relationModel);
-                $result->hidden([$relation], true);
-            }
         }
     }
 
@@ -329,7 +322,7 @@ class BelongsTo extends OneToOne
      */
     public function associate(Model $model): Model
     {
-        $this->parent->setAttr($this->foreignKey, $model->getKey());
+        $this->parent->set($this->foreignKey, $model->getKey());
         $this->parent->save();
 
         return $this->parent->setRelation($this->relation, $model);
@@ -344,7 +337,7 @@ class BelongsTo extends OneToOne
     {
         $foreignKey = $this->foreignKey;
 
-        $this->parent->setAttr($foreignKey, null);
+        $this->parent->set($foreignKey, null);
         $this->parent->save();
 
         return $this->parent->setRelation($this->relation, null);

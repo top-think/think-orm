@@ -216,7 +216,7 @@ abstract class Relation
     protected function getDefaultModel($data)
     {
         if (is_array($data)) {
-            $model = (new $this->model())->data($data);
+            $model = new $this->model($data);
         } elseif ($data instanceof Closure) {
             $model = new $this->model();
             $data($model);

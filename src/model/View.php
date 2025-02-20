@@ -11,23 +11,39 @@
 // +----------------------------------------------------------------------
 declare (strict_types = 1);
 
-namespace think\entity;
+namespace think\model;
 
-use think\Entity;
+use think\Model;
 
 /**
- * Class Simple.
- * 简单实体模型 仅限单表操作 不绑定模型
+ * Class View.
+ * 视图模型
  */
-abstract class Simple extends Entity
+abstract class View extends Model
 {
     /**
-     * 设置为单表模型.
+     * 设置为视图模型.
      *
      * @return bool
      */
-    public function isSimple(): bool
+    public function isView(): bool
     {
         return true;
+    }
+
+    /**
+     * 指定视图查询.
+     *
+     * @param string  $model  实体模型类名
+     * @param string|array|bool $field 查询字段
+     * @param string       $on    JOIN条件
+     * @param string       $type  JOIN类型
+     *
+     * @return $this
+     */
+    public function view(string $model, $field, ?string $on = null, string $joinType = 'INNER')
+    {
+        $this->model()->view($model::getTable() . ' ' . class_basename($model), $field, $on, $joinType);
+        return $this;
     }
 }

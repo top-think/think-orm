@@ -24,7 +24,7 @@ class UserModel extends Model
             ->bind([
                 'email',
                 'new_name'	=> 'nickname',
-                'call_name' => fn ($model) =>$model?->getAttr('nickname')
+                'call_name' => fn ($model) =>$model?->get('nickname')
             ]);
     }
 }

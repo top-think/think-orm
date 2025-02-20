@@ -251,19 +251,12 @@ class HasOne extends OneToOne
                 } else {
                     $relationModel = $data[$result->$localKey];
                     $relationModel->setParent(clone $result);
-                    $relationModel->exists(true);
                 }
                 // 设置关联属性
-                if ($relationModel instanceof Entity && !empty($this->bindAttr)) {
+                if (!empty($this->bindAttr)) {
                     $result->bindRelationAttr($relationModel, $this->bindAttr);
                 } else {
                     $result->setRelation($relation, $relationModel);
-
-                    if (!empty($this->bindAttr)) {
-                        // 绑定关联属性
-                        $this->bindAttr($result, $relationModel);
-                        $result->hidden([$relation], true);
-                    }
                 }
             }
         }
@@ -298,7 +291,6 @@ class HasOne extends OneToOne
         } else {
             $relationModel = $data[$result->$localKey];
             $relationModel->setParent(clone $result);
-            $relationModel->exists(true);
         }
 
         // 动态绑定参数
@@ -307,17 +299,10 @@ class HasOne extends OneToOne
             $this->bind($bindAttr);
         }
         // 设置关联属性
-        if ($relationModel instanceof Entity && !empty($this->bindAttr)) {
+        if (!empty($this->bindAttr)) {
             $result->bindRelationAttr($relationModel, $this->bindAttr);
         } else {
             $result->setRelation($relation, $relationModel);
-
-            if (!empty($this->bindAttr)) {
-                // 绑定关联属性
-                $this->bindAttr($result, $relationModel);
-                $result->hidden([$relation], true);
-            }
-
         }
     }
 

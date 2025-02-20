@@ -89,7 +89,6 @@ class HasOneThrough extends HasManyThrough
                 } else {
                     $relationModel = $data[$result->$localKey];
                     $relationModel->setParent(clone $result);
-                    $relationModel->exists(true);
                 }
 
                 // 设置关联属性
@@ -127,7 +126,6 @@ class HasOneThrough extends HasManyThrough
         } else {
             $relationModel = $data[$result->$localKey];
             $relationModel->setParent(clone $result);
-            $relationModel->exists(true);
         }
 
         $result->setRelation($relation, $relationModel);

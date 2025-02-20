@@ -22,7 +22,7 @@ trait OptimLock
 {
     protected function getOptimLockField()
     {
-        return $this->getOption('optim_lock_field') ?? 'lock_version';
+        return $this->getOption('optimLock') ?? 'lock_version';
     }
 
     /**

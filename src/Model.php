@@ -176,7 +176,7 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
      * @param array  $options  值
      * @return void
      */
-    protected function setOptions(array $options)
+    public function setOptions(array $options)
     {
         foreach ($options as $name => $value) {
             $this->setOption($name, $value);
@@ -191,7 +191,7 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
      *
      * @return void
      */
-    protected function setOption(string $name, $value)
+    public function setOption(string $name, $value)
     {
         self::$weakMap[$this][$name] = $value;
     }
@@ -204,7 +204,7 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
      *
      * @return mixed
      */
-    protected function getOption(string $name, $default = null)
+    public function getOption(string $name, $default = null)
     {
         // 兼容读取3.0版本的属性参数定义
         if (property_exists($this, $name) && isset($this->$name)) {

@@ -104,9 +104,9 @@ trait AutoWriteData
         return $value;
     }
 
-    public function getAutoWriteTimestamp(): bool
+    public function getAutoWriteTimestamp()
     {
-        return $this->getOption('autoWriteTimestamp') ? true : false;
+        return $this->getOption('autoWriteTimestamp');
     }
 
     public function isAutoWriteTimestamp(bool $auto)

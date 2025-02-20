@@ -13,6 +13,7 @@ class UserModel extends Model
 {
     protected $table = 'test_user';
     protected $pk = 'id';
+    protected $autoWriteTimestamp = false;
 
     /**
      * 用户资料

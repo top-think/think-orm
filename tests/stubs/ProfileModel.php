@@ -15,6 +15,7 @@ class ProfileModel extends Model
     use SoftDelete;
 
     protected $table = 'test_profile';
+    protected $autoWriteTimestamp = true;
 
     /**
      * 用户

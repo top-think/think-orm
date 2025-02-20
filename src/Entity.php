@@ -125,12 +125,11 @@ abstract class Entity implements JsonSerializable, ArrayAccess, Arrayable, Jsona
     /**
      * 模型数据转数组.
      *
-     * @param array $allow 允许输出字段
      * @return array
      */
-    public function toArray(array $allow = []): array
+    public function toArray(): array
     {
-        return $this->model()->toArray($allow);
+        return $this->model()->toArray();
     }   
      
     /**

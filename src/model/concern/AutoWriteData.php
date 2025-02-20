@@ -62,11 +62,11 @@ trait AutoWriteData
      */
     protected function autoDateTime(array &$data, bool $update)
     {
-        $autoDateTime   = $this->getOption('auto_timestamp', true);
+        $autoDateTime   = $this->getOption('autoWriteTimestamp', true);
         if ($autoDateTime) {
-            $dateTimeFields = [$this->getOption('update_time')];
+            $dateTimeFields = [$this->getOption('updateTime')];
             if (!$update) {
-                array_unshift($dateTimeFields, $this->getOption('create_time'));
+                array_unshift($dateTimeFields, $this->getOption('createTime'));
             }
 
             foreach ($dateTimeFields as $field) {
@@ -121,12 +121,12 @@ trait AutoWriteData
 
     public function setDateFormat(string $format)
     {
-        $this->setOption('datetime_format', $format);
+        $this->setOption('dateFormat', $format);
     }
 
     public function setTimeField($createTime, $updateTime)
     {
-        $this->setOption('create_time', $createTime);
-        $this->setOption('update_time', $updateTime);
+        $this->setOption('createTime', $createTime);
+        $this->setOption('updateTime', $updateTime);
     }    
 }

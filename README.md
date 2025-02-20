@@ -1,18 +1,11 @@
-# ThinkORM4.0
+# ThinkORM5.0
 
 基于PHP8.0+ 和PDO实现的ORM。
 
-- 模型分层设计
-- 引入实体模型
-- 引入视图模型
-- 完全兼容3.0版本
-
+完全重构的Model层，更轻量化，目前仅供开发测试用
 
 ## 安装
 ~~~
-composer require topthink/think-orm
+composer require topthink/think-orm:5.0.x-dev
 ~~~
 
-## 文档
-
-详细参考 [ThinkORM开发指南](https://doc.thinkphp.cn/@think-orm)

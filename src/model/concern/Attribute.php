@@ -418,6 +418,16 @@ trait Attribute
     }
 
     /**
+     * 判断JSON数据是否为数组格式.
+     *
+     * @return bool
+     */
+    public function isJsonAssoc(): bool
+    {
+        return $this->getOption('jsonAssoc', false);
+    }
+
+    /**
      * 设置数据对象的值 并进行类型自动转换
      *
      * @param string $name  名称

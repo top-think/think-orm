@@ -43,7 +43,7 @@ trait ModelEvent
      */
     public function withEvent(bool $event)
     {
-        $this->setOption('with_event', $event);
+        $this->setOption('withEvent', $event);
 
         return $this;
     }
@@ -57,13 +57,13 @@ trait ModelEvent
      */
     protected function trigger(string $event): bool
     {
-        if (!$this->getOption('with_event', true)) {
+        if (!$this->getOption('withEvent', true)) {
             return true;
         }
 
         $call  = 'on' . Str::studly($event);
         $obj   = $this->getOption('event');
-        $obser = $this->getOption('event_observer');
+        $obser = $this->getOption('eventObserver');
         try {
             if ($obser) {
                 $reflect  = new ReflectionClass($obser);

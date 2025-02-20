@@ -202,9 +202,9 @@ trait DbConnect
 
         $db = $model->getQuery();
 
-        if (!empty(self::$weakMap[$model]['auto_relation'])) {
+        if (!empty(self::$weakMap[$model]['autoRelation'])) {
             // 自动获取关联数据
-            $db->with(self::$weakMap[$model]['auto_relation']);
+            $db->with(self::$weakMap[$model]['autoRelation']);
         }
 
         return call_user_func_array([$db, $method], $args);

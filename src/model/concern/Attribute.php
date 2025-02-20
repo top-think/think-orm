@@ -157,7 +157,7 @@ trait Attribute
     {
         $name = $this->getRealFieldName($name);
 
-        $this->setWeakData('with_attr', $name, $callback);
+        $this->setWeakData('withAttr', $name, $callback);
         // 自动追加输出
         self::$weakMap[$this]['append'][] = $name;
         return $this;
@@ -565,7 +565,7 @@ trait Attribute
     {
         $attr     = Str::studly($name);
         $method   = 'get' . $attr . 'Attr';
-        $withAttr = $this->getWeakData('with_attr', $name);
+        $withAttr = $this->getWeakData('withAttr', $name);
         if ($withAttr) {
             // 动态获取器
             $value = $withAttr($value, $data, $this);

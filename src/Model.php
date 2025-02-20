@@ -115,10 +115,10 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
             'relation'      => [],
             'together'      => [],
             'allow'         => [],
-            'with_attr'     => [],
+            'withAttr'      => [],
             'schema'        => $options['schema'] ?? [],
-            'update_time'   => $options['update_time'] ?? 'update_time',
-            'create_time'   => $options['create_time'] ?? 'create_time',
+            'updateTime'    => $options['updateTtime'] ?? 'update_time',
+            'createTime'    => $options['createTime'] ?? 'create_time',
             'suffix'        => $options['suffix'] ?? '',
             'pk'            => $options['pk'] ?? 'id',
             'validate'      => $options['validate'] ?? $this->parseValidate(),
@@ -130,9 +130,8 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
             'append'        => $options['append'] ?? [],
             'mapping'       => $options['mapping'] ?? [],
             'strict'        => $options['strict'] ?? true,
-            'bind_attr'     => $options['bind_attr'] ?? [],
-            'auto_relation' => $options['auto_relation'] ?? [],
-            'relation_keys' => $options['relation_keys'] ?? [],
+            'bindAttr'      => $options['bindAttr'] ?? [],
+            'autoRelation'  => $options['autoRelation'] ?? [],
         ];
 
         // 设置额外参数
@@ -594,7 +593,7 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
      */
     public function __set(string $name, $value): void
     {
-        if ($value instanceof Modelable && $bind = $this->getBindAttr($this->getOption('bind_attr'), $name)) {
+        if ($value instanceof Modelable && $bind = $this->getBindAttr($this->getOption('bindAttr'), $name)) {
             // 关联属性绑定
             $this->bindRelationAttr($value, $bind);
         } else {

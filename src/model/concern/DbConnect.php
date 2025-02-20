@@ -146,6 +146,15 @@ trait DbConnect
         return $this;
     }
 
+    /**
+     * 获取当前模型的数据表后缀
+     *
+     * @return string
+     */
+    public function getSuffix(): string
+    {
+        return $this->getOption('suffix', '');
+    }
 
     /**
      * 设置当前模型数据表的后缀

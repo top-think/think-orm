@@ -318,7 +318,7 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
 
 
         foreach ($data as $name => &$val) {
-            if ($val instanceof Model) {
+            if ($val instanceof Modelable) {
                 $relations[$name] = $val;
                 unset($data[$name]);
             } elseif ($val instanceof Collection || !in_array($name, $allow)) {
@@ -351,7 +351,7 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
 
         // 保存关联数据
         if (!empty($relations)) {
-            $this->relationSave($relations);
+            $this->relationSave($relations, $isUpdate);
         }
 
         // 重置原始数据

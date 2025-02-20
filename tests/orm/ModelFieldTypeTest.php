@@ -57,13 +57,13 @@ SQL
     public function testFieldReadAndWrite()
     {
         /** @var FieldTypeModel $result */
-        $result = FieldTypeModel::query()->where('id', '=', 3)->find();
+        $result = FieldTypeModel::where('id', '=', 3)->find();
         $result->t_json = new TestFieldJsonDTO(30, 'ddd');
         $result->t_php = new TestFieldPhpDTO(40, 'eee');
         $result->save();
 
         /** @var FieldTypeModel $result */
-        $result = FieldTypeModel::query()->where('id', '=', 3)->find();
+        $result = FieldTypeModel::where('id', '=', 3)->find();
         $this->assertEquals(new TestFieldJsonDTO(30, 'ddd'), $result->t_json);
         $this->assertEquals((string) new TestFieldPhpDTO(40, 'eee'), (string) $result->t_php);
         $this->assertEquals($result->id, $result->t_php->getId());

@@ -107,17 +107,14 @@ trait RelationShip
      * 写入模型关联数据（一对一）.
      *
      * @param array $relations 数据
+     * @param bool  $isUpdate  是否更新
      * @return void
      */
-    private function relationSave(array $relations = [])
+    private function relationSave(array $relations = [], bool $isUpdate = true)
     {
         foreach ($relations as $name => $relation) {
             if ($relation && in_array($name, $this->getOption('together'))) {
-                $relationKey = $this->getRelationKey($name);
-                if ($relationKey) {
-                    $relation->$relationKey = $this->getKey();
-                }
-                $relation->save();
+                $isUpdate ? $relation->save() : $this->$name()->save($relation);
             }
         }
     }

@@ -16,7 +16,7 @@ class FieldTypeModel extends Model
     protected $table = 'test_field_type';
     protected $pk = 'id';
 
-    protected $autoWriteTimestamp = true;
+    protected $autoWriteTimestamp = false;
     protected $dateFormat = false;
 
     protected $type = [

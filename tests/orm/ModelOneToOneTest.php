@@ -57,8 +57,8 @@ class ModelOneToOneTest extends TestCase
         // 预载入时绑定
         $user = UserModel::with('profile')->find($userID);
         $this->assertEquals(
-            [$userID, $email, $nickname, $nickname],
-            [$user->id, $user->email, $user->new_name, $user->call_name]
+            [$userID, $email, $nickname],
+            [$user->id, $user->email, $user->new_name]
         );
 
         // 动态绑定

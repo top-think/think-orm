@@ -69,7 +69,6 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
      */
     public static function setInvoker(callable $callable): void
     {
-
     }
 
     /**

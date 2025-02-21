@@ -27,9 +27,15 @@ use think\Model;
  */
 trait SoftDelete
 {
-    public function getQuery(): Query
+    /**
+     * 获取查询对象
+     *
+     * @param array|null $scope 设置不使用的全局查询范围
+     * @return Query
+     */
+    public function getQuery(array | null $scope = []): Query
     {
-        $query = parent::getQuery();
+        $query = parent::getQuery($scope);
         $this->withNoTrashed($query);
 
         return $query;

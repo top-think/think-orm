@@ -181,15 +181,34 @@ trait DbConnect
     /**
      * 获取查询对象
      *
+     * @param array|null $scope 设置不使用的全局查询范围
      * @return Query
      */
-    public function getQuery(): Query
+    public function getQuery(array | null $scope = []): Query
     {
         $query = $this->db();
-
+        // 全局查询范围
+        if (is_array($scope)) {
+            $globalScope = array_diff($this->getOption('globalScope', []), $scope);
+            $query->scope($globalScope);
+        }
         // 执行扩展查询
         $this->query($query->suffix($this->getOption('suffix')));
         return $query;
+    }
+
+    /**
+     * 设置不使用的全局查询范围.
+     *
+     * @param array $scope 不启用的全局查询范围
+     *
+     * @return Query
+     */
+    public static function withoutGlobalScope(?array $scope = null): Query
+    {
+        $model = new static();
+
+        return $model->getQuery($scope);
     }
 
     public static function __callStatic($method, $args)

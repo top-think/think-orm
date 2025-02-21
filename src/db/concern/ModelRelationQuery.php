@@ -14,7 +14,6 @@ declare (strict_types = 1);
 namespace think\db\concern;
 
 use Closure;
-use think\Entity;
 use think\helper\Str;
 use think\model\Collection as ModelCollection;
 use think\model\contract\Modelable as Model;

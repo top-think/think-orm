@@ -68,7 +68,7 @@ trait RelationShip
             if (!empty($bind)) {
                 // 绑定关联属性
                 $this->bindRelationAttr($val, $bind);
-            } elseif (is_subclass_of($type, Entity::class)) {
+            } elseif (is_subclass_of($type, Model::class)) {
                 // 明确类型直接设置关联属性
                 $this->$relation = new $type($val);
             } else {
@@ -135,18 +135,6 @@ trait RelationShip
     }
 
     /**
-     * 获取关联的外键名.
-     *
-     * @param string $relation 关联名
-     * @return string|null
-     */
-    protected function getRelationKey(string $relation)
-    {
-        $relationKey = $this->getOption('relation_keys', []);
-        return $relationKey[$relation] ?? null;
-    }
-
-    /**
      * 获取关联数据
      *
      * @param string $name 名称
@@ -168,26 +156,28 @@ trait RelationShip
 
     protected function getBindAttr($bind, $name)
     {
-        if (true === $bind || (isset($bind[$name]) && true === $bind[$name])) {
-            return true;
-        }
         return $bind[$name] ?? [];
     }
 
     /**
      * 设置关联绑定数据
      *
-     * @param Entity|array $entity 关联实体对象
-     * @param array|bool  $bind  绑定属性
+     * @param Model|array $model 关联对象
+     * @param array       $bind  绑定属性
      * @return void
      */
-    public function bindRelationAttr($entity, $bind = [])
+    public function bindRelationAttr(Model | array $model, array $bind = [])
     {
-        $data = is_array($entity) ? $entity : $entity->getData();
+        $data = is_array($model) ? $model : $model->getData();
         foreach ($data as $key => $val) {
             if (isset($bind[$key])) {
-                $this->set($bind[$key], $val);
-            } elseif ((true === $bind || in_array($key, $bind)) && !$this->__isset($key)) {
+                $this->set($bind[$key], $val);                    
+            } elseif ($attr = array_search($key, $bind)) {
+                if (is_numeric($attr) || $this->__isset($attr)) {
+                } else {
+                    $this->set($attr, $val);                    
+                }
+            } elseif (in_array($key, $bind) && !$this->__isset($key)) {
                 $this->set($key, $val);
             }
         }

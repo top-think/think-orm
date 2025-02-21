@@ -13,7 +13,6 @@ declare(strict_types=1);
 
 namespace think\model;
 
-use think\Entity;
 use think\Model;
 
 /**
@@ -46,8 +45,8 @@ class Pivot extends Model
     {
         $this->parent = $parent;
 
-        if (is_null($this->name)) {
-            $this->name = $table;
+        if (is_null($this->getOption('name')) {
+            $this->setOption('name', $table);
         }
 
         parent::__construct($data);
@@ -57,22 +56,15 @@ class Pivot extends Model
      * 创建新的模型实例.
      *
      * @param array $data    数据
-     * @param mixed $where   更新条件
-     * @param array $options 参数
      *
      * @return Model
      */
-    public function newInstance(array $data = [], $where = null, array $options = []): Model
+    public function newInstance(array $data = [])
     {
-        $model = parent::newInstance($data, $where, $options);
+        $model = parent::newInstance($data);
 
-        if ($model instanceof Entity) {
-            $model->setParent($this->parent);
-            $model->setOption('table_name', $this->name);
-        } else {
-            $model->parent  = $this->parent;
-            $model->name    = $this->name;
-        }
+        $model->parent = $this->parent;
+        $model->setOption('name', $this->getOption('name'));
 
         return $model;
     }

@@ -23,7 +23,7 @@ use think\helper\Str;
 use think\model\contract\EnumTransform;
 use think\model\contract\FieldTypeTransform;
 use think\model\contract\Typeable;
-use think\model\contract\Modelable;
+use think\model\contract\Modelable as Model;
 use think\model\type\Date;
 use think\model\type\DateTime;
 use think\model\type\Json;
@@ -437,19 +437,13 @@ trait Attribute
      */
     public function set(string $name, $value)
     {
-        $ignore = $this->getOption('ignore', []);
         $name   = $this->getMappingName($name);
         $type   = $this->getFields($name);
 
-        if (in_array($name, $ignore)) {
-            // 忽略属性
-            return $this;
-        }
-
-        if (is_null($value) && is_subclass_of($type, Entity::class)) {
+        if (is_null($value) && is_subclass_of($type, Model::class)) {
             // 关联数据为空 设置一个空模型
             $value = new $type();
-        } elseif (!($value instanceof Modelable || $value instanceof Collection)) {
+        } elseif (!($value instanceof Model || $value instanceof Collection)) {
             // 类型自动转换
             $value = $this->readTransform($value, $type);
         }
@@ -508,13 +502,7 @@ trait Attribute
      */
     public function get(string $name, bool $attr = true)
     {
-        $ignore = $this->getOption('ignore', []);
         $name   = $this->getMappingName($name);
-        if (in_array($name, $ignore)) {
-            // 忽略属性
-            return null;
-        }
-
         if ($attr && $value = $this->getWeakData('get', $name)) {
             // 已经输出的数据直接返回
             return $value;
@@ -580,16 +568,27 @@ trait Attribute
     }
 
     /**
-     * 设置忽略属性.
+     * 使用获取器获取数据对象的值
      *
-     * @param array $ignore 忽略属性列表
+     * @param string $name 名称
+     *
+     * @return mixed
+     */
+    public function getAttr(string $name)
+    {
+        return $this->get($name);
+    }  
+
+    /**
+     * 设置数据对象的值 并进行类型自动转换
+     *
+     * @param string $name  名称
+     * @param mixed  $value 值
      *
      * @return $this
      */
-    public function ignore(array $ignore)
+    public function setAttr(string $name, $value)
     {
-        $this->setOption('ignore', $ignore);
-
-        return $this;
-    }    
+        return $this->set($name, $value);
+    }
 }

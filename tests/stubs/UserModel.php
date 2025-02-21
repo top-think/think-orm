@@ -24,8 +24,7 @@ class UserModel extends Model
         return $this->hasOne(ProfileModel::class, 'uid')
             ->bind([
                 'email',
-                'new_name'	=> 'nickname',
-                'call_name' => fn ($model) =>$model?->get('nickname')
+                'new_name'	=> 'nickname'
             ]);
     }
 }

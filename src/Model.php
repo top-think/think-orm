@@ -306,7 +306,7 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
 
         $data     = $this->getData();
         $origin   = $this->getOrigin();
-        $allow    = $this->getOption('allow') ?: array_keys($this->getFields());
+        $allow    = $this->getOption('field') ?: array_keys($this->getFields());
         $readonly = $this->getOption('readonly');
         $disuse   = $this->getOption('disuse');
         $allow    = array_diff($allow, $readonly, $disuse);
@@ -420,6 +420,18 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
     public function isSimple(): bool
     {
         return false;
+    }
+
+    /**
+     * 刷新模型数据.
+     *
+     * @return $this
+     */
+    public function refresh()
+    {
+        $data = $this->getQuery()->find($this->getKey())->getData();
+        $this->data($data);
+        return $this;
     }
 
     /**

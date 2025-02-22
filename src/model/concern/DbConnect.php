@@ -53,7 +53,11 @@ trait DbConnect
             $db = Db::connect($connection);
         }
 
-        $db = $db->name($this->getName())->pk($this->getOption('pk'));
+        $db = $db->name($this->getName())->pk($this->getPk());
+        $autoInc = $this->getOption('autoInc');
+        if ($autoInc) {
+            $db->autoinc(is_string($autoInc) ? $autoInc : $this->getPk());
+        }
 
         if ($this->getOption('table')) {
             $db->table($this->getOption('table'));

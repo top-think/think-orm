@@ -589,6 +589,21 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
     }
 
     /**
+     * 查询缓存 数据为空不缓存.
+     *
+     * @param mixed         $key    缓存key
+     * @param int|\DateTime $expire 缓存有效期
+     * @param string|array  $tag    缓存标签
+     *
+     * @return $this
+     */
+    public function setCache($key = true, $expire = null, $tag = null)
+    {
+        $this->db()->cache($key, $expire, $tag);
+        return $this;
+    }
+
+    /**
      * 获取属性 支持获取器
      *
      * @param string $name 名称

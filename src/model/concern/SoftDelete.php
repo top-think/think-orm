@@ -102,7 +102,7 @@ trait SoftDelete
             $this->withEvent(true);
 
             $this->trigger('AfterDelete');
-            $this->exists = false;
+            $this->exists(false);
             $this->clear();
             return true;            
         } 

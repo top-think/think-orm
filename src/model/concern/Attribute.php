@@ -213,6 +213,12 @@ trait Attribute
                     $value = $type::get($value, $model);
                 } elseif (is_subclass_of($type, BackedEnum::class)) {
                     $value = $type::from($value);
+                    if (is_subclass_of($type, EnumTransform::class)) {
+                        $value = $value->value();
+                    } elseif ($model->getOption('enumReadName')) {
+                        $method = $model->getOption('enumReadName');
+                        $value  = is_string($method) ? $value->$method() : $value->name;
+                    }                    
                 } else {
                     // 对象类型
                     $value = new $type($value);
@@ -222,7 +228,7 @@ trait Attribute
         };
 
         return match ($type) {
-            'string' => (string) $value,
+            'string'    => (string) $value,
             'int'       => (int) $value,
             'float'     => empty($param) ? (float) $value : (float) number_format($value, (int) $param, '.', ''),
             'bool'      => (bool) $value,
@@ -614,5 +620,19 @@ trait Attribute
     public function isExists(): bool
     {
         return $this->getOption('exists', false);
-    }    
+    }
+
+    /**
+     * 设置枚举类型自动读取数据方式
+     * true 表示使用name值返回
+     * 字符串 表示使用枚举类的方法返回
+     *
+     * @return $this
+     */
+    public function withEnumRead(bool | string $method = true)
+    {
+        $this->setOption('enumReadName', $method);
+
+        return $this;
+    }
 }

@@ -573,36 +573,6 @@ trait ModelRelationQuery
     }
 
     /**
-     * JSON字段数据转换.
-     *
-     * @param array $result 查询数据
-     *
-     * @return void
-     */
-    protected function jsonModelResult(array &$result) : void
-    {
-        $withAttr = $this->options['with_attr'];
-        foreach ($this->options['json'] as $name) {
-            if (!isset($result[$name])) {
-                continue;
-            }
-
-            $jsonData = json_decode($result[$name], true);
-            if (json_last_error() !== JSON_ERROR_NONE) {
-                continue;
-            }
-
-            if (isset($withAttr[$name])) {
-                foreach ($withAttr[$name] as $key => $closure) {
-                    $jsonData[$key] = $closure($jsonData[$key] ?? null, $jsonData);
-                }
-            }
-
-            $result[$name] = !$this->options['json_assoc'] ? (object) $jsonData : $jsonData;
-        }
-    }
-
-    /**
      * 查询数据转换为模型数据集对象
      *
      * @param array $resultSet 数据集
@@ -648,11 +618,6 @@ trait ModelRelationQuery
      */
     protected function resultToModel(array &$result): void
     {
-        // JSON数据处理
-        if (!empty($this->options['json'])) {
-            $this->jsonModelResult($result);
-        }
-
         // 实时读取延迟数据
         if (!empty($this->options['lazy_fields'])) {
             $id = $this->getKey($result);

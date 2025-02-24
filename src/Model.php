@@ -28,6 +28,19 @@ use WeakMap;
 
 /**
  * Class Model.
+ * @mixin Query
+ *
+ * @method static void  onAfterRead(Model $model)     after_read事件定义
+ * @method static mixed onBeforeInsert(Model $model)  before_insert事件定义
+ * @method static void  onAfterInsert(Model $model)   after_insert事件定义
+ * @method static mixed onBeforeUpdate(Model $model)  before_update事件定义
+ * @method static void  onAfterUpdate(Model $model)   after_update事件定义
+ * @method static mixed onBeforeWrite(Model $model)   before_write事件定义
+ * @method static void  onAfterWrite(Model $model)    after_write事件定义
+ * @method static mixed onBeforeDelete(Model $model)  before_write事件定义
+ * @method static void  onAfterDelete(Model $model)   after_delete事件定义
+ * @method static void  onBeforeRestore(Model $model) before_restore事件定义
+ * @method static void  onAfterRestore(Model $model)  after_restore事件定义 
  */
 abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonable, Modelable
 {
@@ -293,6 +306,10 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
             return true;
         }
 
+        if (false === $this->trigger('BeforeWrite')) {
+            return false;
+        }
+
         if (true === $where) {
             $isUpdate = false;
         } elseif (!empty($where)) {
@@ -332,7 +349,7 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
             }
         }
 
-        if (empty($data) || false === $this->trigger('BeforeWrite')) {
+        if (empty($data)) {
             return false;
         }
 
@@ -346,7 +363,6 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
             $this->setKey($db->getLastInsID());
         }
         $this->trigger($isUpdate ? 'AfterUpdate' : 'AfterInsert');
-
         $this->trigger('AfterWrite');
 
         // 保存关联数据

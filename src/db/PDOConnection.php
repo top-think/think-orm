@@ -310,6 +310,7 @@ abstract class PDOConnection extends Connection
             str_contains($type, 'int') || str_contains($type, 'serial') ||
             str_contains($type, 'bit') => 'int',
             str_contains($type, 'bool') => 'bool',
+            str_contains($type, 'json') => 'json',
             str_starts_with($type, 'timestamp') => 'timestamp',
             str_starts_with($type, 'datetime') => 'datetime',
             str_starts_with($type, 'date') => 'date',

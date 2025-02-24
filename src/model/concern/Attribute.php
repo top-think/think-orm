@@ -591,4 +591,28 @@ trait Attribute
     {
         return $this->set($name, $value);
     }
+
+    /**
+     * 设置数据是否存在.
+     *
+     * @param bool $exists
+     *
+     * @return $this
+     */
+    public function exists(bool $exists = true)
+    {
+        $this->setOption('exists', $exists);
+
+        return $this;
+    }
+
+    /**
+     * 判断数据是否存在数据库.
+     *
+     * @return bool
+     */
+    public function isExists(): bool
+    {
+        return $this->getOption('exists', false);
+    }    
 }

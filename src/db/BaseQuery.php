@@ -1642,16 +1642,6 @@ abstract class BaseQuery
     }
 
     /**
-     * 获取模型的更新条件.
-     *
-     * @param array $options 查询参数
-     */
-    protected function getModelUpdateCondition(array $options)
-    {
-        return $options['where']['AND'] ?? null;
-    }
-
-    /**
      * 获取当前的查询标识.
      *
      * @return string

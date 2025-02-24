@@ -232,6 +232,7 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
     {
         $class = str_replace('\\model\\', '\\entity\\', static::class);
         $model = new static($data);
+        $model->exists(true);
         if (class_exists($class)) {
             $entity = new $class($model);
             return $entity;
@@ -341,6 +342,7 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
         $db     = $this->getDbWhere($where);
         $result = $db->field($allow)->save($data, !$isUpdate);
         if (!$isUpdate) {
+            $this->exists(true);
             $this->setKey($db->getLastInsID());
         }
         $this->trigger($isUpdate ? 'AfterUpdate' : 'AfterInsert');
@@ -429,8 +431,10 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
      */
     public function refresh()
     {
-        $data = $this->getQuery()->find($this->getKey())->getData();
-        $this->data($data);
+        if ($this->isExists()) {
+            $data = $this->getQuery()->find($this->getKey())->getData();
+            $this->data($data);
+        }
         return $this;
     }
 
@@ -460,6 +464,7 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
     public function delete(): bool
     {
         if ($this->isVirtual() || $this->isView()) {
+            $this->exists(false);
             $this->clear();
             return true;
         }
@@ -483,6 +488,7 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
             $this->relationDelete($relations);
         }
 
+        $this->exists(false);
         $this->clear();
         return true;
     }

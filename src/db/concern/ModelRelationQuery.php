@@ -622,18 +622,16 @@ trait ModelRelationQuery
             $this->resultToModel($result);
         }
 
-        if ($result instanceof \think\Model) {
-            foreach (['with', 'with_join'] as $with) {
-                // 关联预载入
-                if (!empty($this->options[$with])) {
-                    $result->eagerlyResultSet(
-                        $resultSet,
-                        $this->options[$with],
-                        $this->options['with_relation_attr'],
-                        'with_join' == $with,
-                        $this->options['with_cache'] ?? false
-                    );
-                }
+        foreach (['with', 'with_join'] as $with) {
+            // 关联预载入
+            if (!empty($this->options[$with])) {
+                $result->eagerlyResultSet(
+                    $resultSet,
+                    $this->options[$with],
+                    $this->options['with_relation_attr'],
+                    'with_join' == $with,
+                    $this->options['with_cache'] ?? false
+                );
             }
         }
 
@@ -665,11 +663,7 @@ trait ModelRelationQuery
             }
         }
 
-        $result = $this->model->newInstance(
-            $result,
-            !empty($this->options['is_resultSet']) ? null : $this->getModelUpdateCondition($this->options),
-            $this->options
-        );
+        $result = $this->model->newInstance($result);
 
         if ($this->suffix) {
             $result->setSuffix($this->suffix);

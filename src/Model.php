@@ -429,6 +429,17 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
     }
 
     /**
+     * 判断数据是否有更新.
+     *
+     * @param string $name 字段
+     * @return bool
+     */
+    public function isChange(string $name): bool
+    {
+        return $this->getData($name) !== $this->getOrigin($name);
+    }
+
+    /**
      * 是否为虚拟模型（不能查询）.
      *
      * @return bool

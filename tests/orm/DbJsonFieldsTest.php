@@ -53,13 +53,13 @@ SQL
     public function testJsonFieldMemberNotExists()
     {
         $data = Db::table(self::$table)->where('extend->weight', null)->select();
-        $this->assertSame($data->count(), self::$testGoodsDataCollect->where('extend.weight', null)->count());
+        $this->assertSame($data->count(), self::$testGoodsDataCollect->where('extend->weight', null)->count());
 
         $data = Db::table(self::$table)->where('extend->amount', null)->select();
-        $this->assertSame($data->count(), self::$testGoodsDataCollect->where('extend.amount', null)->count());
+        $this->assertSame($data->count(), self::$testGoodsDataCollect->where('extend->amount', null)->count());
 
         $data = Db::table(self::$table)->where('extend->pack', null)->select();
-        $this->assertSame($data->count(), self::$testGoodsDataCollect->where('extend.pack', null)->count());
+        $this->assertSame($data->count(), self::$testGoodsDataCollect->where('extend->pack', null)->count());
     }
 
     /**
@@ -68,10 +68,10 @@ SQL
     public function testJsonFieldMemberNotExistsOrNull()
     {
         $data = Db::table(self::$table)->where('extend->brand', null)->select();
-        $this->assertSame($data->count(), self::$testGoodsDataCollect->where('extend.brand', null)->count());
+        $this->assertSame($data->count(), self::$testGoodsDataCollect->where('extend->brand', null)->count());
 
         $data = Db::table(self::$table)->where('extend->standard', null)->select();
-        $this->assertSame($data->count(), self::$testGoodsDataCollect->where('extend.standard', null)->count());
+        $this->assertSame($data->count(), self::$testGoodsDataCollect->where('extend->standard', null)->count());
     }
 
     /**
@@ -80,13 +80,13 @@ SQL
     public function testJsonFieldMemberEqual()
     {
         $data = Db::table(self::$table)->where('extend->brand', 'TP8')->select();
-        $this->assertSame($data->count(), self::$testGoodsDataCollect->where('extend.brand', 'TP8')->count());
+        $this->assertSame($data->count(), self::$testGoodsDataCollect->where('extend->brand', 'TP8')->count());
 
         $data = Db::table(self::$table)->where('extend->standard', '大')->select();
-        $this->assertSame($data->count(), self::$testGoodsDataCollect->where('extend.standard', '大')->count());
+        $this->assertSame($data->count(), self::$testGoodsDataCollect->where('extend->standard', '大')->count());
 
         $data = Db::table(self::$table)->where('extend->type', '清洁')->select();
-        $this->assertSame($data->count(), self::$testGoodsDataCollect->where('extend.type', '清洁')->count());
+        $this->assertSame($data->count(), self::$testGoodsDataCollect->where('extend->type', '清洁')->count());
     }
 
     /**
@@ -95,12 +95,12 @@ SQL
     public function testJsonFieldMemberNotEqual()
     {
         $data = Db::table(self::$table)->where('extend->brand', '<>', 'TP8')->whereNull('extend->brand', "or")->select();
-        $this->assertSame($data->count(), self::$testGoodsDataCollect->where('extend.brand', '<>', 'TP8')->count());
+        $this->assertSame($data->count(), self::$testGoodsDataCollect->where('extend->brand', '<>', 'TP8')->count());
 
         $data = Db::table(self::$table)->where('extend->standard', '<>', '大')->whereNull('extend->standard', "or")->select();
-        $this->assertSame($data->count(), self::$testGoodsDataCollect->where('extend.standard', '<>', '大')->count());
+        $this->assertSame($data->count(), self::$testGoodsDataCollect->where('extend->standard', '<>', '大')->count());
 
         $data = Db::table(self::$table)->where('extend->type', '<>', '清洁')->whereNull('extend->type', "or")->select();
-        $this->assertSame($data->count(), self::$testGoodsDataCollect->where('extend.type', '<>', '清洁')->count());
+        $this->assertSame($data->count(), self::$testGoodsDataCollect->where('extend->type', '<>', '清洁')->count());
     }
 }

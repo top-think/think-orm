@@ -10,6 +10,7 @@ use think\model\contract\Typeable;
 class DateTime implements Typeable
 {
     protected $data;
+    protected $value;
 
     public static function from(mixed $value, Modelable $model)
     {
@@ -21,8 +22,15 @@ class DateTime implements Typeable
     public function data($time, $format)
     {
         $date = new \DateTime;
-        $date->setTimestamp(is_numeric($time) ? (int) $time : strtotime($time));
-        $this->data = $date->format($format);
+
+        $this->value = is_numeric($time) ? (int) $time : strtotime($time);
+        $this->data  = $date->setTimestamp($this->value)->format($format);
+    }
+
+    public function format($format)
+    {
+        $date = new \DateTime;
+        return $date->setTimestamp($this->value)->format($format);
     }
 
     public function value()

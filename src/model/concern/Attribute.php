@@ -471,7 +471,9 @@ trait Attribute
     {
         $attr   = Str::studly($name);
         $method = 'set' . $attr . 'Attr';
-        if (method_exists($this, $method)) {
+        if ($this->getEntity() && method_exists($this->getEntity(), $method)) {
+            $value = $this->getEntity()->$method($value, $data);
+        } elseif (method_exists($this, $method)) {
             $value = $this->$method($value, $data);
         } else {
             // 类型转换
@@ -563,6 +565,8 @@ trait Attribute
         if ($withAttr) {
             // 动态获取器
             $value = $withAttr($value, $data, $this);
+        } elseif ($this->getEntity() && method_exists($this->getEntity(), $method)) {
+            $value = $this->getEntity()->$method($value, $data);
         } elseif (method_exists($this, $method)) {
             // 获取器
             $value = $this->$method($value, $data);

@@ -248,9 +248,20 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
         $model->exists(true);
         if (class_exists($class)) {
             $entity = new $class($model);
+            $model->entity($entity);
             return $entity;
         }
         return $model;
+    }
+
+    public function entity(Entity $entity)
+    {
+        $this->setOption('entity', $entity);
+    }
+
+    public function getEntity()
+    {
+        return $this->getOption('entity');
     }
 
     /**

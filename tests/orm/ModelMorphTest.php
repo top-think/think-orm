@@ -53,7 +53,7 @@ class ModelMorphTest extends TestCase
         Db::execute('TRUNCATE TABLE `test_video`;');
 
         // 创建测试数据
-        $post = PostModel::create([
+        $post = MorphPostModel::create([
             'title' => 'Test Post',
             'content' => 'Post content'
         ]);
@@ -67,14 +67,14 @@ class ModelMorphTest extends TestCase
         // 创建评论数据
         CommentModel::create([
             'content' => 'Comment on post',
-            'morphable_type' => PostModel::class,
+            'morphable_type' => MorphPostModel::class,
             'morphable_id' => $post->id,
             'user_id' => 1
         ]);
 
         CommentModel::create([
             'content' => 'Another comment on post',
-            'morphable_type' => PostModel::class,
+            'morphable_type' => MorphPostModel::class,
             'morphable_id' => $post->id,
             'user_id' => 2
         ]);
@@ -89,7 +89,7 @@ class ModelMorphTest extends TestCase
 
     public function testMorphOne()
     {
-        $post = PostModel::find(1);
+        $post = MorphPostModel::find(1);
         $this->assertNotNull($post);
 
         // 测试获取最新的一条评论
@@ -98,14 +98,14 @@ class ModelMorphTest extends TestCase
         $this->assertEquals('Another comment on post', $latestComment->content);
 
         // 测试预加载
-        $post = PostModel::with(['latestComment'])->find(1);
+        $post = MorphPostModel::with(['latestComment'])->find(1);
         $this->assertTrue($post->isRelationLoaded('latestComment'));
         $this->assertNotNull($post->latestComment);
     }
 
     public function testMorphMany()
     {
-        $post = PostModel::find(1);
+        $post = MorphPostModel::find(1);
         $this->assertNotNull($post);
 
         // 测试获取所有评论
@@ -113,12 +113,12 @@ class ModelMorphTest extends TestCase
         $this->assertCount(2, $comments);
 
         // 测试预加载
-        $post = PostModel::with(['comments'])->find(1);
+        $post = MorphPostModel::with(['comments'])->find(1);
         $this->assertTrue($post->isRelationLoaded('comments'));
         $this->assertCount(2, $post->comments);
 
         // 测试关联统计
-        $post = PostModel::withCount('comments')->find(1);
+        $post = MorphPostModel::withCount('comments')->find(1);
         $this->assertEquals(2, $post->comments_count);
 
         // 测试新增关联
@@ -142,7 +142,7 @@ class ModelMorphTest extends TestCase
 
         // 测试获取关联的内容
         $commentable = $comment->commentable;
-        $this->assertInstanceOf(PostModel::class, $commentable);
+        $this->assertInstanceOf(MorphPostModel::class, $commentable);
         $this->assertEquals('Test Post', $commentable->title);
 
         // 测试预加载
@@ -153,20 +153,18 @@ class ModelMorphTest extends TestCase
     }
 }
 
-class PostModel extends Model
+class MorphPostModel extends Model
 {
     protected $table = 'test_post';
-    protected $autoWriteTimestamp = true;
 
     public function comments()
     {
-        return $this->morphMany(CommentModel::class, 'morphable');
+        return $this->morphMany(CommentModel::class, 'commentable');
     }
 
     public function latestComment()
     {
-        return $this->morphOne(CommentModel::class, 'morphable')
-            ->order('id', 'desc');
+        return $this->morphOne(CommentModel::class, 'commentable')->order('id', 'desc');
     }
 }
 

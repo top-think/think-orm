@@ -50,7 +50,7 @@ trait Attribute
         $mapping = $this->getOption('mapping');
 
         // 实体模型赋值
-        foreach ($data as $name => $val) {
+        foreach ($data as $name => $value) {
             if (in_array($name, $this->getOption('disuse'))) {
                 // 废弃字段
                 continue;
@@ -64,14 +64,14 @@ trait Attribute
                 // 组装关联JOIN查询数据
                 [$relation, $attr] = explode('__', $name, 2);
 
-                $relations[$relation][$attr] = $val;
+                $relations[$relation][$attr] = $value;
                 continue;
             }
 
             $trueName = $this->getRealFieldName($name);
             if ($this->isView() || $this->isVirtual() || in_array($trueName, $fields)) {
                 // 读取数据后进行类型转换
-                $value = $this->readTransform($val, $schema[$trueName] ?? 'string');
+                $value = $this->readTransform($value, $schema[$trueName] ?? 'string');
                 // 数据赋值
                 $this->setData($trueName, $value);
                 // 记录原始数据
@@ -232,8 +232,8 @@ trait Attribute
             'int'       => (int) $value,
             'float'     => empty($param) ? (float) $value : (float) number_format($value, (int) $param, '.', ''),
             'bool'      => (bool) $value,
-            'array'     => empty($value) ? [] : json_decode($value, true),
-            'object'    => empty($value) ? new \stdClass() : json_decode($value),
+            'array'     => empty($value) ? [] : (is_array($value) ? $value : json_decode($value, true)),
+            'object'    => empty($value) ? new \stdClass() : (is_object($value) ? $value : json_decode($value)),
             'json'      => $typeTransform(Json::class, $value, $this),
             'date'      => $typeTransform(Date::class, $value, $this),
             'datetime'  => $typeTransform(DateTime::class, $value, $this),

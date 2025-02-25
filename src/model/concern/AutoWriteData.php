@@ -30,13 +30,13 @@ trait AutoWriteData
      * @param bool  $update 是否更新
      * @return void
      */
-    protected function autoWriteData(array &$data, bool $update)
+    protected function autoWriteData(array &$data, bool $update, array $allow = [])
     {
         // 数据写入前置检查
         $this->checkData($data, $update);
 
         // 自动时间戳处理
-        $this->autoDateTime($data, $update);
+        $this->autoDateTime($data, $update, $allow);
 
         $auto = $this->getOption($update ? 'auto_update' : 'auto_insert', []);
         foreach ($auto as $name => $val) {
@@ -60,7 +60,7 @@ trait AutoWriteData
      * @param bool $update 是否更新
      * @return void
      */
-    protected function autoDateTime(array &$data, bool $update)
+    protected function autoDateTime(array &$data, bool $update, array $allow)
     {
         $autoDateTime   = $this->getOption('autoWriteTimestamp', true);
         if ($autoDateTime) {
@@ -70,7 +70,7 @@ trait AutoWriteData
             }
 
             foreach ($dateTimeFields as $field) {
-                if (is_string($field)) {
+                if (is_string($field) && in_array($field, $allow)) {
                     $data[$field] = $this->getDateTime($field);
                     $this->setData($field, $this->readTransform($data[$field], $this->getFields($field)));
                 }

@@ -28,6 +28,7 @@ trait AutoWriteData
      *
      * @param array $data 数据
      * @param bool  $update 是否更新
+     * @param array $allow 允许字段
      * @return void
      */
     protected function autoWriteData(array &$data, bool $update, array $allow = [])
@@ -58,6 +59,7 @@ trait AutoWriteData
      *
      * @param array $data 数据
      * @param bool $update 是否更新
+     * @param array $allow 允许字段
      * @return void
      */
     protected function autoDateTime(array &$data, bool $update, array $allow)

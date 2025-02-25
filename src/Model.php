@@ -241,7 +241,7 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
      *
      * @return Model|Entity
      */
-    public function newInstance(array $data)
+    public function newInstance(array $data = [])
     {
         $class = str_replace('\\model\\', '\\entity\\', static::class);
         $model = new static($data);

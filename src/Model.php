@@ -359,9 +359,9 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
                 $val = $this->setWithAttr($name, $val, $data);
             }
         }
-
+ 
         if (empty($data)) {
-            return false;
+            return true;
         }
 
         // 自动写入数据

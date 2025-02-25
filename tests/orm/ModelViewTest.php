@@ -62,16 +62,6 @@ class ModelViewTest extends TestCase
 
     public function testBasicView()
     {
-        // 定义基本视图模型
-        class UserOrderView extends View
-        {
-            public function query($query)
-            {
-                $query->view('test_user_view', 'id as user_id,name,status')
-                    ->view('test_order_view', 'order_no,amount,create_time', 'test_user_view.id=test_order_view.user_id');
-            }
-        }
-
         // 测试基本查询
         $model = new UserOrderView;
         $result = $model->query()->select()->toArray();
@@ -84,16 +74,6 @@ class ModelViewTest extends TestCase
 
     public function testViewWithCondition()
     {
-        // 定义带条件的视图模型
-        class UserOrderConditionView extends View
-        {
-            public function query($query)
-            {
-                $query->view('test_user_view', 'id as user_id,name,status,create_time')
-                    ->view('test_order_view', 'order_no,amount', 'test_user_view.id=test_order_view.user_id');
-            }
-        }
-
         // 测试条件查询
         $model = new UserOrderConditionView;
         $result = $model
@@ -111,17 +91,6 @@ class ModelViewTest extends TestCase
 
     public function testViewWithAggregate()
     {
-        // 定义聚合视图模型
-        class UserOrderAggregateView extends View
-        {
-            public function query($query)
-            {
-                $query->view('test_user_view', 'id as user_id,name,create_time')
-                    ->view('test_order_view', 'COUNT(id) as order_count,SUM(amount) as total_amount,MIN(create_time) as first_order_time', 'test_user_view.id=test_order_view.user_id')
-                    ->group('test_user_view.id');
-            }
-        }
-
         // 测试聚合查询
         $model = new UserOrderAggregateView;
         $result = $model->select()->toArray();
@@ -142,16 +111,6 @@ class ModelViewTest extends TestCase
 
     public function testViewWithJoinType()
     {
-        // 定义带连接类型的视图模型
-        class UserOrderJoinTypeView extends View
-        {
-            public function query($query)
-            {
-                $query->view('test_user_view', 'id as user_id,name,status')
-                    ->view('test_order_view', 'order_no,amount', 'test_user_view.id=test_order_view.user_id', 'RIGHT');
-            }
-        }
-
         // 测试右连接查询
         $model = new UserOrderJoinTypeView;
         $result = $model->select()->toArray();
@@ -161,5 +120,48 @@ class ModelViewTest extends TestCase
         $orderAmounts = array_column($result, 'amount');
         sort($orderAmounts);
         $this->assertEquals([100.00, 200.00, 300.00], $orderAmounts);
+    }    
+}
+
+// 定义基本视图模型
+class UserOrderView extends View
+{
+    public function query($query)
+    {
+        $query->view('test_user_view', 'id as user_id,name,status')
+            ->view('test_order_view', 'order_no,amount,create_time', 'test_user_view.id=test_order_view.user_id');
+    }
+}
+
+
+
+// 定义带条件的视图模型
+class UserOrderConditionView extends View
+{
+    public function query($query)
+    {
+        $query->view('test_user_view', 'id as user_id,name,status,create_time')
+            ->view('test_order_view', 'order_no,amount', 'test_user_view.id=test_order_view.user_id');
+    }
+}
+
+// 定义聚合视图模型
+class UserOrderAggregateView extends View
+{
+    public function query($query)
+    {
+        $query->view('test_user_view', 'id as user_id,name,create_time')
+            ->view('test_order_view', 'COUNT(id) as order_count,SUM(amount) as total_amount,MIN(create_time) as first_order_time', 'test_user_view.id=test_order_view.user_id')
+            ->group('test_user_view.id');
+    }
+}
+
+// 定义带连接类型的视图模型
+class UserOrderJoinTypeView extends View
+{
+    public function query($query)
+    {
+        $query->view('test_user_view', 'id as user_id,name,status')
+            ->view('test_order_view', 'order_no,amount', 'test_user_view.id=test_order_view.user_id', 'RIGHT');
     }
 }

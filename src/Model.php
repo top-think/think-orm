@@ -361,6 +361,10 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
         }
  
         if (empty($data)) {
+            // 保存关联数据
+            if ($isUpdate && $this->getOption('together')) {
+                $this->relationSave($relations, $isUpdate);
+            }
             return true;
         }
 

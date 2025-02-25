@@ -113,22 +113,25 @@ trait RelationShip
     private function relationSave(array $relations = [], bool $isUpdate = true)
     {
         $together = $this->getOption('together');
-        foreach ($relations as $name => $relation) {
-            if (isset($together[$name])) {
+        foreach ($together as $key => $name) {
+            if (is_numeric($key) && isset($relations[$name])) {
+                // 支持关联写入或更新
+                $relation = $relations[$name];
+                $isUpdate ? $relation->save() : $this->$name()->save($relation);
+            } elseif (is_array($name)) {
+                // 关联写入
                 $data = [];
-                if (array_is_list($together[$name])) {
+                if (array_is_list($name)) {
                     // 绑定关联属性
-                    foreach($together[$name] as $key) {
-                        if ($this->getData($key)) {
-                            $data[$key] = $this->getData($key);
+                    foreach($name as $field) {
+                        if ($this->getData($field)) {
+                            $data[$field] = $this->getData($field);
                         }
                     }
                 } else {
-                    $data = $together[$name];
+                    $data = $name;
                 }
-                $this->$name()->save($data);
-            } elseif (in_array($name, $together)) {
-                $isUpdate ? $relation->save() : $this->$name()->save($relation);
+                $this->$key()->save($data);
             }
         }
     }

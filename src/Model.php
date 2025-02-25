@@ -411,6 +411,24 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
     }
 
     /**
+     * 获取更新数据.
+     *
+     * @return array
+     */
+    public function getChangedData(): array
+    {
+        $data   = $this->getData();
+        $origin = $this->getOrigin();
+        $change = [];
+        foreach ($data as $name => $val) {
+            if (array_key_exists($name, $origin) && $val !== $origin[$name]) {
+                $change[$name] = $val;
+            }
+        }
+        return $change;
+    }
+
+    /**
      * 是否为虚拟模型（不能查询）.
      *
      * @return bool

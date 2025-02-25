@@ -114,23 +114,21 @@ trait RelationShip
     {
         $together = $this->getOption('together');
         foreach ($relations as $name => $relation) {
-            if ($relation) {
-                if (isset($together[$name])) {
-                    $data = [];
-                    if (array_is_list($together[$name])) {
-                        // 绑定关联属性
-                        foreach($together[$name] as $key) {
-                            if ($this->getData($key)) {
-                                $data[$key] = $this->getData($key);
-                            }
+            if (isset($together[$name])) {
+                $data = [];
+                if (array_is_list($together[$name])) {
+                    // 绑定关联属性
+                    foreach($together[$name] as $key) {
+                        if ($this->getData($key)) {
+                            $data[$key] = $this->getData($key);
                         }
-                    } else {
-                        $data = $together[$name];
                     }
-                    $isUpdate ? $relation->save($data) : $this->$name()->save($data);
-                } elseif (in_array($name, $together)) {
-                    $isUpdate ? $relation->save() : $this->$name()->save($relation);
+                } else {
+                    $data = $together[$name];
                 }
+                $this->$name()->save($data);
+            } elseif (in_array($name, $together)) {
+                $isUpdate ? $relation->save() : $this->$name()->save($relation);
             }
         }
     }

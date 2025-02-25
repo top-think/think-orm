@@ -332,7 +332,7 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
         // 验证数据
         $this->validate($data, $allow);
 
-
+        $relations = [];
         foreach ($data as $name => &$val) {
             if ($val instanceof Modelable) {
                 $relations[$name] = $val;
@@ -366,7 +366,7 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
         $this->trigger('AfterWrite');
 
         // 保存关联数据
-        if (!empty($relations)) {
+        if ($this->getOption('together')) {
             $this->relationSave($relations, $isUpdate);
         }
 

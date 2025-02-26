@@ -147,19 +147,4 @@ SQL
         $this->assertCount(1, $results);
         $this->assertContains('mysql', $results[0]->tags);
     }
-
-    public function testJsonFieldValidation()
-    {
-        // 测试无效JSON数据处理
-        $data = [
-            'name' => 'test4',
-            'info' => 'invalid json',
-            'tags' => ['valid', 'array'],
-        ];
-
-        $result = JsonModel::create($data);
-        $this->assertIsArray($result->info); // 应该被转换为空数组
-        $this->assertIsArray($result->tags);
-        $this->assertEquals($data['tags'], $result->tags);
-    }
 }

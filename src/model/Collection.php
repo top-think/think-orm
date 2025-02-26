@@ -164,22 +164,6 @@ class Collection extends BaseCollection
     }
 
     /**
-     * 设置父模型.
-     *
-     * @param Model $parent 父模型
-     *
-     * @return $this
-     */
-    public function setParent($parent)
-    {
-        $this->each(function (Model $model) use ($parent) {
-            $model->setParent($parent);
-        });
-
-        return $this;
-    }
-
-    /**
      * 设置数据字段获取器.
      *
      * @param string|array $name     字段名

@@ -105,13 +105,7 @@ class MorphTo extends Relation
         // 主键数据
         $pk = $this->parent->$morphKey;
 
-        $relationModel = class_exists($model) ? $this->buildQuery((new $model())->relation($subRelation))->find($pk) : null;
-
-        if ($relationModel) {
-            $relationModel->setParent(clone $this->parent);
-        }
-
-        return $relationModel;
+        return class_exists($model) ? $this->buildQuery((new $model())->relation($subRelation))->find($pk) : null;
     }
 
     /**
@@ -271,7 +265,6 @@ class MorphTo extends Relation
                             $relationModel = null;
                         } else {
                             $relationModel = $data[$result->$morphKey];
-                            $relationModel->setParent(clone $result);
                         }
 
                         $result->setRelation($relation, $relationModel);
@@ -335,10 +328,6 @@ class MorphTo extends Relation
             $data = (new $model())->with($subRelation)
                 ->cache($cache[0] ?? false, $cache[1] ?? null, $cache[2] ?? null)
                 ->find($pk);
-
-            if ($data) {
-                $data->setParent(clone $result);
-            }
         }
 
         $result->setRelation($relation, $data ?: null);

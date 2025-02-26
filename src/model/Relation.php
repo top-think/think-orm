@@ -165,7 +165,7 @@ abstract class Relation
      */
     protected function resultSetBuild(array $resultSet, ?Model $parent = null)
     {
-        return (new $this->model())->toCollection($resultSet)->setParent($parent);
+        return (new $this->model())->toCollection($resultSet);
     }
 
     protected function getQueryFields(string $model)

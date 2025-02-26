@@ -39,7 +39,6 @@ class HasOneThrough extends HasManyThrough
         $relationModel = $this->query->relation($subRelation)->find();
 
         if ($relationModel) {
-            $relationModel->setParent(clone $this->parent);
         } else {
             $default = $this->query->getOptions('default_model');
             $relationModel = $this->getDefaultModel($default);
@@ -88,7 +87,6 @@ class HasOneThrough extends HasManyThrough
                     $relationModel = $defaultModel;
                 } else {
                     $relationModel = $data[$result->$localKey];
-                    $relationModel->setParent(clone $result);
                 }
 
                 // 设置关联属性
@@ -125,7 +123,6 @@ class HasOneThrough extends HasManyThrough
             $relationModel = $this->getDefaultModel($default);
         } else {
             $relationModel = $data[$result->$localKey];
-            $relationModel->setParent(clone $result);
         }
 
         $result->setRelation($relation, $relationModel);

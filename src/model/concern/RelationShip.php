@@ -201,30 +201,6 @@ trait RelationShip
     }
 
     /**
-     * 设置父模型对象
-     *
-     * @param self $model 模型对象
-     *
-     * @return $this
-     */
-    public function setParent($model)
-    {
-        $this->setOption('parent', $model);
-
-        return $this;
-    }
-
-    /**
-     * 获取父模型对象
-     *
-     * @return self
-     */
-    public function getParent()
-    {
-        return $this->getOption('parent');
-    }
-
-    /**
      * 设置关联数据.
      *
      * @param string $relation 关联属性

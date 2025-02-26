@@ -62,8 +62,7 @@ class HasMany extends Relation
         return $this->query
             ->where($this->foreignKey, $this->parent->{$this->localKey})
             ->relation($subRelation)
-            ->select()
-            ->setParent(clone $this->parent);
+            ->select();
     }
 
     /**

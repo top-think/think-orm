@@ -233,7 +233,7 @@ trait Attribute
             'float'     => empty($param) ? (float) $value : (float) number_format($value, (int) $param, '.', ''),
             'bool'      => (bool) $value,
             'array'     => empty($value) ? [] : (is_array($value) ? $value : json_decode($value, true)),
-            'object'    => empty($value) ? new \stdClass() : (is_object($value) ? $value : json_decode($value)),
+            'object'    => empty($value) ? new \stdClass() : (is_string($value) ? json_decode($value) : json_decode(json_encode($value, JSON_FORCE_OBJECT))),
             'json'      => $typeTransform(Json::class, $value, $this),
             'date'      => $typeTransform(Date::class, $value, $this),
             'datetime'  => $typeTransform(DateTime::class, $value, $this),

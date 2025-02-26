@@ -165,9 +165,7 @@ class BelongsToMany extends Relation
             $closure($this->query);
         }
 
-        return $this->relation($subRelation)
-            ->select()
-            ->setParent(clone $this->parent);
+        return $this->relation($subRelation)->select();
     }
 
     /**

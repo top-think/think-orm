@@ -80,9 +80,7 @@ class MorphMany extends Relation
 
         $this->baseQuery();
 
-        return $this->query->relation($subRelation)
-            ->select()
-            ->setParent(clone $this->parent);
+        return $this->query->relation($subRelation)->select();
     }
 
     /**

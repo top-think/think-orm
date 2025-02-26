@@ -71,8 +71,6 @@ class HasOne extends OneToOne
                 // 绑定关联属性
                 $this->parent->bindRelationAttr($relationModel, $this->bindAttr);
             }
-
-            $relationModel->setParent(clone $this->parent);
         } else {
             $default       = $this->query->getOptions('default_model');
             $relationModel = $this->getDefaultModel($default);
@@ -249,7 +247,6 @@ class HasOne extends OneToOne
                     $relationModel = $defaultModel;
                 } else {
                     $relationModel = $data[$result->$localKey];
-                    $relationModel->setParent(clone $result);
                 }
                 // 设置关联属性
                 if (!empty($this->bindAttr)) {
@@ -289,7 +286,6 @@ class HasOne extends OneToOne
             $relationModel = $this->getDefaultModel($default);
         } else {
             $relationModel = $data[$result->$localKey];
-            $relationModel->setParent(clone $result);
         }
 
         // 动态绑定参数

@@ -462,10 +462,8 @@ trait Attribute
             // 关联数据为空 设置一个空模型
             $value = new $type();
         } elseif (!($value instanceof Model || $value instanceof Collection)) {
-            if (!$this->hasSetAttr($name)) {
-                // 类型自动转换
-                $value = $this->readTransform($value, $type);
-            }
+            // 类型自动转换
+            $value = $this->readTransform($value, $type);
         }
 
         $this->setData($name, $value);

@@ -39,11 +39,7 @@ SQL
 
     public function testBasicSoftDelete()
     {
-        $model = new class extends Model {
-            protected $table = 'test_soft_delete';
-            use \think\model\concern\SoftDelete;
-            protected $deleteTime = 'delete_time';
-        };
+        $model = new SoftDeleteModel();
 
         // 测试软删除
         $item = $model::find(1);
@@ -61,11 +57,7 @@ SQL
 
     public function testSoftDeleteQuery()
     {
-        $model = new class extends Model {
-            protected $table = 'test_soft_delete';
-            use \think\model\concern\SoftDelete;
-            protected $deleteTime = 'delete_time';
-        };
+        $model = new SoftDeleteModel();
 
         // 软删除一些数据
         $model::find(1)->delete();
@@ -86,11 +78,7 @@ SQL
 
     public function testSoftDeleteRestore()
     {
-        $model = new class extends Model {
-            protected $table = 'test_soft_delete';
-            use \think\model\concern\SoftDelete;
-            protected $deleteTime = 'delete_time';
-        };
+        $model = new SoftDeleteModel();
 
         // 软删除一条数据
         $item = $model::find(1);
@@ -109,16 +97,7 @@ SQL
 
     public function testSoftDeleteScope()
     {
-        $model = new class extends Model {
-            protected $table = 'test_soft_delete';
-            use \think\model\concern\SoftDelete;
-            protected $deleteTime = 'delete_time';
-
-            public function scopeActive($query)
-            {
-                return $query->where('status', 1);
-            }
-        };
+        $model = new SoftDeleteModel();
 
         // 软删除一条激活状态的数据
         $model::find(1)->delete();
@@ -134,11 +113,7 @@ SQL
 
     public function testBatchSoftDelete()
     {
-        $model = new class extends Model {
-            protected $table = 'test_soft_delete';
-            use \think\model\concern\SoftDelete;
-            protected $deleteTime = 'delete_time';
-        };
+        $model = new SoftDeleteModel();
 
         // 批量软删除
         $model::where('status', 1)->delete();
@@ -152,4 +127,15 @@ SQL
         $allItems = $model::withTrashed()->select();
         $this->assertEquals(3, count($allItems));
     }
+}
+
+class SoftDeleteModel extends Model {
+    protected $table = 'test_soft_delete';
+    use \think\model\concern\SoftDelete;
+    protected $deleteTime = 'delete_time';
+
+    public function scopeActive($query)
+    {
+        return $query->where('status', 1);
+    }    
 }

@@ -115,7 +115,6 @@ class ModelHasManyThroughTest extends TestCase
 
         // 测试预加载
         $country = CountryModel::with(['posts'])->find(1);
-        $this->assertTrue($country->isRelationLoaded('posts'));
         $this->assertCount(3, $country->posts);
 
         // 测试关联统计

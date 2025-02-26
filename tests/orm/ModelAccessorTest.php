@@ -74,7 +74,7 @@ SQL
 
     public function testJsonSerialization()
     {
-        $data = ['name' => 'test6', 'price' => '599.99'];
+        $data = ['name' => 'test6', 'price' => 599.99];
         $result = AccessorModel::create($data);
 
         $jsonData = json_decode(json_encode($result), true);
@@ -86,9 +86,9 @@ SQL
         $model = new AccessorModel();
 
         // 插入测试数据
-        $model::create(['name' => 'test_search1', 'price' => '99.99', 'status' => 1]);
-        $model::create(['name' => 'test_search2', 'price' => '199.99', 'status' => 0]);
-        $model::create(['name' => 'other_name', 'price' => '299.99', 'status' => 1]);
+        $model::create(['name' => 'test_search1', 'price' => 99.99, 'status' => 1]);
+        $model::create(['name' => 'test_search2', 'price' => 199.99, 'status' => 0]);
+        $model::create(['name' => 'other_name', 'price' => 299.99, 'status' => 1]);
 
         // 测试name搜索器
         $result = $model::withSearch(['name'], ['name' => 'test'])->select();
@@ -104,9 +104,9 @@ SQL
         $model = new AccessorModel();
 
         // 插入测试数据
-        $model::create(['name' => 'product1', 'price' => '50.00', 'status' => 1]);
-        $model::create(['name' => 'product2', 'price' => '150.00', 'status' => 1]);
-        $model::create(['name' => 'product3', 'price' => '250.00', 'status' => 1]);
+        $model::create(['name' => 'product1', 'price' => 50.00, 'status' => 1]);
+        $model::create(['name' => 'product2', 'price' => 150.00, 'status' => 1]);
+        $model::create(['name' => 'product3', 'price' => 250.00, 'status' => 1]);
 
         // 测试价格范围搜索
         $result = $model::withSearch(['price'], [
@@ -122,9 +122,9 @@ SQL
     {
         $model = new AccessorModel();
         // 插入测试数据
-        $model::create(['name' => 'test_item1', 'price' => '100.00', 'status' => 1]);
-        $model::create(['name' => 'test_item2', 'price' => '200.00', 'status' => 0]);
-        $model::create(['name' => 'other_item', 'price' => '150.00', 'status' => 1]);
+        $model::create(['name' => 'test_item1', 'price' => 100.00, 'status' => 1]);
+        $model::create(['name' => 'test_item2', 'price' => 200.00, 'status' => 0]);
+        $model::create(['name' => 'other_item', 'price' => 150.00, 'status' => 1]);
 
         // 测试组合搜索
         $result = $model::withSearch(['complex'], [

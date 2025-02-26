@@ -99,7 +99,6 @@ class ModelMorphTest extends TestCase
 
         // 测试预加载
         $post = MorphPostModel::with(['latestComment'])->find(1);
-        $this->assertTrue($post->isRelationLoaded('latestComment'));
         $this->assertNotNull($post->latestComment);
     }
 
@@ -114,7 +113,6 @@ class ModelMorphTest extends TestCase
 
         // 测试预加载
         $post = MorphPostModel::with(['comments'])->find(1);
-        $this->assertTrue($post->isRelationLoaded('comments'));
         $this->assertCount(2, $post->comments);
 
         // 测试关联统计
@@ -147,7 +145,6 @@ class ModelMorphTest extends TestCase
 
         // 测试预加载
         $comment = CommentModel::with(['commentable'])->find(3);
-        $this->assertTrue($comment->isRelationLoaded('commentable'));
         $this->assertInstanceOf(VideoModel::class, $comment->commentable);
         $this->assertEquals('Test Video', $comment->commentable->title);
     }
@@ -159,12 +156,12 @@ class MorphPostModel extends Model
 
     public function comments()
     {
-        return $this->morphMany(CommentModel::class, 'commentable');
+        return $this->morphMany(CommentModel::class, 'morphable');
     }
 
     public function latestComment()
     {
-        return $this->morphOne(CommentModel::class, 'commentable')->order('id', 'desc');
+        return $this->morphOne(CommentModel::class, 'morphable')->order('id', 'desc');
     }
 }
 

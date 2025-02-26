@@ -172,9 +172,7 @@ class StudentModel extends Model
 
     public function courses()
     {
-        return $this->belongsToMany(CourseModel::class, 'test_student_course', 'course_id', 'student_id')
-            ->withPivot(['score'])
-            ->withTimestamp();
+        return $this->belongsToMany(CourseModel::class, 'test_student_course', 'course_id', 'student_id');
     }
 }
 
@@ -185,8 +183,6 @@ class CourseModel extends Model
 
     public function students()
     {
-        return $this->belongsToMany(StudentModel::class, 'test_student_course', 'student_id', 'course_id')
-            ->withPivot(['score'])
-            ->withTimestamp();
+        return $this->belongsToMany(StudentModel::class, 'test_student_course', 'student_id', 'course_id');
     }
 }

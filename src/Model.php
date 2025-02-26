@@ -170,7 +170,7 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
      *
      * @return void
      */
-    protected function init(): void {}
+    protected function init() {}
 
     /**
      * 在实体模型中定义 返回相关配置参数.

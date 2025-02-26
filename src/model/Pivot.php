@@ -26,6 +26,7 @@ class Pivot extends Model
      * @var Model
      */
     public $parent;
+    protected $table;
 
     /**
      * 是否时间自动写入.
@@ -43,12 +44,21 @@ class Pivot extends Model
      */
     public function __construct(array $data = [], ?Model $parent = null, string $table = '')
     {
-        parent::__construct($data);
+        $this->table  = $table;
         $this->parent = $parent;
+        parent::__construct($data);
+    }
 
+    /**
+     *  初始化模型.
+     *
+     * @return void
+     */
+    protected function init() 
+    {
         if (is_null($this->getOption('name'))) {
-            $this->setOption('name', $table);
-        }
+            $this->setOption('name', $this->table);
+        }        
     }
 
     /**
@@ -60,11 +70,7 @@ class Pivot extends Model
      */
     public function newInstance(array $data = [])
     {
-        $model = parent::newInstance($data);
-
-        $model->parent = $this->parent;
-        $model->setOption('name', $this->getOption('name'));
-
-        return $model;
+        $this->data($data);
+        return clone $this;
     }
 }

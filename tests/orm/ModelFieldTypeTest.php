@@ -100,18 +100,11 @@ SQL
 
     public function testEnumTypeConversion()
     {
-        $model = new class extends \think\Model {
-            protected $table = 'test_field_type';
-            protected $type = [
-                'status' => UserStatus::class,
-            ];
-        };
-
         // 测试写入时的枚举类型转换
         $testData = [
             'status' => UserStatus::Active,
         ];
-        $result = $model::create($testData);
+        $result = FieldTypeModel::create($testData);
         $this->assertInstanceOf(UserStatus::class, $result->status);
         $this->assertEquals(UserStatus::Active, $result->status);
 
@@ -120,7 +113,7 @@ SQL
         $this->assertEquals('active', $dbResult['status']);
 
         // 测试从数据库读取时的枚举类型转换
-        $model = $model::find($result->id);
+        $model = FieldTypeModel::find($result->id);
         $this->assertInstanceOf(UserStatus::class, $model->status);
         $this->assertEquals(UserStatus::Active, $model->status);
 
@@ -131,27 +124,12 @@ SQL
         $this->assertEquals('inactive', $dbResult['status']);
 
         // 测试无效的枚举值
-        $model = new $model(['status' => 'invalid_status']);
+        $model = new FieldTypeModel(['status' => 'invalid_status']);
         $this->assertNull($model->status);
     }
 
     public function testBasicTypeConversion()
     {
-        $model = new class extends \think\Model {
-            protected $table = 'test_field_type';
-            protected $type = [
-                'int_field' => 'integer',
-                'float_field' => 'float',
-                'bool_field' => 'boolean',
-                'string_field' => 'string',
-                'array_field' => 'array',
-                'object_field' => 'object',
-                'date_field' => 'date',
-                'datetime_field' => 'datetime',
-                'timestamp_field' => 'timestamp',
-            ];
-        };
-
         $testData = [
             'int_field' => '123',
             'float_field' => '123.45',
@@ -165,7 +143,7 @@ SQL
         ];
 
         // 测试写入时的类型转换
-        $result = $model::create($testData);
+        $result = FieldTypeModel::create($testData);
         $array  = $result->toArray();
         $this->assertIsInt($result->int_field);
         $this->assertEquals(123, $result->int_field);
@@ -212,24 +190,6 @@ SQL
 
     public function testModelOutput()
     {
-        $model = new class extends \think\Model {
-            protected $table = 'test_field_type';
-            protected $type = [
-                'int_field' => 'integer',
-                'float_field' => 'float',
-                'bool_field' => 'boolean',
-                'array_field' => 'array',
-                'object_field' => 'object',
-                'date_field' => 'date',
-            ];
-
-            // 定义获取器
-            public function getFullNameAttr()
-            {
-                return 'test_' . $this->string_field;
-            }
-        };
-
         $testData = [
             'int_field' => 123,
             'float_field' => 123.45,
@@ -240,7 +200,7 @@ SQL
             'date_field' => '2023-12-25',
         ];
 
-        $result = $model::create($testData);
+        $result = FieldTypeModel::create($testData);
 
         // 测试toArray输出
         $array = $result->toArray();

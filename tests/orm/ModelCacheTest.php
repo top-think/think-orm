@@ -40,10 +40,7 @@ SQL
 
     public function testBasicCache()
     {
-        $model = new class extends Model {
-            protected $table = 'test_cache_model';
-            protected $pk = 'id';
-        };
+        $model = new CacheModel();
 
         // 测试单条数据缓存
         $result1 = $model::cache(true)->find(1);
@@ -63,10 +60,7 @@ SQL
 
     public function testCacheTag()
     {
-        $model = new class extends Model {
-            protected $table = 'test_cache_model';
-            protected $pk = 'id';
-        };
+        $model = new CacheModel();
 
         // 使用标签缓存数据
         $result1 = $model::cache(true, 'test_tag')->select();
@@ -82,10 +76,7 @@ SQL
 
     public function testCacheWithQuery()
     {
-        $model = new class extends Model {
-            protected $table = 'test_cache_model';
-            protected $pk = 'id';
-        };
+        $model = new CacheModel();
 
         // 测试复杂查询缓存
         $result1 = $model::cache(true)
@@ -107,10 +98,7 @@ SQL
 
     public function testCacheTime()
     {
-        $model = new class extends Model {
-            protected $table = 'test_cache_model';
-            protected $pk = 'id';
-        };
+        $model = new CacheModel();
 
         // 设置缓存时间为1秒
         $result1 = $model::cache(1)->find(1);
@@ -133,10 +121,7 @@ SQL
 
     public function testCacheKey()
     {
-        $model = new class extends Model {
-            protected $table = 'test_cache_model';
-            protected $pk = 'id';
-        };
+        $model = new CacheModel();
 
         // 使用自定义缓存标识查询数据
         $result1 = $model::cache('custom_key_1')->where('status', 1)->select();
@@ -160,4 +145,9 @@ SQL
         $result5 = $model::cache('custom_key_1')->where('status', 1)->select();
         $this->assertCount(3, $result5);
     }
+}
+
+class CacheModel extends Model
+{
+    protected $table = 'test_cache_model';
 }

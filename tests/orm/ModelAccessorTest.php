@@ -5,7 +5,7 @@ namespace tests\orm;
 
 use PHPUnit\Framework\TestCase;
 use think\facade\Db;
-use think\Model;
+use tests\stubs\AccessorModel;
 
 class ModelAccessorTest extends TestCase
 {
@@ -38,22 +38,7 @@ SQL
 
     public function testBasicAccessor()
     {
-        $model = new class extends Model {
-            protected $table = 'test_accessor_model';
-
-            // 定义name字段获取器
-            public function getNameAttr($value)
-            {
-                return strtoupper($value);
-            }
-
-            // 定义status字段获取器
-            public function getStatusTextAttr($value, $data)
-            {
-                $status = [0 => '禁用', 1 => '启用'];
-                return $status[$data['status']];
-            }
-        };
+        $model = new AccessorModel();
 
         $data = ['name' => 'test3', 'price' => 299.99, 'status' => 1];
         $result = $model::create($data);
@@ -64,21 +49,7 @@ SQL
 
     public function testBasicMutator()
     {
-        $model = new class extends Model {
-            protected $table = 'test_accessor_model';
-
-            // 定义name字段修改器
-            public function setNameAttr($value)
-            {
-                return ucfirst($value);
-            }
-
-            // 定义price字段修改器
-            public function setPriceAttr($value)
-            {
-                return number_format($value, 2, '.', '');
-            }
-        };
+        $model = new AccessorModel();
 
         $data = ['name' => 'test4', 'price' => 399];
         $result = $model::create($data);
@@ -89,24 +60,9 @@ SQL
 
     public function testCombinedAccessorMutator()
     {
-        $model = new class extends Model {
-            protected $table = 'test_accessor_model';
-
-            // 定义extra字段的组合获取器和修改器
-            public function getExtraAttr($value)
-            {
-                return json_decode($value, true);
-            }
-
-            public function setExtraAttr($value)
-            {
-                return json_encode($value);
-            }
-        };
-
         $extraData = ['key1' => 'value1', 'key2' => 'value2'];
         $data = ['name' => 'test5', 'extra' => $extraData];
-        $result = $model::create($data);
+        $result = AccessorModel::create($data);
 
         $this->assertIsArray($result->extra);
         $this->assertEquals($extraData, $result->extra);
@@ -118,21 +74,8 @@ SQL
 
     public function testJsonSerialization()
     {
-        $model = new class extends Model {
-            protected $table = 'test_accessor_model';
-
-            // 定义price字段获取器，在序列化时转换为整数分
-            public function getPriceCentAttr($value, $data)
-            {
-                return intval($data['price'] * 100);
-            }
-
-            // 定义追加的属性
-            protected $append = ['price_cent'];
-        };
-
         $data = ['name' => 'test6', 'price' => '599.99'];
-        $result = $model::create($data);
+        $result = AccessorModel::create($data);
 
         $jsonData = json_decode(json_encode($result), true);
         $this->assertEquals(59999, $jsonData['price_cent']);
@@ -140,21 +83,7 @@ SQL
 
     public function testBasicSearcher()
     {
-        $model = new class extends Model {
-            protected $table = 'test_accessor_model';
-
-            // 定义name字段搜索器
-            public function searchNameAttr($query, $value)
-            {
-                $query->where('name', 'like', '%' . $value . '%');
-            }
-
-            // 定义status字段搜索器
-            public function searchStatusAttr($query, $value)
-            {
-                $query->where('status', '=', $value);
-            }
-        };
+        $model = new AccessorModel();
 
         // 插入测试数据
         $model::create(['name' => 'test_search1', 'price' => '99.99', 'status' => 1]);
@@ -172,17 +101,7 @@ SQL
 
     public function testSearcherWithParams()
     {
-        $model = new class extends Model {
-            protected $table = 'test_accessor_model';
-
-            // 定义带参数的price搜索器
-            public function searchPriceAttr($query, $value, $data)
-            {
-                if (isset($data['min_price']) && isset($data['max_price'])) {
-                    $query->whereBetween('price', [$data['min_price'], $data['max_price']]);
-                }
-            }
-        };
+        $model = new AccessorModel();
 
         // 插入测试数据
         $model::create(['name' => 'product1', 'price' => '50.00', 'status' => 1]);
@@ -201,26 +120,7 @@ SQL
 
     public function testCombinedSearcher()
     {
-        $model = new class extends Model {
-            protected $table = 'test_accessor_model';
-
-            // 定义组合搜索器
-            public function searchComplexAttr($query, $value, $data)
-            {
-                if (!empty($data['keyword'])) {
-                    $query->where('name', 'like', '%' . $data['keyword'] . '%');
-                }
-
-                if (isset($data['status'])) {
-                    $query->where('status', '=', $data['status']);
-                }
-
-                if (isset($data['min_price'])) {
-                    $query->where('price', '>=', $data['min_price']);
-                }
-            }
-        };
-
+        $model = new AccessorModel();
         // 插入测试数据
         $model::create(['name' => 'test_item1', 'price' => '100.00', 'status' => 1]);
         $model::create(['name' => 'test_item2', 'price' => '200.00', 'status' => 0]);

@@ -71,7 +71,9 @@ trait Attribute
             $trueName = $this->getRealFieldName($name);
             if ($this->isView() || $this->isVirtual() || in_array($trueName, $fields)) {
                 // 读取数据后进行类型转换
-                $value = $this->readTransform($value, $schema[$trueName] ?? 'string');
+                if (!$fromSave) {
+                    $value = $this->readTransform($value, $schema[$trueName] ?? 'string');
+                }
                 // 数据赋值
                 $this->setData($trueName, $value);
                 // 记录原始数据
@@ -434,6 +436,16 @@ trait Attribute
     }
 
     /**
+     * 设置JSON数据格式.
+     *
+     * @return $this
+     */
+    public function jsonAssoc(bool $assoc = true)
+    {
+        return $this->setOption('jsonAssoc', $assoc);
+    }
+
+    /**
      * 设置数据对象的值 并进行类型自动转换
      *
      * @param string $name  名称
@@ -450,12 +462,21 @@ trait Attribute
             // 关联数据为空 设置一个空模型
             $value = new $type();
         } elseif (!($value instanceof Model || $value instanceof Collection)) {
-            // 类型自动转换
-            $value = $this->readTransform($value, $type);
+            if (!$this->hasSetAttr($name)) {
+                // 类型自动转换
+                $value = $this->readTransform($value, $type);
+            }
         }
 
         $this->setData($name, $value);
         return $this;
+    }
+
+    protected function hasSetAttr(string $name)
+    {
+        $attr   = Str::studly($name);
+        $method = 'set' . $attr . 'Attr';
+        return method_exists($this, $method);
     }
 
     /**

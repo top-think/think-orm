@@ -63,8 +63,7 @@ class ModelViewTest extends TestCase
     public function testBasicView()
     {
         // 测试基本查询
-        $model = new UserOrderView;
-        $result = $model->query()->select()->toArray();
+        $result = UserOrderView::select()->toArray();
         $this->assertCount(3, $result);
         $this->assertEquals('张三', $result[0]['name']);
         $this->assertEquals('ORDER001', $result[0]['order_no']);

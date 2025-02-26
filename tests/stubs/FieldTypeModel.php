@@ -23,5 +23,21 @@ class FieldTypeModel extends Model
         't_json' => TestFieldJsonDTO::class,
         't_php' => TestFieldPhpDTO::class,
         'bigint' => 'string',
+        'int_field' => 'integer',
+        'float_field' => 'float',
+        'bool_field' => 'boolean',
+        'string_field' => 'string',
+        'array_field' => 'array',
+        'object_field' => 'object',
+        'date_field' => 'date',
+        'datetime_field' => 'datetime',
+        'timestamp_field' => 'timestamp',
+        'status' => UserStatus::class,
     ];
+
+    // 定义获取器
+    public function getFullNameAttr()
+    {
+        return 'test_' . $this->string_field;
+    }
 }

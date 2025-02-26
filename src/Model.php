@@ -200,11 +200,12 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
      * @param string $name  参数名
      * @param mixed  $value  值
      *
-     * @return void
+     * @return $this
      */
     public function setOption(string $name, $value)
     {
         self::$weakMap[$this][$name] = $value;
+        return $this;
     }
 
     /**
@@ -246,7 +247,7 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
         $class = str_replace('\\model\\', '\\entity\\', static::class);
         $model = new static($data);
         $model->exists(true);
-        if (class_exists($class)) {
+        if (class_exists($class) && is_subclass_of($class, Entity::class)) {
             $entity = new $class($model);
             $model->entity($entity);
             return $entity;

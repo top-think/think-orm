@@ -145,7 +145,7 @@ class ModelOneToOneTest extends TestCase
         // 测试关联新增
         $user = new UserModel();
         $user->account = 'newuser';
-        $user->profile = ['email' => 'new@thinkphp.cn', 'nickname' => 'newnick'];
+        $user->profile = new ProfileModel(['email' => 'new@thinkphp.cn', 'nickname' => 'newnick']);
         $user->together(['profile'])->save();
 
         $this->assertNotNull($user->profile);
@@ -166,7 +166,7 @@ class ModelOneToOneTest extends TestCase
     {
         $user = new UserModel();
         $user->account = 'deletetest';
-        $user->profile = ['email' => 'delete@thinkphp.cn', 'nickname' => 'deletenick'];
+        $user->profile = new ProfileModel(['email' => 'delete@thinkphp.cn', 'nickname' => 'deletenick']);
         $user->together(['profile'])->save();
 
         $profileId = $user->profile->id;

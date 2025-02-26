@@ -40,22 +40,8 @@ SQL
 
     public function testBasicFieldMapping()
     {
-        $model = new class extends Model {
-            protected $table = 'test_field_mapping';
-            protected $jsonAssoc = true;
-            
-            // 定义字段映射，仅包含字段名称映射
-            protected $mapping = [
-                'name'      => 'user_name',
-                'age'       => 'user_age',
-                'active'    => 'is_active',
-                'info'      => 'user_info',
-                'createdAt' => 'create_at',
-            ];
-        };
-
         // 测试读取映射字段
-        $item = $model::find(1);
+        $item = FieldMappingModel::find(1);
         $this->assertEquals('user1', $item->name);
         $this->assertEquals(25, $item->age);
         $this->assertEquals(1, $item->active);
@@ -63,7 +49,7 @@ SQL
         $this->assertEquals('2023-01-01 10:00:00', $item->createdAt);
 
         // 测试使用映射字段写入
-        $newItem = $model::create([
+        $newItem = FieldMappingModel::create([
             'name'      => 'user3',
             'age'       => 35,
             'active'    => 1,
@@ -82,32 +68,8 @@ SQL
 
     public function testCustomTypeMapping()
     {
-        $model = new class extends Model {
-            protected $table = 'test_field_mapping';
-            
-            // 定义自定义类型转换
-            protected $type = [
-                'user_age'    => 'integer',
-                'is_active'   => 'boolean',
-                'user_info'   => 'array',
-                'create_at'   => 'datetime',
-            ];
-
-            // 自定义获取器
-            public function getUserAgeAttr($value)
-            {
-                return $value . '岁';
-            }
-
-            // 自定义修改器
-            public function setUserAgeAttr($value)
-            {
-                return intval($value);
-            }
-        };
-
         // 测试自定义类型转换和获取器
-        $item = $model::find(1);
+        $item = FieldMappingModel::find(1);
         $this->assertEquals('25岁', $item->user_age);
 
         // 测试自定义修改器
@@ -116,5 +78,39 @@ SQL
 
         $dbItem = Db::table('test_field_mapping')->where('id', 1)->find();
         $this->assertEquals(30, $dbItem['user_age']);
+    }
+}
+
+class FieldMappingModel extends Model {
+    protected $table = 'test_field_mapping';
+    protected $jsonAssoc = true;
+    
+    // 定义字段映射，仅包含字段名称映射
+    protected $mapping = [
+        'name'      => 'user_name',
+        'age'       => 'user_age',
+        'active'    => 'is_active',
+        'info'      => 'user_info',
+        'createdAt' => 'create_at',
+    ];
+
+    // 定义自定义类型转换
+    protected $type = [
+        'user_age'    => 'integer',
+        'is_active'   => 'boolean',
+        'user_info'   => 'array',
+        'create_at'   => 'datetime',
+    ];
+
+    // 自定义获取器
+    public function getUserAgeAttr($value)
+    {
+        return $value . '岁';
+    }
+
+    // 自定义修改器
+    public function setUserAgeAttr($value)
+    {
+        return intval($value);
     }
 }

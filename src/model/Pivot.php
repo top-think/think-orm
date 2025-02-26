@@ -45,7 +45,7 @@ class Pivot extends Model
     {
         $this->parent = $parent;
 
-        if (is_null($this->getOption('name')) {
+        if (is_null($this->getOption('name'))) {
             $this->setOption('name', $table);
         }
 

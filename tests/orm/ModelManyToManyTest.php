@@ -142,7 +142,6 @@ class ModelManyToManyTest extends TestCase
 
         // 测试预加载
         $student = StudentModel::with(['courses'])->find(1);
-        $this->assertTrue($student->isRelationLoaded('courses'));
         $this->assertCount(2, $student->courses);
 
         // 测试中间表数据

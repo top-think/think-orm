@@ -71,7 +71,9 @@ trait Attribute
             $trueName = $this->getRealFieldName($name);
             if ($this->isView() || $this->isVirtual() || in_array($trueName, $fields)) {
                 // 读取数据后进行类型转换
-                $value = $this->readTransform($value, $schema[$trueName] ?? 'string');
+                if (!$fromSave || !$this->hasSetAttr($trueName)) {
+                    $value = $this->readTransform($value, $schema[$trueName] ?? 'string');
+                }
                 // 数据赋值
                 $this->setData($trueName, $value);
                 // 记录原始数据
@@ -461,14 +463,23 @@ trait Attribute
             $value = new $type();
         } elseif (!($value instanceof Model || $value instanceof Collection)) {
             // 类型自动转换
-            $value = $this->readTransform($value, $type);
+            if (!$this->hasSetAttr($name)) {
+                $value = $this->readTransform($value, $type);                
+            }
         }
 
         $this->setData($name, $value);
         return $this;
     }
 
-    protected function hasSetAttr(string $name)
+    protected function hasGetAttr(string $name): bool
+    {
+        $attr   = Str::studly($name);
+        $method = 'get' . $attr . 'Attr';
+        return method_exists($this, $method);
+    }
+
+    protected function hasSetAttr(string $name): bool
     {
         $attr   = Str::studly($name);
         $method = 'set' . $attr . 'Attr';

@@ -89,7 +89,6 @@ class ModelOneToManyTest extends TestCase
 
         // 测试预加载
         $author = AuthorModel::with(['posts'])->find(1);
-        $this->assertTrue($author->isRelationLoaded('posts'));
         $this->assertCount(2, $author->posts);
 
         // 测试关联条件

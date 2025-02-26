@@ -43,13 +43,12 @@ class Pivot extends Model
      */
     public function __construct(array $data = [], ?Model $parent = null, string $table = '')
     {
+        parent::__construct($data);
         $this->parent = $parent;
 
         if (is_null($this->getOption('name'))) {
             $this->setOption('name', $table);
         }
-
-        parent::__construct($data);
     }
 
     /**

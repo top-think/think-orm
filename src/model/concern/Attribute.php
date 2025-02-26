@@ -365,7 +365,7 @@ trait Attribute
             $name = $this->getRealFieldName($name);
             return $this->getWeakData('data', $name);
         }
-        return $this->getOption('data');
+        return $this->getOption('data', []);
     }
 
     /**
@@ -533,7 +533,7 @@ trait Attribute
             return $value;
         }
 
-        if (!array_key_exists($name, $this->getOption('data'))) {
+        if (!array_key_exists($name, $this->getData())) {
             // 动态获取关联数据
             $value = $this->getRelationData($name) ?: null;
         } else {

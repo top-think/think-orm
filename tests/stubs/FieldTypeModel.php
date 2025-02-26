@@ -14,10 +14,7 @@ use think\Model;
 class FieldTypeModel extends Model
 {
     protected $table = 'test_field_type';
-    protected $pk = 'id';
-
     protected $autoWriteTimestamp = false;
-    protected $dateFormat = false;
 
     protected $type = [
         't_json' => TestFieldJsonDTO::class,

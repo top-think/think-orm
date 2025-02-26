@@ -71,9 +71,7 @@ trait Attribute
             $trueName = $this->getRealFieldName($name);
             if ($this->isView() || $this->isVirtual() || in_array($trueName, $fields)) {
                 // 读取数据后进行类型转换
-                if (!$fromSave) {
-                    $value = $this->readTransform($value, $schema[$trueName] ?? 'string');
-                }
+                $value = $this->readTransform($value, $schema[$trueName] ?? 'string');
                 // 数据赋值
                 $this->setData($trueName, $value);
                 // 记录原始数据

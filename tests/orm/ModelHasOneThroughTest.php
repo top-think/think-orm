@@ -26,8 +26,7 @@ class ModelHasOneThroughTest extends TestCase
                 `account` varchar(255) NOT NULL DEFAULT "",
                 `create_time` datetime DEFAULT NULL,
                 PRIMARY KEY (`id`),
-                KEY `idx_user_id` (`user_id`),
-                KEY `idx_profile_id` (`profile_id`)
+                KEY `idx_user_id` (`user_id`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;',
             'DROP TABLE IF EXISTS `test_profile`;',
             'CREATE TABLE `test_profile` (
@@ -36,7 +35,8 @@ class ModelHasOneThroughTest extends TestCase
                 `email` varchar(255) NOT NULL DEFAULT "",
                 `nickname` varchar(255) NOT NULL DEFAULT "",
                 `create_time` datetime DEFAULT NULL,
-                PRIMARY KEY (`id`)
+                PRIMARY KEY (`id`),
+                KEY `idx_account_id` (`account_id`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;'
         ];
         foreach ($sqlList as $sql) {

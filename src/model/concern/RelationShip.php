@@ -117,7 +117,12 @@ trait RelationShip
             if (is_numeric($key) && isset($relations[$name])) {
                 // 支持关联写入或更新
                 $relation = $relations[$name];
-                $isUpdate ? $relation->save() : $this->$name()->save($relation);
+                if ($isUpdate) {
+                    $relation->save();
+                } else {
+                    $this->$name()->save($relation, true);
+                    $relation->setKey($relation->getLastInsID());
+                }
             } elseif (is_array($name)) {
                 // 关联写入
                 $data = [];

@@ -150,7 +150,7 @@ class UserOrderAggregateView extends View
     public function query($query)
     {
         $query->view('test_user_view', 'id as user_id,name,create_time')
-            ->view('test_order_view', 'COUNT(id) as order_count,SUM(amount) as total_amount,MIN(create_time) as first_order_time', 'test_user_view.id=test_order_view.user_id')
+            ->view('test_order_view', 'COUNT(*) as order_count,SUM(amount) as total_amount,MIN(create_time) as first_order_time', 'test_user_view.id=test_order_view.user_id')
             ->group('test_user_view.id');
     }
 }

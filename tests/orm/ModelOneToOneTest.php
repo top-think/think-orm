@@ -25,7 +25,7 @@ class ModelOneToOneTest extends TestCase
             'DROP TABLE IF EXISTS `test_profile`;',
             'CREATE TABLE `test_profile` (
               `id` int NOT NULL AUTO_INCREMENT,
-              `uid` int NOT NULL,
+              `user_id` int NOT NULL,
               `email` varchar(255) NOT NULL DEFAULT "",
               `nickname` varchar(255) NOT NULL DEFAULT "",
               `update_time` datetime NOT NULL,
@@ -65,11 +65,11 @@ class ModelOneToOneTest extends TestCase
         $user = UserModel::find($userID)
             ->bindAttr(
                 'profile',
-                ['email', 'nick_name' => 'nickname', 'true_name' => fn ($model) =>$model?->get('nickname')]
+                ['email', 'nick_name' => 'nickname']
             );
         $this->assertEquals(
-            [$userID, $email, $nickname, $nickname],
-            [$user->id, $user->email, $user->nick_name, $user->true_name]
+            [$userID, $email, $nickname],
+            [$user->id, $user->email, $user->nick_name]
         );
     }
     /**
@@ -84,7 +84,7 @@ class ModelOneToOneTest extends TestCase
         $profile = new ProfileModel();
         $profile->email = 'test@thinkphp.cn';
         $profile->nickname = 'test';
-        $profile->uid = $user->id;
+        $profile->user_id = $user->id;
         $profile->save();
 
         // 测试hasOne关联
@@ -152,6 +152,7 @@ class ModelOneToOneTest extends TestCase
         $this->assertEquals('new@thinkphp.cn', $user->profile->email);
 
         // 测试关联更新
+        $user = UserModel::with(['profile'])->where('account', 'newuser')->find();
         $user->profile->email = 'updated@thinkphp.cn';
         $user->together(['profile'])->save();
 

@@ -40,56 +40,51 @@ SQL
 
     public function testInsertEvents()
     {
-        $beforeInsertCalled = false;
-        $afterInsertCalled = false;
-
+        EventModel::resetEventFlags();
         $data = ['name' => 'test3', 'status' => 1];
         $result = EventModel::create($data);
 
-        $this->assertTrue($beforeInsertCalled, 'before_insert event not triggered');
-        $this->assertTrue($afterInsertCalled, 'after_insert event not triggered');
+        $flags = EventModel::getEventFlags();
+        $this->assertTrue($flags['beforeInsertCalled'], 'before_insert event not triggered');
+        $this->assertTrue($flags['afterInsertCalled'], 'after_insert event not triggered');
         $this->assertEquals('modified_test3', $result->name);
     }
 
     public function testUpdateEvents()
     {
-        $beforeUpdateCalled = false;
-        $afterUpdateCalled = false;
-
         // 先创建一条记录
         $record = EventModel::create(['name' => 'test4', 'status' => 1]);
 
+        EventModel::resetEventFlags();
         // 更新记录
         $record->name = 'new_name';
         $record->save();
 
-        $this->assertTrue($beforeUpdateCalled, 'before_update event not triggered');
-        $this->assertTrue($afterUpdateCalled, 'after_update event not triggered');
+        $flags = EventModel::getEventFlags();
+        $this->assertTrue($flags['beforeUpdateCalled'], 'before_update event not triggered');
+        $this->assertTrue($flags['afterUpdateCalled'], 'after_update event not triggered');
         $this->assertEquals('updated_new_name', $record->name);
     }
 
     public function testDeleteEvents()
     {
-        $beforeDeleteCalled = false;
-        $afterDeleteCalled = false;
-
         // 创建两条记录
         $record1 = EventModel::create(['name' => 'test5', 'status' => 1]);
         $record2 = EventModel::create(['name' => 'test6', 'status' => 0]);
 
         // 尝试删除状态为1的记录
+        EventModel::resetEventFlags();
         $record1->delete();
-        $this->assertTrue($beforeDeleteCalled, 'before_delete event not triggered');
-        $this->assertTrue($afterDeleteCalled, 'after_delete event not triggered');
-
-        // 重置标志
-        $beforeDeleteCalled = false;
-        $afterDeleteCalled = false;
+        $flags = EventModel::getEventFlags();
+        $this->assertTrue($flags['beforeDeleteCalled'], 'before_delete event not triggered');
+        $this->assertTrue($flags['afterDeleteCalled'], 'after_delete event not triggered');
 
         // 尝试删除状态为0的记录
+        EventModel::resetEventFlags();
         $record2->delete();
-        $this->assertTrue($beforeDeleteCalled, 'before_delete event not triggered');
-        $this->assertFalse($afterDeleteCalled, 'after_delete event should not be triggered');
+        $flags = EventModel::getEventFlags();
+        $this->assertTrue($flags['beforeDeleteCalled'], 'before_delete event not triggered');
+        $this->assertFalse($flags['afterDeleteCalled'], 'after_delete event should not be triggered');
 
         // 验证记录2仍然存在
         $this->assertNotNull(EventModel::find($record2->id));
@@ -97,24 +92,21 @@ SQL
 
     public function testWriteEvents()
     {
-        $beforeWriteCalled = false;
-        $afterWriteCalled = false;
-
         // 测试插入时的写入事件
+        EventModel::resetEventFlags();
         $record = EventModel::create(['name' => 'test7', 'status' => 1]);
-        $this->assertTrue($beforeWriteCalled, 'before_write event not triggered on insert');
-        $this->assertTrue($afterWriteCalled, 'after_write event not triggered on insert');
+        $flags = EventModel::getEventFlags();
+        $this->assertTrue($flags['beforeWriteCalled'], 'before_write event not triggered on insert');
+        $this->assertTrue($flags['afterWriteCalled'], 'after_write event not triggered on insert');
         $this->assertEquals('write_test7', $record->name);
 
-        // 重置标志
-        $beforeWriteCalled = false;
-        $afterWriteCalled = false;
-
         // 测试更新时的写入事件
+        EventModel::resetEventFlags();
         $record->name = 'test8';
         $record->save();
-        $this->assertTrue($beforeWriteCalled, 'before_write event not triggered on update');
-        $this->assertTrue($afterWriteCalled, 'after_write event not triggered on update');
+        $flags = EventModel::getEventFlags();
+        $this->assertTrue($flags['beforeWriteCalled'], 'before_write event not triggered on update');
+        $this->assertTrue($flags['afterWriteCalled'], 'after_write event not triggered on update');
         $this->assertEquals('write_test8', $record->name);
     }
 

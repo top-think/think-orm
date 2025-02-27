@@ -54,7 +54,8 @@ SQL
         $data = ['name' => 'test4', 'price' => 399];
         $result = $model::create($data);
 
-        $this->assertEquals('Test4', $result->name);
+        $this->assertEquals('Test4', $result->getData('name'));
+        $this->assertEquals('TEST4', $result->name);
         $this->assertEquals('399.00', $result->price);
     }
 

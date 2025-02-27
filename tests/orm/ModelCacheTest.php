@@ -63,14 +63,14 @@ SQL
         $model = new CacheModel();
 
         // 使用标签缓存数据
-        $result1 = $model::cache(true, 'test_tag')->select();
+        $result1 = $model::cache(true, 5, 'test_tag')->select();
         $this->assertCount(3, $result1);
 
         // 添加新数据
         $model::create(['name' => 'test4', 'status' => 1]);
 
         // 验证缓存数据
-        $result2 = $model::cache(true, 'test_tag')->select();
+        $result2 = $model::cache(true, 5, 'test_tag')->select();
         $this->assertCount(3, $result2);
     }
 
@@ -79,7 +79,7 @@ SQL
         $model = new CacheModel();
 
         // 测试复杂查询缓存
-        $result1 = $model::cache(true)
+        $result1 = $model::cache('test_key')
             ->where('status', 1)
             ->order('id', 'desc')
             ->select();
@@ -89,7 +89,7 @@ SQL
         $model::create(['name' => 'test4', 'status' => 1]);
 
         // 验证缓存数据
-        $result2 = $model::cache(true)
+        $result2 = $model::cache('test_key')
             ->where('status', 1)
             ->order('id', 'desc')
             ->select();

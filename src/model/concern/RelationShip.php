@@ -462,7 +462,7 @@ trait RelationShip
      *
      * @return void
      */
-    public function relationCount(Query $query, array $relations, string $aggregate = 'sum', string $field = '*', bool $useSubQuery = true): void
+    public function relationCount(Query $query, array $relations, string $aggregate = 'sum', string $field = 'id', bool $useSubQuery = true): void
     {
         foreach ($relations as $key => $relation) {
             $closure = $name = null;

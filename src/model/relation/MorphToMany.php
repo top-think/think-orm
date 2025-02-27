@@ -115,7 +115,7 @@ class MorphToMany extends BelongsToMany
                     $data[$result->$pk] = [];
                 }
 
-                $result->setRelation($relation, $this->resultSetBuild($data[$result->$pk], clone $this->parent));
+                $result->setRelation($relation, $this->resultSetBuild($data[$result->$pk]));
             }
         }
     }
@@ -148,7 +148,7 @@ class MorphToMany extends BelongsToMany
                 $data[$pk] = [];
             }
 
-            $result->setRelation($relation, $this->resultSetBuild($data[$pk], clone $this->parent));
+            $result->setRelation($relation, $this->resultSetBuild($data[$pk]));
         }
     }
 

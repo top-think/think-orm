@@ -207,7 +207,7 @@ class HasManyThrough extends Relation
                 }
 
                 // 设置关联属性
-                $result->setRelation($relation, $this->resultSetBuild($data[$pk], clone $this->parent));
+                $result->setRelation($relation, $this->resultSetBuild($data[$pk]));
             }
         }
     }
@@ -240,7 +240,7 @@ class HasManyThrough extends Relation
             $data[$pk] = [];
         }
 
-        $result->setRelation($relation, $this->resultSetBuild($data[$pk], clone $this->parent));
+        $result->setRelation($relation, $this->resultSetBuild($data[$pk]));
     }
 
     /**
@@ -309,7 +309,7 @@ class HasManyThrough extends Relation
      *
      * @return mixed
      */
-    public function relationCount(Model $result, ?Closure $closure = null, string $aggregate = 'count', string $field = '*', ?string &$name = null)
+    public function relationCount(Model $result, ?Closure $closure = null, string $aggregate = 'count', string $field = 'id', ?string &$name = null)
     {
         $localKey = $this->localKey;
 
@@ -349,7 +349,7 @@ class HasManyThrough extends Relation
      *
      * @return string
      */
-    public function getRelationCountQuery(?Closure $closure = null, string $aggregate = 'count', string $field = '*', ?string &$name = null): string
+    public function getRelationCountQuery(?Closure $closure = null, string $aggregate = 'count', string $field = 'id', ?string &$name = null): string
     {
         if ($closure) {
             $closure($this->query, $name);

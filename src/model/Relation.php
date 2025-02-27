@@ -16,6 +16,7 @@ namespace think\model;
 use Closure;
 use think\db\BaseQuery as Query;
 use think\db\exception\DbException as Exception;
+use think\model\Collection;
 use think\model\contract\Modelable as Model;
 
 /**
@@ -159,11 +160,10 @@ abstract class Relation
      * 封装关联数据集.
      *
      * @param array $resultSet 数据集
-     * @param Model $parent    父模型
      *
-     * @return mixed
+     * @return Collection
      */
-    protected function resultSetBuild(array $resultSet, ?Model $parent = null)
+    protected function resultSetBuild(array $resultSet)
     {
         return (new $this->model())->toCollection($resultSet);
     }

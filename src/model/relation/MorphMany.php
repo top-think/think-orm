@@ -153,7 +153,7 @@ class MorphMany extends Relation
                     $data[$result->$pk] = [];
                 }
 
-                $result->setRelation($relation, $this->resultSetBuild($data[$result->$pk], clone $this->parent));
+                $result->setRelation($relation, $this->resultSetBuild($data[$result->$pk]));
             }
         }
     }
@@ -184,7 +184,7 @@ class MorphMany extends Relation
                 $data[$key] = [];
             }
 
-            $result->setRelation($relation, $this->resultSetBuild($data[$key], clone $this->parent));
+            $result->setRelation($relation, $this->resultSetBuild($data[$key]));
         }
     }
 
@@ -199,7 +199,7 @@ class MorphMany extends Relation
      *
      * @return mixed
      */
-    public function relationCount(Model $result, ?Closure $closure = null, string $aggregate = 'count', string $field = '*', ?string &$name = null)
+    public function relationCount(Model $result, ?Closure $closure = null, string $aggregate = 'count', string $field = 'id', ?string &$name = null)
     {
         $pk = $result->getPk();
 
@@ -229,7 +229,7 @@ class MorphMany extends Relation
      *
      * @return string
      */
-    public function getRelationCountQuery(?Closure $closure = null, string $aggregate = 'count', string $field = '*', ?string &$name = null): string
+    public function getRelationCountQuery(?Closure $closure = null, string $aggregate = 'count', string $field = 'id', ?string &$name = null): string
     {
         if ($closure) {
             $closure($this->query, $name);

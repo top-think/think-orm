@@ -408,7 +408,7 @@ trait ModelRelationQuery
      *
      * @return $this
      */
-    protected function withAggregate(string | array $relations, string $aggregate = 'count', $field = '*', bool $subQuery = true)
+    protected function withAggregate(string | array $relations, string $aggregate = 'count', $field = 'id', bool $subQuery = true)
     {
         if (empty($this->model)) {
             return $this;
@@ -476,13 +476,14 @@ trait ModelRelationQuery
      * 关联统计
      *
      * @param string|array $relation 关联方法名
+     * @param string       $field    字段(默认为id)
      * @param bool         $subQuery 是否使用子查询
      *
      * @return $this
      */
-    public function withCount(string | array $relation, bool $subQuery = true)
+    public function withCount(string | array $relation, string $field = 'id', bool $subQuery = true)
     {
-        return $this->withAggregate($relation, 'count', '*', $subQuery);
+        return $this->withAggregate($relation, 'count', $field, $subQuery);
     }
 
     /**

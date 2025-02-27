@@ -20,6 +20,7 @@ use Stringable;
 use think\db\Express;
 use think\db\Raw;
 use think\helper\Str;
+use think\model\Collection;
 use think\model\contract\EnumTransform;
 use think\model\contract\FieldTypeTransform;
 use think\model\contract\Typeable;
@@ -461,24 +462,22 @@ trait Attribute
         if (is_null($value) && is_subclass_of($type, Model::class)) {
             // 关联数据为空 设置一个空模型
             $value = new $type();
-        } elseif (!($value instanceof Model || $value instanceof Collection)) {
+        } elseif (!($value instanceof Model || $value instanceof Collection) && !$this->hasSetAttr($name)) {
             // 类型自动转换
-            if (!$this->hasSetAttr($name)) {
-                $value = $this->readTransform($value, $type);                
-            }
+            $value = $this->readTransform($value, $type);
         }
 
         $this->setData($name, $value);
         return $this;
     }
 
-    protected function hasGetAttr(string $name): bool
-    {
-        $attr   = Str::studly($name);
-        $method = 'get' . $attr . 'Attr';
-        return method_exists($this, $method);
-    }
-
+    /**
+     * 字段是否定义修改器
+     *
+     * @param string $name  名称
+     *
+     * @return bool
+     */
     protected function hasSetAttr(string $name): bool
     {
         $attr   = Str::studly($name);

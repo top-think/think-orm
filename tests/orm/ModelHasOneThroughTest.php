@@ -12,15 +12,15 @@ class ModelHasOneThroughTest extends TestCase
     public static function setUpBeforeClass(): void
     {
         $sqlList = [
-            'DROP TABLE IF EXISTS `user`;',
-            'CREATE TABLE `test_user_through` (
+            'DROP TABLE IF EXISTS `test_user`;',
+            'CREATE TABLE `test_user` (
                 `id` int NOT NULL AUTO_INCREMENT,
                 `name` varchar(255) NOT NULL DEFAULT "",
                 `create_time` datetime DEFAULT NULL,
                 PRIMARY KEY (`id`)
             ) ENGINE = InnoDB DEFAULT CHARSET=utf8mb4;',
-            'DROP TABLE IF EXISTS `account`;',
-            'CREATE TABLE `test_account_through` (
+            'DROP TABLE IF EXISTS `test_account`;',
+            'CREATE TABLE `test_account` (
                 `id` int NOT NULL AUTO_INCREMENT,
                 `user_id` int NOT NULL,
                 `account` varchar(255) NOT NULL DEFAULT "",
@@ -29,8 +29,8 @@ class ModelHasOneThroughTest extends TestCase
                 KEY `idx_user_id` (`user_id`),
                 KEY `idx_profile_id` (`profile_id`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;',
-            'DROP TABLE IF EXISTS `profile`;',
-            'CREATE TABLE `test_profile_through` (
+            'DROP TABLE IF EXISTS `test_profile`;',
+            'CREATE TABLE `test_profile` (
                 `id` int NOT NULL AUTO_INCREMENT,
                 `account_id` int NOT NULL,
                 `email` varchar(255) NOT NULL DEFAULT "",
@@ -46,9 +46,9 @@ class ModelHasOneThroughTest extends TestCase
 
     protected function setUp(): void
     {
-        Db::execute('TRUNCATE TABLE `user`;');
-        Db::execute('TRUNCATE TABLE `account`;');
-        Db::execute('TRUNCATE TABLE `profile`;');
+        Db::execute('TRUNCATE TABLE `test_user`;');
+        Db::execute('TRUNCATE TABLE `test_account`;');
+        Db::execute('TRUNCATE TABLE `test_profile`;');
 
         // 创建测试数据
         $user1 = User::create([

@@ -12,15 +12,15 @@ class ModelHasManyThroughTest extends TestCase
     public static function setUpBeforeClass(): void
     {
         $sqlList = [
-            'DROP TABLE IF EXISTS `country`;',
-            'CREATE TABLE `country` (
+            'DROP TABLE IF EXISTS `test_country`;',
+            'CREATE TABLE `test_country` (
                 `id` int NOT NULL AUTO_INCREMENT,
                 `name` varchar(255) NOT NULL DEFAULT "",
                 `create_time` datetime DEFAULT NULL,
                 PRIMARY KEY (`id`)
             ) ENGINE = InnoDB DEFAULT CHARSET=utf8mb4;',
-            'DROP TABLE IF EXISTS `author`;',
-            'CREATE TABLE `author` (
+            'DROP TABLE IF EXISTS `test_author`;',
+            'CREATE TABLE `test_author` (
                 `id` int NOT NULL AUTO_INCREMENT,
                 `country_id` int NOT NULL,
                 `name` varchar(255) NOT NULL DEFAULT "",
@@ -29,8 +29,8 @@ class ModelHasManyThroughTest extends TestCase
                 PRIMARY KEY (`id`),
                 KEY `idx_country_id` (`country_id`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;',
-            'DROP TABLE IF EXISTS `post`;',
-            'CREATE TABLE `post` (
+            'DROP TABLE IF EXISTS `test_post`;',
+            'CREATE TABLE `test_post` (
                 `id` int NOT NULL AUTO_INCREMENT,
                 `author_id` int NOT NULL,
                 `title` varchar(255) NOT NULL DEFAULT "",
@@ -47,9 +47,9 @@ class ModelHasManyThroughTest extends TestCase
 
     protected function setUp(): void
     {
-        Db::execute('TRUNCATE TABLE `country`;');
-        Db::execute('TRUNCATE TABLE `author`;');
-        Db::execute('TRUNCATE TABLE `post`;');
+        Db::execute('TRUNCATE TABLE `test_country`;');
+        Db::execute('TRUNCATE TABLE `test_author`;');
+        Db::execute('TRUNCATE TABLE `test_post`;');
 
         // 创建测试数据
         $country1 = Country::create([
@@ -122,16 +122,16 @@ class ModelHasManyThroughTest extends TestCase
         $this->assertEquals(3, $country->posts_count);
 
         // 测试条件查询
-        $posts = $country->posts()->where('test_through_post.title', 'like', '%1%')->select();
+        $posts = $country->posts()->where('title', 'like', '%1%')->select();
         $this->assertCount(1, $posts);
         $this->assertEquals('Post1', $posts[0]->title);
 
         // 测试排序
-        $posts = $country->posts()->order('test_through_post.title', 'desc')->select();
+        $posts = $country->posts()->order('title', 'desc')->select();
         $this->assertEquals('Post3', $posts[0]->title);
 
         // 测试字段查询
-        $posts = $country->posts()->field('test_through_post.title')->select();
+        $posts = $country->posts()->field('title')->select();
         $this->assertArrayNotHasKey('content', $posts[0]->toArray());
     }
 }

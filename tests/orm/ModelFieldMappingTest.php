@@ -61,7 +61,7 @@ SQL
         $dbItem = Db::table('test_field_mapping')->where('id', $newItem->id)->find();
         $this->assertEquals('user3', $dbItem['user_name']);
         $this->assertEquals(35, $dbItem['user_age']);
-        $this->assertEquals(1, $dbItem['is_active']);
+        $this->assertEquals(true, $dbItem['is_active']);
         $this->assertEquals(['city' => 'guangzhou'], json_decode($dbItem['user_info'], true));
         $this->assertEquals('2023-01-03 12:00:00', $dbItem['create_at']);
     }
@@ -97,7 +97,7 @@ class FieldMappingModel extends Model {
     // 定义自定义类型转换
     protected $type = [
         'user_age'    => 'integer',
-        'is_active'   => 'boolean',
+        'is_active'   => 'bool',
         'user_info'   => 'array',
         'create_at'   => 'datetime',
     ];

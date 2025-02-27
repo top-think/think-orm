@@ -11,10 +11,8 @@ class ObservedModel extends Model
     protected $autoWriteTimestamp = true;
     protected $eventObserver;
 
-    public function __construct(array $data = [])
+    public function setEventObServer($observer)
     {
-        global $observer;
-        $this->eventObserver = $observer;
-        parent::__construct($data);
+    	$this->eventObserver = $observer;
     }
 }

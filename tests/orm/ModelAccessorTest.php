@@ -143,6 +143,6 @@ SQL
         ])->select();
 
         $this->assertEquals(1, count($result));
-        $this->assertEquals('test_item1', $result[0]->name);
+        $this->assertEquals('TEST_ITEM1', $result[0]->name);
     }
 }

@@ -93,7 +93,7 @@ SQL
             ->where('status', 1)
             ->order('id', 'desc')
             ->select();
-        $this->assertCount(2, $result2);
+        $this->assertCount(3, $result2);
     }
 
     public function testCacheTime()

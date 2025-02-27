@@ -47,7 +47,7 @@ SQL
         $flags = EventModel::getEventFlags();
         $this->assertTrue($flags['beforeInsertCalled'], 'before_insert event not triggered');
         $this->assertTrue($flags['afterInsertCalled'], 'after_insert event not triggered');
-        $this->assertEquals('modified_test3', $result->name);
+        $this->assertEquals('modified_write_test3', $result->name);
     }
 
     public function testUpdateEvents()
@@ -63,7 +63,7 @@ SQL
         $flags = EventModel::getEventFlags();
         $this->assertTrue($flags['beforeUpdateCalled'], 'before_update event not triggered');
         $this->assertTrue($flags['afterUpdateCalled'], 'after_update event not triggered');
-        $this->assertEquals('updated_new_name', $record->name);
+        $this->assertEquals('updated_write_new_name', $record->name);
     }
 
     public function testDeleteEvents()
@@ -98,7 +98,7 @@ SQL
         $flags = EventModel::getEventFlags();
         $this->assertTrue($flags['beforeWriteCalled'], 'before_write event not triggered on insert');
         $this->assertTrue($flags['afterWriteCalled'], 'after_write event not triggered on insert');
-        $this->assertEquals('write_test7', $record->name);
+        $this->assertEquals('modified_write_test7', $record->name);
 
         // 测试更新时的写入事件
         EventModel::resetEventFlags();
@@ -114,6 +114,7 @@ SQL
     {
         $observer = new EventObserver();
         $model = new ObservedModel();
+        $model->setEventObServer($observer);
 
         // 测试插入事件
         $data = ['name' => 'test9', 'status' => 1];

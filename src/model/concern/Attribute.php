@@ -47,18 +47,14 @@ trait Attribute
         // 分析数据
         $data    = $this->parseData($data);
         $schema  = $this->getFields();
-        $fields  = array_keys($schema);
         $mapping = $this->getOption('mapping');
+        $fields  = array_keys(array_merge($schema,$mapping));
 
         // 实体模型赋值
         foreach ($data as $name => $value) {
             if (in_array($name, $this->getOption('disuse'))) {
                 // 废弃字段
                 continue;
-            }
-
-            if (!empty($mapping)) {
-                $name = array_search($name, $mapping) ?: $name;
             }
 
             if (str_contains($name, '__')) {
@@ -69,11 +65,24 @@ trait Attribute
                 continue;
             }
 
-            $trueName = $this->getRealFieldName($name);
+            if (!empty($mapping)) {
+                $key = array_search($name, $mapping);
+                if ($key) {
+                    $trueName = $key;
+                    $type     = $schema[$name] ?? 'string';
+                } else {
+                    $trueName = $this->getRealFieldName($name);
+                    $type     = $schema[$trueName] ?? 'string';
+                }
+            } else {
+                $trueName = $this->getRealFieldName($name);
+                $type     = $schema[$trueName] ?? 'string';
+            }
+            
             if ($this->isView() || $this->isVirtual() || in_array($trueName, $fields)) {
                 // 读取数据后进行类型转换
                 if (!$fromSave || !$this->hasSetAttr($trueName)) {
-                    $value = $this->readTransform($value, $schema[$trueName] ?? 'string');
+                    $value = $this->readTransform($value, $type);
                 }
                 // 数据赋值
                 $this->setData($trueName, $value);

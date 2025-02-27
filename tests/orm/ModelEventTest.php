@@ -107,7 +107,7 @@ SQL
         $flags = EventModel::getEventFlags();
         $this->assertTrue($flags['beforeWriteCalled'], 'before_write event not triggered on update');
         $this->assertTrue($flags['afterWriteCalled'], 'after_write event not triggered on update');
-        $this->assertEquals('write_test8', $record->name);
+        $this->assertEquals('updated_write_test8', $record->name);
     }
 
     public function testModelObserver()

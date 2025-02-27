@@ -67,9 +67,12 @@ trait Attribute
 
             if (!empty($mapping)) {
                 $key = array_search($name, $mapping);
-                if ($key) {
+                if (!$fromSave && $key) {
                     $trueName = $key;
                     $type     = $schema[$name] ?? 'string';
+                } elseif ($fromSave && isset($mapping[$name])) {
+                    $trueName = $mapping[$name];
+                    $type     = $schema[$trueName] ?? 'string';
                 } else {
                     $trueName = $this->getRealFieldName($name);
                     $type     = $schema[$trueName] ?? 'string';

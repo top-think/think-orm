@@ -120,7 +120,7 @@ trait RelationShip
                 if ($isUpdate) {
                     $relation->save();
                 } else {
-                    $this->$name()->save($relation, true);
+                    $this->$name()->save($relation);
                     $relation->setKey($relation->getLastInsID());
                 }
             } elseif (is_array($name)) {

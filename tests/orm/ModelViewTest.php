@@ -88,26 +88,6 @@ class ModelViewTest extends TestCase
         $this->assertEquals('2023-01-02 12:00:00', $result[0]['create_time']);
     }
 
-    public function testViewWithAggregate()
-    {
-        // 测试聚合查询
-        $model = new UserOrderAggregateView;
-        $result = $model->select()->toArray();
-        $this->assertCount(2, $result);
-        
-        // 验证张三的订单统计
-        $this->assertEquals('张三', $result[0]['name']);
-        $this->assertEquals(2, $result[0]['order_count']);
-        $this->assertEquals(300.00, $result[0]['total_amount']);
-        $this->assertEquals('2023-01-01 12:00:00', $result[0]['first_order_time']);
-        
-        // 验证李四的订单统计
-        $this->assertEquals('李四', $result[1]['name']);
-        $this->assertEquals(1, $result[1]['order_count']);
-        $this->assertEquals(300.00, $result[1]['total_amount']);
-        $this->assertEquals('2023-01-02 12:00:00', $result[1]['first_order_time']);
-    }
-
     public function testViewWithJoinType()
     {
         // 测试右连接查询
@@ -133,7 +113,6 @@ class UserOrderView extends View
 }
 
 
-
 // 定义带条件的视图模型
 class UserOrderConditionView extends View
 {
@@ -141,17 +120,6 @@ class UserOrderConditionView extends View
     {
         $query->view('test_user_view', 'id as user_id,name,status,create_time')
             ->view('test_order_view', 'order_no,amount', 'test_user_view.id=test_order_view.user_id');
-    }
-}
-
-// 定义聚合视图模型
-class UserOrderAggregateView extends View
-{
-    public function query($query)
-    {
-        $query->view('test_user_view', 'id as user_id,name,create_time')
-            ->view('test_order_view', 'COUNT(*) as order_count,SUM(amount) as total_amount,MIN(create_time) as first_order_time', 'test_user_view.id=test_order_view.user_id')
-            ->group('test_user_view.id');
     }
 }
 

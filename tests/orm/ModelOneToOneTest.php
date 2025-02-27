@@ -39,6 +39,12 @@ class ModelOneToOneTest extends TestCase
         }
     }
 
+    protected function setUp(): void
+    {
+        Db::execute('TRUNCATE TABLE `test_user`;');
+        Db::execute('TRUNCATE TABLE `test_profile`;');
+    }
+    
     /**
      * 绑定属性
      */
@@ -110,14 +116,14 @@ class ModelOneToOneTest extends TestCase
         $user2->save();
 
         $profile1 = new ProfileModel([
-            'uid' => $user1->id,
+            'user_id' => $user1->id,
             'email' => 'user1@thinkphp.cn',
             'nickname' => 'nickname1'
         ]);
         $profile1->save();
 
         $profile2 = new ProfileModel([
-            'uid' => $user2->id,
+            'user_id' => $user2->id,
             'email' => 'user2@thinkphp.cn',
             'nickname' => 'nickname2'
         ]);

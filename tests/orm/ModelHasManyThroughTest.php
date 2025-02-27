@@ -12,15 +12,15 @@ class ModelHasManyThroughTest extends TestCase
     public static function setUpBeforeClass(): void
     {
         $sqlList = [
-            'DROP TABLE IF EXISTS `test_country`;',
-            'CREATE TABLE `test_country` (
+            'DROP TABLE IF EXISTS `country`;',
+            'CREATE TABLE `country` (
                 `id` int NOT NULL AUTO_INCREMENT,
                 `name` varchar(255) NOT NULL DEFAULT "",
                 `create_time` datetime DEFAULT NULL,
                 PRIMARY KEY (`id`)
             ) ENGINE = InnoDB DEFAULT CHARSET=utf8mb4;',
-            'DROP TABLE IF EXISTS `test_through_author`;',
-            'CREATE TABLE `test_through_author` (
+            'DROP TABLE IF EXISTS `author`;',
+            'CREATE TABLE `author` (
                 `id` int NOT NULL AUTO_INCREMENT,
                 `country_id` int NOT NULL,
                 `name` varchar(255) NOT NULL DEFAULT "",
@@ -29,8 +29,8 @@ class ModelHasManyThroughTest extends TestCase
                 PRIMARY KEY (`id`),
                 KEY `idx_country_id` (`country_id`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;',
-            'DROP TABLE IF EXISTS `test_through_post`;',
-            'CREATE TABLE `test_through_post` (
+            'DROP TABLE IF EXISTS `post`;',
+            'CREATE TABLE `post` (
                 `id` int NOT NULL AUTO_INCREMENT,
                 `author_id` int NOT NULL,
                 `title` varchar(255) NOT NULL DEFAULT "",
@@ -47,56 +47,56 @@ class ModelHasManyThroughTest extends TestCase
 
     protected function setUp(): void
     {
-        Db::execute('TRUNCATE TABLE `test_country`;');
-        Db::execute('TRUNCATE TABLE `test_through_author`;');
-        Db::execute('TRUNCATE TABLE `test_through_post`;');
+        Db::execute('TRUNCATE TABLE `country`;');
+        Db::execute('TRUNCATE TABLE `author`;');
+        Db::execute('TRUNCATE TABLE `post`;');
 
         // 创建测试数据
-        $country1 = CountryModel::create([
+        $country1 = Country::create([
             'name' => 'China'
         ]);
 
-        $country2 = CountryModel::create([
+        $country2 = Country::create([
             'name' => 'USA'
         ]);
 
-        $author1 = ThroughAuthorModel::create([
+        $author1 = Author::create([
             'country_id' => $country1->id,
             'name' => 'author1',
             'email' => 'author1@example.com'
         ]);
 
-        $author2 = ThroughAuthorModel::create([
+        $author2 = Author::create([
             'country_id' => $country1->id,
             'name' => 'author2',
             'email' => 'author2@example.com'
         ]);
 
-        $author3 = ThroughAuthorModel::create([
+        $author3 = Author::create([
             'country_id' => $country2->id,
             'name' => 'author3',
             'email' => 'author3@example.com'
         ]);
 
-        ThroughPostModel::create([
+        Post::create([
             'author_id' => $author1->id,
             'title' => 'Post1',
             'content' => 'Content1'
         ]);
 
-        ThroughPostModel::create([
+        Post::create([
             'author_id' => $author1->id,
             'title' => 'Post2',
             'content' => 'Content2'
         ]);
 
-        ThroughPostModel::create([
+        Post::create([
             'author_id' => $author2->id,
             'title' => 'Post3',
             'content' => 'Content3'
         ]);
 
-        ThroughPostModel::create([
+        Post::create([
             'author_id' => $author3->id,
             'title' => 'Post4',
             'content' => 'Content4'
@@ -106,7 +106,7 @@ class ModelHasManyThroughTest extends TestCase
     public function testHasManyThrough()
     {
         // 测试关联获取
-        $country = CountryModel::find(1);
+        $country = Country::find(1);
         $this->assertNotNull($country);
         
         $posts = $country->posts;
@@ -114,11 +114,11 @@ class ModelHasManyThroughTest extends TestCase
         $this->assertEquals('Post1', $posts[0]->title);
 
         // 测试预加载
-        $country = CountryModel::with(['posts'])->find(1);
+        $country = Country::with(['posts'])->find(1);
         $this->assertCount(3, $country->posts);
 
         // 测试关联统计
-        $country = CountryModel::withCount('posts')->find(1);
+        $country = Country::withCount('posts')->find(1);
         $this->assertEquals(3, $country->posts_count);
 
         // 测试条件查询
@@ -136,16 +136,15 @@ class ModelHasManyThroughTest extends TestCase
     }
 }
 
-class CountryModel extends Model
+class Country extends Model
 {
-    protected $table = 'test_country';
     protected $autoWriteTimestamp = true;
 
     public function posts()
     {
         return $this->hasManyThrough(
-            ThroughPostModel::class,
-            ThroughAuthorModel::class,
+            Post::class,
+            Author::class,
             'country_id',
             'author_id',
             'id',
@@ -154,14 +153,12 @@ class CountryModel extends Model
     }
 }
 
-class ThroughAuthorModel extends Model
+class Author extends Model
 {
-    protected $table = 'test_through_author';
     protected $autoWriteTimestamp = true;
 }
 
-class ThroughPostModel extends Model
+class Post extends Model
 {
-    protected $table = 'test_through_post';
     protected $autoWriteTimestamp = true;
 }

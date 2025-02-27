@@ -156,7 +156,7 @@ class HasOneThrough extends HasManyThrough
         // 组装模型数据
         return array_map(function ($key) use ($list) {
             $set = $list->where($this->throughKey, '=', $key)->first();
-            return $set ? clone $set : null;
+            return $set ?: null;
         }, $keys);
     }
 }

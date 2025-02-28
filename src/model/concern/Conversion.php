@@ -108,8 +108,8 @@ trait Conversion
             if ($val instanceof Modelable || $val instanceof Collection) {
                 if (!empty($relation[$name])) {
                     // 处理关联数据输出
-                    foreach ($relation[$name] as $key => $val) {
-                        $val->$key($val);
+                    foreach ($relation[$name] as $key => $attr) {
+                        $val->$key($attr);
                     }
                 }
                 $item[$name] = $val->toarray();
@@ -126,8 +126,16 @@ trait Conversion
         }
 
         // 输出额外属性 必须定义获取器
-        foreach ($this->getOption('append') as $key) {
-            $item[$key] = $this->get($key);
+        foreach ($this->getOption('append') as $key => $field) {
+            if (is_numeric($key)) {
+                $item[$field] = $this->get($field);
+            } else {
+                // 追加关联属性
+                $relation = $this->getRelationData($key, false);
+                foreach((array) $field as $name) {
+                    $item[$name] = $relation[$name];
+                }
+            } 
         }
 
         return $item;

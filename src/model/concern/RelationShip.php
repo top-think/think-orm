@@ -160,17 +160,20 @@ trait RelationShip
      * 获取关联数据
      *
      * @param string $name 名称
+     * @param bool   $set  是否设置为当前模型属性
      *
      * @return mixed
      */
-    protected function getRelationData(string $name)
+    protected function getRelationData(string $name, bool $set = true)
     {
         $method = Str::camel($name);
         if (method_exists($this, $method)) {
             $modelRelation = $this->$method();
             if ($modelRelation instanceof Relation) {
                 $value = $modelRelation->getRelation();
-                $this->setData($name, $value);
+                if ($set) {
+                    $this->setData($name, $value);
+                }
                 return $value;
             }
         }

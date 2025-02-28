@@ -15,7 +15,6 @@ namespace think\model\concern;
 
 use BackedEnum;
 use Closure;
-use InvalidArgumentException;
 use Stringable;
 use think\db\Express;
 use think\db\Raw;

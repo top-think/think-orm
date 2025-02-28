@@ -89,7 +89,7 @@ trait AutoWriteData
     protected function getDateTime(string $field)
     {
         $type = $this->getFields($field);
-        if ('int' == $type) {
+        if (in_array($type, ['int','integer'])) {
             $value = time();
         } elseif (is_subclass_of($type, Typeable::class)) {
             $value = $type::from('now', $this)->value();

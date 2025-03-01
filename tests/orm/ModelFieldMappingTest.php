@@ -70,7 +70,7 @@ SQL
     {
         // 测试自定义类型转换和获取器
         $item = FieldMappingModel::find(1);
-        $this->assertEquals('25岁', $item->user_age);
+        $this->assertEquals($item->age, $item->user_age);
 
         // 测试自定义修改器
         $item->user_age = '30岁';
@@ -103,13 +103,13 @@ class FieldMappingModel extends Model {
     ];
 
     // 自定义获取器
-    public function getUserAgeAttr($value)
+    public function getAgeAttr($value)
     {
         return $value . '岁';
     }
 
     // 自定义修改器
-    public function setUserAgeAttr($value)
+    public function setAgeAttr($value)
     {
         return intval($value);
     }

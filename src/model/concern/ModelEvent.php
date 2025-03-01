@@ -67,7 +67,7 @@ trait ModelEvent
         try {
             if ($obser) {
                 $reflect  = new ReflectionClass($obser);
-                $callable = $reflect->newinstance();
+                $observer = $reflect->newinstance();
             } else {
                 $observer = $this;
             }

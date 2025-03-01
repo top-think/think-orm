@@ -14,7 +14,6 @@ declare (strict_types = 1);
 namespace think\model\concern;
 
 use BackedEnum;
-use Closure;
 use Stringable;
 use think\db\Express;
 use think\db\Raw;
@@ -22,8 +21,8 @@ use think\helper\Str;
 use think\model\Collection;
 use think\model\contract\EnumTransform;
 use think\model\contract\FieldTypeTransform;
-use think\model\contract\Typeable;
 use think\model\contract\Modelable as Model;
+use think\model\contract\Typeable;
 use think\model\type\Date;
 use think\model\type\DateTime;
 use think\model\type\Json;
@@ -47,9 +46,9 @@ trait Attribute
         $data    = $this->parseData($data);
         $schema  = $this->getFields();
         $mapping = $this->getOption('mapping');
-        $fields  = array_keys(array_merge($schema,$mapping));
+        $fields  = array_keys(array_merge($schema, $mapping));
 
-        // 实体模型赋值
+        // 模型赋值
         foreach ($data as $name => $value) {
             if (in_array($name, $this->getOption('disuse'))) {
                 // 废弃字段
@@ -80,7 +79,7 @@ trait Attribute
                 $trueName = $this->getRealFieldName($name);
                 $type     = $schema[$trueName] ?? 'string';
             }
-            
+
             if ($this->isView() || $this->isVirtual() || in_array($trueName, $fields)) {
                 // 读取数据后进行类型转换
                 if (!$fromSave || !$this->hasSetAttr($trueName)) {
@@ -104,7 +103,7 @@ trait Attribute
             $this->setOption('get', []);
         }
     }
-        
+
     /**
      * 获取主键名.
      *
@@ -232,7 +231,7 @@ trait Attribute
                     } elseif ($model->getOption('enumReadName')) {
                         $method = $model->getOption('enumReadName');
                         $value  = is_string($method) ? $value->$method() : $value->name;
-                    }                    
+                    }
                 } else {
                     // 对象类型
                     $value = new $type($value);
@@ -242,17 +241,17 @@ trait Attribute
         };
 
         return match ($type) {
-            'string'    => (string) $value,
-            'int','integer'       => (int) $value,
-            'float'     => empty($param) ? (float) $value : (float) number_format($value, (int) $param, '.', ''),
-            'bool','boolean'      => (bool) $value,
-            'array'     => empty($value) ? [] : (is_array($value) ? $value : json_decode($value, true)),
-            'object'    => empty($value) ? new \stdClass() : (is_string($value) ? json_decode($value) : json_decode(json_encode($value, JSON_FORCE_OBJECT))),
-            'json'      => $typeTransform(Json::class, $value, $this),
-            'date'      => $typeTransform(Date::class, $value, $this),
-            'datetime'  => $typeTransform(DateTime::class, $value, $this),
-            'timestamp' => $typeTransform(DateTime::class, $value, $this),
-            default     => $typeTransform($type, $value, $this),
+            'string' => (string) $value,
+            'int', 'integer' => (int) $value,
+            'float'          => empty($param) ? (float) $value : (float) number_format($value, (int) $param, '.', ''),
+            'bool', 'boolean' => (bool) $value,
+            'array'          => empty($value) ? [] : (is_array($value) ? $value : json_decode($value, true)),
+            'object'         => empty($value) ? new \stdClass() : (is_string($value) ? json_decode($value) : json_decode(json_encode($value, JSON_FORCE_OBJECT))),
+            'json'           => $typeTransform(Json::class, $value, $this),
+            'date'           => $typeTransform(Date::class, $value, $this),
+            'datetime'       => $typeTransform(DateTime::class, $value, $this),
+            'timestamp'      => $typeTransform(DateTime::class, $value, $this),
+            default          => $typeTransform($type, $value, $this),
         };
     }
 
@@ -296,17 +295,17 @@ trait Attribute
         };
 
         return match ($type) {
-            'string'    => (string) $value,
-            'int','integer'       => (int) $value,
-            'float'     => empty($param) ? (float) $value : (float) number_format($value, (int) $param, '.', ''),
-            'bool','boolean'      => (bool) $value,
-            'object'    => is_object($value) ? json_encode($value, JSON_FORCE_OBJECT) : $value,
-            'array'     => json_encode((array) $value, JSON_UNESCAPED_UNICODE),
-            'json'      => $typeTransform(Json::class, $value, $this),
-            'date'      => $typeTransform(Date::class, $value, $this),
-            'datetime'  => $typeTransform(DateTime::class, $value, $this),
-            'timestamp' => $typeTransform(DateTime::class, $value, $this),
-            default     => $typeTransform($type, $value, $this),
+            'string'         => (string) $value,
+            'int', 'integer'  => (int) $value,
+            'float'          => empty($param) ? (float) $value : (float) number_format($value, (int) $param, '.', ''),
+            'bool', 'boolean' => (bool) $value,
+            'object'         => is_object($value) ? json_encode($value, JSON_FORCE_OBJECT) : $value,
+            'array'          => json_encode((array) $value, JSON_UNESCAPED_UNICODE),
+            'json'           => $typeTransform(Json::class, $value, $this),
+            'date'           => $typeTransform(Date::class, $value, $this),
+            'datetime'       => $typeTransform(DateTime::class, $value, $this),
+            'timestamp'      => $typeTransform(DateTime::class, $value, $this),
+            default          => $typeTransform($type, $value, $this),
         };
     }
 
@@ -467,8 +466,8 @@ trait Attribute
      */
     public function set(string $name, $value)
     {
-        $name   = $this->getMappingName($name);
-        $type   = $this->getFields($name);
+        $name = $this->getMappingName($name);
+        $type = $this->getFields($name);
 
         if (is_null($value) && is_subclass_of($type, Model::class)) {
             // 关联数据为空 设置一个空模型
@@ -523,11 +522,11 @@ trait Attribute
             $step   = $value->getStep();
             $origin = $this->getOrigin($name);
             $real   = match ($value->getType()) {
-                '+'         => $origin + $step,
-                '-'         => $origin - $step,
-                '*'         => $origin * $step,
-                '/'         => $origin / $step,
-                default     => $origin,
+                '+'              => $origin + $step,
+                '-'              => $origin - $step,
+                '*'              => $origin * $step,
+                '/'              => $origin / $step,
+                default          => $origin,
             };
             $this->setData($name, $real);
         } elseif (is_scalar($value)) {
@@ -548,7 +547,7 @@ trait Attribute
      */
     public function get(string $name, bool $attr = true)
     {
-        $name   = $this->getMappingName($name);
+        $name = $this->getMappingName($name);
         if ($attr && $value = $this->getWeakData('get', $name)) {
             // 已经输出的数据直接返回
             return $value;
@@ -625,7 +624,7 @@ trait Attribute
     public function getAttr(string $name)
     {
         return $this->get($name);
-    }  
+    }
 
     /**
      * 设置数据对象的值 并进行类型自动转换

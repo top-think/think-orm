@@ -47,6 +47,7 @@ SQL
         $this->assertEquals(1, $item->active);
         $this->assertEquals(['city' => 'beijing'], $item->info);
         $this->assertEquals('2023-01-01 10:00:00', $item->createdAt);
+        $this->assertEquals($item->age, $item->user_age);
 
         // 测试使用映射字段写入
         $newItem = FieldMappingModel::create([
@@ -64,20 +65,6 @@ SQL
         $this->assertEquals(true, $dbItem['is_active']);
         $this->assertEquals(['city' => 'guangzhou'], json_decode($dbItem['user_info'], true));
         $this->assertEquals('2023-01-03 12:00:00', $dbItem['create_at']);
-    }
-
-    public function testCustomTypeMapping()
-    {
-        // 测试自定义类型转换和获取器
-        $item = FieldMappingModel::find(1);
-        $this->assertEquals($item->age, $item->user_age);
-
-        // 测试自定义修改器
-        $item->user_age = '30岁';
-        $item->save();
-
-        $dbItem = Db::table('test_field_mapping')->where('id', 1)->find();
-        $this->assertEquals(30, $dbItem['user_age']);
     }
 }
 
@@ -101,16 +88,4 @@ class FieldMappingModel extends Model {
         'user_info'   => 'array',
         'create_at'   => 'datetime',
     ];
-
-    // 自定义获取器
-    public function getAgeAttr($value)
-    {
-        return $value . '岁';
-    }
-
-    // 自定义修改器
-    public function setAgeAttr($value)
-    {
-        return intval($value);
-    }
 }

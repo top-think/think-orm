@@ -241,10 +241,10 @@ trait Attribute
         };
 
         return match ($type) {
-            'string' => (string) $value,
-            'int', 'integer' => (int) $value,
+            'string','bigint'=> (string) $value,
+            'int','integer'  => (int) $value,
             'float'          => empty($param) ? (float) $value : (float) number_format($value, (int) $param, '.', ''),
-            'bool', 'boolean' => (bool) $value,
+            'bool','boolean' => (bool) $value,
             'array'          => empty($value) ? [] : (is_array($value) ? $value : json_decode($value, true)),
             'object'         => empty($value) ? new \stdClass() : (is_string($value) ? json_decode($value) : json_decode(json_encode($value, JSON_FORCE_OBJECT))),
             'json'           => $typeTransform(Json::class, $value, $this),
@@ -295,10 +295,10 @@ trait Attribute
         };
 
         return match ($type) {
-            'string'         => (string) $value,
+            'string','bigint' => (string) $value,
             'int', 'integer'  => (int) $value,
             'float'          => empty($param) ? (float) $value : (float) number_format($value, (int) $param, '.', ''),
-            'bool', 'boolean' => (bool) $value,
+            'bool', 'boolean' => $value ? 1 : 0,
             'object'         => is_object($value) ? json_encode($value, JSON_FORCE_OBJECT) : $value,
             'array'          => json_encode((array) $value, JSON_UNESCAPED_UNICODE),
             'json'           => $typeTransform(Json::class, $value, $this),

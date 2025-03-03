@@ -528,10 +528,10 @@ trait Attribute
                 '/'              => $origin / $step,
                 default          => $origin,
             };
-            $this->setData($name, $real);
+            $this->set($name, $real);
         } elseif (is_scalar($value)) {
             // 同步写入修改器或类型自动转换结果
-            $this->setData($name, $value);
+            $this->set($name, $value);
         }
 
         return $value;

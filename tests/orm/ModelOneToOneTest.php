@@ -54,6 +54,7 @@ class ModelOneToOneTest extends TestCase
         $nickname = 'u' . mt_rand(10000, 99999);
 
         $user = new UserModel();
+        $user->id      = 1;
         $user->name    = 'thinkphp';
         $user->profile = new ProfileModel(['email' => $email, 'nickname' => $nickname]);
         $user->together(['profile'])->save();
@@ -85,6 +86,7 @@ class ModelOneToOneTest extends TestCase
     {
         $user = new UserModel();
         $user->name = 'thinkphp';
+        $user->id   = 1;
         $user->save();
 
         $profile = new ProfileModel();
@@ -110,10 +112,10 @@ class ModelOneToOneTest extends TestCase
     public function testEagerLoading()
     {
         // 创建测试数据
-        $user1 = new UserModel(['name' => 'user1']);
-        $user1->save();
-        $user2 = new UserModel(['name' => 'user2']);
-        $user2->save();
+        $user1 = new UserModel();
+        $user1->save(['name' => 'user1','id'=>1]);
+        $user2 = new UserModel();
+        $user2->save(['name' => 'user2','id'=>2]);
 
         $profile1 = new ProfileModel([
             'user_id' => $user1->id,

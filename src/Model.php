@@ -327,7 +327,7 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
         } elseif (!empty($where)) {
             $isUpdate = true;
         } else {
-            $isUpdate = $this->getKey() ? true : false;
+            $isUpdate = $this->isExists() ? true : false;
         }
 
         if (false === $this->trigger($isUpdate ? 'BeforeUpdate' : 'BeforeInsert')) {
@@ -583,7 +583,7 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
     {
         $model = new static();
 
-        $model->allowField($allowField)->save($data, $where);
+        $model->allowField($allowField)->exists(true)->save($data, $where);
 
         return $model;
     }

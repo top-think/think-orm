@@ -304,7 +304,7 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
      * 保存模型实例数据.
      *
      * @param array|object $data 数据
-     * @param mixed $where 更新条件
+     * @param mixed $where 更新条件 true为强制新增
      * @return bool
      */
     public function save(array | object $data = [], $where = []): bool
@@ -511,7 +511,7 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
     {
         $result = [];
         foreach ($dataSet as $key => $data) {
-            $this->replace($replace)->save($data);
+            $this->clear()->replace($replace)->save($data);
             $result[$key] = $this->newInstance($this->getData());
         }
         return $this->toCollection($result);

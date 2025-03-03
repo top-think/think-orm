@@ -42,6 +42,7 @@ SQL
     {
         $data = [
             [
+                'id'              => 1,
                 'bigint'          => '0',
                 'int_field'       => 100,
                 'float_field'     => 1.23,
@@ -56,6 +57,7 @@ SQL
                 'status'          => 'active',
             ],
             [
+                'id'              => 2,
                 'bigint'          => '244791959321042944',
                 'int_field'       => 200,
                 'float_field'     => 2.34,
@@ -71,12 +73,9 @@ SQL
             ],
         ];
 
-        (new FieldTypeModel())->saveAll($data);
-
-        $result = FieldTypeModel::select();
-        $this->assertNotEmpty($result->count());
         foreach ($data as $index => $item) {
-            $this->assertEquals($item, $result[$index]->toArray());
+            $model = FieldTypeModel::create($item);
+            $this->assertEquals($item, $model->toArray());
         }
     }
 

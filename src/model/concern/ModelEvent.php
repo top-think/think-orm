@@ -61,19 +61,21 @@ trait ModelEvent
             return true;
         }
 
-        $call  = 'on' . Str::studly($event);
-        $obj   = $this->getOption('event');
-        $obser = $this->getOption('eventObserver');
+        $method = 'on' . Str::studly($event);
+        $obj    = $this->getOption('event');
+        $obser  = $this->getOption('eventObserver');
         try {
             if ($obser) {
                 $reflect  = new ReflectionClass($obser);
                 $observer = $reflect->newinstance();
+            } elseif ($this->getEntity() && method_exists($this->getEntity(), $method)) {
+                $observer = $this->getEntity();
             } else {
                 $observer = $this;
             }
 
-            if (method_exists($observer, $call)) {
-                $result = $this->invoke([$observer, $call], [$this]);
+            if (method_exists($observer, $method)) {
+                $result = $this->invoke([$observer, $method], [$this]);
             } elseif (is_object($obj) && method_exists($obj, 'trigger')) {
                 $result = $obj->trigger(static::class . '.' . $event, $this);
                 $result = empty($result) ? true : end($result);

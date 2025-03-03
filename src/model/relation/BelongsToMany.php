@@ -366,7 +366,7 @@ class BelongsToMany extends Relation
         if ($closure) {
             $closure($this->query, $name);
         }
-
+        $field = $this->getRelationQueryFields($field, $this->model);
         return $this->belongsToManyQuery($this->foreignKey, $this->localKey, [
             [
                 'pivot.' . $this->localKey, 'exp', new Raw('=' . $this->parent->db(false)->getTable(true) . '.' . $this->parent->getPk()),

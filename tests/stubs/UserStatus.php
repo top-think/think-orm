@@ -1,7 +1,8 @@
 <?php
 declare(strict_types=1);
 
-namespace app\model;
+namespace tests\stubs;
+
 use think\model\contract\EnumTransform;
 
 enum UserStatus: string implements EnumTransform

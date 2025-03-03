@@ -80,7 +80,7 @@ trait Attribute
                 $type     = $schema[$trueName] ?? 'string';
             }
 
-            if ($this->isView() || $this->isVirtual() || in_array($trueName, $fields)) {
+            if (in_array($trueName, $fields)) {
                 // 读取数据后进行类型转换
                 if (!$fromSave || !$this->hasSetAttr($trueName)) {
                     $value = $this->readTransform($value, $type);
@@ -89,6 +89,9 @@ trait Attribute
                 $this->setData($trueName, $value);
                 // 记录原始数据
                 $origin[$trueName] = $value;
+            } else {
+                // 非数据表字段 额外赋值
+                $this->setData($trueName, $value);
             }
         }
 

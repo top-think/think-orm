@@ -665,10 +665,8 @@ trait ModelRelationQuery
         if (!empty($this->options['with_attr'])) {
             $result->withFieldAttr($this->options['with_attr']);
         }
-        // 刷新原始数据
-        $result->refreshOrigin();
 
-
+        // 模型输出设置
         foreach (['hidden', 'visible', 'append'] as $name) {
             if (!empty($this->options[$name])) {
                 [$value, $merge] = $this->options[$name];
@@ -676,6 +674,7 @@ trait ModelRelationQuery
             }
         }
 
+        // 字段映射
         if (!empty($this->options['mapping'])) {
             $result->mapping($this->options['mapping']);
         }

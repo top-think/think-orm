@@ -14,11 +14,11 @@ declare (strict_types = 1);
 namespace think\model\concern;
 
 use Closure;
-use think\Collection;
 use think\db\BaseQuery as Query;
 use think\db\exception\DbException as Exception;
 use think\db\exception\InvalidArgumentException;
 use think\helper\Str;
+use think\model\Collection;
 use think\model\contract\Modelable as Model;
 use think\model\Relation;
 use think\model\relation\BelongsTo;
@@ -212,7 +212,7 @@ trait RelationShip
      * 设置关联数据.
      *
      * @param string $relation 关联属性
-     * @param array  $data  关联数据
+     * @param Model|Collection  $data  关联数据
      *
      * @return void
      */
@@ -627,7 +627,7 @@ trait RelationShip
         // 记录当前关联信息
         $model      = $this->parseRelationModel($model);
         $name       = Str::snake(class_basename($model));
-        $middle     = $middle ?: Str::snake($this->name) . '_' . $name;
+        $middle     = $middle ?: Str::snake($this->getName()) . '_' . $name;
         $foreignKey = $foreignKey ?: $name . '_id';
         $localKey   = $localKey ?: $this->getForeignKey($this->getName());
 

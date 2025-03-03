@@ -17,10 +17,10 @@ use think\Collection;
 use think\db\BaseQuery as Query;
 use think\db\exception\DbException as Exception;
 use think\db\Raw;
+use think\helper\Str;
 use think\model\contract\Modelable as Model;
 use think\model\Pivot;
 use think\model\Relation;
-
 /**
  * 多对多关联类.
  */
@@ -79,7 +79,7 @@ class BelongsToMany extends Relation
 
         if (str_contains($middle, '\\')) {
             $this->pivotName = $middle;
-            $this->middle = class_basename($middle);
+            $this->middle = Str::snake(class_basename($middle));
         } else {
             $this->middle = $middle;
         }
@@ -177,38 +177,25 @@ class BelongsToMany extends Relation
      */
     protected function matchPivot(Model $result): array
     {
-        $pivot    = [];
+        $pivot    = $result->getRelation('pivot');
         $bindAttr = $this->query->getOptions('bind_attr');
         if (empty($bindAttr)) {
             $bindAttr = $this->bindAttr;
         }
 
-        foreach ($result->getData() as $key => $val) {
-            if (str_contains($key, '__')) {
-                [$name, $attr] = explode('__', $key, 2);
-
-                if ('pivot' == $name) {
-                    $pivot[$attr] = $val;
-                    $pos          = array_search($attr, $bindAttr);
-                    if (false !== $pos) {
-                        // 中间表属性绑定
-                        $attr = !is_numeric($pos) ? $pos : $attr;
-                        if (null !== $result->getOrigin($attr)) {
-                            throw new Exception('bind attr has exists:' . $attr);
-                        }
-                        $result->set($attr, $val);
-                    }
-                    unset($result->$key);
+        foreach ($pivot as $attr => $val) {
+            $pos = array_search($attr, $bindAttr);
+            if (false !== $pos) {
+                // 中间表属性绑定
+                $key = !is_numeric($pos) ? $pos : $attr;
+                if (null !== $result->getOrigin($key)) {
+                    throw new Exception('bind attr has exists:' . $attr);
                 }
+                $result->set($key, $val);
             }
         }
 
-        $pivotData = $this->pivot->newInstance($pivot, [
-            [$this->localKey, '=', $this->parent->getKey(), null],
-            [$this->foreignKey, '=', $result->getKey(), null],
-        ]);
-
-        $result->setRelation($this->pivotDataName, $pivotData);
+        $result->setRelation($this->pivotDataName, $this->newPivot($pivot));
 
         return $pivot;
     }

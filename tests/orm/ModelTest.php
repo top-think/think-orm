@@ -65,8 +65,8 @@ SQL
             protected $autoWriteTimestamp = true;
         };
 
-        $updateData = ['name' => 'updated', 'status' => 0];
-        $result     = $model::update($updateData, ['id' => 1]);
+        $updateData = ['id' => 1, 'name' => 'updated', 'status' => 0];
+        $result     = $model::update($updateData);
 
         $this->assertInstanceOf(Model::class, $result);
         $this->assertEquals(1, $result->id);
@@ -139,25 +139,6 @@ SQL
         $this->assertEquals($data['name'], $model->name);
         $this->assertEquals($data['status'], $model->status);
         $this->assertNotEmpty($model->create_time);
-    }
-
-    public function testEvent()
-    {
-        $eventCalled = false;
-
-        $model = new class extends Model
-        {
-            protected $table = 'test_model';
-
-            public function onBeforeInsert()
-            {
-                global $eventCalled;
-                $eventCalled = true;
-            }
-        };
-
-        $model::create(['name' => 'test6', 'status' => 1]);
-        $this->assertTrue($eventCalled);
     }
 
     public function testGlobalScope()

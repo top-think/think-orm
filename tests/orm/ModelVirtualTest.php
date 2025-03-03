@@ -4,6 +4,7 @@ declare (strict_types = 1);
 namespace tests\orm;
 
 use PHPUnit\Framework\TestCase;
+use tests\stubs\VirtualModel;
 use think\model\Virtual;
 
 /**
@@ -13,15 +14,9 @@ class ModelVirtualTest extends TestCase
 {
     public function testVirtualModelBasic()
     {
-        // 定义虚拟模型
-        $model = new class extends Virtual
-        {
-            protected $pk   = 'id';
-            protected $data = [];
-        };
-
         // 测试数据操作
-        $data = ['name' => 'test', 'age' => 18];
+        $model = new VirtualModel();
+        $data  = ['name' => 'test', 'age' => 18];
         $this->assertTrue($model->save($data));
         $this->assertEquals($data, $model->getData());
 
@@ -37,16 +32,9 @@ class ModelVirtualTest extends TestCase
 
     public function testVirtualModelCreate()
     {
-        // 定义虚拟模型
-        $virtualModelClass = new class extends Virtual
-        {
-            protected $pk   = 'id';
-            protected $data = [];
-        };
-
         // 测试create方法创建实例
         $data = ['name' => 'virtual', 'age' => 25];
-        $model = $virtualModelClass::create($data);
+        $model = VirtualModel::create($data);
 
         // 验证创建的实例
         $this->assertInstanceOf(Virtual::class, $model);

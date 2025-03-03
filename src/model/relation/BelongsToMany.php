@@ -366,15 +366,16 @@ class BelongsToMany extends Relation
         if ($closure) {
             $closure($this->query, $name);
         }
-        
+
         $alias = Str::snake(class_basename($this->model));
         if (!str_contains($field, '.')) {
             $field = $alias . '.' . $field;
         }
 
+        $this->query->alias($alias);
         return $this->belongsToManyQuery($this->foreignKey, $this->localKey, [
             [
-                'pivot.' . $this->localKey, 'exp', new Raw('=' . $this->parent->db(false)->getTable(true) . '.' . $this->parent->getPk()),
+                'pivot.' . $this->localKey, 'exp', new Raw('=' . $this->parent->getTable(true) . '.' . $this->parent->getPk()),
             ],
         ])->fetchSql()->$aggregate($field);
     }

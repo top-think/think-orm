@@ -198,7 +198,7 @@ class MorphToMany extends BelongsToMany
         }
 
         return $this->belongsToManyQuery($this->foreignKey, $this->localKey, [
-            ['pivot.' . $this->localKey, 'exp', new Raw('=' . $this->parent->db(false)->getTable(true) . '.' . $this->parent->getPk())],
+            ['pivot.' . $this->localKey, 'exp', new Raw('=' . $this->parent->getTable(true) . '.' . $this->parent->getPk())],
             ['pivot.' . $this->morphType, '=', $this->morphClass],
         ])->fetchSql()->$aggregate($field);
     }
@@ -262,18 +262,8 @@ class MorphToMany extends BelongsToMany
         // 组装模型数据
         $data = [];
         foreach ($list as $set) {
-            $pivot = [];
-            foreach ($set->getData() as $key => $val) {
-                if (str_contains($key, '__')) {
-                    [$name, $attr] = explode('__', $key, 2);
-                    if ('pivot' == $name) {
-                        $pivot[$attr] = $val;
-                        unset($set->$key);
-                    }
-                }
-            }
-
-            $key = $pivot[$this->localKey];
+            $pivot = $set->getRelation('pivot');
+            $key   = $pivot[$this->localKey];
 
             if ($withLimit && isset($data[$key]) && count($data[$key]) >= $withLimit) {
                 continue;

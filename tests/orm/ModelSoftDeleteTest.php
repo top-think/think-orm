@@ -39,15 +39,13 @@ SQL
 
     public function testBasicSoftDelete()
     {
-        $model = new SoftDeleteModel();
-
         // 测试软删除
-        $item = $model::find(1);
+        $item = SoftDeleteModel::find(1);
         $this->assertNotNull($item);
         $item->delete();
 
         // 验证软删除后无法通过普通查询获取
-        $deletedItem = $model::find(1);
+        $deletedItem = SoftDeleteModel::find(1);
         $this->assertNull($deletedItem);
 
         // 验证软删除字段已设置
@@ -57,74 +55,66 @@ SQL
 
     public function testSoftDeleteQuery()
     {
-        $model = new SoftDeleteModel();
-
         // 软删除一些数据
-        $model::find(1)->delete();
-        $model::find(2)->delete();
+        SoftDeleteModel::find(1)->delete();
+        SoftDeleteModel::find(2)->delete();
 
         // 测试默认查询不包含软删除数据
-        $list = $model::select();
+        $list = SoftDeleteModel::select();
         $this->assertEquals(1, count($list));
 
         // 测试包含软删除数据的查询
-        $listWithTrashed = $model::withTrashed()->select();
+        $listWithTrashed = SoftDeleteModel::withTrashed()->select();
         $this->assertEquals(3, count($listWithTrashed));
 
         // 测试仅查询软删除数据
-        $trashedOnly = $model::onlyTrashed()->select();
+        $trashedOnly = SoftDeleteModel::onlyTrashed()->select();
         $this->assertEquals(2, count($trashedOnly));
     }
 
     public function testSoftDeleteRestore()
     {
-        $model = new SoftDeleteModel();
-
         // 软删除一条数据
-        $item = $model::find(1);
+        $item = SoftDeleteModel::find(1);
         $item->delete();
 
         // 恢复软删除的数据
-        $trashedItem = $model::onlyTrashed()->find(1);
+        $trashedItem = SoftDeleteModel::onlyTrashed()->find(1);
         $this->assertNotNull($trashedItem);
         $trashedItem->restore();
 
         // 验证恢复后可以正常查询
-        $restoredItem = $model::find(1);
+        $restoredItem = SoftDeleteModel::find(1);
         $this->assertNotNull($restoredItem);
         $this->assertNull($restoredItem->delete_time);
     }
 
     public function testSoftDeleteScope()
     {
-        $model = new SoftDeleteModel();
-
         // 软删除一条激活状态的数据
-        $model::find(1)->delete();
+        SoftDeleteModel::find(1)->delete();
 
         // 测试查询作用域和软删除的结合
-        $activeItems = $model::active()->select();
+        $activeItems = SoftDeleteModel::active()->select();
         $this->assertEquals(1, count($activeItems));
 
         // 测试包含软删除数据的作用域查询
-        $allActiveItems = $model::withTrashed()->active()->select();
+        $allActiveItems = SoftDeleteModel::withTrashed()->active()->select();
         $this->assertEquals(2, count($allActiveItems));
     }
 
     public function testBatchSoftDelete()
     {
-        $model = new SoftDeleteModel();
-
         // 批量软删除
-        $model::where('status', 1)->delete();
+        SoftDeleteModel::where('status', 1)->select()->delete();
 
         // 验证软删除结果
-        $remainingItems = $model::select();
+        $remainingItems = SoftDeleteModel::select();
         $this->assertEquals(1, count($remainingItems));
         $this->assertEquals(0, $remainingItems[0]->status);
 
         // 验证软删除数据仍在数据库中
-        $allItems = $model::withTrashed()->select();
+        $allItems = SoftDeleteModel::withTrashed()->select();
         $this->assertEquals(3, count($allItems));
     }
 }

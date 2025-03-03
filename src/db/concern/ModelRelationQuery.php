@@ -475,7 +475,7 @@ trait ModelRelationQuery
      *
      * @return $this
      */
-    public function withCount(string | array $relation, string $field = '*', bool $subQuery = true)
+    public function withCount(string | array $relation, string $field = 'id', bool $subQuery = true)
     {
         return $this->withAggregate($relation, 'count', $field, $subQuery);
     }

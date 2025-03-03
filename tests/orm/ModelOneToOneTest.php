@@ -19,7 +19,7 @@ class ModelOneToOneTest extends TestCase
             'DROP TABLE IF EXISTS `test_user`;',
             'CREATE TABLE `test_user`  (
               `id` int NOT NULL AUTO_INCREMENT,
-              `account` varchar(255) NOT NULL DEFAULT "",
+              `name` varchar(255) NOT NULL DEFAULT "",
               PRIMARY KEY (`id`)
             ) ENGINE = InnoDB DEFAULT CHARSET=utf8mb4;',
             'DROP TABLE IF EXISTS `test_profile`;',
@@ -54,7 +54,7 @@ class ModelOneToOneTest extends TestCase
         $nickname = 'u' . mt_rand(10000, 99999);
 
         $user = new UserModel();
-        $user->account = 'thinkphp';
+        $user->name    = 'thinkphp';
         $user->profile = new ProfileModel(['email' => $email, 'nickname' => $nickname]);
         $user->together(['profile'])->save();
 
@@ -84,7 +84,7 @@ class ModelOneToOneTest extends TestCase
     public function testBasicRelation()
     {
         $user = new UserModel();
-        $user->account = 'thinkphp';
+        $user->name = 'thinkphp';
         $user->save();
 
         $profile = new ProfileModel();
@@ -101,7 +101,7 @@ class ModelOneToOneTest extends TestCase
         // 测试belongsTo关联
         $profile = ProfileModel::find($profile->id);
         $this->assertNotNull($profile->user);
-        $this->assertEquals('thinkphp', $profile->user->account);
+        $this->assertEquals('thinkphp', $profile->user->name);
     }
 
     /**
@@ -110,9 +110,9 @@ class ModelOneToOneTest extends TestCase
     public function testEagerLoading()
     {
         // 创建测试数据
-        $user1 = new UserModel(['account' => 'user1']);
+        $user1 = new UserModel(['name' => 'user1']);
         $user1->save();
-        $user2 = new UserModel(['account' => 'user2']);
+        $user2 = new UserModel(['name' => 'user2']);
         $user2->save();
 
         $profile1 = new ProfileModel([
@@ -150,7 +150,7 @@ class ModelOneToOneTest extends TestCase
     {
         // 测试关联新增
         $user = new UserModel();
-        $user->account = 'newuser';
+        $user->name    = 'newuser';
         $user->profile = new ProfileModel(['email' => 'new@thinkphp.cn', 'nickname' => 'newnick']);
         $user->together(['profile'])->save();
 
@@ -158,7 +158,7 @@ class ModelOneToOneTest extends TestCase
         $this->assertEquals('new@thinkphp.cn', $user->profile->email);
 
         // 测试关联更新
-        $user = UserModel::with(['profile'])->where('account', 'newuser')->find();
+        $user = UserModel::with(['profile'])->where('name', 'newuser')->find();
         $user->profile->email = 'updated@thinkphp.cn';
         $user->together(['profile'])->save();
 
@@ -172,7 +172,7 @@ class ModelOneToOneTest extends TestCase
     public function testRelationDelete()
     {
         $user = new UserModel();
-        $user->account = 'deletetest';
+        $user->name    = 'deletetest';
         $user->profile = new ProfileModel(['email' => 'delete@thinkphp.cn', 'nickname' => 'deletenick']);
         $user->together(['profile'])->save();
 

@@ -156,11 +156,11 @@ class ModelManyToManyTest extends TestCase
         // 测试新增关联
         $student = StudentModel::find(2);
         $result = $student->courses()->attach(1, ['score' => 87.5]);
-        $this->assertTrue($result);
+        $this->assertEquals(87.5, $result->score);
 
         // 测试解除关联
         $result = $student->courses()->detach(1);
-        $this->assertTrue($result);
+        $this->assertEquals(1, $result);
     }
 }
 

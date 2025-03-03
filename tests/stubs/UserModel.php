@@ -12,7 +12,6 @@ use think\model\relation\HasOne;
 class UserModel extends Model
 {
     protected $table = 'test_user';
-    protected $pk = 'id';
     protected $autoWriteTimestamp = false;
 
     /**

@@ -112,13 +112,9 @@ SQL
 
     public function testModelObserver()
     {
-        $observer = new EventObserver();
-        $model = new ObservedModel();
-        $model->setEventObServer($observer);
-
         // 测试插入事件
         $data = ['name' => 'test9', 'status' => 1];
-        $result = $model::create($data);
+        $result = ObservedModel::create($data);
 
         $this->assertTrue($observer->beforeInsertCalled, 'observer before_insert event not triggered');
         $this->assertTrue($observer->afterInsertCalled, 'observer after_insert event not triggered');
@@ -142,8 +138,8 @@ SQL
 
         // 测试删除事件
         // 创建两条记录用于测试
-        $record1 = $model::create(['name' => 'test11', 'status' => 1]);
-        $record2 = $model::create(['name' => 'test12', 'status' => 0]);
+        $record1 = ObservedModel::create(['name' => 'test11', 'status' => 1]);
+        $record2 = ObservedModel::create(['name' => 'test12', 'status' => 0]);
 
         // 重置标志
         $observer->beforeDeleteCalled = false;
@@ -164,6 +160,6 @@ SQL
         $this->assertFalse($observer->afterDeleteCalled, 'observer after_delete event should not be triggered');
 
         // 验证记录2仍然存在
-        $this->assertNotNull($model::find($record2->id));
+        $this->assertNotNull(ObservedModel::find($record2->id));
     }
 }

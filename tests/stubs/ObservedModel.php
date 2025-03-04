@@ -9,10 +9,6 @@ class ObservedModel extends Model
 {
     protected $table = 'test_event_model';
     protected $autoWriteTimestamp = true;
-    protected $eventObserver;
+    protected $eventObserver = EventObserver::class;
 
-    public function setEventObServer($observer)
-    {
-    	$this->eventObserver = $observer;
-    }
 }

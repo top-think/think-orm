@@ -1,5 +1,5 @@
 <?php
-declare(strict_types=1);
+declare (strict_types = 1);
 
 namespace tests\orm;
 
@@ -44,17 +44,16 @@ class ModelOneToOneTest extends TestCase
         Db::execute('TRUNCATE TABLE `test_user`;');
         Db::execute('TRUNCATE TABLE `test_profile`;');
     }
-    
+
     /**
      * 绑定属性
      */
     public function testBindAttr()
     {
-        $email = mt_rand(10000, 99999) . '@thinkphp.cn';
+        $email    = mt_rand(10000, 99999) . '@thinkphp.cn';
         $nickname = 'u' . mt_rand(10000, 99999);
 
-        $user = new UserModel();
-        $user->id      = 1;
+        $user          = new UserModel();
         $user->name    = 'thinkphp';
         $user->profile = new ProfileModel(['email' => $email, 'nickname' => $nickname]);
         $user->together(['profile'])->save();
@@ -84,15 +83,14 @@ class ModelOneToOneTest extends TestCase
      */
     public function testBasicRelation()
     {
-        $user = new UserModel();
+        $user       = new UserModel();
         $user->name = 'thinkphp';
-        $user->id   = 1;
         $user->save();
 
-        $profile = new ProfileModel();
-        $profile->email = 'test@thinkphp.cn';
+        $profile           = new ProfileModel();
+        $profile->email    = 'test@thinkphp.cn';
         $profile->nickname = 'test';
-        $profile->user_id = $user->id;
+        $profile->user_id  = $user->id;
         $profile->save();
 
         // 测试hasOne关联
@@ -113,21 +111,21 @@ class ModelOneToOneTest extends TestCase
     {
         // 创建测试数据
         $user1 = new UserModel();
-        $user1->save(['name' => 'user1','id'=>1]);
+        $user1->save(['name' => 'user1']);
         $user2 = new UserModel();
-        $user2->save(['name' => 'user2','id'=>2]);
+        $user2->save(['name' => 'user2']);
 
         $profile1 = new ProfileModel([
-            'user_id' => $user1->id,
-            'email' => 'user1@thinkphp.cn',
-            'nickname' => 'nickname1'
+            'user_id'  => $user1->id,
+            'email'    => 'user1@thinkphp.cn',
+            'nickname' => 'nickname1',
         ]);
         $profile1->save();
 
         $profile2 = new ProfileModel([
-            'user_id' => $user2->id,
-            'email' => 'user2@thinkphp.cn',
-            'nickname' => 'nickname2'
+            'user_id'  => $user2->id,
+            'email'    => 'user2@thinkphp.cn',
+            'nickname' => 'nickname2',
         ]);
         $profile2->save();
 
@@ -138,7 +136,7 @@ class ModelOneToOneTest extends TestCase
         $this->assertEquals('user2@thinkphp.cn', $users[1]->profile->email);
 
         // 测试预加载条件
-        $users = UserModel::with(['profile' => function($query) {
+        $users = UserModel::with(['profile' => function ($query) {
             $query->where('nickname', 'nickname1');
         }])->select();
         $this->assertNotNull($users[0]->profile);
@@ -151,7 +149,7 @@ class ModelOneToOneTest extends TestCase
     public function testRelationSave()
     {
         // 测试关联新增
-        $user = new UserModel();
+        $user          = new UserModel();
         $user->name    = 'newuser';
         $user->profile = new ProfileModel(['email' => 'new@thinkphp.cn', 'nickname' => 'newnick']);
         $user->together(['profile'])->save();
@@ -160,7 +158,7 @@ class ModelOneToOneTest extends TestCase
         $this->assertEquals('new@thinkphp.cn', $user->profile->email);
 
         // 测试关联更新
-        $user = UserModel::with(['profile'])->where('name', 'newuser')->find();
+        $user                 = UserModel::with(['profile'])->where('name', 'newuser')->find();
         $user->profile->email = 'updated@thinkphp.cn';
         $user->together(['profile'])->save();
 
@@ -173,8 +171,8 @@ class ModelOneToOneTest extends TestCase
      */
     public function testRelationDelete()
     {
-        $user = new UserModel();
-        $user->name    = 'deletetest';
+        $user       = new UserModel();
+        $user->name = 'deletetest';
         $user->profile = new ProfileModel(['email' => 'delete@thinkphp.cn', 'nickname' => 'deletenick']);
         $user->together(['profile'])->save();
 

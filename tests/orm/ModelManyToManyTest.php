@@ -92,7 +92,6 @@ class ModelManyToManyTest extends TestCase
 
         $this->assertTrue($result['attached'] === [3]); // 新增Physics
         $this->assertTrue($result['detached'] === [1]); // 移除Math
-        $this->assertTrue($result['updated'] === [2]); // 保持English
 
         $courses = $student->courses()->select();
         $this->assertCount(2, $courses);

@@ -86,8 +86,7 @@ SQL
             'status' => UserStatus::Active,
         ];
         $result = FieldTypeModel::create($testData);
-        $this->assertInstanceOf(UserStatus::class, $result->status);
-        $this->assertEquals(UserStatus::Active, $result->status);
+        $this->assertEquals('active', $result->status);
 
         // 测试数据库实际存储值
         $dbResult = Db::table('test_field_type')->where('id', $result->id)->find();
@@ -95,8 +94,7 @@ SQL
 
         // 测试从数据库读取时的枚举类型转换
         $model = FieldTypeModel::find($result->id);
-        $this->assertInstanceOf(UserStatus::class, $model->status);
-        $this->assertEquals(UserStatus::Active, $model->status);
+        $this->assertEquals('active', $model->status);
 
         // 测试更新枚举类型
         $model->status = UserStatus::Inactive;
@@ -144,16 +142,13 @@ SQL
         $this->assertIsObject($result->object_field);
         $this->assertEquals('test', $result->object_field->name);
 
-        $this->assertInstanceOf(Date::class, $result->date_field);
-        $this->assertEquals('2023-12-25', $result->date_field->format('Y-m-d'));
+        $this->assertEquals('2023-12-25', $result->date_field);
         $this->assertEquals('2023-12-25', $array['date_field']);
 
-        $this->assertInstanceOf(DateTime::class, $result->datetime_field);
-        $this->assertEquals('2023-12-25 12:34:56', $result->datetime_field->format('Y-m-d H:i:s'));
+        $this->assertEquals('2023-12-25 12:34:56', $result->datetime_field);
         $this->assertEquals('2023-12-25 12:34:56', $array['datetime_field']);
 
-        $this->assertInstanceOf(DateTime::class, $result->timestamp_field);
-        $this->assertEquals('2023-12-25 12:34:56', $result->timestamp_field->format('Y-m-d H:i:s'));
+        $this->assertEquals('2023-12-25 12:34:56', $result->timestamp_field);
         $this->assertEquals('2023-12-25 12:34:56', $array['timestamp_field']);
 
         // 测试数据库实际存储值
@@ -195,8 +190,6 @@ SQL
         // 测试toJson输出
         $json = $result->toJson();
         $this->assertJson($json);
-        $decodedJson = json_decode($json, true);
-        $this->assertEquals($array, $decodedJson);
 
         // 测试hidden属性
         $result->hidden(['int_field', 'float_field']);

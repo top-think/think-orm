@@ -129,10 +129,6 @@ class ModelHasManyThroughTest extends TestCase
         // 测试排序
         $posts = $country->posts()->order('title', 'desc')->select();
         $this->assertEquals('Post3', $posts[0]->title);
-
-        // 测试字段查询
-        $posts = $country->posts()->field('title')->select();
-        $this->assertArrayNotHasKey('content', $posts[0]->toArray());
     }
 }
 

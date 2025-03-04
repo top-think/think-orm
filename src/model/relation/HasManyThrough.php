@@ -392,7 +392,6 @@ class HasManyThrough extends Relation
                 ->field($fields)
                 ->alias($alias)
                 ->join($throughTable, $throughTable . '.' . $pk . '=' . $alias . '.' . $throughKey)
-                ->join($modelTable, $modelTable . '.' . $this->localKey . '=' . $throughTable . '.' . $this->foreignKey)
                 ->where($throughTable . '.' . $this->foreignKey, $this->parent->{$this->localKey});
 
             $this->baseQuery = true;

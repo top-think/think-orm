@@ -94,7 +94,7 @@ SQL
         $this->assertContains('php', $result->tags);
 
         // 测试whereJsonContains方法 - 不存在的值
-        $result = JsonModel::whereJsonContains('tags', 'java')->find();
+        $result = JsonModel::whereJsonContains('tags', 'net')->find();
         $this->assertNull($result);
 
         // 测试whereJsonContains方法 - 对象值

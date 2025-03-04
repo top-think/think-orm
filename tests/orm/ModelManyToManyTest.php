@@ -121,7 +121,7 @@ class ModelManyToManyTest extends TestCase
         $this->assertCount(0, $student->courses()->select());
 
         // 测试同步单个ID
-        $result = $student->courses()->sync(1, ['score' => 91.0]);
+        $result = $student->courses()->sync([1 => ['score' => 91.0]]);
         $this->assertTrue($result['attached'] === [1]);
         
         $course = $student->courses()->find();

@@ -368,7 +368,6 @@ class HasManyThrough extends Relation
         return $this->query
             ->alias($alias)
             ->join($throughTable, $throughTable . '.' . $pk . '=' . $alias . '.' . $throughKey)
-            ->join($modelTable, $modelTable . '.' . $this->localKey . '=' . $throughTable . '.' . $this->foreignKey)
             ->whereExp($throughTable . '.' . $this->foreignKey, '=' . $this->parent->getTable() . '.' . $this->localKey)
             ->fetchSql()
             ->$aggregate($field);

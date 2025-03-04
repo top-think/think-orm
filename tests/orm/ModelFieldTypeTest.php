@@ -81,6 +81,10 @@ SQL
 
     public function testEnumTypeConversion()
     {
+        if (PHP_VERSION_ID < 80100) {
+            $this->markTestSkipped('Enum types are only supported in PHP 8.1+');
+        }
+
         // 测试写入时的枚举类型转换
         $testData = [
             'status' => UserStatus::Active,

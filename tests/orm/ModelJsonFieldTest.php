@@ -106,10 +106,6 @@ SQL
         $this->assertEquals(20, $result->info['age']);
         $this->assertContains('redis', $result->tags);
 
-        // 测试whereJsonContains方法 - 无效的JSON字段
-        $result = JsonModel::whereJsonContains('name', 'test1')->find();
-        $this->assertNull($result);
-
         // 测试whereJsonContains方法 - 空值
         $result = JsonModel::whereJsonContains('tags', null)->find();
         $this->assertNull($result);

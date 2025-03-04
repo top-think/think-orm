@@ -10,7 +10,11 @@ class FieldTypeModel extends Model
     protected $table = 'test_field_type';
     protected $autoWriteTimestamp = false;
 
-    protected $type = [];
+    protected $type = [
+        'array_field'   => 'array',
+        'object_field'  => 'object',
+        'bool_field'    =>  'bool',
+    ];
 
     public function __construct(array $data = [])
     {

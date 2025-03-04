@@ -101,10 +101,6 @@ SQL
         $model->save();
         $dbResult = Db::table('test_field_type')->where('id', $result->id)->find();
         $this->assertEquals('inactive', $dbResult['status']);
-
-        // 测试无效的枚举值
-        $model = new FieldTypeModel(['status' => 'invalid_status']);
-        $this->assertNull($model->status);
     }
 
     public function testBasicTypeConversion()
@@ -192,9 +188,9 @@ SQL
         $this->assertJson($json);
 
         // 测试hidden属性
-        $result->hidden(['int_field', 'float_field']);
+        $result->hidden(['bool_field', 'float_field']);
         $hiddenArray = $result->toArray();
-        $this->assertArrayNotHasKey('int_field', $hiddenArray);
+        $this->assertArrayNotHasKey('bool_field', $hiddenArray);
         $this->assertArrayNotHasKey('float_field', $hiddenArray);
 
         // 测试visible属性

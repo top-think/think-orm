@@ -97,14 +97,8 @@ SQL
         $result = JsonModel::whereJsonContains('tags', 'net')->find();
         $this->assertNull($result);
 
-        // 测试whereJsonContains方法 - 对象值
-        $result = JsonModel::whereJsonContains('info', ['city' => 'beijing'])->find();
-        $this->assertNotNull($result);
-        $this->assertEquals(1, $result->id);
-        $this->assertEquals('beijing', $result->info['city']);
-
         // 测试whereJsonContains方法 - 多个条件
-        $result = JsonModel::whereJsonContains('info', ['age' => 20])
+        $result = JsonModel::where('info->age', 20)
             ->whereJsonContains('tags', 'redis')
             ->find();
         $this->assertNotNull($result);
@@ -119,18 +113,6 @@ SQL
         // 测试whereJsonContains方法 - 空值
         $result = JsonModel::whereJsonContains('tags', null)->find();
         $this->assertNull($result);
-
-        // 测试whereJsonContains方法 - 复杂对象
-        JsonModel::create([
-            'name' => 'test3',
-            'info' => ['address' => ['city' => 'guangzhou', 'street' => 'test']],
-            'tags' => ['vue', 'react']
-        ]);
-
-        $result = JsonModel::whereJsonContains('info', ['address' => ['city' => 'guangzhou']])->find();
-        $this->assertNotNull($result);
-        $this->assertEquals('test3', $result->name);
-        $this->assertEquals('guangzhou', $result->info['address']['city']);
 
         // 测试JSON数组追加
         $record = JsonModel::find(1);

@@ -21,6 +21,7 @@ use think\helper\Str;
 use think\model\contract\Modelable as Model;
 use think\model\Pivot;
 use think\model\Relation;
+
 /**
  * 多对多关联类.
  */
@@ -72,14 +73,14 @@ class BelongsToMany extends Relation
      */
     public function __construct(Model $parent, string $model, string $middle, string $foreignKey, string $localKey)
     {
-        $this->parent       = $parent;
-        $this->model        = $model;
-        $this->foreignKey   = $foreignKey;
-        $this->localKey     = $localKey;
+        $this->parent     = $parent;
+        $this->model      = $model;
+        $this->foreignKey = $foreignKey;
+        $this->localKey   = $localKey;
 
         if (str_contains($middle, '\\')) {
             $this->pivotName = $middle;
-            $this->middle = Str::snake(class_basename($middle));
+            $this->middle    = Str::snake(class_basename($middle));
         } else {
             $this->middle = $middle;
         }
@@ -201,36 +202,80 @@ class BelongsToMany extends Relation
     }
 
     /**
-     * 根据关联条件查询当前模型.
-     *
-     * @param string $operator 比较操作符
-     * @param int    $count    个数
-     * @param string $id       关联表的统计字段
-     * @param string $joinType JOIN类型
-     * @param Query  $query    Query对象
-     *
-     * @return Model
+     * 根据关联条件查询当前模型
+     * @access public
+     * @param string     $operator 比较操作符
+     * @param integer    $count 个数
+     * @param string     $id 关联表的统计字段
+     * @param string     $joinType JOIN类型
+     * @param Query|null $query Query对象
+     * @return Query
      */
-    public function has(string $operator = '>=', $count = 1, $id = '*', string $joinType = 'INNER', ?Query $query = null)
+    public function has(string $operator = '>=', int $count = 1, string $id = '*', string $joinType = '', ?Query $query = null): Query
     {
-        return $this->parent;
+        $table      = $this->query->getTable();
+        $pivot      = $this->pivot->getTable();
+
+        $model      = Str::snake(class_basename($this->parent));
+        $relation   = Str::snake(class_basename($this->model));
+        $softDelete = $this->query->getOptions('soft_delete');
+        $query      = $query ?: $this->parent->db();
+
+        return $query->alias($model)
+            ->field($model . '.*')
+            ->join([$pivot => 'pivot'], 'pivot.' . $this->localKey . '=' . $model . '.' . $this->parent->getPk(), $joinType)
+            ->join($table . ' ' . $relation, $relation . '.' . $this->query->getPk() . '= pivot.' . $this->foreignKey, $joinType)
+            ->when($softDelete, function ($query) use ($softDelete, $relation) {
+                $query->where($relation . strstr($softDelete[0], '.'), '=' == $softDelete[1][0] ? $softDelete[1][1] : null);
+            })
+            ->group($model . '.' . $this->parent->getPk())
+            ->having('count(' . $id . ')' . $operator . $count);
     }
 
     /**
-     * 根据关联条件查询当前模型.
-     *
-     * @param mixed  $where    查询条件（数组或者闭包）
-     * @param mixed  $fields   字段
-     * @param string $joinType JOIN类型
-     * @param Query  $query    Query对象
-     *
-     * @throws Exception
-     *
+     * 根据关联条件查询当前模型
+     * @access public
+     * @param array|Closure  $where 查询条件（数组或者闭包）
+     * @param mixed          $fields 字段
+     * @param string         $joinType JOIN类型
+     * @param Query|null     $query Query对象
      * @return Query
      */
-    public function hasWhere($where = [], $fields = null, string $joinType = '', ?Query $query = null)
+    public function hasWhere($where = [], $fields = null, string $joinType = '', ?Query $query = null): Query
     {
-        throw new Exception('relation not support: hasWhere');
+        $table    = $this->query->getTable();
+        $pivot    = $this->pivot->getTable();
+        $model    = Str::snake(class_basename($this->parent));
+        $relation = Str::snake(class_basename($this->model));
+
+        if (is_array($where)) {
+            $this->getQueryWhere($where, $table);
+        } elseif ($where instanceof Query) {
+            $where->via($table);
+        } elseif ($where instanceof Closure) {
+            $where($this->query->via($table));
+            $where = $this->query;
+        }
+
+        $fields     = $this->getRelationQueryFields($fields, $model);
+        $softDelete = $this->query->getOptions('soft_delete');
+        $query      = $query ?: $this->parent->db();
+
+        return $query->alias($model)
+            ->join([$pivot => 'pivot'], 'pivot.' . $this->localKey . '=' . $model . '.' . $this->parent->getPk(), $joinType)
+            ->join($table . ' ' . $relation, $relation . '.' . $this->query->getPk() . '= pivot.' . $this->foreignKey, $joinType)
+            ->when($softDelete, function ($query) use ($softDelete, $relation) {
+                $query->where($relation . strstr($softDelete[0], '.'), '=' == $softDelete[1][0] ? $softDelete[1][1] : null);
+            })
+            ->group($model . '.' . $this->parent->getPk())
+            ->where(function ($query) use ($where) {
+                if ($where instanceof Query) {
+                    $query->where($where);
+                } else {
+                    $query->where($where);
+                }
+            })
+            ->field($fields);
     }
 
     /**
@@ -262,9 +307,9 @@ class BelongsToMany extends Relation
      */
     public function eagerlyResultSet(array &$resultSet, string $relation, array $subRelation, ?Closure $closure = null, array $cache = []): void
     {
-        $localKey   = $this->localKey;
-        $pk         = $resultSet[0]->getPk();
-        $range      = [];
+        $localKey = $this->localKey;
+        $pk       = $resultSet[0]->getPk();
+        $range    = [];
 
         foreach ($resultSet as $result) {
             // 获取关联外键列表
@@ -332,7 +377,7 @@ class BelongsToMany extends Relation
      *
      * @return int
      */
-    public function relationCount(Model $result, ?Closure $closure = null, string $aggregate = 'count', string $field = 'id', ?string &$name = null)
+    public function relationCount(Model $result, ?Closure $closure = null, string $aggregate = 'count', string $field = 'id',  ? string &$name = null)
     {
         $pk = $result->getPk();
 
@@ -361,7 +406,7 @@ class BelongsToMany extends Relation
      *
      * @return string
      */
-    public function getRelationCountQuery(?Closure $closure = null, string $aggregate = 'count', string $field = 'id', ?string &$name = null): string
+    public function getRelationCountQuery(?Closure $closure = null, string $aggregate = 'count', string $field = 'id',  ? string &$name = null) : string
     {
         if ($closure) {
             $closure($this->query, $name);
@@ -390,7 +435,7 @@ class BelongsToMany extends Relation
      *
      * @return array
      */
-    protected function eagerlyManyToMany(array $where, array $subRelation = [], ?Closure $closure = null, array $cache = []): array
+    protected function eagerlyManyToMany(array $where, array $subRelation = [], ?Closure $closure = null, array $cache = []) : array
     {
         if ($closure) {
             $closure($this->query);
@@ -508,7 +553,7 @@ class BelongsToMany extends Relation
             } else {
                 // 保存关联表数据
                 $model = new $this->model();
-                $id = $model->insertGetId($data);
+                $id    = $model->insertGetId($data);
             }
         } elseif (is_numeric($data) || is_string($data)) {
             // 根据关联表主键直接写入中间表
@@ -586,7 +631,7 @@ class BelongsToMany extends Relation
         }
 
         // 删除中间表数据
-        $pivot = [];
+        $pivot   = [];
         $pivot[] = [$this->localKey, '=', $this->parent->getKey()];
 
         if (isset($id)) {
@@ -662,7 +707,7 @@ class BelongsToMany extends Relation
     {
         if (empty($this->baseQuery)) {
             $foreignKey = $this->foreignKey;
-            $localKey = $this->localKey;
+            $localKey   = $this->localKey;
 
             $this->query->filter(function ($result, $options) {
                 $this->matchPivot($result);

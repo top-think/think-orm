@@ -81,8 +81,9 @@ SQL
 
         // 尝试删除状态为0的记录
         EventModel::resetEventFlags();
-        $record2->delete();
-        $flags = EventModel::getEventFlags();
+        $result = $record2->delete();
+        $this->assertFalse($result);
+        $flags  = EventModel::getEventFlags();
         $this->assertTrue($flags['beforeDeleteCalled'], 'before_delete event not triggered');
         $this->assertFalse($flags['afterDeleteCalled'], 'after_delete event should not be triggered');
 

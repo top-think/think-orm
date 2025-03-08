@@ -8,7 +8,7 @@ use think\model\contract\Modelable as Model;
 
 interface FieldTypeTransform
 {
-    public static function get(mixed $value, Model $model): ?static;
+    public static function get(mixed $value, Model $model): mixed;
 
     /**
      * @return static|mixed

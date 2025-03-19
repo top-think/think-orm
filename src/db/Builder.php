@@ -60,7 +60,11 @@ class Builder extends BaseBuilder
         $result = [];
 
         foreach ($data as $key => $val) {
-            $item = $this->parseKey($query, $key, true);
+            $strict = false;
+            if (false === stripos($key,'->')){
+                $strict = true;
+            }
+            $item = $this->parseKey($query, $key, $strict);
             if ($val instanceof BackedEnum) {
                 $val = $val->value;
             } elseif ($val instanceof UnitEnum) {
@@ -79,7 +83,11 @@ class Builder extends BaseBuilder
                 [$key, $name] = explode('->', $key, 2);
                 $item         = $this->parseKey($query, $key);
 
-                $result[$item . '->' . $name] = 'json_set(' . $item . ', \'$.' . $name . '\', ' . $this->parseDataBind($query, $key . '->' . $name, $val, $bind) . ')';
+                if ($this->getConnection()->getConfig('type') == 'sqlsrv'){
+                    $result[$item . '->' . $name] = 'JSON_MODIFY(' . $item . ', \'$.' . $name . '\', ' . $this->parseDataBind($query, $key . '->' . $name, $val, $bind) . ')';
+                }else{
+                    $result[$item . '->' . $name] = 'json_set(' . $item . ', \'$.' . $name . '\', ' . $this->parseDataBind($query, $key . '->' . $name, $val, $bind) . ')';
+                }
             } elseif (!str_contains($key, '.') && !in_array($key, $fields, true)) {
                 if ($options['strict']) {
                     throw new Exception('fields not exists:[' . $key . ']');

@@ -425,7 +425,7 @@ abstract class PDOConnection extends Connection
 
         $info = $this->getSchemaInfo($tableName);
 
-        return $fetch && isset($info[$fetch]) ? $info[$fetch] : $info;
+        return $fetch && array_key_exists($fetch, $info) ? $info[$fetch] : $info;
     }
 
     /**

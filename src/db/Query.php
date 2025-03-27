@@ -361,13 +361,13 @@ class Query extends BaseQuery
     /**
      * 字段值增长
      *
-     * @param string $field 字段名
-     * @param float  $step  增长值
-     * @param int    $lazyTime 延迟时间（秒）
+     * @param string    $field    字段名
+     * @param float|int $step     增长值
+     * @param int       $lazyTime 延迟时间（秒）
      *
      * @return $this
      */
-    public function inc(string $field, float $step = 1, int $lazyTime = 0)
+    public function inc(string $field, float|int $step = 1, int $lazyTime = 0)
     {
         if ($lazyTime > 0) {
             $step = $this->lazyWrite($field, 'inc', $step, $lazyTime);
@@ -384,13 +384,13 @@ class Query extends BaseQuery
     /**
      * 字段值减少.
      *
-     * @param string $field 字段名
-     * @param float  $step  增长值
-     * @param int    $lazyTime 延迟时间（秒）
+     * @param string    $field    字段名
+     * @param float|int $step     增长值
+     * @param int       $lazyTime 延迟时间（秒）
      *
      * @return $this
      */
-    public function dec(string $field, float $step = 1, int $lazyTime = 0)
+    public function dec(string $field, float|int $step = 1, int $lazyTime = 0)
     {
         if ($lazyTime > 0) {
             $step = $this->lazyWrite($field, 'dec', $step, $lazyTime);
@@ -408,13 +408,13 @@ class Query extends BaseQuery
     /**
      * 字段值增长（支持延迟写入）
      *
-     * @param string    $field 字段名
-     * @param float     $step  步进值
+     * @param string    $field    字段名
+     * @param float|int $step     步进值
      * @param int       $lazyTime 延迟时间（秒）
      *
      * @return int|false
      */
-    public function setInc(string $field, float $step = 1, int $lazyTime = 0)
+    public function setInc(string $field, float|int $step = 1, int $lazyTime = 0)
     {
         return $this->inc($field, $step, $lazyTime)->update();
     }
@@ -422,13 +422,13 @@ class Query extends BaseQuery
     /**
      * 字段值减少（支持延迟写入）
      *
-     * @param string    $field 字段名
-     * @param float     $step  步进值
+     * @param string    $field    字段名
+     * @param float|int $step     步进值
      * @param int       $lazyTime 延迟时间（秒）
      *
      * @return int|false
      */
-    public function setDec(string $field, float $step = 1, int $lazyTime = 0)
+    public function setDec(string $field, float|int $step = 1, int $lazyTime = 0)
     {
         return $this->dec($field, $step, $lazyTime)->update();
     }

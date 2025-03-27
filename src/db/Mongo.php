@@ -163,12 +163,12 @@ class Mongo extends BaseQuery
     /**
      * 字段值增长
      *
-     * @param string $field 字段名
-     * @param float  $step  增长值
+     * @param string    $field 字段名
+     * @param float|int $step  增长值
      *
      * @return $this
      */
-    public function inc(string $field, float $step = 1)
+    public function inc(string $field, float|int $step = 1)
     {
         $this->options['data'][$field] = ['$inc', $step];
 
@@ -178,12 +178,12 @@ class Mongo extends BaseQuery
     /**
      * 字段值减少.
      *
-     * @param string $field 字段名
-     * @param float  $step  减少值
+     * @param string    $field 字段名
+     * @param float|int $step  减少值
      *
      * @return $this
      */
-    public function dec(string $field, float $step = 1)
+    public function dec(string $field, float|int $step = 1)
     {
         return $this->inc($field, -1 * $step);
     }

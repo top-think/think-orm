@@ -634,13 +634,13 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
     /**
      * 字段值增长
      *
-     * @param string $field 字段名
-     * @param float  $step  增长值
-     * @param int    $lazyTime 延迟时间（秒）
+     * @param string    $field    字段名
+     * @param float|int $step     增长值
+     * @param int       $lazyTime 延迟时间（秒）
      *
      * @return $this
      */
-    public function inc(string $field, float $step = 1, int $lazyTime = 0)
+    public function inc(string $field, float|int $step = 1, int $lazyTime = 0)
     {
         return $this->set($field, new Express('+', $step, $lazyTime));
     }
@@ -648,13 +648,13 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
     /**
      * 字段值减少.
      *
-     * @param string $field 字段名
-     * @param float  $step  增长值
-     * @param int    $lazyTime 延迟时间（秒）
+     * @param string    $field    字段名
+     * @param float|int $step     增长值
+     * @param int       $lazyTime 延迟时间（秒）
      *
      * @return $this
      */
-    public function dec(string $field, float $step = 1, int $lazyTime = 0)
+    public function dec(string $field, float|int $step = 1, int $lazyTime = 0)
     {
         return $this->set($field, new Express('-', $step, $lazyTime));
     }

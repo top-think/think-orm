@@ -245,8 +245,12 @@ trait Attribute
             'object'         => empty($value) ? new \stdClass() : (is_string($value) ? json_decode($value) : json_decode(json_encode($value, JSON_FORCE_OBJECT))),
             'json'           => $typeTransform(Json::class, $value, $this),
             'date'           => $typeTransform(Date::class, $value, $this),
-            'datetime'       => $typeTransform(DateTime::class, $value, $this),
-            'timestamp'      => $typeTransform(DateTime::class, $value, $this),
+            'datetime','timestamp'      => (function() use ($value, $param, $typeTransform){
+                if (!empty($param)){
+                    $this->setDateFormat($param);
+                }
+                return $typeTransform(DateTime::class, $value, $this);
+            })(),
             default          => $typeTransform($type, $value, $this),
         };
     }

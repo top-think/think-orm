@@ -2,6 +2,9 @@ name: tests
 
 on: [push, pull_request]
 
+permissions:
+  contents: read
+
 jobs:
   phpunit:
     runs-on: ubuntu-latest

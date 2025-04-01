@@ -2,6 +2,9 @@ name: codecov
 
 on: [push, pull_request]
 
+permissions:
+  contents: read
+
 jobs:
   tests:
     runs-on: ubuntu-latest
@@ -37,7 +40,7 @@ jobs:
 
       - name: Get composer cache directory
         id: composercache
-        run: echo "::set-output name=dir::$(composer config cache-files-dir)"
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
 
       - name: Cache vendor
         uses: actions/cache@v4

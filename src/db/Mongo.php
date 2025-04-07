@@ -755,4 +755,35 @@ class Mongo extends BaseQuery
 
         return $fieldType[$field] ?? null;
     }
+
+    /**
+     * 获取字段类型
+     * 
+     * @return array
+     */
+    public function getType()
+    {
+        return $this->getFieldsType();
+    }
+
+    /**
+     * 获取自增主键
+     * 
+     * @return string
+     */
+    public function getAutoInc()
+    {
+        return '';
+    }
+
+    /**
+     * 设置自增主键
+     * 
+     * @param string $autoInc
+     * @return static
+     */
+    public function autoInc(?string $autoInc)
+    {
+        return $this;
+    }
 }

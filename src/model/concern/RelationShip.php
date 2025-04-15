@@ -124,7 +124,8 @@ trait RelationShip
                     }
                 } else {
                     // 数组或数据集
-                    $relationModel = $this->$name();
+                    $method = Str::camel($name);
+                    $relationModel = $this->$method();
                     if ($relationModel instanceof OneToOne) {
                         $data = $relationModel->save($relation);
                     } elseif ($relationModel instanceof HasMany || $relationModel instanceof MorphMany) {

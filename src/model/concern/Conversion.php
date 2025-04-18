@@ -177,7 +177,7 @@ trait Conversion
      * @param int $options json参数
      * @return string
      */
-    public function tojson(int $options = JSON_UNESCAPED_UNICODE): string
+    public function toJson(int $options = JSON_UNESCAPED_UNICODE): string
     {
         return json_encode($this->toArray(), $options);
     }
@@ -186,7 +186,7 @@ trait Conversion
      * 转换为数据集对象
      *
      * @param array|Collection $collection    数据集
-     * @param string           $resultSetType 数据集类
+     * @param string|null      $resultSetType 数据集类
      *
      * @return Collection
      */

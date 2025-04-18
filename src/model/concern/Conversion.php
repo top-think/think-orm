@@ -148,8 +148,12 @@ trait Conversion
             } else {
                 // 追加关联属性
                 $relation = $this->getRelationData($key, false);
-                foreach((array) $field as $name) {
-                    $item[$name] = $relation[$name] ?? null;
+                foreach((array) $field as $key => $name) {
+                    if (is_numeric($key)) {
+                        $item[$name] = $relation?->get($name);
+                    } else {
+                        $item[$name] = $relation?->get($key);
+                    }
                 }
             } 
         }

@@ -149,7 +149,7 @@ trait Conversion
                 // 追加关联属性
                 $relation = $this->getRelationData($key, false);
                 foreach((array) $field as $name) {
-                    $item[$name] = $relation[$name];
+                    $item[$name] = $relation[$name] ?? null;
                 }
             } 
         }

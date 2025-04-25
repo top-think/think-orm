@@ -33,9 +33,9 @@ trait SoftDelete
      * @param array|null $scope 设置不使用的全局查询范围
      * @return Query
      */
-    public function getQuery(array | null $scope = []): Query
+    public function db(array | null $scope = []): Query
     {
-        $query = parent::getQuery($scope);
+        $query = parent::db($scope);
         $this->withNoTrashed($query);
 
         return $query;
@@ -123,9 +123,7 @@ trait SoftDelete
         if (empty($data) && 0 !== $data) {
             return false;
         }
-        $model = (new static());
-
-        $query = $model->getQuery();
+        $query = (new static())->db();
 
         if ($force) {
             $query->removeOption('soft_delete');

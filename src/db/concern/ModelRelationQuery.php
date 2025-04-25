@@ -211,10 +211,11 @@ trait ModelRelationQuery
      *
      * @param string|array $fields 搜索字段
      * @param mixed        $data   搜索数据
+     * @param bool         $strict 是否严格检查数据
      *
      * @return $this
      */
-    public function withSearch(string | array $fields, $data = [])
+    public function withSearch(string | array $fields, $data = [], bool $strict = false)
     {
         if (is_string($fields)) {
             $fields = explode(',', $fields);
@@ -226,10 +227,14 @@ trait ModelRelationQuery
             if ($field instanceof Closure) {
                 $field($this, $data[$key] ?? null, $data);
             } elseif ($this->model) {
+                // 检查字段是否有数据
                 $fieldName = is_numeric($key) ? $field : $key;
+                if ($strict && (!isset($data[$fieldName]) || (empty($data[$fieldName]) && !in_array($data[$fieldName], ['0', 0])))) {
+                    continue;
+                }
                 $method    = 'search' . Str::studly($fieldName) . 'Attr';
                 if (method_exists($this->model, $method)) {
-                    $this->model->$method($this, $data[$field] ?? null, $data);
+                    $this->model->$method($this, $data[$fieldName] ?? null, $data);
                 } elseif (isset($data[$field])) {
                     $this->where($fieldName, in_array($fieldName, $likeFields) ? 'like' : '=', in_array($fieldName, $likeFields) ? '%' . $data[$field] . '%' : $data[$field]);
                 }
@@ -569,14 +574,14 @@ trait ModelRelationQuery
     /**
      * 根据关联条件查询当前模型.
      *
-     * @param string $relation 关联方法名
+     * @param string|array $relation 关联方法名 或 ['关联方法名', '关联表别名']
      * @param mixed  $where    查询条件（数组或者闭包）
      * @param mixed  $fields   字段
      * @param string $joinType JOIN类型
      *
      * @return $this
      */
-    public function hasWhere(string $relation, $where = [], string $fields = '*', string $joinType = '')
+    public function hasWhere(string|array $relation, $where = [], string $fields = '*', string $joinType = '')
     {
         return $this->model->hasWhere($relation, $where, $fields, $joinType, $this);
     }
@@ -584,14 +589,14 @@ trait ModelRelationQuery
     /**
      * 根据关联条件查询当前模型.
      *
-     * @param string $relation 关联方法名
+     * @param string|array $relation 关联方法名 或 ['关联方法名', '关联表别名']
      * @param mixed  $where    查询条件（数组或者闭包）
      * @param mixed  $fields   字段
      * @param string $joinType JOIN类型
      *
      * @return $this
      */
-    public function hasWhereOr(string $relation, $where = [], string $fields = '*', string $joinType = '')
+    public function hasWhereOr(string|array $relation, $where = [], string $fields = '*', string $joinType = '')
     {
         return $this->model->hasWhereOr($relation, $where, $fields, $joinType, $this);
     }
@@ -652,7 +657,7 @@ trait ModelRelationQuery
             }
         }
 
-        $result = $this->model->newInstance($result);
+        $result = $this->model->newInstance($result, $this->options);
 
         if ($this->suffix) {
             $result->setSuffix($this->suffix);

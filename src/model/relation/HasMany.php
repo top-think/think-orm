@@ -39,7 +39,7 @@ class HasMany extends Relation
         $this->model      = $model;
         $this->foreignKey = $foreignKey;
         $this->localKey   = $localKey;
-        $this->query      = (new $model())->getQuery();
+        $this->query      = (new $model())->db();
 
         if (get_class($parent) == $model) {
             $this->selfRelation = true;
@@ -183,7 +183,7 @@ class HasMany extends Relation
         $alias = Str::snake(class_basename($this->model));
         $alias = $this->query->getAlias() ?: $alias . '_' . $aggregate;
         return $this->query->alias($alias)
-            ->whereColumn($alias . '.' . $this->foreignKey, $this->parent->getTable(true) . '.' . $this->localKey)
+            ->whereExp($alias . '.' . $this->foreignKey, '=' . $this->parent->getTable(true) . '.' . $this->localKey)
             ->fetchSql()
             ->$aggregate($field);
     }
@@ -304,7 +304,7 @@ class HasMany extends Relation
     {
         $table    = $this->query->getTable();
         $model    = Str::snake(class_basename($this->parent));
-        $query    = $query ?: $this->parent->getQuery();
+        $query    = $query ?: $this->parent->db();
         $alias    = $query->getAlias() ?: $model;
 
         return $query->alias($alias)
@@ -312,6 +312,9 @@ class HasMany extends Relation
                 $table      = $this->query->getTable();
                 $relation   = Str::snake(class_basename($this->model));
 
+                if ($this->isSelfRelation() && $alias == $relation) {
+                    $relation .= '_'; 
+                }
                 $query->table([$table => $relation])
                     ->field('count(' . $id . ') AS count')
                     ->whereColumn($relation . '.' . $this->foreignKey, $alias . '.' . $this->localKey)
@@ -331,22 +334,27 @@ class HasMany extends Relation
      *
      * @return Query
      */
-    public function hasWhere($where = [], $fields = null, string $joinType = '', ?Query $query = null, string $logic = ''): Query
+    public function hasWhere($where = [], $fields = null, string $joinType = '', ?Query $query = null, string $logic = '', string $relationAlias = ''): Query
     {
         $model    = Str::snake(class_basename($this->parent));
         $relation = Str::snake(class_basename($this->model));
         $table    = $this->query->getTable();
-        $query    = $query ?: $this->parent->getQuery();
+        $query    = $query ?: $this->parent->db();
         $alias    = $query->getAlias() ?: $model;
         $fields   = $this->getRelationQueryFields($fields, $alias);
+        $relAlias = $relationAlias ?: $relation;
+
+        if ($this->isSelfRelation() && $alias == $relAlias) {
+            $relAlias .= '_'; 
+        }
 
         $query->alias($alias)
             ->via($alias)
             ->group($alias . '.' . $this->localKey)
             ->field($fields)
-            ->join([$table => $relation], $alias . '.' . $this->localKey . '=' . $relation . '.' . $this->foreignKey, $joinType);
+            ->join([$table => $relAlias], $alias . '.' . $this->localKey . '=' . $relAlias . '.' . $this->foreignKey, $joinType);
 
-        return $this->getRelationSoftDelete($query, $relation, $where, $logic);
+        return $this->getRelationSoftDelete($query, $relAlias, $where, $logic);
     }
 
     /**

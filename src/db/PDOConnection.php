@@ -1417,8 +1417,8 @@ abstract class PDOConnection extends Connection
             $param = is_numeric($key) ? $key + 1 : ':' . $key;
 
             if (is_array($val)) {
-                if (self::PARAM_INT == $val[1] && '' === $val[0]) {
-                    $val[0] = 0;
+                if (self::PARAM_INT == $val[1]) {
+                    $val[0] = (int) $val[0];
                 } elseif (self::PARAM_FLOAT == $val[1]) {
                     $val[0] = is_string($val[0]) ? (float) $val[0] : $val[0];
                     $val[1] = self::PARAM_STR;

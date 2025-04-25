@@ -58,19 +58,20 @@ class Pivot extends Model
     {
         if (is_null($this->getOption('name'))) {
             $this->setOption('name', $this->pivotName);
-        }        
+        }
     }
 
     /**
      * 创建新的模型实例.
      *
-     * @param array $data    数据
+     * @param array|object $data    数据
+     * @param array        $options
      *
      * @return Model
      */
-    public function newInstance(array $data = [])
+    public function newInstance(array | object $data = [], array $options = [])
     {
         $this->data($data);
-        return clone $this;
+        return $this->clone();
     }
 }

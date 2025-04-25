@@ -30,7 +30,7 @@ class Mysql extends Builder
      * @var array
      */
     protected $parser = [
-        'parseCompare'     => ['=', '!=', '<>', '>', '>=', '<', '<='],
+        'parseCompare'     => ['=', '!=', '<>', '>', '>=', '<', '<=', '&', '|', '^', '>>', '<<'],
         'parseLike'        => ['LIKE', 'NOT LIKE'],
         'parseBetween'     => ['NOT BETWEEN', 'BETWEEN'],
         'parseIn'          => ['NOT IN', 'IN'],

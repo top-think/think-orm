@@ -100,7 +100,6 @@ trait JoinAndViewQuery
         if (is_array($join)) {
             $table = $join;
             $alias = array_shift($join);
-
             return $table;
         }
 

@@ -9,6 +9,7 @@
 // +----------------------------------------------------------------------
 // | Author: liu21st <liu21st@gmail.com>
 // +----------------------------------------------------------------------
+declare (strict_types = 1);
 
 namespace think\model\relation;
 
@@ -138,7 +139,7 @@ class MorphTo extends Relation
     {
         $model = Str::snake(class_basename($this->parent));
         $types = $this->parent->distinct()->column($this->morphType);
-        $query = $query ?: $this->parent->getQuery();
+        $query = $query ?: $this->parent->db();
         $alias = $query->getAlias() ?: $model;
 
         return $query->alias($alias)

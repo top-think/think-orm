@@ -9,6 +9,7 @@
 // +----------------------------------------------------------------------
 // | Author: liu21st <liu21st@gmail.com>
 // +----------------------------------------------------------------------
+declare (strict_types = 1);
 
 namespace think\model\relation;
 
@@ -68,7 +69,7 @@ class MorphOne extends Relation
         $this->type      = $type;
         $this->morphKey  = $morphKey;
         $this->morphType = $morphType;
-        $this->query     = (new $model())->getQuery();
+        $this->query     = (new $model())->db();
     }
 
     /**
@@ -118,7 +119,7 @@ class MorphOne extends Relation
         $model    = Str::snake(class_basename($this->parent));
         $relation = Str::snake(class_basename($this->model));
         $table    = $this->query->getTable();
-        $query    = $query ?: $this->parent->getQuery();
+        $query    = $query ?: $this->parent->db();
         $alias    = $query->getAlias() ?: $model;
 
         $query->alias($alias)
@@ -141,22 +142,23 @@ class MorphOne extends Relation
      *
      * @return Query
      */
-    public function hasWhere($where = [], $fields = null, string $joinType = '', ?Query $query = null, string $logic = '')
+    public function hasWhere($where = [], $fields = null, string $joinType = '', ?Query $query = null, string $logic = '', string $relationAlias = '')
     {
         $table    = $this->query->getTable();
         $model    = Str::snake(class_basename($this->parent));
         $relation = Str::snake(class_basename($this->model));
-        $query    = $query ?: $this->parent->getQuery();
+        $query    = $query ?: $this->parent->db();
         $alias    = $query->getAlias() ?: $model;
         $fields   = $this->getRelationQueryFields($fields, $alias);
+        $relAlias = $relationAlias ?: $relation;
 
         $query->alias($alias)
-            ->join([$table => $relation], $alias . '.' . $this->parent->getPk() . '=' . $relation . '.' . $this->morphKey, $joinType)
-            ->where($relation . '.' . $this->morphType, '=', $this->type)
-            ->group($relation . '.' . $this->morphKey)
+            ->join([$table => $relAlias], $alias . '.' . $this->parent->getPk() . '=' . $relAlias . '.' . $this->morphKey, $joinType)
+            ->where($relAlias . '.' . $this->morphType, '=', $this->type)
+            ->group($relAlias . '.' . $this->morphKey)
             ->field($fields);
 
-        return $this->getRelationSoftDelete($query, $relation, $where, $logic);
+        return $this->getRelationSoftDelete($query, $relAlias, $where, $logic);
     }
 
     /**

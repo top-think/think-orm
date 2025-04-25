@@ -33,9 +33,7 @@ trait Conversion
      */
     public function append(array $append, bool $merge = false)
     {
-        $this->setOption('append', $merge ? array_merge($this->getOption('append'), $append) : $append);
-
-        return $this;
+        return $this->setOption('append', $merge ? array_merge($this->getOption('append'), $append) : $append);
     }
 
     /**
@@ -48,9 +46,7 @@ trait Conversion
      */
     public function hidden(array $hidden, bool $merge = false)
     {
-        $this->setOption('hidden', $merge ? array_merge($this->getOption('hidden'), $hidden) : $hidden);
-
-        return $this;
+        return $this->setOption('hidden', $merge ? array_merge($this->getOption('hidden'), $hidden) : $hidden);
     }
 
     /**
@@ -63,9 +59,7 @@ trait Conversion
      */
     public function visible(array $visible, bool $merge = false)
     {
-        $this->setOption('visible', $merge ? array_merge($this->getOption('visible'), $visible) : $visible);
-
-        return $this;
+        return $this->setOption('visible', $merge ? array_merge($this->getOption('visible'), $visible) : $visible);
     }
 
     /**
@@ -77,9 +71,7 @@ trait Conversion
      */
     public function mapping(array $map)
     {
-        $this->setOption('mapping', $map);
-
-        return $this;
+        return $this->setOption('mapping', $map);
     }
 
     /**
@@ -156,8 +148,12 @@ trait Conversion
             } else {
                 // 追加关联属性
                 $relation = $this->getRelationData($key, false);
-                foreach((array) $field as $name) {
-                    $item[$name] = $relation[$name];
+                foreach((array) $field as $key => $name) {
+                    if (is_numeric($key)) {
+                        $item[$name] = $relation?->get($name);
+                    } else {
+                        $item[$name] = $relation?->get($key);
+                    }
                 }
             } 
         }
@@ -181,7 +177,7 @@ trait Conversion
      * @param int $options json参数
      * @return string
      */
-    public function tojson(int $options = JSON_UNESCAPED_UNICODE): string
+    public function toJson(int $options = JSON_UNESCAPED_UNICODE): string
     {
         return json_encode($this->toArray(), $options);
     }
@@ -190,7 +186,7 @@ trait Conversion
      * 转换为数据集对象
      *
      * @param array|Collection $collection    数据集
-     * @param string           $resultSetType 数据集类
+     * @param string|null      $resultSetType 数据集类
      *
      * @return Collection
      */

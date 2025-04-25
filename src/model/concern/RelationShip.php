@@ -32,6 +32,7 @@ use think\model\relation\MorphOne;
 use think\model\relation\MorphTo;
 use think\model\relation\MorphToMany;
 use think\model\relation\OneToOne;
+use think\model\View;
 
 /**
  * 实体模型关联处理.
@@ -47,9 +48,7 @@ trait RelationShip
      */
     public function together(array $relation)
     {
-        $this->setOption('together', $relation);
-
-        return $this;
+        return $this->setOption('together', $relation);
     }
 
     /**
@@ -116,12 +115,30 @@ trait RelationShip
         foreach ($together as $key => $name) {
             if (is_numeric($key) && isset($relations[$name])) {
                 // 支持关联写入或更新
+                $method   = Str::camel($name);
                 $relation = $relations[$name];
-                if ($isUpdate) {
-                    $relation->save();
+                $data     = null;
+                if ($relation instanceof Model) {
+                    if ($isUpdate) {
+                        $relation->save();
+                    } else {
+                        $data = $this->$method()->save($relation);
+                    }
                 } else {
-                    $this->$name()->save($relation);
-                    $relation->setKey($relation->getLastInsID());
+                    // 数组或数据集
+                    $relationModel = $this->$method();
+                    if ($relationModel instanceof OneToOne) {
+                        $data = $relationModel->save($relation);
+                    } elseif ($relationModel instanceof HasMany || $relationModel instanceof MorphMany) {
+                        $data = $relationModel->saveAll($relation);
+                        if ($data) {
+                            $data = $this->toCollection($data);
+                        }
+                    }
+                }
+                if ($data) {
+                    // 重新赋值关联数据
+                    $this->set($name, $data);
                 }
             } elseif (is_array($name)) {
                 // 关联写入
@@ -136,7 +153,8 @@ trait RelationShip
                 } else {
                     $data = $name;
                 }
-                $this->$key()->save($data);
+                $method = Str::camel($key);
+                $this->$method()->save($data);
             }
         }
     }
@@ -217,11 +235,8 @@ trait RelationShip
             if (isset($bind[$key])) {
                 $this->set($bind[$key], $val);
             } elseif ($attr = array_search($key, $bind)) {
-                if (is_numeric($attr) || $this->__isset($attr)) {
-                } else {
-                    $this->set($attr, $val);
-                }
-            } elseif (in_array($key, $bind) && !$this->__isset($key)) {
+                $this->set(is_numeric($attr) ? $key : $attr, $val);
+            } elseif (in_array($key, $bind)) {
                 $this->set($key, $val);
             }
         }
@@ -279,7 +294,7 @@ trait RelationShip
     /**
      * 根据关联条件查询当前模型.
      *
-     * @param string $relation 关联方法名
+     * @param string|array $relation 关联方法名 或 ['关联方法名', '关联表别名']
      * @param mixed  $where    查询条件（数组或者闭包）
      * @param mixed  $fields   字段
      * @param string $joinType JOIN类型
@@ -287,17 +302,21 @@ trait RelationShip
      *
      * @return Query
      */
-    public static function hasWhere(string $relation, $where = [], string $fields = '*', string $joinType = '', ?Query $query = null): Query
+    public static function hasWhere(string|array $relation, $where = [], string $fields = '*', string $joinType = '', ?Query $query = null): Query
     {
+        if (is_array($relation)) {
+            [$relation, $alias] = $relation;
+        }
+
         return (new static())
             ->$relation()
-            ->hasWhere($where, $fields, $joinType, $query);
+            ->hasWhere($where, $fields, $joinType, $query, '', $alias ?? '');
     }
 
     /**
      * 根据关联条件查询当前模型.
      *
-     * @param string $relation 关联方法名
+     * @param string|array $relation 关联方法名 或 ['关联方法名', '关联表别名']
      * @param mixed  $where    查询条件（数组或者闭包）
      * @param mixed  $fields   字段
      * @param string $joinType JOIN类型
@@ -305,11 +324,15 @@ trait RelationShip
      *
      * @return Query
      */
-    public static function hasWhereOr(string $relation, $where = [], string $fields = '*', string $joinType = '', ?Query $query = null): Query
+    public static function hasWhereOr(string|array $relation, $where = [], string $fields = '*', string $joinType = '', ?Query $query = null): Query
     {
+        if (is_array($relation)) {
+            [$relation, $alias] = $relation;
+        }
+
         return (new static())
             ->$relation()
-            ->hasWhereOr($where, $fields, $joinType, $query);
+            ->hasWhere($where, $fields, $joinType, $query, 'OR', $alias ?? '');
     }
 
     /**
@@ -424,6 +447,13 @@ trait RelationShip
 
             $relationResult->eagerlyResultSet($resultSet, $relationName, $subRelation, $closure, $relationCache, $join);            
         }
+
+        // 视图模型初始化数据
+        foreach ($resultSet as $result) {
+            if ($result instanceof View) {
+                $result->initData();
+            }
+        }
     }
 
     /**
@@ -471,6 +501,11 @@ trait RelationShip
             }
 
             $relationResult->eagerlyResult($result, $relationName, $subRelation, $closure, $relationCache, $join);
+        }
+
+        if ($result instanceof View) {
+            // 视图模型初始化数据
+            $result->initData();
         }
     }
 

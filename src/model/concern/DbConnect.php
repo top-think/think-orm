@@ -32,21 +32,27 @@ trait DbConnect
      * 获取Db对象实例.
      * @return Query
      */
-    public function db()
+    public function getQuery()
     {
-        return $this->getOption('db')
-            ->schema($this->getOption('schema'))
+        $db = $this->initDb()->newQuery();
+
+        if ($this->getOption('cache')) {
+            [$key, $expire, $tag] = $this->getOption('cache');
+            $db->cache($key, $expire, $tag);
+        }
+
+        return $db->schema($this->getOption('schema'))
             ->pk($this->getPk())
             ->autoInc($this->getOption('autoInc'))
             ->suffix($this->getOption('suffix'))
             ->setKey($this->getKey())
+            ->replace($this->getOption('replace', false))
             ->model($this);
     }
 
     /**
      * 初始化数据库连接对象.
-     *
-     * @return void
+     * @return Query
      */
     private function initDb()
     {
@@ -64,7 +70,7 @@ trait DbConnect
             $db->suffix($this->getOption('suffix'));
         }
 
-        $this->setOption('db', $db);
+        return $db;
     }
 
     /**
@@ -82,15 +88,15 @@ trait DbConnect
                 $schema = $this->getOption('type', []);
             } else {
                 // 获取数据表信息
-                $model  = $this->getOption('db');
-                $fields = $model->getFieldsType();
-                $schema = array_merge($fields, $this->getOption('type', $model->getType()));
+                $db     = $this->initDb();
+                $fields = $db->getFieldsType();
+                $schema = array_merge($fields, $this->getOption('type', []));
                 // 获取主键和自增字段
                 if (!$this->getOption('pk')) {
-                    $this->setOption('pk', $model->getPk());
+                    $this->setOption('pk', $db->getPk());
                 }
                 if (!$this->getOption('autoInc')) {
-                    $this->setOption('autoInc', $model->getAutoInc());
+                    $this->setOption('autoInc', $db->getAutoInc());
                 }
             }
 
@@ -113,9 +119,7 @@ trait DbConnect
      */
     public function replace(bool $replace = true)
     {
-        $this->db()->replace($replace);
-
-        return $this;
+        return $this->setOption('replace', $replace);
     }
 
     /**
@@ -156,9 +160,9 @@ trait DbConnect
      * @param array|null $scope 设置不使用的全局查询范围
      * @return Query
      */
-    public function getQuery(array | null $scope = []): Query
+    public function db(array | null $scope = []): Query
     {
-        $query = $this->db();
+        $query = $this->getQuery();
         // 全局查询范围
         if (is_array($scope)) {
             $globalScope = array_diff($this->getOption('globalScope', []), $scope);
@@ -180,7 +184,7 @@ trait DbConnect
     {
         $model = new static();
 
-        return $model->getQuery($scope);
+        return $model->db($scope);
     }
 
     public static function __callStatic($method, $args)
@@ -191,7 +195,7 @@ trait DbConnect
             throw new Exception('virtual model not support db query');
         }
 
-        $db = $model->getQuery();
+        $db = $model->db();
 
         if (!empty(self::$weakMap[$model]['autoRelation'])) {
             // 自动获取关联数据
@@ -207,6 +211,6 @@ trait DbConnect
             return call_user_func_array([$this, 'withFieldAttr'], $args);
         }
 
-        return call_user_func_array([$this->getQuery(), $method], $args);
-    }    
+        return call_user_func_array([$this->db(), $method], $args);
+    }
 }

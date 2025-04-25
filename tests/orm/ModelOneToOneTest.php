@@ -288,6 +288,26 @@ class ModelOneToOneTest extends TestCase
         $users = UserModel::has('profile')->select();
         $this->assertCount(1, $users);
     }
+
+    /**
+     * 测试追加关联属性
+     */
+    public function testRelationAppend()
+    {
+        $user       = new UserModel();
+        $user->name = 'thinkphp';
+        $user->save();
+
+        $profile           = new ProfileModel();
+        $profile->email    = 'test@thinkphp.cn';
+        $profile->nickname = 'test';
+        $profile->user_id  = $user->id;
+        $profile->save();
+
+        // 测试hasOne关联
+        $user = UserModel::where('id', $user->id)->append(['profile' => ['user_id' => 'uid']])->find()->toArray();
+        $this->assertEquals($profile->user_id, $user['uid']);
+    }
 }
 
 /**

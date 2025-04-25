@@ -44,7 +44,7 @@ abstract class BaseBuilder
      * @var array
      */
     protected $parser = [
-        'parseCompare'     => ['=', '<>', '>', '>=', '<', '<='],
+        'parseCompare'     => ['=', '<>', '>', '>=', '<', '<=', '&', '|', '^', '>>', '<<'],
         'parseLike'        => ['LIKE', 'NOT LIKE'],
         'parseBetween'     => ['NOT BETWEEN', 'BETWEEN'],
         'parseIn'          => ['NOT IN', 'IN'],
@@ -520,10 +520,11 @@ abstract class BaseBuilder
      * @param mixed  $value
      * @param string $field
      * @param int    $bindType
+     * @param string $param
      *
      * @return string
      */
-    protected function parseCompare(Query $query, string $key, string $exp, $value, $field, int $bindType): string
+    protected function parseCompare(Query $query, string $key, string $exp, $value, $field, int $bindType, ?string $param = null): string
     {
         if (is_array($value)) {
             throw new Exception('where express error:' . $exp . var_export($value, true));
@@ -544,7 +545,11 @@ abstract class BaseBuilder
             return $key . ' IS NULL';
         }
 
-        return $key . ' ' . $exp . ' ' . $value;
+        if (is_null($param)) {
+            return $key . ' ' . $exp . ' ' . $value;
+        } else {
+            return '( ' . $key . ' ' . $exp . ' ' . $value . ' ) ' . $param;
+        }
     }
 
     /**

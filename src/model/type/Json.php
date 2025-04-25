@@ -18,7 +18,7 @@ class Json implements Typeable
         return $static;
     }
 
-    public function data($data, ?bool $assoc = true)
+    public function data($data, ?bool $assoc)
     {
         if (is_string($data) && json_validate($data)) {
             $data = json_decode($data, $assoc);

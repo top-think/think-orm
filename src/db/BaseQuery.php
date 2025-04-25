@@ -1454,7 +1454,7 @@ abstract class BaseQuery
      * @throws ModelNotFoundException
      * @throws DataNotFoundException
      *
-     * @return Collection|array|static[]
+     * @return Collection<static>
      */
     public function select(array $data = []): Collection
     {
@@ -1485,13 +1485,13 @@ abstract class BaseQuery
      * 查找单条记录.
      *
      * @param mixed   $data 主键数据
-     * @param Closure $closure 闭包数据
+     * @param ?Closure $closure 闭包数据
      *
      * @throws Exception
      * @throws ModelNotFoundException
      * @throws DataNotFoundException
      *
-     * @return mixed
+     * @return mixed|static
      */
     public function find($data = null, ?Closure $closure = null)
     {

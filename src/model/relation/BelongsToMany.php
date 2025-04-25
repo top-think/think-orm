@@ -9,6 +9,7 @@
 // +----------------------------------------------------------------------
 // | Author: liu21st <liu21st@gmail.com>
 // +----------------------------------------------------------------------
+declare (strict_types = 1);
 
 namespace think\model\relation;
 
@@ -85,7 +86,7 @@ class BelongsToMany extends Relation
             $this->middle = $middle;
         }
 
-        $this->query = (new $model())->getQuery();
+        $this->query = (new $model())->db();
         $this->pivot = $this->newPivot();
     }
 
@@ -217,7 +218,7 @@ class BelongsToMany extends Relation
         $pivot      = $this->pivot->getTable();
         $model      = Str::snake(class_basename($this->parent));
         $relation   = Str::snake(class_basename($this->model));
-        $query      = $query ?: $this->parent->getQuery();
+        $query      = $query ?: $this->parent->db();
         $alias      = $query->getAlias() ?: $model;
 
         if ('=' === $operator && 0 === $count) {
@@ -250,23 +251,24 @@ class BelongsToMany extends Relation
      * @param Query|null     $query Query对象
      * @return Query
      */
-    public function hasWhere($where = [], $fields = null, string $joinType = '', ?Query $query = null, string $logic = ''): Query
+    public function hasWhere($where = [], $fields = null, string $joinType = '', ?Query $query = null, string $logic = '', string $relationAlias = ''): Query
     {
         $table    = $this->query->getTable();
         $pivot    = $this->pivot->getTable();
         $model    = Str::snake(class_basename($this->parent));
         $relation = Str::snake(class_basename($this->model));
-        $query    = $query ?: $this->parent->getQuery();
+        $query    = $query ?: $this->parent->db();
         $alias    = $query->getAlias() ?: $model;
         $fields   = $this->getRelationQueryFields($fields, $alias);
+        $relAlias = $relationAlias ?: $relation;
 
         $query->alias($alias)
             ->join([$pivot => 'pivot'], 'pivot.' . $this->localKey . '=' . $alias . '.' . $this->parent->getPk(), $joinType)
-            ->join($table . ' ' . $relation, $relation . '.' . $this->query->getPk() . '= pivot.' . $this->foreignKey, $joinType)
+            ->join([$table => $relAlias], $relAlias . '.' . $this->query->getPk() . '= pivot.' . $this->foreignKey, $joinType)
             ->group($alias . '.' . $this->parent->getPk())
             ->field($fields);
 
-        return $this->getRelationSoftDelete($query, $relation, $where, $logic);            
+        return $this->getRelationSoftDelete($query, $relAlias, $where, $logic);            
     }
 
     /**

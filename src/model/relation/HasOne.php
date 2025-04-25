@@ -37,7 +37,7 @@ class HasOne extends OneToOne
         $this->model      = $model;
         $this->foreignKey = $foreignKey;
         $this->localKey   = $localKey;
-        $this->query      = (new $model())->getQuery();
+        $this->query      = (new $model())->db();
 
         if (get_class($parent) == $model) {
             $this->selfRelation = true;
@@ -99,7 +99,7 @@ class HasOne extends OneToOne
         $alias = $this->query->getAlias() ?: $alias . '_' . $aggregate;
         return $this->query
             ->alias($alias)
-            ->whereColumn($alias . '.' . $this->foreignKey, $this->parent->getTable(true) . '.' . $this->localKey)
+            ->whereExp($alias . '.' . $this->foreignKey, '=' . $this->parent->getTable(true) . '.' . $this->localKey)
             ->fetchSql()
             ->$aggregate($field);
     }
@@ -148,9 +148,13 @@ class HasOne extends OneToOne
         $model    = Str::snake(class_basename($this->parent));
         $relation = Str::snake(class_basename($this->model));
         $table    = $this->query->getTable();
-        $query    = $query ?: $this->parent->getQuery();
+        $query    = $query ?: $this->parent->db();
         $alias    = $query->getAlias() ?: $model;
         $method   = (0 == $count && '=' == $operator) ? 'whereNotExists' : 'whereExists';
+
+        if ($this->isSelfRelation() && $alias == $relation) {
+            $relation .= '_'; 
+        }
 
         return $query->alias($alias)->$method(function ($query) use ($table, $alias, $relation) {
             $query->table([$table => $relation])
@@ -170,21 +174,27 @@ class HasOne extends OneToOne
      *
      * @return Query
      */
-    public function hasWhere($where = [], $fields = null, string $joinType = '', ?Query $query = null, string $logic = ''): Query
+    public function hasWhere($where = [], $fields = null, string $joinType = '', ?Query $query = null, string $logic = '', string $relationAlias = ''): Query
     {
         $model    = Str::snake(class_basename($this->parent));
         $relation = Str::snake(class_basename($this->model));
         $table    = $this->query->getTable();
-        $query    = $query ?: $this->parent->getQuery();
+        $query    = $query ?: $this->parent->db();
         $alias    = $query->getAlias() ?: $model;
         $fields   = $this->getRelationQueryFields($fields, $alias);
+        $relAlias = $relationAlias ?: $relation;
+
+        if ($this->isSelfRelation() && $alias == $relAlias) {
+            $relAlias .= '_'; 
+        }
 
         $query->alias($alias)
-            ->via($alias)
-            ->field($fields)
-            ->join([$table => $relation], $alias . '.' . $this->localKey . '=' . $relation . '.' . $this->foreignKey, $joinType);            
+        ->via($alias)
+        ->field($fields)
+        ->join([$table => $relAlias], $alias . '.' . $this->localKey . '=' . $relAlias . '.' . $this->foreignKey, $joinType);
+         
 
-        return $this->getRelationSoftDelete($query, $relation, $where, $logic);
+        return $this->getRelationSoftDelete($query, $relAlias, $where, $logic);
     }
 
     /**

@@ -208,7 +208,7 @@ trait Attribute
             return $value;
         }
 
-        $param = null;
+        $param = '';
         if (is_array($type)) {
             [$type, $param] = $type;
         } elseif (str_contains($type, ':')) {
@@ -219,9 +219,9 @@ trait Attribute
             if (class_exists($type) && !($value instanceof $type)) {
                 if (is_subclass_of($type, Typeable::class)) {
                     $value = $type::from($value, $model);
-                    if ($param && DateTime::class == $type) {
-                        $value = $value->format($param);
-                    }
+                    if ($value instanceof DateTime && $param) {
+                        $value->setFormat($param);
+                    }                    
                 } elseif (is_subclass_of($type, FieldTypeTransform::class)) {
                     $value = $type::get($value, $model);
                 } elseif (is_subclass_of($type, BackedEnum::class)) {
@@ -273,6 +273,7 @@ trait Attribute
             return $value;
         }
 
+        $param = '';
         if (is_array($type)) {
             [$type, $param] = $type;
         } elseif (str_contains($type, ':')) {
@@ -316,9 +317,7 @@ trait Attribute
      */
     public function refreshOrigin()
     {
-        $this->setOption('origin', $this->getData());
-
-        return $this;
+        return $this->setOption('origin', $this->getData());
     }
 
     /**
@@ -344,6 +343,10 @@ trait Attribute
     public function getKey()
     {
         $pk = $this->getPk();
+        if (is_null($pk)) {
+            return;
+        }
+        
         if (is_string($pk)) {
             return $this->get($pk);
         }
@@ -359,11 +362,12 @@ trait Attribute
      *
      * @param array $data
      *
-     * @return void
+     * @return $this
      */
     public function data(array $data)
     {
         $this->initializeData($data);
+        return $this;
     }
 
     /**
@@ -443,7 +447,7 @@ trait Attribute
      */
     public function isJsonAssoc(): bool|null
     {
-        return $this->getOption('jsonAssoc');
+        return $this->getOption('jsonAssoc', true);
     }
 
     /**
@@ -513,9 +517,7 @@ trait Attribute
     {
         $attr   = Str::studly($name);
         $method = 'set' . $attr . 'Attr';
-        if ($this->getEntity() && method_exists($this->getEntity(), $method)) {
-            $value = $this->getEntity()->$method($value, $data);
-        } elseif (method_exists($this, $method)) {
+        if (method_exists($this, $method)) {
             $value = $this->$method($value, $data);
         } else {
             // 类型转换
@@ -607,18 +609,12 @@ trait Attribute
         if ($withAttr) {
             // 动态获取器
             $value = $withAttr($value, $data, $this);
-        } elseif ($this->getEntity() && method_exists($this->getEntity(), $method)) {
-            $value = $this->getEntity()->$method($value, $data);
         } elseif (method_exists($this, $method)) {
             // 获取器
             $value = $this->$method($value, $data);
         } elseif ($value instanceof Typeable || is_subclass_of($value, EnumTransform::class)) {
             // 类型自动转换
-            if ($value instanceof DateTime && class_exists($this->getDateFormat())) {
-                $value = $value->value(false);
-            } else {
-                $value = $value->value();
-            }
+            $value = $value->value();
         } elseif (is_int($value) && $this->isTimeAttr($name) && false != $this->getDateFormat()) {
             // 兼容数字类型时间字段的自动转换输出
             $value = (new \DateTime())
@@ -630,7 +626,7 @@ trait Attribute
 
     protected function isTimeAttr(string $name): bool
     {
-        return in_array($name, [$this->getOption('createTime'), $this->getOption('updateTime'), $this->getOption('deleteTime')]) || str_ends_with($name, '_time');
+        return in_array($name, [$this->getOption('createTime'), $this->getOption('updateTime'), $this->getOption('deleteTime')]) || in_array($name, $this->getOption('timestampField', []));
     }
 
     /**
@@ -667,9 +663,7 @@ trait Attribute
      */
     public function exists(bool $exists = true)
     {
-        $this->setOption('exists', $exists);
-
-        return $this;
+        return $this->setOption('exists', $exists);
     }
 
     /**
@@ -691,8 +685,6 @@ trait Attribute
      */
     public function withEnumRead(bool | string $method = true)
     {
-        $this->setOption('enumReadName', $method);
-
-        return $this;
+        return $this->setOption('enumReadName', $method);
     }
 }

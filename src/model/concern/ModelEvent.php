@@ -41,9 +41,7 @@ trait ModelEvent
      */
     public function withEvent(bool $event)
     {
-        $this->setOption('withEvent', $event);
-
-        return $this;
+        return $this->setOption('withEvent', $event);
     }
 
     /**

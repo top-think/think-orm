@@ -92,7 +92,7 @@ trait AutoWriteData
         if (in_array($type, ['int', 'integer'])) {
             return time();
         } elseif (is_subclass_of($type, Typeable::class)) {
-            return $type::from('now', $this)->value();
+            return $type::from('now', $this)->format('Y-m-d H:i:s.u');
         } elseif (str_contains($type, '\\')) {
             $obj = new $type();
             if ($obj instanceof Stringable) {
@@ -101,7 +101,7 @@ trait AutoWriteData
                 return (string) $obj;
             }
         } else {
-            return DateTime::from('now', $this)->value();
+            return DateTime::from('now', $this)->format('Y-m-d H:i:s.u');
         }
     }
 
@@ -112,9 +112,7 @@ trait AutoWriteData
 
     public function isAutoWriteTimestamp(string | bool $auto)
     {
-        $this->setOption('autoWriteTimestamp', $auto);
-
-        return $this;
+        return $this->setOption('autoWriteTimestamp', $auto);
     }
 
     public function getDateFormat()
@@ -124,9 +122,7 @@ trait AutoWriteData
 
     public function setDateFormat(string | bool $format)
     {
-        $this->setOption('dateFormat', $format);
-
-        return $this;
+        return $this->setOption('dateFormat', $format);
     }
 
     public function setTimeField($createTime, $updateTime)

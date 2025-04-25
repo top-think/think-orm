@@ -128,7 +128,6 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
             'updateTime'   => $options['updateTime'] ?? 'update_time',
             'createTime'   => $options['createTime'] ?? 'create_time',
             'suffix'       => $options['suffix'] ?? '',
-            'pk'           => $options['pk'] ?? 'id',
             'validate'     => $options['validate'] ?? $this->parseValidate(),
             'type'         => $options['type'] ?? [],
             'readonly'     => $options['readonly'] ?? [],
@@ -145,6 +144,15 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
         // 设置额外参数
         $this->setOptions(array_diff_key($options, self::$weakMap[$this]));
 
+        // 模型初始化
+        $this->initialize();
+
+        // 初始化数据
+        $this->initializeData($data);        
+    }
+
+    protected function initialize()
+    {
         if (!empty(static::$_maker)) {
             foreach (static::$_maker as $maker) {
                 call_user_func($maker, $this);
@@ -153,12 +161,6 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
 
         // 初始化模型
         $this->init();
-
-        // 设置数据库连接
-        $this->initDb();
-
-        // 初始化数据
-        $this->initializeData($data);
     }
 
     /**
@@ -202,6 +204,9 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
     public function setOption(string $name, $value)
     {
         self::$weakMap[$this][$name] = $value;
+        if (property_exists($this, $name)) {
+            $this->$name = $value;
+        }        
         return $this;
     }
 
@@ -218,7 +223,7 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
         // 兼容读取3.0版本的属性参数定义
         if (property_exists($this, $name) && isset($this->$name)) {
             return $this->$name;
-        }
+        } 
         return self::$weakMap[$this][$name] ?? $default;
     }
 
@@ -235,25 +240,52 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
     /**
      * 创建新的模型实例.
      *
-     * @param array $data
+     * @param array|object $data
+     * @param array        $options
      *
      * @return Model|Entity
      */
-    public function newInstance(array $data = [])
+    public function newInstance(array | object $data = [], array $options = [])
     {
         $model = new static($data);
         if (!empty($data)) {
             $model->exists(true);
         }
 
+        $with = !empty($options['with']) || !empty($options['with_join']);
         if ($this->getEntity()) {
             // 存在对应实体模型实例
-            return $this->getEntity()->setModel($model);
+            return $this->getEntity()->newInstance($model, $with);
         }
 
-        $class = $this->getOption('entityClass', str_replace('\\model\\', '\\entity\\', static::class));
+        return $this->fetchModel($model, $with);
+    }
+
+    /**
+     * 获取克隆的模型实例.
+     *
+     * @return static
+     */
+    public function clone()
+    {
+        $model = new static();
+        self::$weakMap[$model] = self::$weakMap[$this];
+        return $model;
+    }
+
+    /**
+     * 获取实际模型实例.
+     *
+     * @param Model $model
+     * @param bool  $with 是否包含关联查询
+     *
+     * @return Modelable
+     */
+    protected function fetchModel(Model $model, bool $with = false): Modelable
+    {
+        $class = $model->getOption('entityClass', str_replace('\\model\\', '\\entity\\', static::class));
         if (class_exists($class) && is_subclass_of($class, Entity::class)) {
-            $entity = new $class($model);
+            $entity = new $class($model, $with);
             $model->entity($entity);
             return $entity;
         }
@@ -355,7 +387,10 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
         $this->autoWriteData($data, $isUpdate, $allow);
 
         $db     = $this->getDbWhere($where);
-        $result = $db->field($allow)->removeOption('data')->save($data, !$isUpdate);
+        $result = $db->field($allow)
+            ->removeOption('data')
+            ->save($data, !$isUpdate);
+
         if (!$isUpdate) {
             $this->exists(true);
             $this->setKey($db->getLastInsID());
@@ -386,16 +421,17 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
         $readonly = $this->getOption('readonly');
         $disuse   = $this->getOption('disuse');
         $allow    = array_diff($allow, $disuse, $isUpdate ? $readonly : []);
+        $together = $this->getOption('together');
 
         // 验证数据
         $this->validate($data, $allow);
 
         $relations = [];
         foreach ($data as $name => &$val) {
-            if ($val instanceof Modelable) {
+            if ($val instanceof Modelable || in_array($name, $together)) {
                 $relations[$name] = $val;
                 unset($data[$name]);
-            } elseif ($val instanceof Collection || !in_array($name, $allow)) {
+            } elseif ($val instanceof Collection || (!empty($allow) && !in_array($name, $allow))) {
                 unset($data[$name]);
             } elseif ($isUpdate && !$this->isForce() && $this->isNotRequireUpdate($name, $val, $origin)) {
                 unset($data[$name]);
@@ -417,15 +453,22 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
     {
     }
 
-    protected function getDbWhere($where)
+    protected function getDbWhere($where = [])
     {
         $db = $this->db();
         // 检查条件
         if (!empty($where)) {
             $db->where($where);
-        } else {
+        } elseif ($this->getKey()) {
             $db->setKey($this->getKey());
+        } else {
+            $db->where($this->getOrigin());
         }
+
+        if ($this->isForce()) {
+            $db->removeOption('soft_delete');
+        }
+
         return $db;
     }
 
@@ -484,11 +527,11 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
     /**
      * 设置为视图模型（不能写入）.
      *
-     * @return bool
+     * @return $this
      */
     public function asView(bool $isView = true)
     {
-        $this->setOption('is_view', $isView);
+        return $this->setOption('is_view', $isView);
     }
 
     /**
@@ -509,7 +552,7 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
     public function refresh(): static
     {
         if ($this->isExists()) {
-            $data = $this->getQuery()->find($this->getKey())->getData();
+            $data = $this->db()->find($this->getKey())->getData();
             $this->data($data);
         }
         return $this;
@@ -526,10 +569,23 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
     public static function saveAll(iterable $dataSet, bool $replace = true): Collection
     {
         $result = [];
+        $model  = new static;
+        $pk     = $model->getPk();
         foreach ($dataSet as $key => $data) {
-            $model = new static;
-            $model->replace($replace)->save($data);
-            $result[$key] = $model;
+            $model  = new static;
+            if ($replace) {
+                $exists = true;
+                foreach ((array) $pk as $field) {
+                    if (is_string($field) && !isset($data[$field])) {
+                        $exists = false;
+                    }
+                }
+            } else {
+                $exists = false;
+            }
+
+            $model->replace($replace)->exists($exists)->save($data);
+            $result[$key] = $model->fetchModel($model);
         }
         return $model->toCollection($result);
     }
@@ -557,7 +613,7 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
             }
         }
 
-        $result = $this->db()->setKey($this->getKey())->delete();
+        $result = $this->getDbWhere()->delete();
 
         $this->trigger('AfterDelete');
 
@@ -577,15 +633,15 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
      * @param array|object  $data 数据
      * @param array  $allowField  允许字段
      * @param bool   $replace     使用Replace
-     * @return static
+     * @return Modelable
      */
-    public static function create(array | object $data, array $allowField = [], bool $replace = false): static
+    public static function create(array | object $data, array $allowField = [], bool $replace = false): Modelable
     {
         $model = new static();
 
         $model->allowField($allowField)->replace($replace)->save($data, true);
-
-        return $model;
+        
+        return $model->fetchModel($model);
     }
 
     /**
@@ -594,15 +650,15 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
      * @param array|object  $data 数据
      * @param mixed  $where       更新条件
      * @param array  $allowField  允许字段
-     * @return static
+     * @return Modelable
      */
-    public static function update(array | object $data, $where = [], array $allowField = []): static
+    public static function update(array | object $data, $where = [], array $allowField = []): Modelable
     {
         $model = new static();
 
         $model->allowField($allowField)->exists(true)->save($data, $where);
 
-        return $model;
+        return $model->fetchModel($model);
     }
 
     /**
@@ -677,8 +733,7 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
      */
     public function setCache($key = true, $expire = null, $tag = null)
     {
-        $this->db()->cache($key, $expire, $tag);
-        return $this;
+        return $this->setOption('cache', [$key, $expire, $tag]);
     }
 
     /**
@@ -690,9 +745,7 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
      */
     public function allowField(array $allow)
     {
-        $this->setOption('allow', $allow);
-
-        return $this;
+        return $this->setOption('allow', $allow);
     }
 
     /**
@@ -704,9 +757,7 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
      */
     public function readonly(array $fields)
     {
-        $this->setOption('readonly', $fields);
-
-        return $this;
+        return $this->setOption('readonly', $fields);
     }
 
     /**
@@ -718,9 +769,7 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
      */
     public function force(bool $force = true)
     {
-        $this->setOption('force', $force);
-
-        return $this;
+        return $this->setOption('force', $force);
     }
 
     /**
@@ -810,6 +859,40 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
     public function jsonSerialize(): array
     {
         return $this->toArray();
+    }
+
+    /**
+     * 序列化模型对象
+     * 
+     * @return array
+     */
+    public function __serialize(): array
+    {
+        $removeKeys = ['invoker', 'db', 'event'];
+        return array_diff_key(self::$weakMap[$this], array_flip($removeKeys));
+    }
+
+    /**
+     * 反序列化模型对象
+     * 
+     * @param array $data 
+     * @return void
+     */
+    public function __unserialize(array $data) 
+    {
+        self::$weakMap[$this] = $data;
+        // 重新初始化
+        $this->initialize();
+    }
+
+    /**
+     * 克隆模型实例
+     * 
+     * @return void
+     */
+    public function __clone()
+    {
+        throw new InvalidArgumentException('use $modelObj->clone() replace clone $modelObj');
     }
 
     // ArrayAccess

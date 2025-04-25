@@ -77,9 +77,9 @@ SQL
         $this->assertNotEmpty($model->update_time);
 
         // 测试allowField方法限制字段更新
-        $model = TestModel::find(3);
+        $model      = TestModel::find(3);
         $updateData = ['name' => 'updated3', 'score' => 30, 'status' => 0];
-        $result = $model->allowField(['name', 'score'])->save($updateData);
+        $result     = $model->allowField(['name', 'score'])->save($updateData);
 
         $this->assertTrue($result);
         $model = TestModel::withoutGlobalScope()->find(3);
@@ -198,6 +198,35 @@ SQL
         $data = TestModel::find(3);
         $data->inc('score', 5)->save();
         $this->assertEquals(45, $data->score);
+    }
+
+    public function testClone()
+    {
+        Db::table('test_model')->insertAll(self::$testData);
+
+        // 测试基本属性克隆
+        $original = TestModel::find(1);
+        $cloned   = $original->clone();
+
+        $this->assertEquals($original->name, $cloned->name);
+        $this->assertEquals($original->score, $cloned->score);
+        $this->assertEquals($original->status, $cloned->status);
+        $this->assertEquals($original->create_time, $cloned->create_time);
+        $this->assertEquals($original->update_time, $cloned->update_time);
+
+        // 测试克隆后的数据独立性
+        $cloned->name  = 'cloned_test';
+        $cloned->score = 50;
+        $cloned->save();
+
+        // 验证原始对象数据未被修改
+        $this->assertEquals('test1', $original->name);
+        $this->assertEquals(35, $original->score);
+
+        // 验证克隆对象数据已更新
+        $this->assertEquals('cloned_test', $cloned->name);
+        $this->assertEquals(50, $cloned->score);
+        $this->assertNotEmpty($cloned->update_time);
     }
 
     public function testDecrement()
@@ -400,24 +429,24 @@ SQL
         Db::table('test_model')->insertAll(self::$testData);
 
         // 测试动态获取器
-        $model = TestModel::where('id', 1)->find()->withAttr('score', function($value, $data){
+        $model = TestModel::where('id', 1)->find()->withAttr('score', function ($value, $data) {
             return $value + 1;
         });
         $this->assertEquals(36, $model->score); // 动态获取器优先
 
-        $model = TestModel::select([1])->withAttr('score', function($value, $data){
+        $model = TestModel::select([1])->withAttr('score', function ($value, $data) {
             return $value + 2;
         });
         $this->assertEquals(37, $model[0]->score);
 
         // 测试不存在的字段
-        $model = TestModel::where('id', 1)->find()->withAttr('nickname', function($value, $data){
+        $model = TestModel::where('id', 1)->find()->withAttr('nickname', function ($value, $data) {
             return 'nickname:' . $data['name'];
-        })->withAttr('score', function($value, $data){
+        })->withAttr('score', function ($value, $data) {
             return $value + 1;
         });
-        $this->assertEquals('nickname:test1', $model->nickname); // 动态获取器优先    
-        $this->assertEquals(36, $model->score); // 动态获取器优先    
+        $this->assertEquals('nickname:test1', $model->nickname); // 动态获取器优先
+        $this->assertEquals(36, $model->score);                  // 动态获取器优先
 
         // 测试是否自动append
         $this->assertArrayHasKey('nickname', $model->toArray());

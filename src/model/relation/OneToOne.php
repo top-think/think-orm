@@ -94,6 +94,13 @@ abstract class OneToOne extends Relation
         $joinTable = $this->query->getTable();
         $joinAlias = Str::snake($relation);
         $joinType  = $joinType ?: $this->joinType;
+        if (true !== $field) {
+            $joinField = $field;
+        } elseif ($this->query->getOptions('field')) {
+            $joinField = $this->query->getOptions('field');
+        } else {
+            $joinField = $field;
+        }
 
         $query->via($joinAlias);
 
@@ -122,13 +129,13 @@ abstract class OneToOne extends Relation
             // 使用field指定获取关联的字段
             $withField = $query->getOptions('field');
             if ($withField) {
-                $field = $withField;
+                $joinField = $withField;
             }
             $query->removeOption('field');
         }
 
         $query->join([$joinTable => $joinAlias], $joinOn, $joinType)
-            ->tableField($field, $joinTable, $joinAlias, $joinAlias . '__');
+            ->tableField($joinField, $joinTable, $joinAlias, $joinAlias . '__');
     }
 
     /**

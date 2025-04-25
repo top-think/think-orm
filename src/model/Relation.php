@@ -180,6 +180,7 @@ abstract class Relation
     protected function getQueryFields(string $model)
     {
         $fields = $this->query->getOptions('field');
+        $this->query->removeOption('field');
 
         return $this->getRelationQueryFields($fields, $model);
     }
@@ -210,21 +211,6 @@ abstract class Relation
         }
 
         return $fields;
-    }
-
-    /**
-     * 根据关联条件查询当前模型.
-     *
-     * @param mixed  $where    查询条件（数组或者闭包）
-     * @param mixed  $fields   字段
-     * @param string $joinType JOIN类型
-     * @param Query  $query    Query对象
-     *
-     * @return Query
-     */
-    public function hasWhereOr($where = [], $fields = null, string $joinType = '', ?Query $query = null): Query
-    {
-        return $this->hasWhere($where, $fields, $joinType, $query, 'OR');
     }
 
     /**

@@ -263,7 +263,8 @@ class Builder extends BaseBuilder
             throw new Exception('where express error:' . var_export($exp, true));
         }
 
-        $exp = strtoupper($exp);
+        $param = $val[2] ?? null;
+        $exp   = strtoupper($exp);
         if (isset($this->exp[$exp])) {
             $exp = $this->exp[$exp];
         }
@@ -293,7 +294,7 @@ class Builder extends BaseBuilder
         // 解析查询表达式
         foreach ($this->parser as $fun => $parse) {
             if (in_array($exp, $parse)) {
-                return $this->$fun($query, $key, $exp, $value, $field, $bindType, $val[2] ?? 'AND');
+                return $this->$fun($query, $key, $exp, $value, $field, $bindType, $param);
             }
         }
 
@@ -313,9 +314,10 @@ class Builder extends BaseBuilder
      *
      * @return string
      */
-    protected function parseLike(Query $query, string $key, string $exp, $value, $field, int $bindType, string $logic): string
+    protected function parseLike(Query $query, string $key, string $exp, $value, $field, int $bindType, ?string $logic = null): string
     {
         // 模糊匹配
+        $logic = $logic ?: 'AND';
         if (is_array($value)) {
             $array = [];
             foreach ($value as $item) {

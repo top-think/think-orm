@@ -15,7 +15,10 @@ namespace think\model;
 
 use ReflectionClass;
 use think\Entity;
+use think\helper\Str;
 use think\Model;
+use think\model\Collection;
+use think\model\contract\Modelable;
 
 /**
  * 视图模型
@@ -26,8 +29,9 @@ abstract class View extends Entity
      * 架构函数.
      *
      * @param Model $model 模型连接对象
+     * @param bool  $with  是否存在with关联查询
      */
-    public function __construct(?Model $model = null)
+    public function __construct(?Model $model = null, bool $with = false)
     {
         parent::__construct($model);
 
@@ -35,54 +39,67 @@ abstract class View extends Entity
         $this->model()->asView(true);
 
         // 初始化模型
-        if (!$this->model()->isEmpty()) {
-            $this->initData();
+        if (!$this->isEmpty()) {
+            $this->initData(!$with);
         }
     }
 
     /**
-     * 设置Model对象并初始化数据
+     * 初始化实体数据属性（如果存在关联查询则会延迟执行）.
      *
-     * @param Model $model
-     *
-     * @return $this
-     */
-    public function setModel(Model $model)
-    {
-        parent::setModel($model);
-        $this->initData();
-        return $this;
-    }
-
-    /**
-     * 初始化实体数据属性.
-     *
+     * @param bool  $relation  是否处理关联数据
      * @return void
      */
-    private function initData()
+    public function initData(bool $relation = true)
     {
         // 获取实体属性
         $properties = $this->getEntityProperties();
+        $data       = $this->model()->getData();
         foreach ($properties as $key => $field) {
+            if (!$relation) {
+                // 确保存在基础模型数据
+                if (isset($data[$field])) { 
+                    $this->$field = $data[$field];
+                }
+                continue;
+            }
+
             if (is_int($key)) {
-                $this->$field = $this->model()->$field;
+                $this->$field = $this->fetchViewAttr($field);
             } elseif (strpos($field, '->')) {
                 $items    = explode('->', $field);
                 $relation = array_shift($items);
-                if (isset($data->$relation)) {
+                if (isset($data[$relation])) {
                     // 存在关联数据
-                    $value    = $this->model()->$relation;
+                    $value    = $data[$relation];
                     foreach ($items as $item) {
                         $value = $value->$item;
                     }
                     $this->$key = $value;
-                } else {
-                    $this->$key = $this->model()->$key;
                 }
             } else {
-                $this->$key = $this->model()->$field;
+                $this->$key = $this->fetchViewAttr($field);
             }
         }
+    }
+
+    /**
+     * 获取视图属性值（支持视图获取器）.
+     *
+     * @param string $field 视图属性
+     *
+     * @return mixed
+     */
+    private function fetchViewAttr(string $field)
+    {
+        $method = 'get' . Str::camel($field) . 'Attr';
+        if (method_exists($this, $method)) {
+            $value = $this->$method($this->model()); 
+        } else {
+            $value = $this->model()->$field;
+        }
+
+        return $value;
     }
 
     /**
@@ -92,18 +109,21 @@ abstract class View extends Entity
      */
     private function getEntityProperties(): array
     {
-        $reflection = new ReflectionClass($this);
-        $options    = $this->getOptions();
-        $mapping    = $options['property_mapping'] ?? [];
-        $properties = [];
+        $properties = $this->getOption('view_properties');
+        if (empty($properties)) {
+            $reflection = new ReflectionClass($this);
+            $mapping    = $this->getOption('viewMapping', []);
+            $properties = [];
 
-        foreach ($reflection->getProperties() as $property) {
-            $field = $property->getName();
-            if (isset($mapping[$field])) {
-                $properties[$field] = $mapping[$field];
-            } else {
-                $properties[] = $field;
+            foreach ($reflection->getProperties() as $property) {
+                $field = $property->getName();
+                if (isset($mapping[$field])) {
+                    $properties[$field] = $mapping[$field];
+                } else {
+                    $properties[] = $field;
+                }
             }
+            $this->setOption('view_properties', $properties);
         }
 
         return $properties;
@@ -116,7 +136,39 @@ abstract class View extends Entity
      */
     public function toArray(): array
     {
-        return get_object_vars($this);
+        $data = get_object_vars($this);
+        foreach ($data as $name => &$val) {
+            if ($val instanceof Modelable || $val instanceof Collection) {
+                $val = $val->toArray();
+            }
+        }
+        return $data;
+    }
+
+    /**
+     * 判断数据是否为空.
+     *
+     * @return bool
+     */
+    public function isEmpty(): bool
+    {
+        return $this->model()->isEmpty();
+    }
+
+    /**
+     * 获取克隆的模型实例.
+     *
+     * @return static
+     */
+    public function clone()
+    {
+        $model = new static();
+        $model->setModel($this->model());
+        // 初始化模型
+        if (!$this->isEmpty()) {
+            $model->initData();
+        }
+        return $model;
     }
 
     /**
@@ -125,7 +177,7 @@ abstract class View extends Entity
      * @param int $options json参数
      * @return string
      */
-    public function tojson(int $options = JSON_UNESCAPED_UNICODE): string
+    public function toJson(int $options = JSON_UNESCAPED_UNICODE): string
     {
         return json_encode($this->toArray(), $options);
     }
@@ -151,20 +203,7 @@ abstract class View extends Entity
      */
     public function setRelation($relation, $model)
     {
-        $properties = $this->getEntityProperties();
-        foreach ($properties as $key => $field) {
-            if (strpos($field, '->') && str_starts_with($field, $relation)) {
-                // 关联映射属性
-                $items  = explode('->', $field);
-                array_shift($items);
-
-                $value  = $model;
-                foreach ($items as $item) {
-                    $value = $value->$item;
-                }
-                $this->$key = $value;
-            }
-        }
+        $this->model()->setRelation($relation, $model);
     }
 
     /**
@@ -221,7 +260,7 @@ abstract class View extends Entity
      */
     public function __isset(string $name): bool
     {
-        return isset($this->$name);
+        return !is_null($this->__get($name));
     }
 
     /**
@@ -233,11 +272,43 @@ abstract class View extends Entity
      */
     public function __unset(string $name): void
     {
-        __unset($this->$name);
+        unset($this->$name);
     }
 
     public function __debugInfo()
     {
         return [];
+    }
+
+    /**
+     * 克隆模型实例
+     * 
+     * @return void
+     */
+    public function __clone()
+    {
+    }
+
+    /**
+     * 序列化模型对象
+     * 
+     * @return array
+     */
+    public function __serialize(): array
+    {
+        return get_object_vars($this);
+    }
+
+    /**
+     * 反序列化模型对象
+     * 
+     * @param array $data 
+     * @return void
+     */
+    public function __unserialize(array $data) 
+    {
+        foreach ($data as $name => $val) {
+            $this->$name = $val;
+        }
     }
 }

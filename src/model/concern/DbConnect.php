@@ -104,7 +104,7 @@ trait DbConnect
         }
 
         if ($field) {
-            return $schema[$field] ?? 'string';
+            return $schema[$field] ?? null;
         }
 
         return $schema;

@@ -431,7 +431,7 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
             if ($val instanceof Modelable || in_array($name, $together)) {
                 $relations[$name] = $val;
                 unset($data[$name]);
-            } elseif ($val instanceof Collection || !in_array($name, $allow)) {
+            } elseif ($val instanceof Collection || (!empty($allow) && !in_array($name, $allow))) {
                 unset($data[$name]);
             } elseif ($isUpdate && !$this->isForce() && $this->isNotRequireUpdate($name, $val, $origin)) {
                 unset($data[$name]);

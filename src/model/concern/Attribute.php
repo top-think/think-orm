@@ -521,7 +521,10 @@ trait Attribute
             $value = $this->$method($value, $data);
         } else {
             // 类型转换
-            $value = $this->writeTransform($value, $this->getFields($name));
+            $type = $this->getFields($name);
+            if (isset($type)) {
+                $value = $this->writeTransform($value, $type);
+            }
         }
 
         if ($value instanceof Express) {

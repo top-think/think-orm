@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace think\model;
 
+use think\helper\Str;
 use think\Model;
 
 /**
@@ -26,6 +27,11 @@ class Pivot extends Model
      * @var Model
      */
     public $parent;
+
+    /**
+     * 中间表名称.
+     * @var string
+     */
     protected $pivotName;
 
     /**
@@ -56,8 +62,8 @@ class Pivot extends Model
      */
     protected function init() 
     {
-        if (is_null($this->getOption('name'))) {
-            $this->setOption('name', $this->pivotName);
+        if (null === $this->getOption('name')) {
+            $this->setOption('name', $this->pivotName ?: Str::snake(class_basename(static::class)));
         }
     }
 

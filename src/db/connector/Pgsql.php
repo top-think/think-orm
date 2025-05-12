@@ -12,6 +12,7 @@
 namespace think\db\connector;
 
 use PDO;
+use think\db\BaseQuery;
 use think\db\PDOConnection;
 
 /**
@@ -108,5 +109,70 @@ class Pgsql extends PDOConnection
     protected function supportSavepoint(): bool
     {
         return true;
+    }
+
+    /**
+     * 插入记录.
+     *
+     * @param BaseQuery $query        查询对象
+     * @param bool      $getLastInsID 返回自增主键
+     *
+     * @return mixed
+     */
+    public function insert(BaseQuery $query, bool $getLastInsID = false)
+    {
+        // 分析查询表达式
+        $options = $query->parseOptions();
+
+        // 生成SQL语句
+        $sql = $this->builder->insert($query);
+
+        // 执行操作
+        $result = '' == $sql ? 0 : $this->pdoExecute($query, $sql);
+
+        if ($result) {
+            $sequence = $options['sequence'] ?? null;
+            $lastInsId = $getLastInsID ? $this->getLastInsID($query, $sequence) : null;
+
+            $data = $options['data'];
+
+            if ($lastInsId) {
+                $pk = $query->getAutoInc();
+                if ($pk) {
+                    $data[$pk] = $lastInsId;
+                }
+            }
+
+            $query->setOption('data', $data);
+
+            $this->db->trigger('after_insert', $query);
+
+            if ($getLastInsID && $lastInsId) {
+                return $lastInsId;
+            }
+        }
+
+        return $result;
+    }
+
+    /**
+     * 获取最近插入的ID.
+     *
+     * @param BaseQuery   $query    查询对象
+     * @param null|string $sequence 自增序列名
+     *
+     * @return mixed
+     *
+     * @throws \Exception
+     */
+    public function getLastInsID(BaseQuery $query, ?string $sequence = null)
+    {
+        try {
+            $insertId = $this->linkID->lastInsertId($sequence);
+        } catch (\Exception $e) {
+            throw $e;
+        }
+
+        return $this->autoInsIDType($query, $insertId);
     }
 }

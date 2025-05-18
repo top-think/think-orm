@@ -8,6 +8,10 @@
          convertErrorsToExceptions="true"
          convertNoticesToExceptions="true"
          convertWarningsToExceptions="true"
+         displayDetailsOnTestsThatTriggerDeprecations="true"
+         displayDetailsOnTestsThatTriggerErrors="true"
+         displayDetailsOnTestsThatTriggerNotices="true"
+         displayDetailsOnTestsThatTriggerWarnings="true"
          processIsolation="false"
          stopOnError="false"
          stopOnFailure="false"
@@ -30,5 +34,10 @@
     <env name="TESTS_DB_MYSQL_DATABASE" value="testing"/>
     <env name="TESTS_DB_MYSQL_USERNAME" value="root"/>
     <env name="TESTS_DB_MYSQL_PASSWORD" value="password"/>
+    <env name="TESTS_DB_PGSQL_HOSTNAME" value="127.0.0.1"/>
+    <env name="TESTS_DB_PGSQL_HOSTPORT" value="5432"/>
+    <env name="TESTS_DB_PGSQL_DATABASE" value="testing"/>
+    <env name="TESTS_DB_PGSQL_USERNAME" value="root"/>
+    <env name="TESTS_DB_PGSQL_PASSWORD" value="password"/>
   </php>
 </phpunit>

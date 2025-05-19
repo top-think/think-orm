@@ -29,6 +29,19 @@ jobs:
         ports:
           - 3306:3306
         options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: root
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: testing
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U root"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
 
     steps:
       - name: Checkout
@@ -73,3 +86,8 @@ jobs:
           TESTS_DB_MYSQL_USERNAME: root
           TESTS_DB_MYSQL_PASSWORD: password
           TESTS_DB_MYSQL_DATABASE: testing
+          TESTS_DB_PGSQL_HOST: 127.0.0.1
+          TESTS_DB_PGSQL_PORT: 5432
+          TESTS_DB_PGSQL_USERNAME: root
+          TESTS_DB_PGSQL_PASSWORD: password
+          TESTS_DB_PGSQL_DATABASE: testing

@@ -1,7 +1,6 @@
 <?php
 
-return
-[
+return [
     'paths' => [
         'migrations' => '%%PHINX_CONFIG_DIR%%/tests/db/migrations',
         'seeds' => '%%PHINX_CONFIG_DIR%%/tests/db/seeds'

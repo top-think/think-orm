@@ -10,6 +10,8 @@ use think\db\ConnectionInterface;
 use think\db\connector\Pgsql;
 use function tests\kill_connection;
 use function tests\mysql_kill_connection;
+use function tests\pg_install_func;
+use function tests\pg_reset_function;
 use function tests\query_connection_id;
 use function tests\query_mysql_connection_id;
 use think\facade\Db;
@@ -37,6 +39,11 @@ abstract class BaseDbTransactionTest extends Base
         // });
         $this->db = Db::connect($this->dbName, true);
         $this->db->execute('TRUNCATE TABLE test_tran_a;');
+
+        if ($this->dbName === 'pgsql') {
+            pg_reset_function();
+            pg_install_func();
+        }
     }
 
     protected function reconnect(): ConnectionInterface

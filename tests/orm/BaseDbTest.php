@@ -17,6 +17,8 @@ use think\db\exception\DbException;
 use think\db\Raw;
 use think\Exception as ThinkException;
 use think\facade\Db;
+use function tests\pg_install_func;
+use function tests\pg_reset_function;
 
 abstract class BaseDbTest extends Base
 {
@@ -37,6 +39,11 @@ abstract class BaseDbTest extends Base
     public function setUp(): void
     {
         $this->db = Db::connect($this->dbName);
+
+        if ($this->dbName === 'pgsql') {
+            pg_reset_function();
+            pg_install_func();
+        }
     }
 
     public function testInitUsers(): array

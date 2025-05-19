@@ -54,8 +54,8 @@
             "@composer bin phinx update --ansi"
         ],
         "db-migrate": [
-            "./vendor/bin/phinx migrate -e mysql",
-            "./vendor/bin/phinx migrate -e pgsql"
+            "./vendor/bin/phinx migrate -e mysql -vvv",
+            "./vendor/bin/phinx migrate -e pgsql -vvv"
         ],
         "db-rollback": [
             "./vendor/bin/phinx rollback -f -e mysql",

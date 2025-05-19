@@ -12,6 +12,7 @@
 namespace think\db\connector;
 
 use PDO;
+use think\db\BaseQuery;
 use think\db\PDOConnection;
 
 /**
@@ -108,5 +109,12 @@ class Pgsql extends PDOConnection
     protected function supportSavepoint(): bool
     {
         return true;
+    }
+
+    public function getLastInsID(BaseQuery $query, ?string $sequence = null)
+    {
+        $insertId = $this->linkID->lastInsertId($sequence);
+
+        return $this->autoInsIDType($query, $insertId);
     }
 }

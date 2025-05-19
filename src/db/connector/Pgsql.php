@@ -125,7 +125,7 @@ class Pgsql extends PDOConnection
         if ($result) {
             // todo 应该改造为使用 returning 返回完全解决该问题
             $sequence  = $options['sequence'] ?? null;
-            $lastInsId = $this->getLastInsID($query, $sequence);
+            $lastInsId = $getLastInsID ? $this->getLastInsID($query, $sequence) : null;
 
             $data = $options['data'];
 

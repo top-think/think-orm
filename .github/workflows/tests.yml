@@ -79,7 +79,6 @@ jobs:
         run: composer install --prefer-dist --no-progress --no-suggest
 
       - name: Run DB Migrate
-        continue-on-error: true
         run: |
           composer bin phinx install
           composer run db-migrate
@@ -96,7 +95,7 @@ jobs:
           TESTS_DB_PGSQL_DATABASE: testing
 
       - name: Run test suite
-        run: composer exec -- phpunit
+        run: composer exec -- phpunit --testdox
         env:
           TESTS_DB_MYSQL_HOSTNAME: 127.0.0.1
           TESTS_DB_MYSQL_HOSTPORT: 3306

@@ -32,9 +32,9 @@ abstract class BaseDbTransactionTest extends Base
 
     public function setUp(): void
     {
-        Db::listen(function ($sql, $time) {
-            echo "SQL: $sql [$time ms]\n";
-        });
+        // Db::listen(function ($sql, $time) {
+        //     echo "SQL: $sql [$time ms]\n";
+        // });
         $this->db = Db::connect($this->dbName, true);
         $this->db->execute('TRUNCATE TABLE test_tran_a;');
     }

@@ -94,12 +94,12 @@ function kill_connection(string $name, $cid): void
 global $pg_func_installed;
 $pg_func_installed = [];
 
-function pg_server_version(string $name = 'pgsql'): string
+function pg_server_version(string $name = 'pgsql', bool $raw = false): string
 {
     $pdo = Db::connect($name)->connect();
     $version = $pdo->getAttribute(\PDO::ATTR_SERVER_VERSION);
 
-    return explode(' ', $version)[0];
+    return $raw ? $version : explode(' ', $version)[0];
 }
 
 function pg_install_func(string $name = 'pgsql'): void
@@ -113,9 +113,13 @@ function pg_install_func(string $name = 'pgsql'): void
     /** @var \PDO $pdo */
     $pdo = Db::connect($name)->connect();
 
-    $file_path = version_compare(pg_server_version($name), '12.0', '>=')
+    $rawVersion = pg_server_version($name, true);
+    $version = pg_server_version($name);
+    $file_path = version_compare($version, '12.0', '>=')
         ? __DIR__ . '/../src/db/connector/pgsql12.sql'
         : __DIR__ . '/../src/db/connector/pgsql.sql';
+
+    echo PHP_EOL, "> Installing PostgreSQL({$rawVersion}) functions from {$file_path}", PHP_EOL;
 
     $content = file_get_contents($file_path);
     $statements = preg_split('/;\s*(?=CREATE|COMMENT|DROP)/i', $content);

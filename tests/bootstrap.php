@@ -79,5 +79,25 @@ Db::setConfig([
             // 数据库调试模式
             'debug' => false,
         ],
+        'pgsql_manage' => [
+            // 数据库类型
+            'type' => 'pgsql',
+            // 主机地址
+            'hostname' => getenv('TESTS_DB_PGSQL_HOSTNAME'),
+            // 主机端口
+            'hostport' => getenv('TESTS_DB_PGSQL_HOSTPORT'),
+            // 数据库名
+            'database' => getenv('TESTS_DB_PGSQL_DATABASE'),
+            // 用户名
+            'username' => getenv('TESTS_DB_PGSQL_USERNAME'),
+            // 密码
+            'password' => getenv('TESTS_DB_PGSQL_PASSWORD'),
+            // 数据库编码默认采用utf8
+            'charset' => 'utf8',
+            // 数据库表前缀
+            'prefix' => 'test_',
+            // 数据库调试模式
+            'debug' => false,
+        ],
     ],
 ]);

@@ -50,9 +50,45 @@ function query_mysql_connection_id(ConnectionInterface $connect): int
     return (int) $cid;
 }
 
+function query_pgsql_connection_id(ConnectionInterface $connect): int
+{
+    $cid = $connect->query('SELECT pg_backend_pid() as cid')[0]['cid'];
+
+    return (int) $cid;
+}
+
+function query_connection_id(ConnectionInterface $connect): int
+{
+    if ($connect->getConfig('type') === 'mysql') {
+        return query_mysql_connection_id($connect);
+    } elseif ($connect->getConfig('type') === 'pgsql') {
+        return query_pgsql_connection_id($connect);
+    } else {
+        throw new \RuntimeException('Unsupported database type');
+    }
+}
+
+
 function mysql_kill_connection(string $name, $cid)
 {
     Db::connect($name)->execute("KILL {$cid}");
+}
+
+function pgsql_kill_connection(string $name, $cid)
+{
+    Db::connect($name)->execute("SELECT pg_terminate_backend({$cid})");
+}
+
+function kill_connection(string $name, $cid): void
+{
+    $connect = Db::connect($name);
+    if ($connect->getConfig('type') === 'mysql') {
+        mysql_kill_connection($name, $cid);
+    } elseif ($connect->getConfig('type') === 'pgsql') {
+        pgsql_kill_connection($name, $cid);
+    } else {
+        throw new \RuntimeException('Unsupported database type');
+    }
 }
 
 global $pg_func_installed;

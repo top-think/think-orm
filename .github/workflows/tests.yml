@@ -79,6 +79,22 @@ jobs:
         run: composer install --prefer-dist --no-progress --no-suggest
 
       - name: Run test suite
+        run: |
+          composer bin phinx install
+          composer run db-migrate
+        env:
+          TESTS_DB_MYSQL_HOST: 127.0.0.1
+          TESTS_DB_MYSQL_PORT: 3306
+          TESTS_DB_MYSQL_USERNAME: root
+          TESTS_DB_MYSQL_PASSWORD: password
+          TESTS_DB_MYSQL_DATABASE: testing
+          TESTS_DB_PGSQL_HOST: 127.0.0.1
+          TESTS_DB_PGSQL_PORT: 5432
+          TESTS_DB_PGSQL_USERNAME: root
+          TESTS_DB_PGSQL_PASSWORD: password
+          TESTS_DB_PGSQL_DATABASE: testing
+
+      - name: Run test suite
         run: composer exec -- phpunit
         env:
           TESTS_DB_MYSQL_HOST: 127.0.0.1

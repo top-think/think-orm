@@ -20,7 +20,7 @@ use think\facade\Db;
 use function tests\pg_install_func;
 use function tests\pg_reset_function;
 
-abstract class BaseDbTest extends Base
+abstract class DbTestBase extends Base
 {
     public ConnectionInterface $db;
     protected string $dbName;

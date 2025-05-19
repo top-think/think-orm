@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace tests\orm;
 
-class PgsqlDbTest extends BaseDbTest
+class PgsqlDbTest extends DbTestBase
 {
     protected string $dbName = 'pgsql';
 

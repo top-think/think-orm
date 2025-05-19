@@ -18,7 +18,7 @@ use think\facade\Db;
 use Throwable;
 use function tests\query_pgsql_connection_id;
 
-abstract class BaseDbTransactionTest extends Base
+abstract class DbTransactionTestBase extends Base
 {
     protected ConnectionInterface $db;
     protected string $dbName;

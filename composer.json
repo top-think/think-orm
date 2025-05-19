@@ -21,6 +21,7 @@
         "topthink/think-helper":"^3.1"
     },
     "require-dev": {
+        "bamarni/composer-bin-plugin": "^1.8",
         "phpunit/phpunit": "^9.6|^10"
     },
     "autoload": {
@@ -40,6 +41,39 @@
         "ext-mongodb": "provide mongodb support"
     },
     "config": {
-        "sort-packages": true
+        "sort-packages": true,
+        "allow-plugins": {
+            "bamarni/composer-bin-plugin": true
+        }
+    },
+    "scripts": {
+        "post-install-cmd": [
+            "@composer bin phinx install --ansi"
+        ],
+        "phinx-update": [
+            "@composer bin phinx update --ansi"
+        ],
+        "db-migrate": [
+            "./vendor/bin/phinx migrate -e mysql",
+            "./vendor/bin/phinx migrate -e pgsql"
+        ],
+        "db-rollback": [
+            "./vendor/bin/phinx rollback -f -e mysql",
+            "./vendor/bin/phinx rollback -f -e pgsql"
+        ],
+        "db-status": [
+            "./vendor/bin/phinx status -e mysql",
+            "./vendor/bin/phinx status -e pgsql"
+        ],
+        "db-rebuild": [
+            "@composer run db-rollback",
+            "@composer run db-migrate"
+        ]
+    },
+    "extra": {
+        "bamarni-bin": {
+            "bin-links": true,
+            "forward-command": false
+        }
     }
 }

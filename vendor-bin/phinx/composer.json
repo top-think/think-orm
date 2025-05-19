@@ -1,0 +1,5 @@
+{
+    "require-dev": {
+        "robmorgan/phinx": "^0.14"
+    }
+}

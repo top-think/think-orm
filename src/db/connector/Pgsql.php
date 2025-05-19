@@ -111,6 +111,43 @@ class Pgsql extends PDOConnection
         return true;
     }
 
+    public function insert(BaseQuery $query, bool $getLastInsID = false)
+    {
+        // 分析查询表达式
+        $options = $query->parseOptions();
+
+        // 生成SQL语句
+        $sql = $this->builder->insert($query);
+
+        // 执行操作
+        $result = '' == $sql ? 0 : $this->pdoExecute($query, $sql);
+
+        if ($result) {
+            // todo 应该改造为使用 returning 返回完全解决该问题
+            $sequence  = $options['sequence'] ?? null;
+            $lastInsId = $this->getLastInsID($query, $sequence);
+
+            $data = $options['data'];
+
+            if ($lastInsId) {
+                $pk = $query->getAutoInc();
+                if ($pk && is_string($pk)) {
+                    $data[$pk] = $lastInsId;
+                }
+            }
+
+            $query->setOption('data', $data);
+
+            $this->db->trigger('after_insert', $query);
+
+            if ($getLastInsID && $lastInsId) {
+                return $lastInsId;
+            }
+        }
+
+        return $result;
+    }
+
     public function getLastInsID(BaseQuery $query, ?string $sequence = null)
     {
         $insertId = $this->linkID->lastInsertId($sequence);

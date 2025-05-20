@@ -41,10 +41,6 @@ class ModelFieldTypeBase extends TestCaseBase
      */
     public function testFieldTypeSelect(array $data)
     {
-        var_dump($this->db->getTableFieldsInfo('test_field_type'));
-        var_dump($this->db->getSchemaInfo('test_field_type'));
-        var_dump($this->db->getFieldBindType('bigint'));
-
         $result = $this->db->table('test_field_type')->setFieldType(['bigint' => 'string'])->select();
         $this->assertNotEmpty($result->count());
         foreach ($data as $index => $item) {

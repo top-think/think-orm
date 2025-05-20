@@ -20,7 +20,7 @@ class TestCaseBase extends TestCase
 {
     protected ConnectionInterface $db;
     protected static string $connectName;
-    protected bool $isPgScriptInstalled = false;
+    protected static bool $isResetPgScript = false;
 
     protected static function initModelSupport(): void
     {
@@ -44,10 +44,12 @@ class TestCaseBase extends TestCase
     {
         $this->db ??= Db::connect(static::$connectName);
 
-        if (static::$connectName === 'pgsql' && $this->isPgScriptInstalled) {
-            pg_reset_function();
+        if (static::$connectName === 'pgsql') {
+            if (self::$isResetPgScript === false) {
+                pg_reset_function();
+                self::$isResetPgScript = true;
+            }
             pg_install_func();
-            $this->isPgScriptInstalled = true;
         }
 
         // var_dump(static::class . '-' . __FUNCTION__ . '-' . spl_object_id($this));

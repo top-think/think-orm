@@ -10,13 +10,12 @@ use think\db\BaseQuery;
 use think\db\ConnectionInterface;
 use think\db\connector\Pgsql;
 use think\facade\Db;
-use think\Model;
 use function version_compare;
 
 /**
  * @property string $connectName;
  */
-class Base extends TestCase
+class TestCaseBase extends TestCase
 {
     protected ConnectionInterface $db;
     protected static string $connectName;

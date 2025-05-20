@@ -4,23 +4,20 @@ declare(strict_types=1);
 
 namespace tests\orm;
 
-use think\db\ConnectionInterface;
+use tests\TestCaseBase;
+use think\Collection;
+use think\db\exception\DbException;
+use think\db\Raw;
+use think\Exception as ThinkException;
+use think\facade\Db;
 use function array_column;
 use function array_keys;
 use function array_unique;
 use function array_values;
 use function tests\array_column_ex;
 use function tests\array_value_sort;
-use tests\Base;
-use think\Collection;
-use think\db\exception\DbException;
-use think\db\Raw;
-use think\Exception as ThinkException;
-use think\facade\Db;
-use function tests\pg_install_func;
-use function tests\pg_reset_function;
 
-abstract class DbTestBase extends Base
+abstract class DbTestBase extends TestCaseBase
 {
     protected function provideTestData(): array
     {

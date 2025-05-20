@@ -3,18 +3,15 @@ declare(strict_types=1);
 
 namespace tests\orm;
 
-use PHPUnit\Framework\TestCase;
-use tests\Base;
 use tests\stubs\ProfileModel;
 use tests\stubs\UserModel;
-use think\db\Query;
-use think\facade\Db;
+use tests\TestCaseBase;
 use think\Model;
 
 /**
  * 模型一对一关联
  */
-abstract class ModelOneToOneBase extends Base
+abstract class ModelOneToOneBase extends TestCaseBase
 {
     public static function setUpBeforeClass(): void
     {

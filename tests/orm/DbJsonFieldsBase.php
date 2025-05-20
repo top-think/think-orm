@@ -2,11 +2,9 @@
 
 namespace tests\orm;
 
-use tests\Base;
-use think\Collection;
-use think\facade\Db;
+use tests\TestCaseBase;
 
-abstract class DbJsonFieldsBase extends Base
+abstract class DbJsonFieldsBase extends TestCaseBase
 {
     protected function provideTestData(): array
     {

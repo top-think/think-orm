@@ -5,20 +5,15 @@ declare(strict_types=1);
 namespace tests\orm;
 
 use Exception;
-use tests\Base;
+use tests\TestCaseBase;
 use think\db\ConnectionInterface;
 use think\db\connector\Pgsql;
-use function tests\kill_connection;
-use function tests\mysql_kill_connection;
-use function tests\pg_install_func;
-use function tests\pg_reset_function;
-use function tests\query_connection_id;
-use function tests\query_mysql_connection_id;
 use think\facade\Db;
 use Throwable;
-use function tests\query_pgsql_connection_id;
+use function tests\kill_connection;
+use function tests\query_connection_id;
 
-abstract class DbTransactionTestBase extends Base
+abstract class DbTransactionTestBase extends TestCaseBase
 {
     protected ConnectionInterface $db;
 

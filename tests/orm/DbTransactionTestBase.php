@@ -21,7 +21,7 @@ use function tests\query_pgsql_connection_id;
 abstract class DbTransactionTestBase extends Base
 {
     protected ConnectionInterface $db;
-    protected string $dbName;
+    protected static string $dbName;
 
     protected function provideTestData(): array
     {

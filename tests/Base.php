@@ -10,12 +10,25 @@ use think\db\BaseQuery;
 use think\db\ConnectionInterface;
 use think\db\connector\Pgsql;
 use think\facade\Db;
+use think\Model;
 use function version_compare;
 
+/**
+ * @property-read string $dbName;
+ */
 class Base extends TestCase
 {
     protected ConnectionInterface $db;
-    protected string $dbName;
+    protected static string $dbName;
+
+    public function __get(string $name)
+    {
+        if ($name === 'dbName') {
+            return static::$dbName;
+        }
+
+        throw new \Exception('Undefined property: ' . static::class . '::$' . $name);
+    }
 
     public function setUp(): void
     {
@@ -25,6 +38,8 @@ class Base extends TestCase
             pg_reset_function();
             pg_install_func();
         }
+
+        // var_dump(static::class . '-' . __FUNCTION__ . '-' . spl_object_id($this));
     }
 
     protected static function compatibleInsertAll(BaseQuery $query, array $data): void

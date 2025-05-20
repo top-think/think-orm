@@ -11,7 +11,7 @@ use think\model\relation\HasOne;
  */
 class UserModel extends Model
 {
-    protected $table = 'test_user';
+    protected $table = 'orm_test_user';
     protected $pk = 'id';
 
     /**

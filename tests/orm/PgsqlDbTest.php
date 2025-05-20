@@ -5,7 +5,7 @@ namespace tests\orm;
 
 class PgsqlDbTest extends DbTestBase
 {
-    protected string $dbName = 'pgsql';
+    protected static string $dbName = 'pgsql';
 
     public function testInitUsers(): array
     {

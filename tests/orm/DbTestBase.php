@@ -23,7 +23,7 @@ use function tests\pg_reset_function;
 abstract class DbTestBase extends Base
 {
     public ConnectionInterface $db;
-    protected string $dbName;
+    protected static string $dbName;
 
     protected function provideTestData(): array
     {

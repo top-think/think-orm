@@ -5,7 +5,7 @@ namespace tests\orm;
 
 class PgsqlDbJsonFieldsTest extends DbJsonFieldsBase
 {
-    protected string $dbName = 'pgsql';
+    protected static string $dbName = 'pgsql';
 
     public function testInitGoods(): array
     {

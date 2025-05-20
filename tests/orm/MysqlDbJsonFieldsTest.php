@@ -5,5 +5,5 @@ namespace tests\orm;
 
 class MysqlDbJsonFieldsTest extends DbJsonFieldsBase
 {
-    protected string $dbName = 'mysql';
+    protected static string $dbName = 'mysql';
 }

@@ -14,7 +14,7 @@ class ProfileModel extends Model
 {
     use SoftDelete;
 
-    protected $table = 'test_profile';
+    protected $table = 'orm_test_profile';
 
     /**
      * 用户

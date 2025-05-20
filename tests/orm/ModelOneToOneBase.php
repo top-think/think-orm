@@ -4,40 +4,35 @@ declare(strict_types=1);
 namespace tests\orm;
 
 use PHPUnit\Framework\TestCase;
+use tests\Base;
 use tests\stubs\ProfileModel;
 use tests\stubs\UserModel;
+use think\db\Query;
 use think\facade\Db;
+use think\Model;
 
 /**
  * 模型一对一关联
  */
-class ModelOneToOneTest extends TestCase
+abstract class ModelOneToOneBase extends Base
 {
     public static function setUpBeforeClass(): void
     {
-        self::markTestSkipped('冲突需要更改兼容性');
-        $sqlList = [
-            'DROP TABLE IF EXISTS `test_user`;',
-            'CREATE TABLE `test_user`  (
-              `id` int NOT NULL AUTO_INCREMENT,
-              `account` varchar(255) NOT NULL DEFAULT "",
-              PRIMARY KEY (`id`)
-            ) ENGINE = InnoDB DEFAULT CHARSET=utf8mb4;',
-            'DROP TABLE IF EXISTS `test_profile`;',
-            'CREATE TABLE `test_profile` (
-              `id` int NOT NULL AUTO_INCREMENT,
-              `uid` int NOT NULL,
-              `email` varchar(255) NOT NULL DEFAULT "",
-              `nickname` varchar(255) NOT NULL DEFAULT "",
-              `update_time` datetime NOT NULL,
-              `delete_time` datetime DEFAULT NULL,
-              `create_time` datetime NOT NULL,
-              PRIMARY KEY (`id`)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;',
-        ];
-        foreach ($sqlList as $sql) {
-            Db::execute($sql);
-        }
+        parent::setUpBeforeClass();
+
+        // todo 需要一个重置能力更安全
+        Model::maker(function (Model $model) {
+            $model->setConnection(static::$dbName);
+            var_dump('maker:' . __FUNCTION__ . '-' . $model::class . '-' . spl_object_id($model));
+        });
+    }
+
+    public function setUp(): void
+    {
+        parent::setUp();
+
+        $this->db->execute('TRUNCATE TABLE orm_test_user;');
+        $this->db->execute('TRUNCATE TABLE orm_test_profile;');
     }
 
     /**
@@ -50,7 +45,8 @@ class ModelOneToOneTest extends TestCase
 
         $user = new UserModel();
         $user->account = 'thinkphp';
-        $user->profile = new ProfileModel(['email' => $email, 'nickname' => $nickname]);
+        $profile = new ProfileModel(['email' => $email, 'nickname' => $nickname]);
+        $user->profile = $profile;
         $user->together(['profile'])->save();
 
         $userID = $user->id;

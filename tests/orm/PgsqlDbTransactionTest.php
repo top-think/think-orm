@@ -5,5 +5,5 @@ namespace tests\orm;
 
 class PgsqlDbTransactionTest extends DbTransactionTestBase
 {
-    protected static string $dbName = 'pgsql';
+    protected static string $connectName = 'pgsql';
 }

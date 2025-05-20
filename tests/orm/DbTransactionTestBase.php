@@ -21,7 +21,6 @@ use function tests\query_pgsql_connection_id;
 abstract class DbTransactionTestBase extends Base
 {
     protected ConnectionInterface $db;
-    protected static string $dbName;
 
     protected function provideTestData(): array
     {
@@ -34,21 +33,17 @@ abstract class DbTransactionTestBase extends Base
 
     public function setUp(): void
     {
+        parent::setUp();
+
         // Db::listen(function ($sql, $time) {
         //     echo "SQL: $sql [$time ms]\n";
         // });
-        $this->db = Db::connect($this->dbName, true);
         $this->db->execute('TRUNCATE TABLE test_tran_a;');
-
-        if ($this->dbName === 'pgsql') {
-            pg_reset_function();
-            pg_install_func();
-        }
     }
 
     protected function reconnect(): ConnectionInterface
     {
-        return $this->db = Db::connect($this->dbName, true);
+        return $this->db = Db::connect($this->connectName, true);
     }
 
     protected static function insertAll(ConnectionInterface $db, string $table, array $data): void
@@ -92,8 +87,8 @@ abstract class DbTransactionTestBase extends Base
         // 初始化配置
         $oldConfig = Db::getConfig();
         $config = $oldConfig;
-        $config['connections'][$this->dbName]['break_reconnect'] = true;
-        $config['connections'][$this->dbName]['break_match_str'] = [
+        $config['connections'][$this->connectName]['break_reconnect'] = true;
+        $config['connections'][$this->connectName]['break_match_str'] = [
             'query execution was interrupted',
             'no connection to the server',
         ];
@@ -105,7 +100,7 @@ abstract class DbTransactionTestBase extends Base
             self::insertAll($this->db, 'test_tran_a', $this->provideTestData());
 
             $cid = query_connection_id($this->db);
-            kill_connection($this->dbName . '_manage', $cid);
+            kill_connection($this->connectName . '_manage', $cid);
             // 触发重连
             $this->db->table('test_tran_a')->where('id', '=', 2)->value('username');
 
@@ -114,7 +109,7 @@ abstract class DbTransactionTestBase extends Base
             $cid = $newCid;
 
             // 事务前重连
-            kill_connection($this->dbName . '_manage', $cid);
+            kill_connection($this->connectName . '_manage', $cid);
             $this->db->table('test_tran_a')->startTrans();
             $this->db->table('test_tran_a')->where('id', '=', 2)->update([
                 'username' => '2-8-b',
@@ -134,7 +129,7 @@ abstract class DbTransactionTestBase extends Base
                 $this->db->table('test_tran_a')->where('id', '=', 2)->update([
                     'username' => '2-8-c',
                 ]);
-                kill_connection($this->dbName . '_manage', $cid);
+                kill_connection($this->connectName . '_manage', $cid);
                 $this->db->table('test_tran_a')->where('id', '=', 3)->update([
                     'username' => '3-7-b',
                 ]);
@@ -145,13 +140,13 @@ abstract class DbTransactionTestBase extends Base
                 } catch (Exception $rollbackException) {
                     // Ignore exception
                     $this->proxyAssertMatchesRegularExpression(
-                        $this->dbName === 'mysql' ? '~(server has gone away)~' : '~(no connection to the server)~',
+                        $this->connectName === 'mysql' ? '~(server has gone away)~' : '~(no connection to the server)~',
                         $rollbackException->getMessage()
                     );
                 }
                 // Ignore exception
                 $this->proxyAssertMatchesRegularExpression(
-                    $this->dbName === 'mysql' ? '~(server has gone away)~' : '~(no connection to the server)~',
+                    $this->connectName === 'mysql' ? '~(server has gone away)~' : '~(no connection to the server)~',
                     $exception->getMessage()
                 );
             }
@@ -216,8 +211,8 @@ abstract class DbTransactionTestBase extends Base
         // 初始化配置
         $oldConfig = Db::getConfig();
         $config = $oldConfig;
-        $config['connections'][$this->dbName]['break_reconnect'] = true;
-        $config['connections'][$this->dbName]['break_match_str'] = [
+        $config['connections'][$this->connectName]['break_reconnect'] = true;
+        $config['connections'][$this->connectName]['break_match_str'] = [
             'query execution was interrupted',
             'no connection to the server',
         ];
@@ -242,7 +237,7 @@ abstract class DbTransactionTestBase extends Base
             ]);
             $oldConnect->table('test_tran_a')->commit();
             // kill
-            kill_connection($this->dbName . '_manage', $cid);
+            kill_connection($this->connectName . '_manage', $cid);
             // tran 2
             $oldConnect->table('test_tran_a')->startTrans();
             $newConnect->table('test_tran_a')->where('id', '=', 3)->update([
@@ -257,13 +252,13 @@ abstract class DbTransactionTestBase extends Base
             } catch (Exception $rollbackException) {
                 // Ignore exception
                 $this->proxyAssertMatchesRegularExpression(
-                    $this->dbName === 'mysql' ? '~(server has gone away)~' : '~(no connection to the server)~',
+                    $this->connectName === 'mysql' ? '~(server has gone away)~' : '~(no connection to the server)~',
                     $rollbackException->getMessage()
                 );
             }
             // Ignore exception
             $this->proxyAssertMatchesRegularExpression(
-                $this->dbName === 'mysql' ? '~(server has gone away)~' : '~(no connection to the server)~',
+                $this->connectName === 'mysql' ? '~(server has gone away)~' : '~(no connection to the server)~',
                 $exception->getMessage()
             );
         } finally {

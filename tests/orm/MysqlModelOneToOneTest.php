@@ -5,5 +5,5 @@ namespace tests\orm;
 
 class MysqlModelOneToOneTest extends ModelOneToOneBase
 {
-    protected static string $dbName = 'mysql';
+    protected static string $connectName = 'mysql';
 }

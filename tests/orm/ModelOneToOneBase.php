@@ -22,7 +22,7 @@ abstract class ModelOneToOneBase extends Base
 
         // todo 需要一个重置能力更安全
         Model::maker(function (Model $model) {
-            $model->setConnection(static::$dbName);
+            $model->setConnection(static::$connectName);
             var_dump('maker:' . __FUNCTION__ . '-' . $model::class . '-' . spl_object_id($model));
         });
     }
@@ -31,6 +31,7 @@ abstract class ModelOneToOneBase extends Base
     {
         parent::setUp();
 
+        // 每个测试执行前重置测试数据
         $this->db->execute('TRUNCATE TABLE orm_test_user;');
         $this->db->execute('TRUNCATE TABLE orm_test_profile;');
     }

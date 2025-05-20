@@ -14,17 +14,18 @@ use think\Model;
 use function version_compare;
 
 /**
- * @property-read string $dbName;
+ * @property string $connectName;
  */
 class Base extends TestCase
 {
     protected ConnectionInterface $db;
-    protected static string $dbName;
+    protected static string $connectName;
+    protected bool $isPgScriptInstalled = false;
 
     public function __get(string $name)
     {
-        if ($name === 'dbName') {
-            return static::$dbName;
+        if ($name === 'connectName') {
+            return static::$connectName;
         }
 
         throw new \Exception('Undefined property: ' . static::class . '::$' . $name);
@@ -32,11 +33,12 @@ class Base extends TestCase
 
     public function setUp(): void
     {
-        $this->db = Db::connect($this->dbName);
+        $this->db ??= Db::connect(static::$connectName);
 
-        if ($this->dbName === 'pgsql') {
+        if (static::$connectName === 'pgsql' && $this->isPgScriptInstalled) {
             pg_reset_function();
             pg_install_func();
+            $this->isPgScriptInstalled = true;
         }
 
         // var_dump(static::class . '-' . __FUNCTION__ . '-' . spl_object_id($this));
@@ -45,6 +47,7 @@ class Base extends TestCase
     protected static function compatibleInsertAll(BaseQuery $query, array $data): void
     {
         if ($query->getConnection() instanceof Pgsql) {
+            // 当前驱动批量插入不兼容，会产生类型错误，修复后可以移除兼容性
             foreach ($data as $datum) {
                 (clone $query)->insert($datum);
             }

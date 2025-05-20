@@ -22,9 +22,6 @@ use function tests\pg_reset_function;
 
 abstract class DbTestBase extends Base
 {
-    public ConnectionInterface $db;
-    protected static string $dbName;
-
     protected function provideTestData(): array
     {
         return [
@@ -36,22 +33,12 @@ abstract class DbTestBase extends Base
         ];
     }
 
-    public function setUp(): void
-    {
-        $this->db = Db::connect($this->dbName);
-
-        if ($this->dbName === 'pgsql') {
-            pg_reset_function();
-            pg_install_func();
-        }
-    }
-
     public function testInitUsers(): array
     {
         $this->db->execute('TRUNCATE TABLE test_user;');
 
         $userData = $this->provideTestData();
-        $this->db->table('test_user')->insertAll($userData);
+        self::compatibleInsertAll($this->db->table('test_user'), $userData);
 
         return $userData;
     }

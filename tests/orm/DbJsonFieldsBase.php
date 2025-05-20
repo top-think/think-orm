@@ -25,7 +25,7 @@ abstract class DbJsonFieldsBase extends Base
         $this->db->execute('TRUNCATE TABLE test_goods;');
 
         $userData = $this->provideTestData();
-        $this->db->table('test_goods')->json(['extend'])->insertAll($userData);
+        self::compatibleInsertAll($this->db->table('test_goods')->json(['extend']), $userData);
 
         return $userData;
     }

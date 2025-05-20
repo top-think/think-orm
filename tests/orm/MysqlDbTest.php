@@ -5,5 +5,5 @@ namespace tests\orm;
 
 class MysqlDbTest extends DbTestBase
 {
-    protected static string $dbName = 'mysql';
+    protected static string $connectName = 'mysql';
 }

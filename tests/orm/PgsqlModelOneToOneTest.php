@@ -5,5 +5,5 @@ namespace tests\orm;
 
 class PgsqlModelOneToOneTest extends ModelOneToOneBase
 {
-    protected static string $dbName = 'pgsql';
+    protected static string $connectName = 'pgsql';
 }

@@ -3,40 +3,49 @@ declare(strict_types=1);
 
 namespace tests\orm;
 
-use PHPUnit\Framework\TestCase;
 use tests\stubs\FieldTypeModel;
 use tests\stubs\TestFieldJsonDTO;
 use tests\stubs\TestFieldPhpDTO;
-use think\facade\Db;
+use tests\TestCaseBase;
 
-class ModelFieldTypeTest extends TestCase
+class ModelFieldTypeBase extends TestCaseBase
 {
-    public static function setUpBeforeClass(): void
+    protected function provideTestData(): array
     {
-        Db::execute('DROP TABLE IF EXISTS `test_field_type`;');
-        Db::execute(
-            <<<SQL
-CREATE TABLE `test_field_type` (
-     `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-     `t_json` json DEFAULT NULL,
-     `t_php` varchar(512) DEFAULT NULL,
-     `bigint` bigint UNSIGNED DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-SQL
-        );
-    }
-
-    public function testFieldTypeSelect()
-    {
-        $data = [
+        return [
             ['id' => 1, 't_json' => '{"num1": 1, "str1": "a"}', 't_php' => (string) (new TestFieldPhpDTO(1, 'a')), 'bigint' => '0'],
             ['id' => 2, 't_json' => '{"num1": 2, "str1": "b"}', 't_php' => (string) (new TestFieldPhpDTO(2, 'b')), 'bigint' => '244791959321042944'],
             ['id' => 3, 't_json' => '{"num1": 3, "str1": "c"}', 't_php' => (string) (new TestFieldPhpDTO(3, 'c')), 'bigint' => '18374686479671623679'],
         ];
+    }
 
-        (new FieldTypeModel())->insertAll($data);
+    public static function setUpBeforeClass(): void
+    {
+        parent::setUpBeforeClass();
 
-        $result = Db::table('test_field_type')->select();
+        self::initModelSupport();
+    }
+
+    public function testInitData(): array
+    {
+        $this->db->execute('TRUNCATE TABLE test_field_type;');
+
+        $data = $this->provideTestData();
+        self::compatibleModelInsertAll(new FieldTypeModel(), $data);
+
+        return $data;
+    }
+
+    /**
+     * @depends testInitData
+     */
+    public function testFieldTypeSelect(array $data)
+    {
+        var_dump($this->db->getTableFieldsInfo('test_field_type'));
+        var_dump($this->db->getSchemaInfo('test_field_type'));
+        var_dump($this->db->getFieldBindType('bigint'));
+
+        $result = $this->db->table('test_field_type')->setFieldType(['bigint' => 'string'])->select();
         $this->assertNotEmpty($result->count());
         foreach ($data as $index => $item) {
             $this->assertEquals($item, $result[$index]);
@@ -52,7 +61,7 @@ SQL
     }
 
     /**
-     * @depends testFieldTypeSelect
+     * @depends testInitData
      */
     public function testFieldReadAndWrite()
     {
@@ -69,9 +78,6 @@ SQL
         $this->assertEquals($result->id, $result->t_php->getId());
     }
 
-    /**
-     * @depends testFieldTypeSelect
-     */
     public function testFieldReadInvalid()
     {
 

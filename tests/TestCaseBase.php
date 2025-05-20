@@ -10,6 +10,7 @@ use think\db\BaseQuery;
 use think\db\ConnectionInterface;
 use think\db\connector\Pgsql;
 use think\facade\Db;
+use think\Model;
 use function version_compare;
 
 /**
@@ -20,6 +21,15 @@ class TestCaseBase extends TestCase
     protected ConnectionInterface $db;
     protected static string $connectName;
     protected bool $isPgScriptInstalled = false;
+
+    protected static function initModelSupport(): void
+    {
+        // todo 需要一个重置能力更安全
+        Model::maker(function (Model $model) {
+            $model->setConnection(static::$connectName);
+            var_dump('maker:' . __FUNCTION__ . '-' . $model::class . '-' . spl_object_id($model));
+        });
+    }
 
     public function __get(string $name)
     {
@@ -46,6 +56,18 @@ class TestCaseBase extends TestCase
     protected static function compatibleInsertAll(BaseQuery $query, array $data): void
     {
         if ($query->getConnection() instanceof Pgsql) {
+            // 当前驱动批量插入不兼容，会产生类型错误，修复后可以移除兼容性
+            foreach ($data as $datum) {
+                (clone $query)->insert($datum);
+            }
+        } else {
+            $query->insertAll($data);
+        }
+    }
+
+    protected static function compatibleModelInsertAll(Model $query, array $data): void
+    {
+        if ($query->getConnection() === 'pgsql') {
             // 当前驱动批量插入不兼容，会产生类型错误，修复后可以移除兼容性
             foreach ($data as $datum) {
                 (clone $query)->insert($datum);

@@ -111,6 +111,28 @@ class Pgsql extends PDOConnection
         return true;
     }
 
+    protected function getFieldType(string $type): string
+    {
+        // 将字段类型转换为小写以进行比较
+        $type = strtolower($type);
+
+        return match (true) {
+            str_starts_with($type, 'set') => 'set',
+            str_starts_with($type, 'enum') => 'enum',
+            str_starts_with($type, 'bigint'),
+            str_contains($type, 'numeric') => 'bigint',
+            str_contains($type, 'float') || str_contains($type, 'double') ||
+            str_contains($type, 'decimal') || str_contains($type, 'real') ||
+            str_contains($type, 'int') || str_contains($type, 'serial') ||
+            str_contains($type, 'bit') => 'int',
+            str_contains($type, 'bool') => 'bool',
+            str_starts_with($type, 'timestamp') => 'timestamp',
+            str_starts_with($type, 'datetime') => 'datetime',
+            str_starts_with($type, 'date') => 'date',
+            default => 'string',
+        };
+    }
+
     public function insert(BaseQuery $query, bool $getLastInsID = false)
     {
         // 分析查询表达式

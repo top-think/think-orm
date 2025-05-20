@@ -6,7 +6,6 @@ namespace tests\orm;
 use tests\stubs\ProfileModel;
 use tests\stubs\UserModel;
 use tests\TestCaseBase;
-use think\Model;
 
 /**
  * 模型一对一关联
@@ -17,11 +16,7 @@ abstract class ModelOneToOneBase extends TestCaseBase
     {
         parent::setUpBeforeClass();
 
-        // todo 需要一个重置能力更安全
-        Model::maker(function (Model $model) {
-            $model->setConnection(static::$connectName);
-            var_dump('maker:' . __FUNCTION__ . '-' . $model::class . '-' . spl_object_id($model));
-        });
+        self::initModelSupport();
     }
 
     public function setUp(): void

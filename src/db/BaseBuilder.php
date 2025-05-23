@@ -340,7 +340,7 @@ abstract class BaseBuilder
     {
         $newQuery = $query->newQuery();
         $value($newQuery);
-        $whereClosure = $this->buildWhere($newQuery, $newQuery->getOptions('where') ?: []);
+        $whereClosure = $this->buildWhere($newQuery, $newQuery->getOption('where') ?: []);
 
         if (!empty($whereClosure)) {
             $query->bind($newQuery->getBind(false));

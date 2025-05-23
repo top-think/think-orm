@@ -222,7 +222,7 @@ class Mongo extends Connection
 
         // 生成MongoQuery对象
         $mongoQuery = $this->builder->select($query);
-        $master     = (bool) $query->getOptions('master');
+        $master     = (bool) $query->getOption('master');
 
         // 执行查询操作
         return $this->getCursor($query, $mongoQuery, $master);
@@ -335,9 +335,9 @@ class Mongo extends Connection
     {
         $options = $query->parseOptions();
 
-        if ($query->getOptions('cache')) {
+        if ($query->getOption('cache')) {
             // 检查查询缓存
-            $cacheItem = $this->parseCache($query, $query->getOptions('cache'));
+            $cacheItem = $this->parseCache($query, $query->getOption('cache'));
             $key       = $cacheItem->getKey();
 
             if ($this->cache->has($key)) {
@@ -349,7 +349,7 @@ class Mongo extends Connection
             $mongoQuery = $mongoQuery($query);
         }
 
-        $master = (bool) $query->getOptions('master');
+        $master = (bool) $query->getOption('master');
         $this->getCursor($query, $mongoQuery, $master);
 
         $resultSet = $this->getResult($options['typeMap']);
@@ -412,9 +412,9 @@ class Mongo extends Connection
 
         $this->numRows = $writeResult->getMatchedCount();
 
-        if ($query->getOptions('cache')) {
+        if ($query->getOption('cache')) {
             // 清理缓存数据
-            $cacheItem = $this->parseCache($query, $query->getOptions('cache'));
+            $cacheItem = $this->parseCache($query, $query->getOption('cache'));
             $key       = $cacheItem->getKey();
             $tag       = $cacheItem->getTag();
 

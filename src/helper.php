@@ -21,7 +21,7 @@ use think\db\Raw;
 use think\facade\Db;
 
 if (!function_exists('db')) {
-    function db(string $name, ?string $connect = null): Query
+    function db(string $name, string|array|null $connect = null): Query
     {
         if ($connect) {
             return Db::connect($connect)->name($name);

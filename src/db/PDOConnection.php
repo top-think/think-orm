@@ -720,10 +720,10 @@ abstract class PDOConnection extends Connection
         $query->parseOptions();
         $bind = $query->getBind();
 
-        if ($query->getOptions('cache')) {
+        if ($query->getOption('cache')) {
             // 检查查询缓存
-            $cacheItem = $this->parseCache($query, $query->getOptions('cache'));
-            if (!$query->getOptions('force_cache')) {
+            $cacheItem = $this->parseCache($query, $query->getOption('cache'));
+            if (!$query->getOption('force_cache')) {
                 $key = $cacheItem->getKey();
 
                 if ($this->cache->has($key)) {
@@ -741,15 +741,15 @@ abstract class PDOConnection extends Connection
         }
 
         if (!isset($master)) {
-            $master = (bool) $query->getOptions('master');
+            $master = (bool) $query->getOption('master');
         }
 
-        $procedure = $query->getOptions('procedure') || in_array(strtolower(substr(trim($sql), 0, 4)), ['call', 'exec']);
+        $procedure = $query->getOption('procedure') || in_array(strtolower(substr(trim($sql), 0, 4)), ['call', 'exec']);
 
         $this->getPDOStatement($sql, $bind, $master, $procedure);
 
         $resultSet    = $this->getResult($procedure);
-        $requireCache = $query->getOptions('cache_always') || !empty($resultSet);
+        $requireCache = $query->getOption('cache_always') || !empty($resultSet);
 
         if (isset($cacheItem) && $requireCache) {
             // 缓存数据集
@@ -871,9 +871,9 @@ abstract class PDOConnection extends Connection
 
         $this->numRows = $this->PDOStatement->rowCount();
 
-        if ($query->getOptions('cache')) {
+        if ($query->getOption('cache')) {
             // 清理缓存数据
-            $cacheItem = $this->parseCache($query, $query->getOptions('cache'));
+            $cacheItem = $this->parseCache($query, $query->getOption('cache'));
             $key       = $cacheItem->getKey();
             $tag       = $cacheItem->getTag();
 
@@ -1262,7 +1262,7 @@ abstract class PDOConnection extends Connection
 
         $result       = $pdo->fetchColumn();
         $result       = false !== $result ? $result : $default;
-        $requireCache = $query->getOptions('cache_always') || !empty($result);
+        $requireCache = $query->getOption('cache_always') || !empty($result);
 
         if (isset($cacheItem) && $requireCache) {
             // 缓存数据
@@ -1388,7 +1388,7 @@ abstract class PDOConnection extends Connection
             $result = $resultSet;
         }
 
-        $requireCache = $query->getOptions('cache_always') || !empty($result);
+        $requireCache = $query->getOption('cache_always') || !empty($result);
 
         if (isset($cacheItem) && $requireCache) {
             // 缓存数据

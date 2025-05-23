@@ -4,6 +4,7 @@ declare (strict_types = 1);
 namespace tests\orm;
 
 use PHPUnit\Framework\TestCase;
+use think\db\exception\DbException;
 use think\model\Virtual;
 
 /**
@@ -22,18 +23,29 @@ class ModelVirtualTest extends TestCase
     {
         // 测试数据操作
         $model = new VirtualModel();
-        $data  = ['name' => 'test', 'age' => 18];
-        $this->assertTrue($model->save($data));
-        $this->assertEquals($data, $model->getData());
+        $model->name = 'test';
+        $model->age  = 18;
+        $this->assertEquals('test', $model->name);
+        $this->assertEquals(18, $model->age);
 
         // 测试更新数据
-        $updateData = ['age' => 20];
-        $this->assertTrue($model->save($updateData));
+        $model->age = 20;
         $this->assertEquals(20, $model->getData('age'));
 
-        // 测试删除数据
-        $this->assertTrue($model->delete());
-        $this->assertEmpty($model->getData());
+        $this->expectException(DbException::class);
+        $this->expectExceptionMessage("virtual model not support db query");
+        $model->save();
+    }
+
+    public function testVirtualDelete()
+    {
+        $model = new VirtualModel(['name' => 'test', 'age' => 18]);
+        $this->assertEquals('test', $model->name);
+        $this->assertEquals(18, $model->age);
+
+        $this->expectException(DbException::class);
+        $this->expectExceptionMessage("virtual model not support db query");
+        $model->delete();
     }
 
     public function testVirtualModelCreate()

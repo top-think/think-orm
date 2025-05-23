@@ -184,7 +184,7 @@ class Mongo
                     // 使用闭包查询
                     $query = new Query($this->connection);
                     call_user_func_array($value, [&$query]);
-                    $filter[$logic][] = $this->parseWhere($query, $query->getOptions('where'));
+                    $filter[$logic][] = $this->parseWhere($query, $query->getOption('where'));
                 } else {
                     if (str_contains($field, '|')) {
                         // 不同字段使用相同查询条件（OR）

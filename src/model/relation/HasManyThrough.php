@@ -177,7 +177,7 @@ class HasManyThrough extends Relation
             $this->query->removeWhereField($foreignKey);
 
             $data = $this->eagerlyWhere([
-                [$this->foreignKey, 'in', $range],
+                [$this->foreignKey, 'in', array_unique($range)],
             ], $foreignKey, $subRelation, $closure, $cache);
 
             // 关联数据封装
@@ -252,7 +252,7 @@ class HasManyThrough extends Relation
             $throughKey = Str::snake(class_basename($this->model)) . '.' . $this->throughKey;
         }
 
-        $withLimit = $this->query->getOptions('limit');
+        $withLimit = $this->query->getOption('limit');
         if ($withLimit) {
             $this->query->removeOption('limit');
         }

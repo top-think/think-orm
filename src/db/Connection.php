@@ -287,8 +287,8 @@ abstract class Connection implements ConnectionInterface
      */
     protected function getCacheKey(BaseQuery $query, string $method = ''): string
     {
-        if (!empty($query->getOptions('key')) && empty($method)) {
-            $key = 'think_' . $this->getConfig('database') . '.' . var_export($query->getTable(), true) . '|' . var_export($query->getOptions('key'), true);
+        if (!empty($query->getOption('key')) && empty($method)) {
+            $key = 'think_' . $this->getConfig('database') . '.' . var_export($query->getTable(), true) . '|' . var_export($query->getOption('key'), true);
         } else {
             $key = $query->getQueryGuid();
         }
@@ -360,7 +360,7 @@ abstract class Connection implements ConnectionInterface
             str_replace(
                 [':' . $key . ' ', ':' . $key . ',', ':' . $key . ')'],
                 [$value . ' ', $value . ',', $value . ')'],
-                $sql);
+                $sql . ' ');
         }
 
         return rtrim($sql);

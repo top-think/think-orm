@@ -93,8 +93,8 @@ trait ParamsBind
     public function isAutoBind(): bool
     {
         $autoBind = $this->getConfig('auto_param_bind');
-        if (null !== $this->getOptions('auto_bind')) {
-            $autoBind = $this->getOptions('auto_bind');
+        if (null !== $this->getOption('auto_bind')) {
+            $autoBind = $this->getOption('auto_bind');
         }
 
         return (bool) $autoBind;

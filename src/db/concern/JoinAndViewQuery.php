@@ -33,13 +33,17 @@ trait JoinAndViewQuery
      */
     public function join(array | string | Raw $join, ?string $condition = null, string $type = 'INNER', array $bind = [])
     {
-        $table = $this->getJoinTable($join);
+        $table = $this->getJoinTable($join, $alias);
 
         if (!empty($bind) && $condition) {
             $this->bindParams($condition, $bind);
         }
 
-        $this->options['join'][] = [$table, strtoupper($type), $condition];
+        if ($alias) {
+            $this->options['join'][$alias] = [$table, strtoupper($type), $condition];
+        } else {
+            $this->options['join'][] = [$table, strtoupper($type), $condition];
+        }
 
         return $this;
     }

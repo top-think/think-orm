@@ -179,7 +179,7 @@ abstract class Relation
      */
     protected function getQueryFields(string $model)
     {
-        $fields = $this->query->getOptions('field');
+        $fields = $this->query->getOption('field');
         $this->query->removeOption('field');
 
         return $this->getRelationQueryFields($fields, $model);
@@ -283,7 +283,7 @@ abstract class Relation
         }
 
         // 启用软删除则增加软删除条件
-        $softDelete = $this->query->getOptions('soft_delete');
+        $softDelete = $this->query->getOption('soft_delete');
         return $query->when($softDelete, function ($query) use ($softDelete, $relation) {
             $query->where($relation . strstr($softDelete[0], '.'), '=' == $softDelete[1][0] ? $softDelete[1][1] : null);
         });

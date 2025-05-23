@@ -45,8 +45,7 @@ trait Attribute
         // 分析数据
         $data    = $this->parseData($data);
         $schema  = $this->getFields();
-        $mapping = $this->getOption('mapping');
-        $fields  = array_keys(array_merge($schema, $mapping));
+        $fields  = array_keys($schema);
 
         // 模型赋值
         foreach ($data as $name => $value) {
@@ -63,24 +62,9 @@ trait Attribute
                 continue;
             }
 
-            if (!empty($mapping)) {
-                $key = array_search($name, $mapping);
-                if (!$fromSave && $key) {
-                    $trueName = $key;
-                    $type     = $schema[$name] ?? 'string';
-                } elseif ($fromSave && isset($mapping[$name])) {
-                    $trueName = $mapping[$name];
-                    $type     = $schema[$trueName] ?? 'string';
-                } else {
-                    $trueName = $this->getRealFieldName($name);
-                    $type     = $schema[$trueName] ?? 'string';
-                }
-            } else {
-                $trueName = $this->getRealFieldName($name);
-                $type     = $schema[$trueName] ?? 'string';
-            }
-
+            $trueName = $fromSave ? $this->getMappingName($name) : $name;
             if (in_array($trueName, $fields)) {
+                $type = $schema[$trueName] ?? 'string';
                 // 读取数据后进行类型转换
                 if (!$fromSave || !$this->hasSetAttr($trueName)) {
                     $value = $this->readTransform($value, $type);
@@ -193,18 +177,14 @@ trait Attribute
     /**
      * 数据读取 类型转换.
      *
-     * @param mixed        $value 值
-     * @param string|arrau $type  要转换的类型
+     * @param mixed             $value 值
+     * @param string|array|null $type  要转换的类型
      *
      * @return mixed
      */
-    protected function readTransform($value, string | array $type)
+    protected function readTransform($value, string | array | null $type)
     {
-        if (is_null($value)) {
-            return;
-        }
-
-        if ($value instanceof Raw || $value instanceof Express) {
+        if (is_null($type) || is_null($value) || $value instanceof Raw || $value instanceof Express) {
             return $value;
         }
 
@@ -258,18 +238,14 @@ trait Attribute
     /**
      * 数据写入 类型转换.
      *
-     * @param mixed        $value 值
-     * @param string|array $type  要转换的类型
+     * @param mixed             $value 值
+     * @param string|array|null $type  要转换的类型
      *
      * @return mixed
      */
-    protected function writeTransform($value, string | array $type)
+    protected function writeTransform($value, string | array | null $type)
     {
-        if (null === $value) {
-            return;
-        }
-
-        if ($value instanceof Raw || $value instanceof Express) {
+        if (is_null($type) || is_null($value) || $value instanceof Raw || $value instanceof Express) {
             return $value;
         }
 
@@ -383,6 +359,17 @@ trait Attribute
             return $this->getWeakData('data', $name);
         }
         return $this->getOption('data', []);
+    }
+
+    /**
+     * 判断模型是否存在数据字段.
+     *
+     * @param string $name 字段名
+     * @return bool
+     */
+    public function hasData(string $name): bool
+    {
+        return $this->hasGetAttr($name) || array_key_exists($this->getMappingName($name), self::$weakMap[$this]['data']);
     }
 
     /**
@@ -505,20 +492,33 @@ trait Attribute
     }
 
     /**
+     * 字段是否定义获取器
+     *
+     * @param string $name  名称
+     *
+     * @return bool
+     */
+    protected function hasGetAttr(string $name): bool
+    {
+        $attr   = Str::studly($name);
+        $method = 'get' . $attr . 'Attr';
+        return method_exists($this, $method);
+    }
+
+    /**
      * 使用修改器或类型自动转换处理数据（写入数据前自动调用）
      *
      * @param string $name  名称
      * @param mixed  $value 值
-     * @param array  $data 所有数据
      *
      * @return mixed
      */
-    private function setWithAttr(string $name, $value, array $data = [])
+    private function setWithAttr(string $name, $value)
     {
         $attr   = Str::studly($name);
         $method = 'set' . $attr . 'Attr';
         if (method_exists($this, $method)) {
-            $value = $this->$method($value, $data);
+            $value = $this->$method($value, $this->getData());
         } else {
             // 类型转换
             $value = $this->writeTransform($value, $this->getFields($name));
@@ -560,7 +560,7 @@ trait Attribute
             return $value;
         }
 
-        if (!array_key_exists($name, $this->getData())) {
+        if (!array_key_exists($name, $this->getData()) && !array_key_exists($name, $this->getFields())) {
             // 动态获取关联数据
             $value = $this->getRelationData($name) ?: null;
         } else {
@@ -586,10 +586,7 @@ trait Attribute
     protected function getMappingName(string $name): string
     {
         $mapping = $this->getOption('mapping');
-        if (!empty($mapping)) {
-            $name = array_search($name, $mapping) ?: $name;
-        }
-        return $this->getRealFieldName($name);
+        return array_search($name, $mapping) ?: $this->getRealFieldName($name);
     }
 
     /**
@@ -612,14 +609,43 @@ trait Attribute
         } elseif (method_exists($this, $method)) {
             // 获取器
             $value = $this->$method($value, $data);
-        } elseif ($value instanceof Typeable || is_subclass_of($value, EnumTransform::class)) {
+        } elseif ($value instanceof Typeable || is_subclass_of($value, EnumTransform::class, false)) {
             // 类型自动转换
-            $value = $value->value();
+            if ($value instanceof Json) {
+                // JSON数据转换
+                $value = $this->readTransformJson($name, $value);
+            } else {
+                $value = $value->value();
+            }
         } elseif (is_int($value) && $this->isTimeAttr($name) && false != $this->getDateFormat()) {
             // 兼容数字类型时间字段的自动转换输出
             $value = (new \DateTime())
                 ->setTimestamp($value)
                 ->format($this->getDateFormat());
+        }
+        return $value;
+    }
+
+    /**
+     * 处理JSON数据对象的值
+     *
+     * @param string $name 名称
+     * @param Json   $value 值
+     *
+     * @return array|object
+     */
+    protected function readTransformJson(string $name, Json $value)
+    {
+        // JSON数据转换
+        $value = $value->value();
+        if ($value) {
+            foreach ($value as $key => &$val) {
+                $type = $this->getFields($name . '->' . $key);
+                if ($type) {
+                    // 定义了JSON属性类型自动转换
+                    $val  = $this->readTransform($val, $type);
+                }
+            }            
         }
         return $value;
     }

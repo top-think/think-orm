@@ -74,11 +74,11 @@ class FieldMappingModel extends Model {
     
     // 定义字段映射，仅包含字段名称映射
     protected $mapping = [
-        'name'      => 'user_name',
-        'age'       => 'user_age',
-        'active'    => 'is_active',
-        'info'      => 'user_info',
-        'createdAt' => 'create_at',
+        'user_name' => 'name',
+        'user_age'  => 'age',
+        'is_active' => 'active',
+        'user_info' => 'info',
+        'create_at' => 'createdAt',
     ];
 
     // 定义自定义类型转换

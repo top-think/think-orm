@@ -69,7 +69,7 @@ class Builder extends BaseBuilder
             } elseif (is_null($val) && in_array($key, $fields, true)) {
                 $result[$item] = 'NULL';
                 continue;
-            } elseif (!is_scalar($val) && (in_array($key, (array) $query->getOptions('json')) || 'json' == $query->getFieldType($key))) {
+            } elseif (!is_scalar($val) && (in_array($key, (array) $query->getOption('json')) || 'json' == $query->getFieldType($key))) {
                 $val = json_encode($val);
             }
 
@@ -430,8 +430,8 @@ class Builder extends BaseBuilder
             $value = $this->parseRaw($query, $value);
         } else {
             // 检查枚举类型
-            if (is_subclass_of($value, UnitEnum::class)) {
-                if (is_subclass_of($value, BackedEnum::class)) {
+            if (is_subclass_of($value, UnitEnum::class, false)) {
+                if (is_subclass_of($value, BackedEnum::class, false)) {
                     $value = array_column($value::cases(), 'value');
                 } else {
                     $value = array_column($value::cases(), 'name');
@@ -592,7 +592,7 @@ class Builder extends BaseBuilder
                     $sort = $val;
                 }
 
-                if (preg_match('/^[\w\.]+$/', $key)) {
+                if (preg_match('/^[\w\-\>\.]+$/', $key)) {
                     $sort    = strtoupper($sort);
                     $sort    = in_array($sort, ['ASC', 'DESC'], true) ? ' ' . $sort : '';
                     $array[] = $this->parseKey($query, $key, true) . $sort;

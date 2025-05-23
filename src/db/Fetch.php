@@ -177,11 +177,11 @@ class Fetch
             return $this->insert($data);
         }
 
-        $data = array_merge($this->query->getOptions('data') ?: [], $data);
+        $data = array_merge($this->query->getOption('data', []), $data);
 
         $this->query->setOption('data', $data);
 
-        if ($this->query->getOptions('where')) {
+        if ($this->query->getOption('where')) {
             $isUpdate = true;
         } else {
             $isUpdate = $this->query->parseUpdateData($data);
@@ -306,7 +306,7 @@ class Fetch
                 }
             }
 
-            if (empty($this->query->getOptions('where'))) {
+            if (empty($this->query->getOption('where'))) {
                 // 如果没有任何更新条件则不执行
                 throw new Exception('miss update condition');
             }

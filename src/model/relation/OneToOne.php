@@ -80,8 +80,8 @@ abstract class OneToOne extends Relation
             $table = $query->getTable();
             $query->table([$table => $name]);
 
-            if ($query->getOptions('field')) {
-                $masterField = $query->getOptions('field');
+            if ($query->getOption('field')) {
+                $masterField = $query->getOption('field');
                 $query->removeOption('field');
             } else {
                 $masterField = true;
@@ -96,8 +96,8 @@ abstract class OneToOne extends Relation
         $joinType  = $joinType ?: $this->joinType;
         if (true !== $field) {
             $joinField = $field;
-        } elseif ($this->query->getOptions('field')) {
-            $joinField = $this->query->getOptions('field');
+        } elseif ($this->query->getOption('field')) {
+            $joinField = $this->query->getOption('field');
         } else {
             $joinField = $field;
         }
@@ -127,7 +127,7 @@ abstract class OneToOne extends Relation
             $closure($query);
 
             // 使用field指定获取关联的字段
-            $withField = $query->getOptions('field');
+            $withField = $query->getOption('field');
             if ($withField) {
                 $joinField = $withField;
             }

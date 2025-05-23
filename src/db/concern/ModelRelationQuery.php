@@ -137,9 +137,12 @@ trait ModelRelationQuery
             }
 
             // 检查模型类的查询范围方法
+            $entity = $this->model->getEntity();
             foreach ($scope as $name) {
                 $method = 'scope' . trim($name);
-                if (method_exists($this->model, $method)) {
+                if ($entity && method_exists($entity, $method)) {
+                    $this->options['scope'][$name] = [[$entity, $method], $args];
+                } elseif (method_exists($this->model, $method)) {
                     $this->options['scope'][$name] = [[$this->model, $method], $args];
                 }
             }
@@ -232,8 +235,11 @@ trait ModelRelationQuery
                 if ($strict && (!isset($data[$fieldName]) || (empty($data[$fieldName]) && !in_array($data[$fieldName], ['0', 0])))) {
                     continue;
                 }
-                $method    = 'search' . Str::studly($fieldName) . 'Attr';
-                if (method_exists($this->model, $method)) {
+                $method = 'search' . Str::studly($fieldName) . 'Attr';
+                $entity = $this->model->getEntity();
+                if ($entity && method_exists($entity, $method)) {
+                    $entity->$method($this, $data[$fieldName] ?? null, $data);
+                } elseif (method_exists($this->model, $method)) {
                     $this->model->$method($this, $data[$fieldName] ?? null, $data);
                 } elseif (isset($data[$field])) {
                     $this->where($fieldName, in_array($fieldName, $likeFields) ? 'like' : '=', in_array($fieldName, $likeFields) ? '%' . $data[$field] . '%' : $data[$field]);

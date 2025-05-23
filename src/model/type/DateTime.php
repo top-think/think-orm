@@ -33,7 +33,7 @@ class DateTime implements Typeable
                 } elseif (strpos('.', $time)) {
                     $time  = \DateTime::createFromFormat('Y-m-d H:i:s.u', $time);
                 } else {
-                    $time  = (new \DateTime($time));
+                    $time  = $time ? (new \DateTime($time)) : null;
                 }
                 $this->format = $format;
             }
@@ -50,6 +50,10 @@ class DateTime implements Typeable
     {
         if ($this->data instanceof Stringable) {
             return $this->data->__toString();
+        }
+
+        if (is_null($this->data)) {
+            return null;
         }
 
         return $this->data->format($format ?: $this->format);

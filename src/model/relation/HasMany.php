@@ -91,7 +91,7 @@ class HasMany extends Relation
 
         if (!empty($range)) {
             $data = $this->eagerlyOneToMany([
-                [$this->foreignKey, 'in', $range],
+                [$this->foreignKey, 'in', array_unique($range)],
             ], $subRelation, $closure, $cache);
 
             // 关联数据封装
@@ -210,7 +210,7 @@ class HasMany extends Relation
             $closure($this->query);
         }
 
-        $withLimit = $this->query->getOptions('limit');
+        $withLimit = $this->query->getOption('limit');
         if ($withLimit) {
             $this->query->removeOption('limit');
         }

@@ -61,7 +61,7 @@ class Pgsql extends PDOConnection
     {
         [$tableName] = explode(' ', $tableName);
 
-        $sql    = 'select fields_name as "field",fields_type as "type",fields_not_null as "null",fields_key_name as "key",fields_default as "default",fields_default as "extra" from table_msg(\'' . $tableName . '\');';
+        $sql    = 'select fields_name as "field",fields_type as "type",fields_not_null as "null",fields_key_name as "key",fields_default as "default",fields_default as "extra",fields_comment as "comment" from table_msg(\'' . $tableName . '\');';
         $pdo    = $this->getPDOStatement($sql);
         $result = $pdo->fetchAll(PDO::FETCH_ASSOC);
         $info   = [];
@@ -77,6 +77,7 @@ class Pgsql extends PDOConnection
                     'default' => $val['default'],
                     'primary' => !empty($val['key']),
                     'autoinc' => str_starts_with((string) $val['extra'], 'nextval('),
+                    'comment' => $val['comment'],
                 ];
             }
         }

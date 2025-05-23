@@ -86,10 +86,10 @@ class Pgsql extends Builder
         } elseif (str_contains($key, '.')) {
             [$table, $key] = explode('.', $key, 2);
 
-            $alias = $query->getOptions('alias');
+            $alias = $query->getOption('alias');
 
             if ('__TABLE__' == $table) {
-                $table = $query->getOptions('table');
+                $table = $query->getOption('table');
                 $table = is_array($table) ? array_shift($table) : $table;
             }
 

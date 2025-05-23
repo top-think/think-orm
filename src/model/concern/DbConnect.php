@@ -14,7 +14,6 @@ declare (strict_types = 1);
 namespace think\model\concern;
 
 use think\db\BaseQuery as Query;
-use think\db\exception\DbException as Exception;
 use think\facade\Db;
 
 /**
@@ -34,7 +33,7 @@ trait DbConnect
      */
     public function getQuery()
     {
-        $db = $this->initDb()->newQuery();
+        $db = $this->initDb()->newQuery($this->getOption('query'));
 
         if ($this->getOption('cache')) {
             [$key, $expire, $tag] = $this->getOption('cache');
@@ -84,27 +83,24 @@ trait DbConnect
     {
         $schema = $this->getOption('schema');
         if (empty($schema)) {
-            if ($this->isView() || $this->isVirtual()) {
-                $schema = $this->getOption('type', []);
-            } else {
-                // 获取数据表信息
-                $db     = $this->initDb();
-                $fields = $db->getFieldsType();
-                $schema = array_merge($fields, $this->getOption('type', []));
-                // 获取主键和自增字段
-                if (!$this->getOption('pk')) {
-                    $this->setOption('pk', $db->getPk());
-                }
-                if (!$this->getOption('autoInc')) {
-                    $this->setOption('autoInc', $db->getAutoInc());
-                }
+            // 获取数据表信息
+            $db     = $this->initDb();
+            $fields = $db->getFieldsType();
+            $schema = array_merge($fields, $this->getOption('type', []));
+            // 获取主键和自增字段
+            if (!$this->getOption('pk')) {
+                $this->setOption('pk', $db->getPk());
+            }
+
+            if (!$this->getOption('autoInc')) {
+                $this->setOption('autoInc', $db->getAutoInc());
             }
 
             $this->setOption('schema', $schema);
         }
 
         if ($field) {
-            return $schema[$field] ?? 'string';
+            return $schema[$field] ?? null;
         }
 
         return $schema;
@@ -190,12 +186,7 @@ trait DbConnect
     public static function __callStatic($method, $args)
     {
         $model = new static();
-
-        if ($model->isVirtual()) {
-            throw new Exception('virtual model not support db query');
-        }
-
-        $db = $model->db();
+        $db    = $model->db();
 
         if (!empty(self::$weakMap[$model]['autoRelation'])) {
             // 自动获取关联数据

@@ -13,7 +13,9 @@ declare (strict_types = 1);
 
 namespace think\model;
 
+use think\db\exception\DbException as Exception;
 use think\Model;
+use think\model\contract\Modelable;
 
 /**
  * Class Virtual.
@@ -22,12 +24,48 @@ use think\Model;
 abstract class Virtual extends Model
 {
     /**
-     * 设置为虚拟模型.
+     * 创建数据.
      *
-     * @return bool
+     * @param array|object  $data 数据
+     * @param array  $allowField  允许字段
+     * @param bool   $replace     使用Replace
+     * @return Modelable
      */
-    public function isVirtual(): bool
+    public static function create(array | object $data, array $allowField = [], bool $replace = false): Modelable
     {
-        return true;
+        $model = new static();
+
+        if (!empty($data)) {
+            // 初始化模型数据
+            $model->data($data);
+        }
+        return $model;
     }
+
+    /**
+     * 获取Db对象实例.
+     * @return Query
+     */
+    public function getQuery()
+    {
+        throw new Exception('virtual model not support db query');
+    }
+
+    /**
+     * 获取数据表字段类型列表（或某个字段的类型）.
+     *
+     * @param string|null $field 字段名
+     *
+     * @return array|string
+     */
+    protected function getFields(?string $field = null)
+    {
+        $schema = array_merge($this->getOption('schema', []), $this->getOption('type', []));
+
+        if ($field) {
+            return $schema[$field] ?? null;
+        }
+
+        return $schema;
+    }    
 }

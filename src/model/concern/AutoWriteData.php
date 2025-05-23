@@ -72,12 +72,17 @@ trait AutoWriteData
             }
 
             foreach ($dateTimeFields as $field) {
-                if (is_string($field) && in_array($field, $allow)) {
+                if (is_string($field) && (empty($allow) || in_array($field, $allow))) {
                     $data[$field] = $this->getDateTime($field);
                     $this->setData($field, $this->readTransform($data[$field], $this->getFields($field)));
                 }
             }
         }
+    }
+
+    public function getAutoTimeFields(): array
+    {
+        return [$this->getOption('createTime'), $this->getOption('updateTime')];
     }
 
     /**
@@ -88,7 +93,7 @@ trait AutoWriteData
      */
     protected function getDateTime(string $field)
     {
-        $type = $this->getFields($field);
+        $type = $this->getFields($field) ?? 'string';
         if (in_array($type, ['int', 'integer'])) {
             return time();
         } elseif (is_subclass_of($type, Typeable::class)) {

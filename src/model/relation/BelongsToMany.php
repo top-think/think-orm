@@ -180,7 +180,7 @@ class BelongsToMany extends Relation
     protected function matchPivot(Model $result): array
     {
         $pivot    = $result->getRelation('pivot');
-        $bindAttr = $this->query->getOptions('bind_attr');
+        $bindAttr = $this->query->getOption('bind_attr');
         if (empty($bindAttr)) {
             $bindAttr = $this->bindAttr;
         }
@@ -314,7 +314,7 @@ class BelongsToMany extends Relation
         if (!empty($range)) {
             // 查询关联数据
             $data = $this->eagerlyManyToMany([
-                ['pivot.' . $localKey, 'in', $range],
+                ['pivot.' . $localKey, 'in', array_unique($range)],
             ], $subRelation, $closure, $cache);
 
             // 关联数据封装
@@ -435,7 +435,7 @@ class BelongsToMany extends Relation
             $closure($this->query);
         }
 
-        $withLimit = $this->query->getOptions('limit');
+        $withLimit = $this->query->getOption('limit');
         if ($withLimit) {
             $this->query->removeOption('limit');
         }

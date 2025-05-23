@@ -637,6 +637,9 @@ class Mongo extends BaseQuery
                 [$alias, $key] = explode('.', $column);
             } else {
                 $key = $column;
+                if ($key == '_id' && $this->connection->getConfig('pk_convert_id')) {
+                    $key = 'id';
+                }
             }
         }
 

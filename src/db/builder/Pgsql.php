@@ -13,8 +13,8 @@ declare(strict_types=1);
 
 namespace think\db\builder;
 
-use think\db\Builder;
 use think\db\BaseQuery as Query;
+use think\db\Builder;
 use think\db\Raw;
 
 /**
@@ -97,6 +97,16 @@ class Pgsql extends Builder
                 $table = $alias[$table];
             }
 
+            // 尝试对表名/别名进行转义
+            if (!preg_match('/[,\"\*\(\).\s]/', $table)) {
+                $table = '"' . $table . '"';
+            }
+
+            if ('*' != $key && !preg_match('/[,\"\*\(\).\s]/', $key)) {
+                $key = '"' . $key . '"';
+            }
+        } else {
+            // 尝试对单独的字段名进行转义
             if ('*' != $key && !preg_match('/[,\"\*\(\).\s]/', $key)) {
                 $key = '"' . $key . '"';
             }

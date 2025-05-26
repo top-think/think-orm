@@ -155,8 +155,8 @@ abstract class DbTestBase extends TestCaseBase
         $result = $this->db->table('test_user')->whereNotIn('type', [])->column('*');
         $this->assertEquals($expected, $result);
 
-        // 合并多余空格，替换 "`" 是为了同时兼容 pg 与 mysql
-        $sqlLogs = array_map(static fn ($str) => preg_replace(['#\s{2,}#', '~`~'], [' ', ''], $str), $sqlLogs);
+        // 合并多余空格，替换 "`" 和 "`" 是为了同时兼容 pg 与 mysql
+        $sqlLogs = array_map(static fn ($str) => preg_replace(['#\s{2,}#', '~[`"]~'], [' ', ''], $str), $sqlLogs);
 
         $this->assertEquals([
             'SELECT * FROM test_user WHERE type IN (1,3)',
@@ -166,6 +166,40 @@ abstract class DbTestBase extends TestCaseBase
             'SELECT * FROM test_user WHERE type NOT IN (1,3)',
             'SELECT * FROM test_user WHERE 1 = 1',
         ], $sqlLogs);
+    }
+
+    /**
+     * @depends testInitUsers
+     */
+    public function testKeyEscape(array $users)
+    {
+        $result = $this->db
+            ->table('test_user')
+            ->alias('user')
+            ->join('test_user union', 'union.id = user.id')
+            ->order('user.id', 'desc')
+            ->column([
+                'user.id' => 'order',
+                'user.username' => 'select',
+                'user.nickname' => 'where',
+                'user.type' => 'table',
+                'union.password' => 'primary',
+            ], 'user.id');
+
+        $expected = array_column_ex(
+            $users,
+            [
+                'id' => 'order',
+                'username' => 'select',
+                'nickname' => 'where',
+                'type' => 'table',
+                'password' => 'primary',
+                'id',
+            ],
+            'id'
+        );
+
+        self::assertEquals($expected, $result);
     }
 
     public function testException()

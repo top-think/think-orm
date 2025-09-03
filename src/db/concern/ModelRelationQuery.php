@@ -163,6 +163,7 @@ trait ModelRelationQuery
                 [$call, $args] = $val;
                 call_user_func_array($call, $args);
             }
+            $this->options['scope'] = [];
         }
 
         return $this;

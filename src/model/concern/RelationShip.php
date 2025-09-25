@@ -428,6 +428,8 @@ trait RelationShip
 
             $relation = Str::camel($relation);
 
+            $field = $field ?: $this->$relation()->getPk();
+
             if ($useSubQuery) {
                 $count = $this->$relation()->getRelationCountQuery($closure, $aggregate, $field, $name);
             } else {

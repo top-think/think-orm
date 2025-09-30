@@ -326,9 +326,14 @@ abstract class Entity implements JsonSerializable, ArrayAccess, Arrayable, Jsona
     public static function __callStatic($method, $args)
     {
         $entity = new static();
-        if (in_array($method, ['destroy', 'create', 'update', 'saveAll'])) {
+        $modelClass = get_class($entity->model());
+
+        $staticMethods = (new \ReflectionClass($modelClass))->getMethods(\ReflectionMethod::IS_STATIC);
+		$staticPublicMethods = array_filter($staticMethods, fn($m) => $m->isPublic());
+
+        if (in_array($method, array_column($staticPublicMethods, 'name'))) {
             // 调用model的静态方法
-            $db = $entity->model();
+            $db = $modelClass;
         } else {
             // 调用Query类查询方法
             $db = $entity->model()->db();

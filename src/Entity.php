@@ -40,21 +40,14 @@ abstract class Entity implements JsonSerializable, ArrayAccess, Arrayable, Jsona
         $this->initWeakMap();
 
         // 获取实体模型参数
-        $baseOptions = $this->getBaseOptions();
-        $options     = $this->getOptions();
-        
-        foreach (['viewMapping', 'autoMapping'] as $item) {
-            $options[$item] = array_merge($baseOptions[$item] ?? [], $options[$item] ?? []);
-        }
-
-        $options = array_merge($baseOptions, $options);
+        $options = $this->getOptions();
 
         if (is_null($model)) {
             $class = !empty($options['modelClass']) ? $options['modelClass'] : str_replace('\\entity\\', '\\model\\', static::class);
             $model = new $class();
+            $model->entity($this);
         }
 
-        $model->entity($this);
         self::$weakMap[$this] = [
             'model' =>  $model,
         ];
@@ -72,17 +65,7 @@ abstract class Entity implements JsonSerializable, ArrayAccess, Arrayable, Jsona
     }
 
     /**
-     * 定义实体模型的基础配置参数.
-     *
-     * @return array
-     */
-    protected function getBaseOptions(): array
-    {
-        return [];
-    }
-
-    /**
-     * 定义实体模型相关配置参数.
+     * 在实体模型中定义 返回相关配置参数.
      *
      * @return array
      */
@@ -134,12 +117,11 @@ abstract class Entity implements JsonSerializable, ArrayAccess, Arrayable, Jsona
      * 创建新的实例.
      *
      * @param Model $model 模型连接对象
-     * @param array $options 查询参数
      */
-    public function newInstance(?Model $model, array $options = [])
+    public function newInstance(?Model $model)
     {
         $entity = new static();
-        return $entity->setModel($model, $options);
+        return $entity->setModel($model);
     }
 
     /**
@@ -326,10 +308,15 @@ abstract class Entity implements JsonSerializable, ArrayAccess, Arrayable, Jsona
     public static function __callStatic($method, $args)
     {
         $entity = new static();
-        if (in_array($method, ['destroy', 'create', 'update', 'saveAll'])) {
-            // 调用model的静态方法
-            $db = $entity->model();
-        } else {
+        $modelClass = get_class($entity->model());
+        
+        $staticMethods = (new \ReflectionClass($modelClass))->getMethods(\ReflectionMethod::IS_STATIC);
+		$staticPublicMethods = array_filter($staticMethods, fn($m) => $m->isPublic());
+
+        if (in_array($method, array_column($staticPublicMethods, 'name'))) {
+			// 调用model的静态方法
+			$db = $modelClass;
+		} else {
             // 调用Query类查询方法
             $db = $entity->model()->db();
         }

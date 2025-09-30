@@ -20,6 +20,7 @@ use think\contract\Arrayable;
 use think\contract\Jsonable;
 use think\db\BaseQuery as Query;
 use think\db\Express;
+use think\exception\InvalidArgumentException;
 use think\exception\ValidateException;
 use think\model\Collection;
 use think\model\contract\Modelable;

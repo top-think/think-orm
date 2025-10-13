@@ -135,7 +135,7 @@ trait Conversion
                 $item[$name] = $val->toArray();
             } elseif (empty($allow) || in_array($name, $allow)) {
                 // 通过获取器输出
-                $item[$name] = $this->getWithAttr($name, $val, $data);
+                $item[$name] = $this->getAttrOfWith($name, $val, $data);
             }
 
             if (array_key_exists($name, $item) && isset($mapping[$name])) {

@@ -62,7 +62,7 @@ abstract class View extends Entity
                 $this->$field = $this->fetchViewAttr($field, $data, $with);
             } elseif (strpos($field, '->')) {
                 // 关联属性或JSON字段映射
-                $this->$key = $this->getRelationMapAttr($field, $data);
+                $this->$key = $this->getAttrOfRelationMap($field, $data);
             } else {
                 // 主模型属性映射
                 $this->$key = $this->fetchViewAttr($field, $data, $with);
@@ -80,7 +80,7 @@ abstract class View extends Entity
      *
      * @return mixed
      */
-    private function getRelationMapAttr(string $field, array $data)
+    private function getAttrOfRelationMap(string $field, array $data)
     {
         $items    = explode('->', $field);
         $relation = array_shift($items);

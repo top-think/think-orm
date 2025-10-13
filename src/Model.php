@@ -788,7 +788,7 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
      */
     public function __set(string $name, $value): void
     {
-        if ($value instanceof Modelable && $bind = $this->getBindAttr($this->getOption('bindAttr'), $name)) {
+        if ($value instanceof Modelable && $bind = $this->getAttrOfBind($this->getOption('bindAttr'), $name)) {
             // 关联属性绑定
             $this->bindRelationAttr($value, $bind);
         } else {

@@ -516,7 +516,7 @@ trait Attribute
      *
      * @return mixed
      */
-    private function setWithAttr(string $name, $value)
+    private function setAttrOfWith(string $name, $value)
     {
         $attr   = Str::studly($name);
         $method = 'set' . $attr . 'Attr';

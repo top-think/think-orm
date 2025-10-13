@@ -46,7 +46,7 @@ trait AutoWriteData
                 if ($val instanceof Closure) {
                     $value = $val($this);
                 } else {
-                    $value = is_string($name) ? $val : $this->setWithAttr($field, null, $data);
+                    $value = is_string($name) ? $val : $this->setAttrOfWith($field, null);
                 }
                 $data[$field] = $value;
                 $this->setData($field, $value);

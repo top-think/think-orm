@@ -17,6 +17,7 @@ use think\Facade;
 /**
  * @see \think\DbManager
  * @mixin \think\DbManager
+ * @method static query(string $sql, array $bind = [], bool $master = false, bool $pdo = false) 执行查询 返回数据集
  */
 class Db extends Facade
 {

@@ -304,7 +304,8 @@ abstract class PDOConnection extends Connection
             str_starts_with($type, 'set')           => 'set',
             str_starts_with($type, 'enum')          => 'enum',
             str_starts_with($type, 'bigint')        => 'bigint',
-            str_contains($type, 'float') || str_contains($type, 'double') || str_contains($type, 'real') || str_contains($type, 'numeric')          => 'float',
+            str_contains($type, 'float') || str_contains($type, 'double') || 
+            str_contains($type, 'real')             => 'float',
             str_contains($type, 'int') || str_contains($type, 'serial') ||
             str_contains($type, 'bit')              => 'int',
             str_contains($type, 'bool')             => 'bool',
@@ -652,20 +653,19 @@ abstract class PDOConnection extends Connection
      * @param BaseQuery  $query     查询对象
      * @param string     $sql       sql指令
      * @param Model|null $model     模型对象实例
-     * @param null       $condition 查询条件
      *
      * @throws DbException
      *
      * @return \Generator
      */
-    public function getCursor(BaseQuery $query, string $sql, $model = null, $condition = null)
+    public function getCursor(BaseQuery $query, string $sql, $model = null)
     {
         $this->queryPDOStatement($query, $sql);
 
         // 返回结果集
         while ($result = $this->PDOStatement->fetch($this->fetchType)) {
             if ($model) {
-                yield $model->newInstance($result, $condition);
+                yield $model->newInstance($result);
             } else {
                 yield $result;
             }
@@ -685,7 +685,8 @@ abstract class PDOConnection extends Connection
      */
     public function query(string $sql, array $bind = [], bool $master = false): array
     {
-        return $this->pdoQuery($this->newQuery()->bind($bind), $sql, $master);
+        $this->getPDOStatement($sql, $bind, $master);
+        return $this->getResult();
     }
 
     /**
@@ -700,7 +701,25 @@ abstract class PDOConnection extends Connection
      */
     public function execute(string $sql, array $bind = []): int
     {
-        return $this->pdoExecute($this->newQuery()->bind($bind), $sql, true);
+        $this->getPDOStatement($sql, $bind, true);
+        return $this->PDOStatement->rowCount();
+    }
+
+    /**
+     * 获取最近插入的ID.
+     * @param string    $sequence 自增序列名
+     *
+     * @return mixed
+     */
+    public function getAutoID(?string $sequence = null)
+    {
+        try {
+            $insertId = $this->linkID->lastInsertId($sequence);
+        } catch (\Exception $e) {
+            $insertId = '';
+        }
+
+        return $insertId;
     }
 
     /**
@@ -737,7 +756,7 @@ abstract class PDOConnection extends Connection
 
         if ($sql instanceof Closure) {
             $sql  = $sql($query);
-            $bind = $query->getBind();
+            $bind = array_merge($bind, $query->getBind());
         }
 
         if (!isset($master)) {
@@ -935,21 +954,25 @@ abstract class PDOConnection extends Connection
      * 使用游标查询记录.
      *
      * @param BaseQuery $query 查询对象
+     * @param bool $unbuffered 是否开启无缓冲查询（仅限mysql）
      *
      * @return \Generator
      */
-    public function cursor(BaseQuery $query)
+    public function cursor(BaseQuery $query, bool $unbuffered = false)
     {
         // 分析查询表达式
         $options = $query->parseOptions();
 
         // 生成查询SQL
         $sql = $this->builder->select($query);
-
-        $condition = $options['where']['AND'] ?? null;
+        
+        // 检查是否需要无缓冲查询（仅对MySQL且支持该方法时生效）
+        if ($unbuffered && method_exists($this, 'cursorUnbuffered')) {
+            return $this->cursorUnbuffered($query, $sql);
+        }
 
         // 执行查询操作
-        return $this->getCursor($query, $sql, $query->getModel(), $condition);
+        return $this->getCursor($query, $sql, $query->getModel());
     }
 
     /**
@@ -1659,19 +1682,18 @@ abstract class PDOConnection extends Connection
      * 批处理执行SQL语句
      * 批处理的指令都认为是execute操作.
      *
-     * @param BaseQuery $query    查询对象
      * @param array     $sqlArray SQL批处理指令
      *
      * @return bool
      */
-    public function batchQuery(BaseQuery $query, array $sqlArray = []): bool
+    public function batchQuery(array $sqlArray = []): bool
     {
         // 自动启动事务支持
         $this->startTrans();
 
         try {
             foreach ($sqlArray as $sql) {
-                $this->pdoExecute($query, $sql);
+                $this->execute($sql);
             }
             // 提交事务
             $this->commit();
@@ -1746,13 +1768,7 @@ abstract class PDOConnection extends Connection
      */
     public function getLastInsID(BaseQuery $query, ?string $sequence = null)
     {
-        try {
-            $insertId = $this->linkID->lastInsertId($sequence);
-        } catch (\Exception $e) {
-            $insertId = '';
-        }
-
-        return $this->autoInsIDType($query, $insertId);
+        return $this->autoInsIDType($query, $this->getAutoID($sequence));
     }
 
     /**

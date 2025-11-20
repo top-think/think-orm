@@ -166,4 +166,50 @@ class Mysql extends PDOConnection
         $this->initConnect(true);
         $this->linkID->exec("XA ROLLBACK '$xid'");
     }
+
+    /**
+     * 使用无缓冲游标查询记录（MySQL专用）
+     *
+     * @param \think\db\BaseQuery $query 查询对象
+     * @param string $sql 查询SQL
+     *
+     * @return \Generator
+     */
+    protected function cursorUnbuffered(\think\db\BaseQuery $query, string $sql)
+    {
+        // 启用无缓冲查询模式
+        $this->initUnbufferedMode();
+        
+        try {
+            // 执行查询操作
+            yield from $this->getCursor($query, $sql, $query->getModel());
+        } finally {
+            // 恢复缓冲模式
+            $this->restoreBufferedMode();
+        }
+    }
+
+    /**
+     * 开启无缓冲查询模式
+     *
+     * @return void
+     */
+    protected function initUnbufferedMode(): void
+    {
+        if ($this->linkID) {
+            $this->linkID->setAttribute(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, false);
+        }
+    }
+
+    /**
+     * 恢复缓冲查询模式
+     *
+     * @return void
+     */
+    protected function restoreBufferedMode(): void
+    {
+        if ($this->linkID) {
+            $this->linkID->setAttribute(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, true);
+        }
+    }
 }

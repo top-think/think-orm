@@ -797,11 +797,7 @@ abstract class BaseQuery
         }
 
         if (is_string($field)) {
-            $field = $this->getFieldMap($field) ?: $field;
-            if (!empty($this->options['via']) && !str_contains($field, '.') && !str_contains($field, '->')) {
-                $field = $this->options['via'] . '.' . $field;
-            }
-
+            $field = $this->parseOrderField($this->getFieldMap($field) ?: $field);
             if (is_string($field) && strpos($field, '->')) {
                 [$alias, $attr] = explode('->', $field, 2);
 
@@ -820,10 +816,13 @@ abstract class BaseQuery
         } elseif (!empty($this->options['via'])) {
             foreach ($field as $key => $val) {
                 if (is_numeric($key)) {
-                    $field[$key] = $this->options['via'] . '.' . $val;
+                    $field[$key] = $this->parseOrderField($val);
                 } else {
-                    $field[$this->options['via'] . '.' . $key] = $val;
-                    unset($field[$key]);
+                    $key1 = $this->parseOrderField($key);
+                    if ($key != $key1) {
+                        $field[$key1] = $val;
+                        unset($field[$key]);
+                    }
                 }
             }
         }
@@ -841,6 +840,13 @@ abstract class BaseQuery
         return $this;
     }
 
+    protected function parseOrderField(string $field): string
+    {
+        if (!empty($this->options['via']) && !str_contains($field, '.') && !str_contains($field, '->')) {
+            $field = $this->options['via'] . '.' . $field;
+        }
+        return $field;        
+    }
     /**
      * 分页查询.
      *

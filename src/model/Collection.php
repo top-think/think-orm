@@ -32,17 +32,32 @@ class Collection extends BaseCollection
      *
      * @param array $relation 关联
      * @param mixed $cache    关联缓存
+     * @param bol   $withJoin 是否JOIN
      *
      * @return $this
      */
-    public function load(array $relation, $cache = false)
+    public function load(array $relation, $cache = false, bool $withJoin = false)
     {
         if (!$this->isEmpty()) {
             $item = current($this->items);
-            $item->eagerlyResultSet($this->items, $relation, [], false, $cache);
+            $item->eagerlyResultSet($this->items, $relation, [], $withJoin, $cache);
         }
 
         return $this;
+    }
+
+    /**
+     * 转换为视图模型
+     *
+     * @param string $view 视图类名
+     *
+     * @return $this
+     */
+    public function toView(string $view)
+    {
+        return $this->map(function (Model $model) use($view) {
+            return $model->toView($view);
+        });
     }
 
     /**

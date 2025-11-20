@@ -88,7 +88,6 @@ class HasManyThrough extends Relation
         return $this->query->relation($subRelation)->select();
     }
 
-
     /**
      * 根据关联条件查询当前模型.
      *
@@ -175,10 +174,10 @@ class HasManyThrough extends Relation
 
         if (!empty($range)) {
             $this->query->removeWhereField($foreignKey);
-
-            $data = $this->eagerlyWhere([
-                [$this->foreignKey, 'in', array_unique($range)],
-            ], $foreignKey, $subRelation, $closure, $cache);
+            $range = array_unique($range);
+            $data  = $this->eagerlyWhere([
+                [$this->foreignKey, 'in', $range],
+            ], $foreignKey, $subRelation, $closure, $cache, count($range) > 1 ? true : false);
 
             // 关联数据封装
             foreach ($resultSet as $result) {
@@ -232,10 +231,11 @@ class HasManyThrough extends Relation
      * @param array   $subRelation 子关联
      * @param Closure $closure
      * @param array   $cache       关联缓存
+     * @param bool    $collection  是否数据集查询
      *
      * @return array
      */
-    protected function eagerlyWhere(array $where, string $key, array $subRelation = [], ?Closure $closure = null, array $cache = []): array
+    protected function eagerlyWhere(array $where, string $key, array $subRelation = [], ?Closure $closure = null, array $cache = [], bool $collection = false): array
     {
         // 预载入关联查询 支持嵌套预载入
         $throughList = $this->through->where($where)->select();
@@ -253,14 +253,22 @@ class HasManyThrough extends Relation
         }
 
         $withLimit = $this->query->getOption('limit');
-        if ($withLimit) {
+        if ($withLimit && $collection) {
             $this->query->removeOption('limit');
+        }
+
+        if ($this->isOneofMany) {
+            if (!$collection) {
+                $this->query->limit(1);
+            } else {
+                $withLimit = 1;
+            }
         }
 
         $list = $this->query
             ->where($throughKey, 'in', $keys)
             ->cache($cache[0] ?? false, $cache[1] ?? null, $cache[2] ?? null)
-            ->select();
+            ->lazy();
 
         // 组装模型数据
         $data = [];

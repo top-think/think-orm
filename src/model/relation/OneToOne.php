@@ -47,6 +47,30 @@ abstract class OneToOne extends Relation
     protected $relation;
 
     /**
+     * 获取一对多关联的最新一条数据.
+     *
+     * @param string $field 排序字段
+     *
+     * @return $this
+     */
+    public function firstOfMany(string $field = '') 
+    {
+        return $this->first($field);
+    }
+
+    /**
+     * 获取一对多关联的最旧一条数据.
+     *
+     * @param string $field 排序字段
+     *
+     * @return $this
+     */
+    public function lastOfMany(string $field = '')
+    {
+         return $this->last($field);
+    }
+
+    /**
      * 设置join类型.
      *
      * @param string $type JOIN类型
@@ -56,7 +80,6 @@ abstract class OneToOne extends Relation
     public function joinType(string $type)
     {
         $this->joinType = $type;
-
         return $this;
     }
 
@@ -288,10 +311,10 @@ abstract class OneToOne extends Relation
      * @param array   $subRelation 子关联
      * @param Closure $closure
      * @param array   $cache       关联缓存
-     *
+     * @param bool    $collection  是否数据集查询
      * @return array
      */
-    protected function eagerlyWhere(array $where, string $key, array $subRelation = [], ?Closure $closure = null, array $cache = [])
+    protected function eagerlyWhere(array $where, string $key, array $subRelation = [], ?Closure $closure = null, array $cache = [], bool $collection = false)
     {
         // 预载入关联查询 支持嵌套预载入
         if ($closure) {
@@ -299,15 +322,20 @@ abstract class OneToOne extends Relation
             $closure($this->query);
         }
 
+        if ($collection) {
+            $this->query->removeOption('limit');
+        } else {
+            $this->query->limit(1);
+        }
+
         $list = $this->query
             ->where($where)
             ->with($subRelation)
             ->cache($cache[0] ?? false, $cache[1] ?? null, $cache[2] ?? null)
-            ->select();
+            ->lazy();
 
         // 组装模型数据
         $data = [];
-
         foreach ($list as $set) {
             if (!isset($data[$set->$key])) {
                 $data[$set->$key] = $set;

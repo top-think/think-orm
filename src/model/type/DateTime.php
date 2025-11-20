@@ -52,8 +52,8 @@ class DateTime implements Typeable
             return $this->data->__toString();
         }
 
-        if (is_null($this->data)) {
-            return null;
+        if (is_null($this->data) || is_string($this->data)) {
+            return $this->data;
         }
 
         return $this->data->format($format ?: $this->format);

@@ -65,7 +65,7 @@ trait OptimLock
         $data[$optimLock] = $lockVer + 1;
     }
 
-    public function getDbWhere($where)
+    public function getDbWhere($where = [])
     {
         $db = $this->db();
         // 检查条件

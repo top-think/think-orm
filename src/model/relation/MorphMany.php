@@ -173,7 +173,7 @@ class MorphMany extends Relation
                 [$morphKey, 'in', array_unique($range)],
                 [$morphType, '=', $type],
             ];
-            $data = $this->eagerlyMorphToMany($where, $subRelation, $closure, $cache);
+            $data = $this->eagerlyMorphToMany($where, $subRelation, $closure, $cache, true);
 
             // 关联数据封装
             foreach ($resultSet as $result) {
@@ -279,10 +279,11 @@ class MorphMany extends Relation
      * @param array   $subRelation 子关联
      * @param Closure $closure     闭包
      * @param array   $cache       关联缓存
+     * @param bool    $collection  是否数据集查询
      *
      * @return array
      */
-    protected function eagerlyMorphToMany(array $where, array $subRelation = [], ?Closure $closure = null, array $cache = []) : array
+    protected function eagerlyMorphToMany(array $where, array $subRelation = [], ?Closure $closure = null, array $cache = [], bool $collection = false) : array
     {
         // 预载入关联查询 支持嵌套预载入
         $this->query->removeOption('where');
@@ -293,19 +294,28 @@ class MorphMany extends Relation
         }
 
         $withLimit = $this->query->getOption('limit');
-        if ($withLimit) {
+        if ($withLimit && $collection) {
             $this->query->removeOption('limit');
+        }
+
+        if ($this->isOneofMany) {
+            // 仅获取一条关联数据
+            if (!$collection) {
+                $this->query->limit(1);
+            } else {
+                $withLimit = 1;
+            }
         }
 
         $list = $this->query
             ->where($where)
             ->with($subRelation)
             ->cache($cache[0] ?? false, $cache[1] ?? null, $cache[2] ?? null)
-            ->select();
-        $morphKey = $this->morphKey;
+            ->lazy();
 
         // 组装模型数据
-        $data = [];
+        $data     = [];
+        $morphKey = $this->morphKey;
         foreach ($list as $set) {
             $key = $set->$morphKey;
 

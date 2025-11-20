@@ -1,6 +1,6 @@
 # ThinkORM4.0
 
-基于PHP8.0+ 和PDO实现的轻量级ORM，完全重构的Model层，支持实体模型和分层，并基本兼容3.0。
+基于PHP8.0+ 和PDO实现的轻量级ORM，完全重构的Model层，支持实体模型和分层（[新特性盘点](https://doc.thinkphp.cn/@think-orm/v4_0/new-features.html)），并基本兼容3.0（参考[升级指导](https://doc.thinkphp.cn/@think-orm/v4_0/upgrade.html)）。
 
 ## 特性
 
@@ -11,6 +11,8 @@
 * 聚合查询
 * 强大的模型及关联定义
 * 模型获取器和修改器
+* 虚拟模型支持
+* 实体模型和视图模型支持
 * 支持ActiveRecord模式和仓储模式
 * 模型事件和类型自动转换
 * 数据自动写入和延迟写入
@@ -19,7 +21,7 @@
 * 数据写入自动验证
 * 多数据库和`MongoDb`支持
 * 分布式及事务、断点重连
-* `JSON`及枚举类查询
+* `JSON`及枚举类支持
 * `PSR-16`缓存及`PSR-3`日志规范
 
 ## 安装

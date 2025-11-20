@@ -90,9 +90,10 @@ class HasMany extends Relation
         }
 
         if (!empty($range)) {
-            $data = $this->eagerlyOneToMany([
-                [$this->foreignKey, 'in', array_unique($range)],
-            ], $subRelation, $closure, $cache);
+            $range = array_unique($range);
+            $data  = $this->eagerlyOneToMany([
+                [$this->foreignKey, 'in', $range],
+            ], $subRelation, $closure, $cache, count($range) > 1 ? true : false);
 
             // 关联数据封装
             foreach ($resultSet as $result) {
@@ -195,10 +196,11 @@ class HasMany extends Relation
      * @param array   $subRelation 子关联
      * @param Closure $closure
      * @param array   $cache       关联缓存
+     * @param bool    $collection  是否数据集查询
      *
      * @return array
      */
-    protected function eagerlyOneToMany(array $where, array $subRelation = [], ?Closure $closure = null, array $cache = []) : array
+    protected function eagerlyOneToMany(array $where, array $subRelation = [], ?Closure $closure = null, array $cache = [], bool $collection = false) : array
     {
         $foreignKey = $this->foreignKey;
 
@@ -211,15 +213,23 @@ class HasMany extends Relation
         }
 
         $withLimit = $this->query->getOption('limit');
-        if ($withLimit) {
+        if ($withLimit && $collection) {
             $this->query->removeOption('limit');
+        }
+
+        if ($this->isOneofMany) {
+            if (!$collection) {
+                $this->query->limit(1);
+            } else {
+                $withLimit = 1;
+            }
         }
 
         $list = $this->query
             ->where($where)
             ->cache($cache[0] ?? false, $cache[1] ?? null, $cache[2] ?? null)
             ->with($subRelation)
-            ->select();
+            ->lazy();
 
         // 组装模型数据
         $data = [];

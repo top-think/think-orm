@@ -63,7 +63,7 @@ trait RelationShip
         foreach ($relations as $relation => $val) {
             $relation = $this->getRealFieldName($relation);
             $type     = $this->getFields($relation);
-            $bind     = $this->getBindAttr($this->getOption('bindAttr'), $relation);
+            $bind     = $this->getAttrOfBind($this->getOption('bindAttr'), $relation);
             if (!empty($bind)) {
                 // 绑定关联属性
                 $this->bindRelationAttr($val, $bind, $relation);
@@ -216,7 +216,7 @@ trait RelationShip
         return false;
     }
 
-    protected function getBindAttr($bind, $name)
+    protected function getAttrOfBind($bind, $name)
     {
         return $bind[$name] ?? [];
     }

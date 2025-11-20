@@ -20,12 +20,14 @@ class Json implements Typeable
 
     public function data($data, ?bool $assoc)
     {
-        if (is_string($data) && json_validate($data)) {
-            $data = json_decode($data, $assoc);
-        } elseif (empty($data)) {
-            $data = [];
+        if (is_string($data)) {
+            $this->data = json_decode($data, $assoc);
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                $this->data = [$data];
+            }
+            return;
         }
-        $this->data = is_string($data) ? [$data] : $data;
+        $this->data = empty($data) ? [] : $data;
     }
 
     public function value()

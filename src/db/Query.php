@@ -14,7 +14,9 @@ declare (strict_types = 1);
 namespace think\db;
 
 use PDOStatement;
+use think\Collection;
 use think\db\exception\DbException as Exception;
+use think\model\LazyCollection as ModelLazyCollection;
 
 /**
  * PDO数据查询类.
@@ -143,7 +145,7 @@ class Query extends BaseQuery
      */
     public function batchQuery(array $sql = []): bool
     {
-        return $this->connection->batchQuery($this, $sql);
+        return $this->connection->batchQuery($sql);
     }
 
     /**
@@ -439,11 +441,11 @@ class Query extends BaseQuery
      * @access public
      * @param  string  $field    字段名
      * @param  string  $type     自增或者自减
-     * @param  float   $step     写入步进值
+     * @param  float|int   $step     写入步进值
      * @param  int     $lazyTime 延时时间(s)
      * @return false|integer
      */
-    public function lazyWrite(string $field, string $type, float $step, int $lazyTime)
+    public function lazyWrite(string $field, string $type, float|int $step, int $lazyTime)
     {
         $guid  = $this->getLazyFieldCacheKey($field);
         $cache = $this->getCache();
@@ -502,84 +504,142 @@ class Query extends BaseQuery
     }
 
     /**
-     * 使用游标查找记录.
+     * 使用游标查找记录.（不支持查询缓存）
      *
-     * @param mixed $data 数据
-     *
-     * @return \Generator
+     * @param bool $unbuffered 是否开启无缓冲查询（仅限mysql）
+     * 
+     * @return LazyCollection
      */
-    public function cursor($data = null)
+    public function cursor(bool $unbuffered = false): LazyCollection
     {
-        if (!is_null($data)) {
-            // 主键条件分析
-            $this->parsePkWhere($data);
+        $connection = clone $this->connection;
+        $class      = $this->model ? ModelLazyCollection::class : LazyCollection::class;
+
+        if (!empty($this->options['with_join'])) {
+            $withJoin  = true;
+            $relations = $this->options['with_join'];
+        } elseif(!empty($this->options['with'])) {
+            $withJoin  = false;
+            $relations = $this->options['with'];
         }
 
-        $this->options['data'] = $data;
+        if (isset($withJoin)) {
+            return (new $class(function () use ($connection, $unbuffered) {
+                yield from $connection->cursor($this, $unbuffered);
+            }))->load($relations, false, $withJoin);
+        } else {
+            return new $class(function () use ($connection, $unbuffered) {
+                yield from $connection->cursor($this, $unbuffered);
+            });
+        }
+    }
 
-        $connection = clone $this->connection;
-
-        return $connection->cursor($this);
+    /**
+     * 流式处理查询结果（不支持查询缓存）
+     *
+     * @param callable $callback    处理回调
+     * @param bool     $unbuffered  是否使用无缓冲查询（仅MySQL支持）
+     *
+     * @return int 处理的记录数
+     */
+    public function stream(callable $callback, bool $unbuffered = false): int
+    {
+        $count = 0;
+        $this->cursor($unbuffered)
+            ->each(function ($item) use ($callback, &$count) {
+                $callback($item);
+                $count++;
+            });
+        return $count;
     }
 
     /**
      * 分批数据返回处理.
      *
-     * @param int               $count    每次处理的数据数量
-     * @param callable          $callback 处理回调方法
-     * @param string|array|null $column   分批处理的字段名
-     * @param string            $order    字段排序
+     * @param int         $size    每次处理的数据数量
+     * @param callable    $callback 处理回调方法
+     * @param string|null $column   分批处理的字段名
+     * @param string      $order    字段排序
      *
      * @throws Exception
      *
      * @return bool
      */
-    public function chunk(int $count, callable $callback, string | array | null $column = null, string $order = 'asc'): bool
+    public function chunk(int $size, callable $callback, string | null $column = null, string $order = 'asc'): bool
     {
-        $options = $this->getOptions();
-        $column  = $column ?: $this->getPk();
-
-        if (isset($options['order'])) {
-            unset($options['order']);
-        }
-
-        $bind = $this->bind;
-
-        if (is_array($column)) {
-            $times = 1;
-            $query = $this->options($options)->page($times, $count);
-        } else {
-            $query = $this->options($options)->limit($count);
-
-            if (str_contains($column, '.')) {
-                [$alias, $key] = explode('.', $column);
-            } else {
-                $key = $column;
-            }
-        }
-
-        $resultSet = $query->order($column, $order)->select();
-
-        while (count($resultSet) > 0) {
-            if (false === call_user_func($callback, $resultSet)) {
+        $chunks = $this->lazy($size, $column, $order)->chunk($size);
+        
+        foreach ($chunks as $chunk) {
+            $result = $callback($chunk);
+            if ($result === false) {
                 return false;
             }
+        }
+        
+        return true;
+    }
 
-            if (isset($times)) {
-                $times++;
-                $query = $this->options($options)->page($times, $count);
-            } else {
-                $end    = $resultSet->pop();
-                $lastId = is_array($end) ? $end[$key] : $end->getData($key);
-
-                $query = $this->options($options)
-                    ->limit($count)
-                    ->where($column, 'asc' == strtolower($order) ? '>' : '<', $lastId);
-            }
-
-            $resultSet = $query->bind($bind)->order($column, $order)->select();
+    /**
+     * 惰性分批遍历数据
+     * @param int         $count   每批处理的数量
+     * @param string|null $column  分批处理的字段名
+     * @param string      $order   字段排序 
+     * @return LazyCollection
+     */
+    public function lazy(int $size = 1000, ?string $column = null, string $order = 'desc'): LazyCollection
+    {
+        if ($size < 1) {
+            throw new Exception('The chunk size should be at least 1');
         }
 
-        return true;
+        $class = $this->model ? ModelLazyCollection::class : LazyCollection::class;
+        return new $class(function () use ($size, $column, $order) {
+            $limit   = (int) $this->getOption('limit', 0);
+            $column  = $column ?: $this->getPk();
+            $length  = $limit && $size >= $limit ? $limit : $size;
+            $options = $this->getOptions();
+            $bind    = $this->bind;
+            $times   = 0;
+            $field   = $this->getOption('field');
+            if (is_array($field) && false !== stripos(implode(',', $field), 'distinct')) {
+                $distinct = true;
+            } else {
+                $distinct = false;
+            }
+            if ($this->getOption('order') || !is_string($column) || $distinct) {
+                $page      = 1;
+                $resultSet = $this->options($options)->page($page, $length)->select();
+            } else {
+                $resultSet = $this->options($options)->order($column, $order)->limit($length)->select();
+            }
+
+            while (true) {
+                foreach ($resultSet as $item) {
+                    yield $item;
+                    $times++;
+                    if ($limit > $size && $times >= $limit) {
+                        break 2;
+                    }
+                    if (!isset($page)) {
+                        $lastId = $item[$column];
+                    }
+                }
+
+                if (count($resultSet) < $size) {
+                    break;
+                }
+
+                if (isset($page)) {
+                    $page++;
+                    $query = $this->options($options)->page($page, $length);
+                } else {
+                    $query = $this->options($options)
+                        ->where($column, 'asc' == strtolower($order) ? '>' : '<', $lastId)
+                        ->order($column, $order)
+                        ->limit($length);
+                }
+                $resultSet = $query->bind($bind)->select();
+            }
+        });
     }
 }

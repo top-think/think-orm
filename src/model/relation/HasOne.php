@@ -226,9 +226,10 @@ class HasOne extends OneToOne
             $default      = $this->query->getOption('default_model');
             $defaultModel = $this->getDefaultModel($default);
 
-            $data = $this->eagerlyWhere([
+            $range = array_unique($range);
+            $data  = $this->eagerlyWhere([
                 [$foreignKey, 'in', $range],
-            ], $foreignKey, $subRelation, $closure, $cache);
+            ], $foreignKey, $subRelation, $closure, $cache, count($range) > 1 ? true : false);
 
             // 动态绑定参数
             $bindAttr = $this->query->getOption('bind_attr');

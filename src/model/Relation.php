@@ -97,6 +97,13 @@ abstract class Relation
     protected $default;
 
     /**
+     * 获取一条关联数据.
+     *
+     * @var bool
+     */
+    protected $isOneofMany = false;
+
+    /**
      * 获取关联的所属模型.
      *
      * @return Model
@@ -224,11 +231,14 @@ abstract class Relation
      */
     protected function getQueryWhere(array &$where, string $relation): void
     {
+        if (array_is_list($where) && isset($where[0]) && is_string($where[0])) {
+            $where = [ $where ];
+        }
         foreach ($where as $key => &$val) {
             if (is_string($key)) {
                 $where[] = [!str_contains($key, '.') ? $relation . '.' . $key : $key, '=', $val];
                 unset($where[$key]);
-            } elseif (isset($val[0]) && !str_contains($val[0], '.')) {
+            } elseif (is_array($val) && isset($val[0]) && !str_contains($val[0], '.')) {
                 $val[0] = $relation . '.' . $val[0];
             }
         }
@@ -287,6 +297,36 @@ abstract class Relation
         return $query->when($softDelete, function ($query) use ($softDelete, $relation) {
             $query->where($relation . strstr($softDelete[0], '.'), '=' == $softDelete[1][0] ? $softDelete[1][1] : null);
         });
+    }
+
+    /**
+     * 获取关联的最新一条数据.
+     *
+     * @param string $field 排序字段
+     *
+     * @return $this
+     */
+    public function first(string $field = '') 
+    {
+        $field = $field ?: $this->query->getPk();
+        $this->query->order($field, 'desc');
+        $this->isOneofMany = true;
+        return $this;
+    }
+
+    /**
+     * 获取关联的最旧一条数据.
+     *
+     * @param string $field 排序字段
+     *
+     * @return $this
+     */
+    public function last(string $field = '')
+    {
+        $field = $field ?: $this->query->getPk();
+        $this->query->order($field, 'asc');
+        $this->isOneofMany = true;
+        return $this;
     }
 
     /**

@@ -27,8 +27,8 @@
   <php>
     <env name="TESTS_DB_MYSQL_HOSTNAME" value="127.0.0.1"/>
     <env name="TESTS_DB_MYSQL_HOSTPORT" value="3306"/>
-    <env name="TESTS_DB_MYSQL_DATABASE" value="testing"/>
+    <env name="TESTS_DB_MYSQL_DATABASE" value="demo"/>
     <env name="TESTS_DB_MYSQL_USERNAME" value="root"/>
-    <env name="TESTS_DB_MYSQL_PASSWORD" value="password"/>
+    <env name="TESTS_DB_MYSQL_PASSWORD" value=""/>
   </php>
 </phpunit>

@@ -17,6 +17,7 @@ use Closure;
 use think\helper\Str;
 use think\model\Collection;
 use think\model\contract\Modelable;
+use think\model\View;
 
 /**
  * 模型数据转换处理.
@@ -134,7 +135,7 @@ trait Conversion
                 $item[$name] = $val->toArray();
             } elseif (empty($allow) || in_array($name, $allow)) {
                 // 通过获取器输出
-                $item[$name] = $this->getWithAttr($name, $val, $data);
+                $item[$name] = $this->getAttrOfWith($name, $val, $data);
             }
 
             if (array_key_exists($name, $item) && isset($mapping[$name])) {
@@ -147,7 +148,14 @@ trait Conversion
         // 输出额外属性 必须定义获取器
         foreach ($this->getOption('append') as $key => $field) {
             if (is_numeric($key)) {
-                $item[$field] = $this->get($field);
+                if (strpos($field, '.')) {
+                    [$name, $field] = explode('.', $field, 2);
+                    $relation = $this->getRelationData($name, false);
+                    $value    = $relation?->get($field);
+                } else {
+                    $value = $this->get($field);
+                }
+                $item[$field] = $value;
             } else {
                 // 追加关联属性
                 $relation = $this->getRelationData($key, false);
@@ -204,5 +212,16 @@ trait Conversion
         }
 
         return $collection;
-    }    
+    }
+
+    /**
+     * 转换为视图模型
+     *
+     * @param string $class 视图模型类名
+     * @return View
+     */
+    public function toView(string $class)
+    {
+        return is_subclass_of($class, View::class) ? new $class($this) : $this;
+    }
 }

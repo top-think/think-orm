@@ -70,6 +70,7 @@ SQL
     public function testBreakReconnect()
     {
         $testData = self::$testData;
+        
         // 初始化配置
         $config = Db::getConfig();
         $config['connections']['mysql']['break_reconnect'] = true;
@@ -180,6 +181,7 @@ SQL
     public function testTransactionSavepointBreakReconnect()
     {
         $testData = self::$testData;
+        
         // 初始化配置
         $config = Db::getConfig();
         $config['connections']['mysql']['break_reconnect'] = true;

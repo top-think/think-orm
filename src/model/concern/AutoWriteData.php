@@ -46,7 +46,7 @@ trait AutoWriteData
                 if ($val instanceof Closure) {
                     $value = $val($this);
                 } else {
-                    $value = is_string($name) ? $val : $this->setWithAttr($field, null, $data);
+                    $value = is_string($name) ? $val : $this->setAttrOfWith($field, null);
                 }
                 $data[$field] = $value;
                 $this->setData($field, $value);
@@ -72,7 +72,7 @@ trait AutoWriteData
             }
 
             foreach ($dateTimeFields as $field) {
-                if (is_string($field) && (empty($allow) || in_array($field, $allow))) {
+                if (is_string($field) && empty($data[$field]) && (empty($allow) || in_array($field, $allow))) {
                     $data[$field] = $this->getDateTime($field);
                     $this->setData($field, $this->readTransform($data[$field], $this->getFields($field)));
                 }

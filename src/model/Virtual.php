@@ -29,9 +29,10 @@ abstract class Virtual extends Model
      * @param array|object  $data 数据
      * @param array  $allowField  允许字段
      * @param bool   $replace     使用Replace
+     * @param string $suffix      数据表后缀
      * @return Modelable
      */
-    public static function create(array | object $data, array $allowField = [], bool $replace = false): Modelable
+    public static function create(array | object $data, array $allowField = [], bool $replace = false, string $suffix = ''): Modelable
     {
         $model = new static();
 

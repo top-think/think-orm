@@ -541,11 +541,21 @@ class Mongo extends BaseQuery
      *
      * @return Cursor
      */
+    public function cursor(): Cursor
+    {
+        return $this->getCursor();
+    }
+    
+    /**
+     * 执行查询但只返回Cursor对象
+     *
+     * @return Cursor
+     */
     public function getCursor(): Cursor
     {
         $this->parseOptions();
 
-        return $this->connection->getCursor($this);
+        return $this->connection->cursor($this);
     }
 
     /**
@@ -637,6 +647,9 @@ class Mongo extends BaseQuery
                 [$alias, $key] = explode('.', $column);
             } else {
                 $key = $column;
+                if ($key == '_id' && $this->connection->getConfig('pk_convert_id')) {
+                    $key = 'id';
+                }
             }
         }
 

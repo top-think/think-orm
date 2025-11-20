@@ -313,9 +313,10 @@ class BelongsToMany extends Relation
 
         if (!empty($range)) {
             // 查询关联数据
-            $data = $this->eagerlyManyToMany([
-                ['pivot.' . $localKey, 'in', array_unique($range)],
-            ], $subRelation, $closure, $cache);
+            $range = array_unique($range);
+            $data  = $this->eagerlyManyToMany([
+                ['pivot.' . $localKey, 'in', $range],
+            ], $subRelation, $closure, $cache, count($range) > 1 ? true : false);
 
             // 关联数据封装
             foreach ($resultSet as $result) {
@@ -426,25 +427,35 @@ class BelongsToMany extends Relation
      * @param array   $subRelation 子关联
      * @param Closure $closure     闭包
      * @param array   $cache       关联缓存
+     * @param bool    $collection  是否数据集查询
      *
      * @return array
      */
-    protected function eagerlyManyToMany(array $where, array $subRelation = [], ?Closure $closure = null, array $cache = []) : array
+    protected function eagerlyManyToMany(array $where, array $subRelation = [], ?Closure $closure = null, array $cache = [], bool $collection = false) : array
     {
         if ($closure) {
             $closure($this->query);
         }
 
         $withLimit = $this->query->getOption('limit');
-        if ($withLimit) {
+        if ($withLimit && $collection) {
             $this->query->removeOption('limit');
+        }
+
+        if ($this->isOneofMany) {
+            // 仅获取一条关联数据
+            if (!$collection) {
+                $this->query->limit(1);
+            } else {
+                $withLimit = 1;
+            }
         }
 
         // 预载入关联查询 支持嵌套预载入
         $list = $this->belongsToManyQuery($this->foreignKey, $this->localKey, $where)
             ->with($subRelation)
             ->cache($cache[0] ?? false, $cache[1] ?? null, $cache[2] ?? null)
-            ->select();
+            ->lazy();
 
         // 组装模型数据
         $data = [];

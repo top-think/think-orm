@@ -235,6 +235,13 @@ trait ModelRelationQuery
                 if ($strict && (!isset($data[$fieldName]) || (empty($data[$fieldName]) && !in_array($data[$fieldName], ['0', 0])))) {
                     continue;
                 }
+
+                if (is_string($key) && isset($data[$key])) {
+                    // 默认搜索规则
+                    $this->where($key, $field, 'like' == $field ? '%' . $data[$key] . '%' : $data[$key]);
+                    continue;
+                }
+                
                 $method = 'search' . Str::studly($fieldName) . 'Attr';
                 $entity = $this->model->getEntity();
                 if ($entity && method_exists($entity, $method)) {

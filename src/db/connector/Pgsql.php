@@ -61,7 +61,50 @@ class Pgsql extends PDOConnection
     {
         [$tableName] = explode(' ', $tableName);
 
-        $sql    = 'select fields_name as "field",fields_type as "type",fields_not_null as "null",fields_key_name as "key",fields_default as "default",fields_default as "extra",fields_comment as "comment" from table_msg(\'' . $tableName . '\');';
+        // 分离 schema 和表名
+        if (str_contains($tableName, '.')) {
+            [$schema, $tableName] = explode('.', $tableName);
+        } else {
+            $schema = 'public';
+        }
+
+        // 使用标准 PostgreSQL 系统表查询字段信息
+        $sql = <<<SQL
+SELECT
+    a.attname AS "field",
+    CASE t.typname
+        WHEN 'int8' THEN 'bigint'
+        WHEN 'int4' THEN 'integer'
+        WHEN 'int2' THEN 'smallint'
+        WHEN 'bpchar' THEN 'char'
+        WHEN 'float4' THEN 'float'
+        WHEN 'float8' THEN 'double'
+        ELSE t.typname
+    END AS "type",
+    a.attnotnull AS "notnull",
+    (p.contype = 'p') AS "primary",
+    pg_get_expr(d.adbin, d.adrelid) AS "default",
+    (
+        pg_get_serial_sequence(format('%I.%I', n.nspname, c.relname), a.attname) IS NOT NULL
+        OR a.attidentity <> ''
+    ) AS "autoinc",
+    col_description(c.oid, a.attnum) AS "comment"
+FROM
+    pg_attribute a
+    JOIN pg_class c ON a.attrelid = c.oid
+    JOIN pg_namespace n ON c.relnamespace = n.oid
+    JOIN pg_type t ON a.atttypid = t.oid
+    LEFT JOIN pg_attrdef d ON a.attrelid = d.adrelid AND a.attnum = d.adnum
+    LEFT JOIN pg_constraint p ON a.attrelid = p.conrelid AND a.attnum = ANY(p.conkey) AND p.contype = 'p'
+WHERE
+    c.relname = '{$tableName}'
+    AND n.nspname = '{$schema}'
+    AND a.attnum > 0
+    AND NOT a.attisdropped
+ORDER BY
+    a.attnum
+SQL;
+
         $pdo    = $this->getPDOStatement($sql);
         $result = $pdo->fetchAll(PDO::FETCH_ASSOC);
         $info   = [];
@@ -73,10 +116,10 @@ class Pgsql extends PDOConnection
                 $info[$val['field']] = [
                     'name'    => $val['field'],
                     'type'    => $val['type'],
-                    'notnull' => (bool) ('' !== $val['null']),
+                    'notnull' => (bool) $val['notnull'],
                     'default' => $val['default'],
-                    'primary' => !empty($val['key']),
-                    'autoinc' => str_starts_with((string) $val['extra'], 'nextval('),
+                    'primary' => (bool) $val['primary'],
+                    'autoinc' => (bool) $val['autoinc'],
                     'comment' => $val['comment'],
                 ];
             }
@@ -94,16 +137,11 @@ class Pgsql extends PDOConnection
      */
     public function getTables(string $dbName = ''): array
     {
-        $sql    = "select tablename as Tables_in_test from pg_tables where  schemaname ='public'";
+        $sql    = "SELECT tablename FROM pg_tables WHERE schemaname = 'public' ORDER BY tablename";
         $pdo    = $this->getPDOStatement($sql);
         $result = $pdo->fetchAll(PDO::FETCH_ASSOC);
-        $info   = [];
 
-        foreach ($result as $key => $val) {
-            $info[$key] = current($val);
-        }
-
-        return $info;
+        return array_column($result, 'tablename');
     }
 
     protected function supportSavepoint(): bool

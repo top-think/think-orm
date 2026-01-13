@@ -66,6 +66,8 @@ class Mongo extends Connection
         'username'        => '',
         // 密码
         'password'        => '',
+        // 验证数据库
+        'auth_source' => '',
         // 端口
         'hostport'        => '',
         // 连接dsn
@@ -169,6 +171,7 @@ class Mongo extends Connection
 
             if (empty($config['dsn'])) {
                 $config['dsn'] = 'mongodb://' . ($config['username'] ? "{$config['username']}" : '') . ($config['password'] ? ":{$config['password']}@" : '') . $config['hostname'] . ($config['hostport'] ? ":{$config['hostport']}" : '');
+                $config['dsn'] .= !empty($config['auth_source']) ? '/?authSource=' . $config['auth_source'] : '';
             }
 
             $startTime = microtime(true);

@@ -241,10 +241,10 @@ class BelongsTo extends OneToOne
             // 关联数据封装
             foreach ($resultSet as $result) {
                 // 关联模型
-                if (!isset($data[$result->$foreignKey])) {
+                if (!isset($data[$result->$foreignKey ?? ''])) {
                     $relationModel = $defaultModel;
                 } else {
-                    $relationModel = $data[$result->$foreignKey];
+                    $relationModel = $data[$result->$foreignKey ?? ''];
                 }
 
                 // 设置关联属性

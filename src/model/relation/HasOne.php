@@ -240,10 +240,10 @@ class HasOne extends OneToOne
             // 关联数据封装
             foreach ($resultSet as $result) {
                 // 关联模型
-                if (!isset($data[$result->$localKey])) {
+                if (!isset($data[$result->$localKey ?? ''])) {
                     $relationModel = $defaultModel;
                 } else {
-                    $relationModel = $data[$result->$localKey];
+                    $relationModel = $data[$result->$localKey ?? ''];
                 }
                 // 设置关联属性
                 if (!empty($this->bindAttr) && $relationModel) {

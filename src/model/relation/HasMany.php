@@ -98,11 +98,11 @@ class HasMany extends Relation
             // 关联数据封装
             foreach ($resultSet as $result) {
                 $pk = $result->$localKey;
-                if (!isset($data[$pk])) {
-                    $data[$pk] = [];
+                if (!isset($data[$pk ?? ''])) {
+                    $data[$pk ?? ''] = [];
                 }
 
-                $result->setRelation($relation, $this->resultSetBuild($data[$pk]));
+                $result->setRelation($relation, $this->resultSetBuild($data[$pk ?? '']));
             }
         }
     }

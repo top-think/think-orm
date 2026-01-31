@@ -289,7 +289,14 @@ class Mongo
             $result['$where'] = $value instanceof Javascript ? $value : new Javascript($value);
         } elseif ('like' == $exp) {
             // 模糊查询 采用正则方式
-            $result[$key] = $value instanceof Regex ? $value : new Regex($value, 'i');
+            if (!($value instanceof Regex)) {
+                if (strpos($value,'/') !== 0){
+                    // 非正则表达式,做一下字符转义处理
+                    $value = preg_quote($value);
+                }
+                $value = new Regex($value,'i');
+            }
+            $result[$key] = $value;
         } elseif (in_array($exp, ['nin', 'in'])) {
             // IN 查询
             $value = is_array($value) ? $value : explode(',', $value);

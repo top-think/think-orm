@@ -50,7 +50,11 @@ abstract class Entity implements JsonSerializable, ArrayAccess, Arrayable, Jsona
         $options = array_merge($baseOptions, $options);
 
         if (is_null($model)) {
-            $class = !empty($options['modelClass']) ? $options['modelClass'] : str_replace('\\entity\\', '\\model\\', static::class);
+            if (empty($options['modelClass'])) {
+                $class = str_replace(['\\entity\\', 'entity\\'], ['\\model\\', 'model\\'], static::class);
+            } else {
+                $class = $options['modelClass'];
+            }
             $model = new $class();
         }
 

@@ -266,7 +266,7 @@ abstract class Paginator implements ArrayAccess, Countable, IteratorAggregate, J
             throw new DomainException('not support total');
         }
 
-        return $this->total;
+        return (int) $this->total;
     }
 
     /**

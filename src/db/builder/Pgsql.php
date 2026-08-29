@@ -27,14 +27,14 @@ class Pgsql extends Builder
      *
      * @var string
      */
-    protected $insertSql = 'INSERT INTO %TABLE% (%FIELD%) VALUES (%DATA%) %COMMENT%';
+    protected $insertSql = 'INSERT INTO %TABLE% (%FIELD%) VALUES (%DATA%) %EXTRA% %COMMENT%';
 
     /**
      * INSERT ALL SQL表达式.
      *
      * @var string
      */
-    protected $insertAllSql = 'INSERT INTO %TABLE% (%FIELD%) %DATA% %COMMENT%';
+    protected $insertAllSql = 'INSERT INTO %TABLE% (%FIELD%) %DATA% %EXTRA% %COMMENT%';
 
     /**
      * limit分析.
@@ -125,5 +125,18 @@ class Pgsql extends Builder
     protected function parseRand(Query $query): string
     {
         return 'RANDOM()';
+    }
+
+        /**
+     * 查询额外参数分析.
+     *
+     * @param Query  $query 查询对象
+     * @param string $extra 额外参数
+     *
+     * @return string
+     */
+    protected function parseExtra(Query $query, string $extra): string
+    {
+        return $extra === '' ? '' : ' ' . $extra;
     }
 }
